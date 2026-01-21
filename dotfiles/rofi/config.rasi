@@ -1,0 +1,93 @@
+configuration {
+    modi: "drun";
+    show-icons: true;
+    display-drun: " ";  /* Search icon */
+    drun-display-format: "{name}";
+    window-format: "[{w}] {c}";
+    lines: 8;
+    columns: 1;
+}
+
+* {
+    /* --- Colors --- */
+    bg: #2a202f;              /* Dark Grey Background */
+    fg: #d5bfe2;              /* White Text */
+    accent: #ab89beff;        /* Purple Highlight */
+    dark-bg: #1a1520;         /* Darker background */
+    
+    background-color: transparent;
+    text-color: @fg;
+    font: "JetBrainsMono Nerd Font 14";
+    border-radius: 8px;
+}
+
+window {
+    width: 50%;
+    border: 2px solid;
+    border-color: @accent;
+    background-color: rgba(42, 32, 47, 0.95);
+    padding: 20px;
+}
+
+inputbar {
+    padding: 12px 15px;
+    margin: 0 0 20px 0;
+    border-radius: 6px;
+    background-color: rgba(80, 61, 90, 0.8);
+    border: 1px solid;
+    children: [ prompt, entry ];
+}
+
+prompt {
+    padding: 0 12px 0 0;
+    background-color: inherit;
+    text-color: @accent;
+}
+
+entry {
+    background-color: inherit;
+    text-color: @fg;
+    placeholder: "Search Apps...";
+    placeholder-color: rgba(213, 191, 226, 0.5);
+}
+
+listview {
+    lines: 8;
+    columns: 1;
+    padding: 0px;
+    spacing: 8px;
+    scrollbar: false;
+}
+
+element {
+    padding: 10px 12px;
+    border-radius: 6px;
+    /* Remove the specific color here, we define it below */
+    background-color: transparent; 
+    text-color: #b8a0cc;
+}
+
+/* 1. Define the Standard and Alternate rows to be identical */
+element normal.normal, element alternate.normal {
+    background-color: rgba(26, 21, 32, 0.5);
+    text-color: #b8a0cc;
+}
+
+/* 2. Define the Selected row */
+element selected.normal {
+    background-color: @accent;
+    text-color: @bg;
+    border: 1px solid;
+    border-color: @accent;
+}
+
+element-icon {
+    size: 28px;
+    padding: 5px 5px 5px 5px;
+    background-color: @accent;
+}
+
+element-text {
+    vertical-align: 0.5;
+    text-color: inherit;
+}

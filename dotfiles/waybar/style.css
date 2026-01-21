@@ -1,0 +1,68 @@
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", "Noto Sans", sans-serif;
+    font-size: 14px;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: transparent;
+    color: #d5bfe2;
+}
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#tray,
+#mode,
+#idle_inhibitor,
+#mpd,
+
+#workspaces button, #custom-add_workspace {
+    padding: 0 10px;
+    margin: 2px 2px;
+    color: #d5bfe2;
+    background-color: #2a202f;
+    border-radius: 10px;
+}
+#workspaces button.active, #custom-add_workspace:hover {
+    color: #d5bfe2;
+    background-color: #2a202f;
+    border-bottom: 3px solid #88639b;
+}
+#network, #pulseaudio, #clock, #bluetooth {
+    background-color: #2a202f;
+    padding: 5px 15px;
+    margin: 4px 4px;
+    border-radius: 10px;
+}
+#custom-launcher {
+    background-color: #a05dc6; /* Your Purple Accent */
+    color: #1a1520;           /* Dark Text */
+    border-radius: 6px;
+    padding: 0 10px;
+    margin: 5px 5px 5px 10px; /* Adjust spacing */
+}
+
+#custom-power {
+    background-color: #ff5555; /* Red for Power */
+    color: #ffffff;
+    border-radius: 6px;
+    padding: 0 10px;
+    margin: 5px 10px 5px 5px; /* Adjust spacing */
+}
+
+/* Optional: Add hover effects */
+#custom-launcher:hover, #custom-power:hover {
+    background-color: #d5bfe2; /* Lighter color on hover */
+    color: #000000;
+}
+#custom-ddc1, #custom-ddc2 {
+    background-color: #d5bfe2;
+    color: #1a1520;
+    border-radius: 6px;
+    padding: 0 10px;
+    margin: 5px 5px;
+}

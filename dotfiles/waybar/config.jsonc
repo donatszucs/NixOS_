@@ -1,0 +1,27 @@
+[
+    // -- MONITOR 1 CONFIGURATION --
+    {
+        "output": "DP-1",
+        "layer": "top",
+        "position": "top",
+        "height": 38,
+        "spacing": 4,
+        "include": ["~/.config/waybar/common_modules.jsonc"],
+        "modules-left": ["clock", "custom/launcher", "custom/power"],
+        "modules-center": ["hyprland/workspaces", "custom/add_workspace" ],
+        "modules-right": ["custom/ddc1", "bluetooth", "pulseaudio", "network"]
+    },
+
+    // -- MONITOR 2 CONFIGURATION --
+    {
+        "output": "DP-2",
+        "layer": "top",
+        "position": "top",
+        "height": 38,
+        "spacing": 4,
+        "include": ["~/.config/waybar/common_modules.jsonc"],
+        "modules-left": ["clock", "custom/launcher", "custom/power"],
+        "modules-center": ["hyprland/workspaces", "custom/add_workspace" ],
+        "modules-right": ["custom/ddc2", "bluetooth", "pulseaudio", "network"]
+    }
+]

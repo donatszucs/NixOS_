@@ -1,0 +1,83 @@
+{
+    "hyprland/workspaces": {
+    "disable-scroll": true,
+    "all-outputs": false,
+    "format": "{name}"
+    },
+    "custom/add_workspace": {
+        "format": "",
+        "on-click": "hyprctl dispatch workspace empty",
+        "tooltip": false
+    },
+    "clock":
+    {
+        "format": "{:%H:%M:%S}",
+        "tooltip": true,
+        "tooltip-format": "{:%Y. %m. %d.}",
+        "interval": 1
+    },
+    "pulseaudio": {
+    "format": "{volume}% {icon} ",
+    "format-bluetooth": "{volume}% {icon}",
+    "format-muted": "🔇",
+    "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", ""]
+        },
+    "scroll-step": 1,
+    "on-click": "$HOME/.config/hypr/scripts/volume-toggle.sh",
+    "ignored-sinks": ["Easy Effects Sink"]
+    },
+    "network": {
+        "format-wifi": "{essid} ({signalStrength}%)  ",
+        "format-ethernet": "Connected  ",
+        "format-disconnected": "Disconnected ⚠ ",
+        "tooltip-format": "{ifname}: {ipaddr} via {gwaddr}",
+        "tooltip": true,
+        "on-click": "nm-connection-editor"
+    },
+    "bluetooth": {
+        "format": " {status}",
+        "format-connected": " {device_alias}",
+        "format-connected-battery": " {device_alias} {device_battery_percentage}%",
+        "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+        "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+        "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
+        "on-click": "blueman-manager"
+    },
+    "custom/ddc1": {
+        "format": " {}%",
+        "exec": "~/.config/waybar/scripts/ddc_brightness.sh 1 get",
+        "on-scroll-up": "~/.config/waybar/scripts/ddc_brightness.sh 1 up",
+        "on-scroll-down": "~/.config/waybar/scripts/ddc_brightness.sh 1 down",
+        "signal": 1,       /* <--- Listens for 'pkill -RTMIN+1 waybar' */
+        "interval": "once", /* <--- Only runs once at startup, then waits for signal */
+        "tooltip": false
+    },
+
+    "custom/ddc2": {
+        "format": " {}%",
+        "exec": "~/.config/waybar/scripts/ddc_brightness.sh 2 get",
+        "on-scroll-up": "~/.config/waybar/scripts/ddc_brightness.sh 2 up",
+        "on-scroll-down": "~/.config/waybar/scripts/ddc_brightness.sh 2 down",
+        "signal": 2,       /* <--- Listens for 'pkill -RTMIN+2 waybar' */
+        "interval": "once",
+        "tooltip": false
+    },
+    "custom/launcher": {
+        "format": " ",
+        "on-click": "rofi -show drun",
+        "tooltip": false
+    },
+    "custom/power": {
+        "format": " ",
+        "on-click": "~/.config/waybar/scripts/powermenu.sh",
+        "tooltip": false
+    }
+}
