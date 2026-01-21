@@ -1,0 +1,4 @@
+cd ~/nixos-config
+git add .
+git commit -m "Updated waybar colors"
+git push

@@ -71,6 +71,7 @@
     settings = {
       General = {
         Enable = "Source,Sink,Media,Socket";
+        ControllerMode = "dual";
         Experimental = true; # Helps with some headsets/controllers
       };
     };
