@@ -46,9 +46,9 @@
   };
 
   xdg.portal = {
-  enable = true;
-  wlr.enable = true;
-  extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    enable = true;
+    wlr.enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   };
 
 
@@ -150,18 +150,16 @@
   # Optional: Hint Electron apps to use Wayland
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
-  # Enable greetd display manager with hyprlock
-  services.greetd = {
-  enable = true;
-  settings = rec {
-    initial_session = {
-      command = "hyprland > /dev/null 2>&1";
+  # Enable display manager with hyprlock
+  services.displayManager = {
+    autoLogin = {
+      enable = true;
       user = "doni";
     };
-    default_session = initial_session;
+    gdm = {
+      enable = true;
+    };
   };
-
-};
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -192,6 +190,9 @@
   google-chrome
   spotify
 
+  # -- keyboard --
+  wvkbd             # On-screen keyboard
+
   # -- Wallpapers & Screen Locking --
   hyprpaper         # Wallpaper utility
   hyprlock          # Screen locker
@@ -207,9 +208,8 @@
   # -- Task Management --
   btop              # The cool terminal one
   mission-center    # The Windows-style GUI one
+  
   # -- Themeing --
-  nwg-look
-
   noto-fonts
   nerd-fonts.jetbrains-mono
 

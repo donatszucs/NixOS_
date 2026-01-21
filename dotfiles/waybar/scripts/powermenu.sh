@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Options
+close="󰅚 Close Menu"
 shutdown=" Shutdown"
 reboot=" Reboot"
 lock=" Lock"
@@ -12,19 +13,21 @@ rofi_cmd() {
     rofi -dmenu \
         -mesg "Power Menu" \
 		-theme-str 'configuration { show-icons: false; }' \
-        -theme-str 'window { width: 200px; }' \
-        -theme-str 'listview { lines: 5; scrollbar: false; }' \
+        -theme-str 'window { width: 220px; }' \
+        -theme-str 'listview { lines: 6; scrollbar: false; }' \
         -theme-str 'inputbar { enabled: false; }'
 }
 
 # Pass variables to rofi dmenu
 run_rofi() {
-	echo -e "$lock\n$suspend\n$logout\n$reboot\n$shutdown" | rofi_cmd
+	echo -e "$lock\n$suspend\n$logout\n$reboot\n$shutdown\n$close" | rofi_cmd
 }
 
 # Execute Command
 run_cmd() {
-	if [[ "$1" == "--shutdown" ]]; then
+	if [[ "$1" == "--close" ]]; then
+		pkill rofi
+	elif [[ "$1" == "--shutdown" ]]; then
 		systemctl poweroff
 	elif [[ "$1" == "--reboot" ]]; then
 		systemctl reboot
@@ -40,6 +43,9 @@ run_cmd() {
 # Actions
 chosen="$(run_rofi)"
 case ${chosen} in
+	$close)
+		run_cmd --close
+        ;;
     $shutdown)
 		run_cmd --shutdown
         ;;

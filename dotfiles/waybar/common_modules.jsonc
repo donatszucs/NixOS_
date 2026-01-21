@@ -35,7 +35,7 @@
             "default": ["", ""]
         },
     "scroll-step": 1,
-    "on-click": "$HOME/.config/hypr/scripts/volume-toggle.sh",
+    "on-click": "pkill pavucontrol || pavucontrol -t 3",
     "ignored-sinks": ["Easy Effects Sink"]
     },
     "network": {
@@ -83,6 +83,11 @@
     "custom/power": {
         "format": " Power  ",
         "on-click": "~/.config/waybar/scripts/powermenu.sh",
+        "tooltip": false
+    },
+    "custom/keyboard":{
+        "format":"Keyboard  ",
+        "on-click": "pkill wvkbd-mobint || wvkbd-mobintl",
         "tooltip": false
     }
 }

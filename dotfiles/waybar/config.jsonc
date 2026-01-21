@@ -9,7 +9,7 @@
         "include": ["~/.config/waybar/common_modules.jsonc"],
         "modules-left": ["clock", "custom/launcher", "custom/power"],
         "modules-center": ["custom/close_window", "hyprland/workspaces", "custom/add_workspace" ],
-        "modules-right": ["custom/ddc1", "bluetooth", "pulseaudio", "network"]
+        "modules-right": ["custom/keyboard", "custom/ddc1", "bluetooth", "pulseaudio", "network"]
     },
 
     // -- MONITOR 2 CONFIGURATION --
@@ -22,6 +22,6 @@
         "include": ["~/.config/waybar/common_modules.jsonc"],
         "modules-left": ["clock", "custom/launcher", "custom/power"],
         "modules-center": ["custom/close_window", "hyprland/workspaces", "custom/add_workspace" ],
-        "modules-right": ["custom/ddc2", "bluetooth", "pulseaudio", "network"]
+        "modules-right": ["custom/keyboard", "custom/ddc2", "bluetooth", "pulseaudio", "network"]
     }
 ]
