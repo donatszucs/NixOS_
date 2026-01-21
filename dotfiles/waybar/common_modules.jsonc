@@ -87,7 +87,7 @@
     },
     "custom/keyboard":{
         "format":"Keyboard  ",
-        "on-click": "pkill wvkbd-mobint || wvkbd-mobintl",
+        "on-click": "pkill wvkbd-mobint || wvkbd-mobintl -R 10 -L 300 --fn \"JetBrainsMono Nerd Font 20\" --bg 604c6c00 --fg 604c6c --fg-sp 413450",
         "tooltip": false
     }
 }
