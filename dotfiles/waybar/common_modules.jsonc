@@ -47,9 +47,9 @@
         "on-click": "nm-connection-editor"
     },
     "bluetooth": {
-        "format": " {status}",
-        "format-connected": " {device_alias}",
-        "format-connected-battery": " {device_alias} {device_battery_percentage}%",
+        "format": "{status} ",
+        "format-connected": "{device_alias} ",
+        "format-connected-battery": "{device_alias} {device_battery_percentage}% ",
         "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
         "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
         "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
@@ -57,7 +57,7 @@
         "on-click": "blueman-manager"
     },
     "custom/ddc1": {
-        "format": " {}%",
+        "format": "{}%  ",
         "exec": "~/.config/waybar/scripts/ddc_brightness.sh 1 get",
         "on-scroll-up": "~/.config/waybar/scripts/ddc_brightness.sh 1 up",
         "on-scroll-down": "~/.config/waybar/scripts/ddc_brightness.sh 1 down",
@@ -67,7 +67,7 @@
     },
 
     "custom/ddc2": {
-        "format": " {}%",
+        "format": "{}%  ",
         "exec": "~/.config/waybar/scripts/ddc_brightness.sh 2 get",
         "on-scroll-up": "~/.config/waybar/scripts/ddc_brightness.sh 2 up",
         "on-scroll-down": "~/.config/waybar/scripts/ddc_brightness.sh 2 down",
@@ -76,12 +76,12 @@
         "tooltip": false
     },
     "custom/launcher": {
-        "format": " ",
+        "format": "Menu  ",
         "on-click": "rofi -show drun",
         "tooltip": false
     },
     "custom/power": {
-        "format": " ",
+        "format": " Power  ",
         "on-click": "~/.config/waybar/scripts/powermenu.sh",
         "tooltip": false
     }

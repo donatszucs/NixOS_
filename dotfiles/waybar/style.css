@@ -31,9 +31,10 @@ window#waybar {
 #mode,
 #idle_inhibitor,
 #mpd,
+
 #workspaces button,
 #custom-add_workspace {
-    padding: 0 10px;
+    padding: 0 20px;
     margin: 2px 2px;
     color: #d5bfe2;
     background-color: #2a202f;

@@ -9,8 +9,12 @@ logout=" Logout"
 
 # Rofi Command
 rofi_cmd() {
-	rofi -dmenu \
-		-mesg "Power Menu"
+    rofi -dmenu \
+        -mesg "Power Menu" \
+		-theme-str 'configuration { show-icons: false; }' \
+        -theme-str 'window { width: 200px; }' \
+        -theme-str 'listview { lines: 5; scrollbar: false; }' \
+        -theme-str 'inputbar { enabled: false; }'
 }
 
 # Pass variables to rofi dmenu
@@ -29,7 +33,7 @@ run_cmd() {
 	elif [[ "$1" == "--logout" ]]; then
 		hyprctl dispatch exit
 	elif [[ "$1" == "--lock" ]]; then
-		swaylock # or hyprlock if you have it
+		hyprlock
 	fi
 }
 

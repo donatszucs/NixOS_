@@ -34,25 +34,23 @@ inputbar {
     margin: 0 0 20px 0;
     border-radius: 6px;
     background-color: rgba(80, 61, 90, 0.8);
-    border: 1px solid;
-    children: [ prompt, entry ];
-}
-
-prompt {
-    padding: 0 12px 0 0;
-    background-color: inherit;
-    text-color: @accent;
+    border: 2px solid;
+    border-color: @accent;
+    children: [ entry ];
 }
 
 entry {
     background-color: inherit;
     text-color: @fg;
-    placeholder: "Search Apps...";
+    padding: 4px 10px;
+    placeholder: " Search Apps...";
     placeholder-color: rgba(213, 191, 226, 0.5);
 }
 
 listview {
+    border: 0px 0px 0px; /* Removes the "perforated" dashed lines */
     lines: 8;
+    text-color: @fg;
     columns: 1;
     padding: 0px;
     spacing: 8px;
@@ -90,4 +88,20 @@ element-icon {
 element-text {
     vertical-align: 0.5;
     text-color: inherit;
+}
+
+message {
+    enabled: true;
+    background-color: @bg;
+    padding: 10px;
+    border: 2px solid;
+    border-color: @accent;
+    border-radius: 6px;
+    margin: 10px 0px 0px 0px;
+}
+
+/* The actual text inside the message */
+textbox {
+    text-color: #b8a0cc; /* Your Purple Accent */
+    background-color: inherit;
 }
