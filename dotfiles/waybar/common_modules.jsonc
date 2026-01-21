@@ -9,6 +9,11 @@
         "on-click": "hyprctl dispatch workspace empty",
         "tooltip": false
     },
+    "custom/close_window": {
+        "format": "",  /* The "X" Icon */
+        "on-click": "hyprctl dispatch killactive",
+        "tooltip": false
+    },
     "clock":
     {
         "format": "{:%H:%M:%S}",

@@ -6,10 +6,22 @@
     min-height: 0;
 }
 
+/* Color Scheme:
+   Primary Text: #d5bfe2
+   Dark Text: #1a1520
+   White Text: #ffffff
+   Dark Background: #2a202f
+   Accent Background: #cba6f7
+   Purple Background: #a05dc6
+   Red Background: #e26565
+   Border Accent: #88639b
+*/
+
 window#waybar {
     background-color: transparent;
     color: #d5bfe2;
 }
+
 #cpu,
 #memory,
 #disk,
@@ -19,47 +31,86 @@ window#waybar {
 #mode,
 #idle_inhibitor,
 #mpd,
-
-#workspaces button, #custom-add_workspace {
+#workspaces button,
+#custom-add_workspace {
     padding: 0 10px;
     margin: 2px 2px;
     color: #d5bfe2;
     background-color: #2a202f;
     border-radius: 10px;
 }
-#workspaces button.active, #custom-add_workspace:hover {
+
+#workspaces button.active {
     color: #d5bfe2;
     background-color: #2a202f;
     border-bottom: 3px solid #88639b;
 }
-#network, #pulseaudio, #clock, #bluetooth {
+
+#workspaces button:hover {
+    background: #cba6f7;
+    color: #1a1520;
+    border-radius: 10px;
+    box-shadow: none;
+    text-shadow: none;
+    transition: none;
+}
+
+#custom-add_workspace:hover {
+    background: #cba6f7;
+    color: #1a1520;
+    border-bottom: 3px solid #88639b;
+    border-radius: 10px;
+    box-shadow: none;
+    text-shadow: none;
+    transition: none;
+}
+#custom-close_window {
+    background-color: #e26565; /* Red */
+    color: #ffffff;            /* White Text */
+    padding: 0 10px;
+    margin: 5px 5px 5px 5px;   /* Spacing */
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+#custom-close_window:hover {
+    background-color: #ff8888; /* Lighter Red on hover */
+}
+
+#network,
+#pulseaudio,
+#clock,
+#bluetooth {
     background-color: #2a202f;
     padding: 5px 15px;
     margin: 4px 4px;
     border-radius: 10px;
 }
+
 #custom-launcher {
-    background-color: #a05dc6; /* Your Purple Accent */
-    color: #1a1520;           /* Dark Text */
+    background-color: #a05dc6;
+    color: #1a1520;
     border-radius: 6px;
     padding: 0 10px;
-    margin: 5px 5px 5px 10px; /* Adjust spacing */
+    margin: 5px 5px 5px 10px;
 }
 
 #custom-power {
-    background-color: #ff5555; /* Red for Power */
+    background-color: #e26565;
     color: #ffffff;
     border-radius: 6px;
     padding: 0 10px;
-    margin: 5px 10px 5px 5px; /* Adjust spacing */
+    margin: 5px 10px 5px 5px;
 }
 
-/* Optional: Add hover effects */
-#custom-launcher:hover, #custom-power:hover {
-    background-color: #d5bfe2; /* Lighter color on hover */
+#custom-launcher:hover,
+#custom-power:hover {
+    background-color: #d5bfe2;
     color: #000000;
 }
-#custom-ddc1, #custom-ddc2 {
+
+#custom-ddc1,
+#custom-ddc2 {
     background-color: #d5bfe2;
     color: #1a1520;
     border-radius: 6px;

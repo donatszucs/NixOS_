@@ -8,7 +8,7 @@
         "spacing": 4,
         "include": ["~/.config/waybar/common_modules.jsonc"],
         "modules-left": ["clock", "custom/launcher", "custom/power"],
-        "modules-center": ["hyprland/workspaces", "custom/add_workspace" ],
+        "modules-center": ["custom/close_window", "hyprland/workspaces", "custom/add_workspace" ],
         "modules-right": ["custom/ddc1", "bluetooth", "pulseaudio", "network"]
     },
 
@@ -21,7 +21,7 @@
         "spacing": 4,
         "include": ["~/.config/waybar/common_modules.jsonc"],
         "modules-left": ["clock", "custom/launcher", "custom/power"],
-        "modules-center": ["hyprland/workspaces", "custom/add_workspace" ],
+        "modules-center": ["custom/close_window", "hyprland/workspaces", "custom/add_workspace" ],
         "modules-right": ["custom/ddc2", "bluetooth", "pulseaudio", "network"]
     }
 ]

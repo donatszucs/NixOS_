@@ -80,6 +80,9 @@
   # 3. Force load the kernel module (Driver)
   boot.kernelModules = [ "btusb" ];
   
+  # Flatpak support
+  services.flatpak.enable = true;
+
   # Enable the graphics driver
   hardware.graphics.enable = true;
 
