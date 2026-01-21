@@ -6,6 +6,10 @@ configuration {
     window-format: "[{w}] {c}";
     lines: 8;
     columns: 1;
+    hover-select: true;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+    kb-cancel: "MouseSecondary";
 }
 
 * {
