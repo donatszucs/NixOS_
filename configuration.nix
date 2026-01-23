@@ -212,9 +212,11 @@
   # -- Themeing --
   noto-fonts
   nerd-fonts.jetbrains-mono
-
+  catppuccin-gtk
+  numix-cursor-theme
   adwaita-icon-theme
   ];
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
