@@ -112,6 +112,7 @@ window#waybar {
     color: #000000;
 }
 
+#custom-mod_switcher,
 #custom-keyboard,
 #custom-ddc1,
 #custom-ddc2 {

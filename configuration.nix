@@ -138,7 +138,7 @@
   users.users.doni = {
     isNormalUser = true;
     description = "Doni";
-    extraGroups = [ "networkmanager" "wheel" "i2c" "video" ];
+    extraGroups = [ "networkmanager" "wheel" "i2c" "video" "input" "uinput" ];
     packages = with pkgs; [
       git
     ];
@@ -160,6 +160,9 @@
       enable = true;
     };
   };
+
+  # Enable input remapper service
+  services.input-remapper.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -186,6 +189,7 @@
   ddcutil           # Control monitor settings like brightness, contrast, etc.
   libnotify        # Notification library
   pwvucontrol     # Pipewire volume control CLI
+  input-remapper   # Input remapping service
 
   # -- Applications --
   vscode            
