@@ -35,7 +35,7 @@
             "default": ["", ""]
         },
     "scroll-step": 1,
-    "on-click": "pkill pavucontrol || pavucontrol -t 3",
+    "on-click": "pkill pwvucontrol || pwvucontrol -t 4",
     "ignored-sinks": ["Easy Effects Sink"]
     },
     "network": {
@@ -84,6 +84,14 @@
         "format": " Power  ",
         "on-click": "~/.config/waybar/scripts/powermenu.sh",
         "tooltip": false
+    },
+    "custom/audio_cycle": {
+    "format": "󰓃",
+    "on-click": "~/nixos-config/dotfiles/waybar/scripts/cycle_output.sh",
+    "on-scroll-up": "~/nixos-config/dotfiles/waybar/scripts/cycle_output.sh",
+    "on-scroll-down": "~/nixos-config/dotfiles/waybar/scripts/cycle_output.sh",
+    "tooltip-format": "Cycle Audio Output",
+    "escape": true
     },
     "custom/keyboard":{
         "format":"Keyboard  ",

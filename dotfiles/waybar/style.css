@@ -81,6 +81,7 @@ window#waybar {
 #network,
 #pulseaudio,
 #clock,
+#custom-audio_cycle,
 #bluetooth {
     background-color: #2a202f;
     padding: 5px 15px;
@@ -104,6 +105,7 @@ window#waybar {
     margin: 5px 10px 5px 5px;
 }
 
+#custom-audio_cycle:hover,
 #custom-launcher:hover,
 #custom-power:hover {
     background-color: #d5bfe2;

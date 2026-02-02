@@ -184,11 +184,14 @@
   rofi              # Application launcher
   brightnessctl     # Screen brightness control
   ddcutil           # Control monitor settings like brightness, contrast, etc.
+  libnotify        # Notification library
+  pwvucontrol     # Pipewire volume control CLI
 
   # -- Applications --
   vscode            
   google-chrome
   spotify
+  qalculate-gtk
 
   # -- keyboard --
   wvkbd             # On-screen keyboard
@@ -203,6 +206,7 @@
   # -- Screenshots / Clipboard --
   grim              # Screenshot tool
   slurp             # Select area for screenshot
+  cliphist         # Clipboard manager backend
   wl-clipboard      # Clipboard manager
 
   # -- Task Management --
