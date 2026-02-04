@@ -10,14 +10,12 @@ sudo nixos-rebuild switch
 
 Notes:
 
-nerd-fonts.jetbrains-mono probably needs to be installed separately for icons to work.
-
 SuperMouse preset needs to be added in Input Remapper
 
 Wallpapers and displays need to be configured
 
 Tapo light setup:
 
-uv init, add tapo/python-dotenv
+    - uv init, add tapo/python-dotenv
 
-.env in the scripts folder with the variables
+    - .env in the scripts folder with the variables

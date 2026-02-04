@@ -1,7 +1,8 @@
 * {
     border: none;
     border-radius: 0;
-    font-family: "JetBrainsMono Nerd Font", "Noto Sans", sans-serif;
+    font-family: "JetBrainsMonoNL Nerd Font", "Noto Sans", sans-serif;
+    font-weight: bold;
     font-size: 14px;
     min-height: 0;
 }
@@ -18,10 +19,74 @@
 */
 
 window#waybar {
-    background-color: transparent;
-    color: #d5bfe2;
+    background: linear-gradient(180deg, rgba(13, 0, 21, 0.3) 0%, rgba(0,0,0,0) 100%);
 }
 
+#custom-power,
+#custom-close_window {
+    background: linear-gradient(180deg, 
+        #bb5353 0%,
+        #e26565 100%
+    );
+    color: #ffffff;            /* White Text */
+    padding: 0 10px;
+    margin: 5px 5px 5px 5px;   /* Spacing */
+    border-radius: 8px;
+    font-size: 16px;
+    border-bottom: 2px solid #652e2e;
+    transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.8s;
+}
+
+#custom-power:hover,
+#custom-close_window:hover {
+    background: linear-gradient(180deg, 
+        rgb(168, 75, 75) 0%,
+        #ff8888 100%
+    );
+}
+
+#workspaces button,
+#custom-add_workspace,
+#workspaces button.active,
+#custom-launcher,
+#network,
+#pulseaudio,
+#clock,
+#custom-audio_cycle,
+#bluetooth {
+    background: linear-gradient(180deg, 
+        #2a202f 0%,   /* Egy gazdagabb lila a tetejére */
+        #28192e 100%  /* A sötétebb alapod az aljára */
+    );
+    color: #d5bfe2;
+    padding: 5px 15px;
+    margin: 4px 4px;
+    border-radius: 8px;
+    min-width: 15px;
+    border-bottom: 2px solid #8e6ca0;
+    transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.8s;
+}
+
+#workspaces button:hover,
+#custom-add_workspace:hover,
+#workspaces button.active:hover,
+#custom-launcher:hover,
+#network:hover,
+#pulseaudio:hover,
+#clock:hover,
+#custom-audio_cycle:hover,
+#bluetooth:hover {
+    background: linear-gradient(180deg, 
+        #231a27 0%,   /* Egy gazdagabb lila a tetejére */
+        #593b67 100%  /* A sötétebb alapod az aljára */
+    );
+}
+
+#workspaces button {
+    border-bottom: 0px solid transparent;
+}
+
+/* NOT USED */
 #cpu,
 #memory,
 #disk,
@@ -31,94 +96,34 @@ window#waybar {
 #mode,
 #idle_inhibitor,
 #mpd,
-
-#workspaces button,
-#custom-add_workspace {
-    padding: 0 20px;
-    margin: 2px 2px;
-    color: #d5bfe2;
-    background-color: #2a202f;
-    border-radius: 10px;
-}
-
-#workspaces button.active {
-    color: #d5bfe2;
-    background-color: #2a202f;
-    border-bottom: 3px solid #88639b;
-}
-
-#workspaces button:hover {
-    background: #d5bfe2;
-    color: #1a1520;
-    border-radius: 10px;
-    box-shadow: none;
-    text-shadow: none;
-    transition: none;
-}
-
-#custom-add_workspace:hover {
-    background: #d5bfe2;
-    color: #1a1520;
-    border-bottom: 3px solid #88639b;
-    border-radius: 10px;
-    box-shadow: none;
-    text-shadow: none;
-    transition: none;
-}
-#custom-power,
-#custom-close_window {
-    background-color: #e26565; /* Red */
-    color: #ffffff;            /* White Text */
-    padding: 0 10px;
-    margin: 5px 5px 5px 5px;   /* Spacing */
-    border-radius: 8px;
-    font-size: 16px;
-    border-bottom: 3px solid #652e2e;
-}
-
-#custom-power:hover,
-#custom-close_window:hover {
-    background-color: #ff8888; /* Lighter Red on hover */
-}
-
-#custom-mod_switcher:hover,
-#custom-keyboard:hover,
-#custom-tapo:hover,
-#custom-ddc1:hover,
-#custom-ddc2:hover,
-
-#custom-launcher,
-#network,
-#pulseaudio,
-#clock,
-#custom-audio_cycle,
-#bluetooth {
-    background-color: #2a202f;
-    color: #d5bfe2;
-    padding: 5px 15px;
-    margin: 4px 4px;
-    border-radius: 10px;
-    min-width: 15px;
-    border-bottom: 3px solid #88639b;
-}
-
-#custom-audio_cycle:hover,
-#custom-launcher:hover,
-#network:hover,
-#pulseaudio:hover,
-#clock:hover,
-#bluetooth:hover,
+/* NOT USED */
 
 #custom-mod_switcher,
 #custom-keyboard,
 #custom-ddc1,
 #custom-tapo,
 #custom-ddc2 {
-    background-color: #d5bfe2;
-    color: #1a1520;
+    background: linear-gradient(180deg, 
+        #d5bfe2 0%,   /* Heavier, darker top */
+        #c8b3d4 100%  /* Your target bottom */
+    );
+    color: #2a202f;
     padding: 5px 15px;
     margin: 4px 4px;
-    border-radius: 10px;
+    border-radius: 8px;
     min-width: 15px;
-    border-bottom: 3px solid #88639b;
+    border-bottom: 2px solid #88639b;
+    transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.8s;
 }
+
+#custom-mod_switcher:hover,
+#custom-keyboard:hover,
+#custom-ddc1:hover,
+#custom-tapo:hover,
+#custom-ddc2:hover {
+    background: linear-gradient(180deg, 
+        #c2acd0 0%,   /* Lighter top on hover */
+        #f5e4ff 100%  /* Darker bottom on hover */
+    );
+}
+

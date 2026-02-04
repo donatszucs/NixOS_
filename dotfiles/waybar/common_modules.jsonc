@@ -87,7 +87,7 @@
     },
     "custom/audio_cycle": {
     "format": "󰓃",
-    "on-click": "~/.config/waybar/waybar/scripts/cycle_output.sh",
+    "on-click": "~/.config/waybar/scripts/cycle_output.sh ",
     "on-scroll-up": "~/.config/waybar/scripts/cycle_output.sh",
     "on-scroll-down": "~/.config/waybar/scripts/cycle_output.sh",
     "tooltip-format": "Cycle Audio Output",
