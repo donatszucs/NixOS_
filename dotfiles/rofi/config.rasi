@@ -7,9 +7,13 @@ configuration {
     lines: 8;
     columns: 1;
     hover-select: true;
+    kb-page-prev: "ScrollUp";
+    kb-page-next: "ScrollDown";
+    ml-row-up: "";
+    ml-row-down: "";
     me-select-entry: "";
     me-accept-entry: "MousePrimary";
-    kb-cancel: "MouseSecondary";
+    kb-cancel: "MouseSecondary,Escape";
 }
 
 * {

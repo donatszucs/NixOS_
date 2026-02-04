@@ -78,39 +78,41 @@ window#waybar {
     background-color: #ff8888; /* Lighter Red on hover */
 }
 
+#custom-power {
+    background-color: #e26565;
+    color: #ffffff;
+    padding: 5px 15px;
+    margin: 4px 4px;
+    border-radius: 10px;
+    min-width: 15px;
+}
+
+#custom-mod_switcher:hover,
+#custom-keyboard:hover,
+#custom-ddc1:hover,
+#custom-ddc2:hover,
+
+#custom-launcher,
 #network,
 #pulseaudio,
 #clock,
 #custom-audio_cycle,
 #bluetooth {
     background-color: #2a202f;
+    color: #d5bfe2;
     padding: 5px 15px;
     margin: 4px 4px;
     border-radius: 10px;
-}
-
-#custom-launcher {
-    background-color: #a05dc6;
-    color: #1a1520;
-    border-radius: 6px;
-    padding: 0 10px;
-    margin: 5px 5px 5px 10px;
-}
-
-#custom-power {
-    background-color: #e26565;
-    color: #ffffff;
-    border-radius: 6px;
-    padding: 0 10px;
-    margin: 5px 10px 5px 5px;
+    min-width: 15px;
 }
 
 #custom-audio_cycle:hover,
 #custom-launcher:hover,
-#custom-power:hover {
-    background-color: #d5bfe2;
-    color: #000000;
-}
+#custom-power:hover,
+#network:hover,
+#pulseaudio:hover,
+#clock:hover,
+#bluetooth:hover,
 
 #custom-mod_switcher,
 #custom-keyboard,
@@ -118,7 +120,19 @@ window#waybar {
 #custom-ddc2 {
     background-color: #d5bfe2;
     color: #1a1520;
-    border-radius: 6px;
-    padding: 0 10px;
-    margin: 5px 5px;
+    padding: 5px 15px;
+    margin: 4px 4px;
+    border-radius: 10px;
+    min-width: 15px;
+}
+#custom-tapo {
+    background-color: #d5bfe2;
+    color: #1a1520;
+    padding: 5px 15px;
+    margin: 4px 4px;
+    border-radius: 10px;
+    /* Use a Monospace font so '100%' and ' Off' are exactly the same width */
+    font-family: "JetBrainsMono Nerd Font", "Roboto Mono", monospace;
+    /* Fixed width helps as a secondary backup */
+    min-width: 50px; 
 }

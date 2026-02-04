@@ -4,3 +4,7 @@ result
 .DS_Store
 *.swp
 hardware-configuration.nix
+dotfiles/waybar/scripts/README.md
+dotfiles/waybar/scripts/uv.lock
+dotfiles/waybar/scripts/pyproject.toml
+dotfiles/waybar/scripts/.python-version

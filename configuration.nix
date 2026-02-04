@@ -144,6 +144,8 @@
     ];
   };
 
+  programs.nix-ld.enable = true;
+
   # Enable Hyprland
   programs.hyprland.enable = true; # enables Hyprland and XWayland
 
@@ -190,6 +192,7 @@
   libnotify        # Notification library
   pwvucontrol     # Pipewire volume control CLI
   input-remapper   # Input remapping service
+  pkgs.uv          # Python package manager
 
   # -- Applications --
   vscode            

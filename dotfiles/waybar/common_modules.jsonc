@@ -100,8 +100,18 @@
     "signal": 10,  // Waybar will listen for SIGRTMIN+10
     "tooltip": false
     },
+    "custom/tapo": {
+    "format": "{}",
+    "exec": "~/nixos-config/dotfiles/waybar/scripts/tapo_toggle.sh",
+    "on-click": "~/nixos-config/dotfiles/waybar/scripts/tapo_toggle.sh toggle",
+    "on-scroll-up": "~/nixos-config/dotfiles/waybar/scripts/tapo_toggle.sh up",
+    "on-scroll-down": "~/nixos-config/dotfiles/waybar/scripts/tapo_toggle.sh down",
+    "signal": 11,
+    "interval": 60,
+    "tooltip": false
+    },
     "custom/keyboard":{
-        "format":"Keyboard  ",
+        "format":" ",
         "on-click": "pkill wvkbd-mobint || wvkbd-mobintl -R 10 -L 300 --fn \"JetBrainsMono Nerd Font 20\" --bg 604c6c00 --text 2a202f --fg d5bfe2 --fg-sp 2a202f --text-sp d5bfe2 --press a05dc6 --press-sp a05dc6",
         "tooltip": false
     }
