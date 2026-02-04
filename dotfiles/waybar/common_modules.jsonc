@@ -57,7 +57,7 @@
         "on-click": "blueman-manager"
     },
     "custom/ddc1": {
-        "format": "{}%  ",
+        "format": "{}",
         "exec": "~/.config/waybar/scripts/ddc_brightness.sh 1 get",
         "on-scroll-up": "~/.config/waybar/scripts/ddc_brightness.sh 1 up",
         "on-scroll-down": "~/.config/waybar/scripts/ddc_brightness.sh 1 down",
@@ -67,7 +67,7 @@
     },
 
     "custom/ddc2": {
-        "format": "{}%  ",
+        "format": "{}",
         "exec": "~/.config/waybar/scripts/ddc_brightness.sh 2 get",
         "on-scroll-up": "~/.config/waybar/scripts/ddc_brightness.sh 2 up",
         "on-scroll-down": "~/.config/waybar/scripts/ddc_brightness.sh 2 down",
@@ -87,25 +87,25 @@
     },
     "custom/audio_cycle": {
     "format": "󰓃",
-    "on-click": "~/nixos-config/dotfiles/waybar/scripts/cycle_output.sh",
-    "on-scroll-up": "~/nixos-config/dotfiles/waybar/scripts/cycle_output.sh",
-    "on-scroll-down": "~/nixos-config/dotfiles/waybar/scripts/cycle_output.sh",
+    "on-click": "~/.config/waybar/waybar/scripts/cycle_output.sh",
+    "on-scroll-up": "~/.config/waybar/scripts/cycle_output.sh",
+    "on-scroll-down": "~/.config/waybar/scripts/cycle_output.sh",
     "tooltip-format": "Cycle Audio Output",
     "escape": true
     },
     "custom/mod_switcher": {
     "format": "{}",
-    "exec": "~/nixos-config/dotfiles/waybar/scripts/mod_switcher.sh",
-    "on-click": "~/nixos-config/dotfiles/waybar/scripts/mod_switcher.sh toggle",
+    "exec": "~/.config/waybar/scripts/mod_switcher.sh",
+    "on-click": "~/.config/waybar/scripts/mod_switcher.sh toggle",
     "signal": 10,  // Waybar will listen for SIGRTMIN+10
     "tooltip": false
     },
     "custom/tapo": {
     "format": "{}",
-    "exec": "~/nixos-config/dotfiles/waybar/scripts/tapo_toggle.sh",
-    "on-click": "~/nixos-config/dotfiles/waybar/scripts/tapo_toggle.sh toggle",
-    "on-scroll-up": "~/nixos-config/dotfiles/waybar/scripts/tapo_toggle.sh up",
-    "on-scroll-down": "~/nixos-config/dotfiles/waybar/scripts/tapo_toggle.sh down",
+    "exec": "~/.config/waybar/scripts/tapo_toggle.sh get",
+    "on-click": "~/.config/waybar/scripts/tapo_toggle.sh toggle",
+    "on-scroll-up": "~/.config/waybar/scripts/tapo_toggle.sh up",
+    "on-scroll-down": "~/.config/waybar/scripts/tapo_toggle.sh down",
     "signal": 11,
     "interval": 60,
     "tooltip": false

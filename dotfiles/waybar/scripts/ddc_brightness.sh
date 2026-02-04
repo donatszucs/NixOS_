@@ -23,7 +23,9 @@ CURRENT=$(cat "$CACHE_FILE")
 
 # --- GET COMMAND (Used by Waybar to show value) ---
 if [ "$CMD" = "get" ]; then
-    echo "$CURRENT"
+    # Use printf to ensure the % is always padded to the same width
+    printf "%3d%%  \n" "$CURRENT"
+
     exit 0
 fi
 

@@ -48,7 +48,7 @@ window#waybar {
 }
 
 #workspaces button:hover {
-    background: #cba6f7;
+    background: #d5bfe2;
     color: #1a1520;
     border-radius: 10px;
     box-shadow: none;
@@ -57,7 +57,7 @@ window#waybar {
 }
 
 #custom-add_workspace:hover {
-    background: #cba6f7;
+    background: #d5bfe2;
     color: #1a1520;
     border-bottom: 3px solid #88639b;
     border-radius: 10px;
@@ -65,30 +65,25 @@ window#waybar {
     text-shadow: none;
     transition: none;
 }
+#custom-power,
 #custom-close_window {
     background-color: #e26565; /* Red */
     color: #ffffff;            /* White Text */
     padding: 0 10px;
     margin: 5px 5px 5px 5px;   /* Spacing */
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 16px;
+    border-bottom: 3px solid #652e2e;
 }
 
+#custom-power:hover,
 #custom-close_window:hover {
     background-color: #ff8888; /* Lighter Red on hover */
 }
 
-#custom-power {
-    background-color: #e26565;
-    color: #ffffff;
-    padding: 5px 15px;
-    margin: 4px 4px;
-    border-radius: 10px;
-    min-width: 15px;
-}
-
 #custom-mod_switcher:hover,
 #custom-keyboard:hover,
+#custom-tapo:hover,
 #custom-ddc1:hover,
 #custom-ddc2:hover,
 
@@ -104,11 +99,11 @@ window#waybar {
     margin: 4px 4px;
     border-radius: 10px;
     min-width: 15px;
+    border-bottom: 3px solid #88639b;
 }
 
 #custom-audio_cycle:hover,
 #custom-launcher:hover,
-#custom-power:hover,
 #network:hover,
 #pulseaudio:hover,
 #clock:hover,
@@ -117,6 +112,7 @@ window#waybar {
 #custom-mod_switcher,
 #custom-keyboard,
 #custom-ddc1,
+#custom-tapo,
 #custom-ddc2 {
     background-color: #d5bfe2;
     color: #1a1520;
@@ -124,15 +120,5 @@ window#waybar {
     margin: 4px 4px;
     border-radius: 10px;
     min-width: 15px;
-}
-#custom-tapo {
-    background-color: #d5bfe2;
-    color: #1a1520;
-    padding: 5px 15px;
-    margin: 4px 4px;
-    border-radius: 10px;
-    /* Use a Monospace font so '100%' and ' Off' are exactly the same width */
-    font-family: "JetBrainsMono Nerd Font", "Roboto Mono", monospace;
-    /* Fixed width helps as a secondary backup */
-    min-width: 50px; 
+    border-bottom: 3px solid #88639b;
 }

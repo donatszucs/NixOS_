@@ -12,36 +12,34 @@ EMAIL = os.getenv("TAPO_EMAIL")
 PASSWORD = os.getenv("TAPO_PASSWORD")
 
 async def main():
+    if len(sys.argv) < 2: return
+    
     client = ApiClient(EMAIL, PASSWORD)
     device = await client.l530(IP)
-    
-    if len(sys.argv) > 1:
-        cmd = sys.argv[1]
-        if cmd == "toggle":
-            info = await device.get_device_info()
-            if info.device_on: await device.off()
-            else: await device.on()
-        elif cmd == "brightness" and len(sys.argv) > 2:
-            info = await device.get_device_info()
-            current = info.brightness
-            adjustment = int(sys.argv[2])
-            new_brightness = max(1, min(100, current + adjustment))
-            await device.set_brightness(new_brightness)
+    cmd = sys.argv[1]
 
-    # Fetch final state
-    info = await device.get_device_info()
-    
-    if not info.device_on:
-        # " Off" (with a leading space) makes it 4 characters
-        print(" Off 󱩎")
-    else:
-        brightness = info.brightness
-        # "{:>3}%" ensures the number is right-aligned in a 3-space block
-        # e.g., "  5%", " 50%", "100%"
-        print(f"{brightness:>3}% 󱩒")
+    if cmd == "on": await device.on()
+    elif cmd == "off": await device.off()
+    elif cmd == "set":
+        # Safeguard: Ensure sys.argv[2] exists and is not empty
+        if len(sys.argv) > 2 and sys.argv[2].strip():
+            try:
+                val = int(sys.argv[2])
+                await device.set_brightness(val)
+            except ValueError:
+                pass # Ignore bad input
+    elif cmd == "brightness":
+        try:
+            info = await device.get_device_info()
+            print(f"{info.brightness}")
+        except Exception:
+            print("OFF") # Fallback if device is unreachable
+    elif cmd == "status":
+        try:
+            info = await device.get_device_info()
+            print(f"{'ON' if info.device_on else 'OFF'}")
+        except Exception:
+            print("anyad") # Fallback if device is unreachable
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except Exception:
-        print("󰛑")
+    asyncio.run(main())
