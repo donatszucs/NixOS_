@@ -11,7 +11,7 @@ if [[ "$1" == "toggle" ]]; then
         # TURN OFF
         input-remapper-control --command stop --device "$DEVICE" --preset "$PRESET"
         rm "$STATE_FILE"
-        echo "󰘳"  # Icon for SUPER mode (Windows/Super logo)
+        echo "󱗼"  # Icon for SUPER mode (Windows/Super logo)
     else
         # TURN ON
         input-remapper-control --command start --device "$DEVICE" --preset "$PRESET"
@@ -21,7 +21,7 @@ if [[ "$1" == "toggle" ]]; then
     pkill -RTMIN+10 waybar
 else
     if [ -f "$STATE_FILE" ]; then
-        echo "󰘳"
+        echo "󱗼"
     else
         echo "󰍽"
     fi

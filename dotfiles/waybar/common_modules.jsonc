@@ -81,7 +81,7 @@
         "tooltip": false
     },
     "custom/power": {
-        "format": " Power  ",
+        "format": "",
         "on-click": "~/.config/waybar/scripts/powermenu.sh",
         "tooltip": false
     },
@@ -111,7 +111,7 @@
     "tooltip": false
     },
     "custom/keyboard":{
-        "format":" ",
+        "format":"",
         "on-click": "pkill wvkbd-mobint || wvkbd-mobintl -R 10 -L 300 --fn \"JetBrainsMono Nerd Font 20\" --bg 604c6c00 --text 2a202f --fg d5bfe2 --fg-sp 2a202f --text-sp d5bfe2 --press a05dc6 --press-sp a05dc6",
         "tooltip": false
     }
