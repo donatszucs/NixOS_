@@ -12,8 +12,6 @@ Notes:
 
 SuperMouse preset needs to be added in Input Remapper
 
-Wallpapers and displays need to be configured
-
 Tapo light setup:
 
     - uv init, add tapo/python-dotenv

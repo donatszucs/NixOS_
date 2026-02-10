@@ -1,0 +1,17 @@
+@import "~/.config/rofi/config.rasi"
+
+listview {
+    scrollbar: false;
+    lines: 4;
+    columns: 1;
+}
+
+inputbar {
+    enabled: false;
+}
+
+element-icon {
+    size: 200px;
+    background-color: transparent;
+    border-radius: 8px;
+}

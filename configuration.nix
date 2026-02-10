@@ -172,7 +172,19 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-
+  
+  # -- Wallpaper app --
+  (
+    makeDesktopItem {
+      name = "Rofi Wallpaper Selector";
+      desktopName = "Wallpaper Selector";
+      comment = "Select a wallpaper";
+      exec = "/home/doni/nixos-config/scripts/wallpaper-launcher.sh";
+      terminal = false;
+      type = "Application";
+      categories = ["Utility"];
+    }
+  )
   # -- Network --
   networkmanagerapplet
 
@@ -193,6 +205,7 @@
   pwvucontrol     # Pipewire volume control CLI
   input-remapper   # Input remapping service
   pkgs.uv          # Python package manager
+  jq               # Command-line JSON processor
 
   # -- Applications --
   vscode            
