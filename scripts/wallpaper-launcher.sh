@@ -7,11 +7,11 @@ CONF_DIR="$HOME/.config/hypr"
 # 1. Get the focused monitor name (e.g., DP-1, HDMI-A-1)
 MONITOR=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name')
 
-# 2. Build rofi menu with image paths as icons
+# 2. Build rofi menu with image paths as icons (sorted)
 MENU_CONTENT=""
 while IFS= read -r img; do
     MENU_CONTENT+="$img\x00icon\x1f$WALL_DIR/$img\n"
-done < <(ls "$WALL_DIR")
+done < <(ls -1 "$WALL_DIR" | sort)
 
 # Remove trailing newline
 MENU_CONTENT="${MENU_CONTENT%\\n}"

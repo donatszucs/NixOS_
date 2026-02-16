@@ -61,6 +61,9 @@
   # Enable I2C kernel modules
   hardware.i2c.enable = true;
 
+  # Enable GVFS for file management in Thunar and other GTK apps
+  services.gvfs.enable = true;
+
   # 1. Enable firmware (Critical for WiFi/Bluetooth)
   hardware.enableAllFirmware = true;
 

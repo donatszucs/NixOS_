@@ -2,16 +2,23 @@
 
 listview {
     scrollbar: false;
-    lines: 4;
-    columns: 1;
+    lines: 1;
+    columns: 4;
 }
 
 inputbar {
     enabled: false;
 }
 
+element {
+    orientation: vertical;
+}
+
 element-icon {
-    size: 200px;
+    size: 250px;
     background-color: transparent;
-    border-radius: 8px;
+}
+
+element-text {
+    horizontal-align: 0.5;
 }
