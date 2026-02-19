@@ -43,12 +43,18 @@ case "$1" in
             printf '{"text":"Nothing playing","tooltip":""}'\n
         fi
         ;;
+    check-active)
+        [ -n "$active" ]
+        ;;
     check)
         # Always show the module
         exit 0
         ;;
     playpause-icon)
-        status=$([ -n "$active" ] && playerctl -p "$active" status 2>/dev/null)
+        if [ -z "$active" ]; then
+            exit 1
+        fi
+        status=$(playerctl -p "$active" status 2>/dev/null)
         [ "$status" = "Playing" ] && echo '󰏤' || echo '󰐊'
         ;;
     play-pause)

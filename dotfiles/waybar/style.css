@@ -38,9 +38,11 @@ window#waybar {
 #audio,
 #connections,
 #nowplaying,
+#tray-group,
 #custom-add_workspace,
 #custom-launcher,
 #custom-connections,
+#custom-tray_icon,
 #custom-nowplaying,
 #network,
 #pulseaudio,
@@ -68,12 +70,10 @@ window#waybar {
 #disk,
 #temperature,
 #backlight,
-#tray,
 #mode,
 #idle_inhibitor,
 #mpd,
 /* NOT USED END */
-
 #custom-mod_switcher,
 #custom-keyboard,
 #custom-ddc1,
@@ -139,21 +139,20 @@ window#waybar {
 #custom-add_workspace:hover,
 #workspaces button.active:hover,
 #custom-launcher:hover,
-#custom-connections:hover,
+#custom-tray_icon:hover,
 #custom-nowplaying:hover,
 #network:hover,
 #pulseaudio:hover,
 #clock:hover,
 #custom-audio_cycle:hover,
 #bluetooth:hover,
-#custom-playpause,
-#custom-skip,
 #nowplaying #custom-playpause:hover,
 #nowplaying #custom-skip:hover,
 #audio #pulseaudio:hover,
 #audio #custom-audio_cycle:hover,
 #connections #bluetooth:hover,
-#connections #network:hover {
+#connections #network:hover,
+#tray-group #custom-tray_icon:hover {
     background: linear-gradient(180deg, 
         #231a27 0%,
         #593b67 100%
@@ -187,7 +186,8 @@ window#waybar {
 
 #audio,
 #nowplaying,
-#connections {
+#connections,
+#tray-group {
     padding: 0;
 }
 
@@ -198,7 +198,9 @@ window#waybar {
 #nowplaying #custom-skip,
 #connections #custom-connections,
 #connections #bluetooth,
-#connections #network {
+#connections #network,
+#tray-group #custom-tray_icon,
+#tray-group #tray {
     background: transparent;
     border: none;
     border-bottom: none;

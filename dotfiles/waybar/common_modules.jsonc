@@ -170,14 +170,38 @@
     "custom/playpause": {
         "format": "{}",
         "exec": "~/.config/waybar/scripts/nowplaying.sh playpause-icon",
+        "exec-if": "~/.config/waybar/scripts/nowplaying.sh check-active",
         "on-click": "~/.config/waybar/scripts/nowplaying.sh play-pause",
         "interval": 2,
         "tooltip": false,
         "exec-on-event": true
     },
     "custom/skip": {
-        "format": "󰒭",
+        "format": "{}",
+        "exec": "echo '󰒭'",
+        "exec-if": "~/.config/waybar/scripts/nowplaying.sh check-active",
         "on-click": "~/.config/waybar/scripts/nowplaying.sh next",
+        "interval": 2,
         "tooltip": false
+    },
+    "group/tray": {
+        "orientation": "horizontal",
+        "modules": [
+            "custom/tray_icon",
+            "tray"
+        ],
+        "drawer": {
+            "transition-duration": 500,
+            "children-class": "tray-drawer",
+            "transition-left-to-right": false
+        }
+    },
+    "custom/tray_icon": {
+        "format": "󱊖",
+        "tooltip": false,
+        "on-click": "missioncenter"
+    },
+    "tray": {
+        "spacing": 6
     }
 }
