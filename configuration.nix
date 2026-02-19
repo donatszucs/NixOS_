@@ -15,7 +15,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Use latest kernel.
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_6_18;
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -73,9 +73,10 @@
     powerOnBoot = true;
     settings = {
       General = {
-        Enable = "Source,Sink,Media,Socket";
-        ControllerMode = "dual";
-        Experimental = true; # Helps with some headsets/controllers
+        # Enable = "Source,Sink,Media,Socket"; # Allow all profiles (including keyboard/mouse HID)
+        Experimental = true; # Show battery charge for supported devices
+        JustWorksRepairing = "always"; # Helps with some devices that fail to pair
+        # MultiProfile = "multiple";
       };
     };
   };
@@ -105,7 +106,7 @@
     # Enable this if you have graphical corruption issues or application crashes after waking
     # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead
     # of just the bare essentials.
-    powerManagement.enable = false;
+    powerManagement.enable = true;
 
     # Fine-grained power management. Turns off GPU when not in use.
     # Experimental and only works on modern Nvidia GPUs (Turing or newer).
@@ -214,6 +215,7 @@
   vscode            
   google-chrome
   spotify
+  discord
   qalculate-gtk
 
   # -- keyboard --
@@ -237,7 +239,7 @@
   mission-center    # The Windows-style GUI one
   
   # -- Themeing --
-  catppuccin-gtk
+  dracula-theme
   numix-cursor-theme
   adwaita-icon-theme
   ];

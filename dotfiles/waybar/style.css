@@ -35,8 +35,11 @@ window#waybar {
     border-bottom: 2px solid #8e6ca0;
 }
 
+#audio,
+#connections,
 #custom-add_workspace,
 #custom-launcher,
+#custom-connections,
 #network,
 #pulseaudio,
 #clock,
@@ -120,11 +123,11 @@ window#waybar {
 #custom-mod_switcher:hover,
 #custom-keyboard:hover,
 #custom-ddc1:hover,
-#custom-tapo:hover,
+#custom-tapo:hover,  
 #custom-ddc2:hover {
     background: linear-gradient(180deg, 
-        #c2acd0 0%,
-        #f5e4ff 100%
+        #bda6ca 0%,
+        #f4e7fc 100%
     );
 }
 
@@ -132,11 +135,16 @@ window#waybar {
 #custom-add_workspace:hover,
 #workspaces button.active:hover,
 #custom-launcher:hover,
+#custom-connections:hover,
 #network:hover,
 #pulseaudio:hover,
 #clock:hover,
 #custom-audio_cycle:hover,
-#bluetooth:hover {
+#bluetooth:hover,
+#audio #pulseaudio:hover,
+#audio #custom-audio_cycle:hover,
+#connections #bluetooth:hover,
+#connections #network:hover {
     background: linear-gradient(180deg, 
         #231a27 0%,
         #593b67 100%
@@ -164,4 +172,22 @@ window#waybar {
 
 #custom-add_workspace {
     padding: 0 11px 0 9px;
+}
+
+/* DRAWER STYLES */
+
+#audio,
+#connections {
+    padding: 0;
+}
+
+#audio #pulseaudio,
+#audio #custom-audio_cycle,
+#connections #custom-connections,
+#connections #bluetooth,
+#connections #network {
+    background: transparent;
+    border: none;
+    border-bottom: none;
+    margin: 0;
 }

@@ -14,12 +14,38 @@
         "on-click": "hyprctl dispatch killactive",
         "tooltip": false
     },
+    "group/connections": {
+        "orientation": "horizontal",
+        "modules": [
+            "custom/connections",
+            "bluetooth",
+            "network"
+        ],
+        "drawer": {
+            "transition-duration": 500,
+            "children-class": "connections-drawer",
+            "transition-left-to-right": false
+        }
+    },
+    "group/audio": {
+        "orientation": "horizontal",
+        "modules": [
+            "pulseaudio",
+            "custom/audio_cycle"
+        ],
+        "drawer": {
+            "transition-duration": 500,
+            "children-class": "audio-drawer",
+            "transition-left-to-right": false
+        }
+    },
     "clock":
     {
         "format": "{:%H:%M:%S}",
         "tooltip": true,
         "tooltip-format": "{:%Y. %m. %d.}",
-        "interval": 1
+        "interval": 1,
+        "on-click": "google-chrome-stable --app=https://calendar.google.com"
     },
     "pulseaudio": {
     "format": "{volume}% {icon} ",
@@ -65,7 +91,11 @@
         "interval": "once", /* <--- Only runs once at startup, then waits for signal */
         "tooltip": false
     },
-
+    "custom/connections": {
+        "format": "",
+        "tooltip": true,
+        "tooltip-format": "Show Connections"
+    },
     "custom/ddc2": {
         "format": "{}",
         "exec": "~/.config/waybar/scripts/ddc_brightness.sh 2 get",
