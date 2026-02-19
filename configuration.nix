@@ -153,6 +153,8 @@
   # Enable Hyprland
   programs.hyprland.enable = true; # enables Hyprland and XWayland
 
+  programs.kdeconnect.enable = true; # KDE Connect for phone integration
+
   # Optional: Hint Electron apps to use Wayland
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
