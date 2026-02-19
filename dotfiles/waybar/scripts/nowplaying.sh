@@ -29,9 +29,18 @@ fi
 case "$1" in
     title)
         if [ -n "$active" ]; then
-            playerctl -p "$active" metadata --format '{{title}}' 2>/dev/null | head -c 40
+            title=$(playerctl -p "$active" metadata --format '{{title}}' 2>/dev/null | head -c 40)
+            artist=$(playerctl -p "$active" metadata --format '{{artist}}' 2>/dev/null)
+            # Handle if chrome is the player, but the tab has been closed
+            if [ -n "$title" ] && [ -n "$artist" ]; then
+                printf '{"text":"%s","tooltip":"%s"}\n' \
+                "$(echo "$title" | sed 's/"/\\"/g')" \
+                "$(echo "$artist" | sed 's/"/\\"/g')"
+            else
+                printf '{"text":"Nothing playing","tooltip":""}'\n
+            fi
         else
-            echo "Nothing playing"
+            printf '{"text":"Nothing playing","tooltip":""}'\n
         fi
         ;;
     check)

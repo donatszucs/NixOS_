@@ -160,12 +160,11 @@
     },
     "custom/nowplaying": {
         "format": "󰎆  {}",
+        "return-type": "json",
         "exec": "~/.config/waybar/scripts/nowplaying.sh title",
         "exec-if": "~/.config/waybar/scripts/nowplaying.sh check",
         "on-click": "~/.config/waybar/scripts/nowplaying.sh focus",
         "interval": 2,
-        "escape": true,
-        "tooltip-format": "{}",
         "exec-on-event": true
     },
     "custom/playpause": {
