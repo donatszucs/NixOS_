@@ -144,5 +144,41 @@
         "format":"",
         "on-click": "pkill wvkbd-mobint || wvkbd-mobintl -R 10 -L 300 --fn \"JetBrainsMono Nerd Font 20\" --bg 604c6c00 --text 2a202f --fg d5bfe2 --fg-sp 2a202f --text-sp d5bfe2 --press a05dc6 --press-sp a05dc6",
         "tooltip": false
+    },
+    "group/nowplaying": {
+        "orientation": "horizontal",
+        "modules": [
+            "custom/nowplaying",
+            "custom/playpause",
+            "custom/skip"
+        ],
+        "drawer": {
+            "transition-duration": 300,
+            "children-class": "nowplaying-drawer",
+            "transition-left-to-right": true
+        }
+    },
+    "custom/nowplaying": {
+        "format": "󰎆  {}",
+        "exec": "~/.config/waybar/scripts/nowplaying.sh title",
+        "exec-if": "~/.config/waybar/scripts/nowplaying.sh check",
+        "on-click": "~/.config/waybar/scripts/nowplaying.sh focus",
+        "interval": 2,
+        "escape": true,
+        "tooltip-format": "{}",
+        "exec-on-event": true
+    },
+    "custom/playpause": {
+        "format": "{}",
+        "exec": "~/.config/waybar/scripts/nowplaying.sh playpause-icon",
+        "on-click": "~/.config/waybar/scripts/nowplaying.sh play-pause",
+        "interval": 2,
+        "tooltip": false,
+        "exec-on-event": true
+    },
+    "custom/skip": {
+        "format": "󰒭",
+        "on-click": "~/.config/waybar/scripts/nowplaying.sh next",
+        "tooltip": false
     }
 }

@@ -7,8 +7,8 @@
         "height": 40,
         "spacing": 1,
         "include": ["~/.config/waybar/common_modules.jsonc"],
-        "modules-left": ["clock", "custom/launcher", "custom/power"],
-        "modules-center": ["custom/close_window", "hyprland/workspaces", "custom/add_workspace" ],
+        "modules-left": ["clock", "custom/launcher", "group/nowplaying", "custom/power"],
+        "modules-center": ["custom/close_window", "hyprland/workspaces", "custom/add_workspace"],
         "modules-right": ["custom/tapo", "custom/mod_switcher", "custom/keyboard", "custom/ddc1", "group/audio", "group/connections"]
     },
 
@@ -20,8 +20,8 @@
         "height": 40,
         "spacing": 1,
         "include": ["~/.config/waybar/common_modules.jsonc"],
-        "modules-left": ["clock", "custom/launcher", "custom/power"],
-        "modules-center": ["custom/close_window", "hyprland/workspaces", "custom/add_workspace" ],
+        "modules-left": ["clock", "custom/launcher", "group/nowplaying", "custom/power"],
+        "modules-center": ["custom/close_window", "hyprland/workspaces", "custom/add_workspace"],
         "modules-right": ["custom/mod_switcher", "custom/keyboard", "custom/ddc2", "group/audio", "group/connections"]
     }
 ]
