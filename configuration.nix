@@ -16,7 +16,10 @@
 
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_6_18;
-
+  
+  # Supported filesystems for the initrd (for mounting /boot and other partitions)
+  boot.supportedFilesystems = ["ntfs"];
+  
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -151,9 +154,32 @@
   programs.nix-ld.enable = true;
 
   # Enable Hyprland
-  programs.hyprland.enable = true; # enables Hyprland and XWayland
+  programs.hyprland.enable = true;
 
-  programs.kdeconnect.enable = true; # KDE Connect for phone integration
+  # KDE Connect for phone integration
+  programs.kdeconnect.enable = true;
+
+  programs.gamemode = {
+    enable = true;
+    settings = {
+      general = {
+        softrealtime = "auto";
+        renice = 15;
+      };
+      custom = {
+        start = "${pkgs.libnotify}/bin/notify-send 'GameMode started'";
+        end = "${pkgs.libnotify}/bin/notify-send 'GameMode ended'";
+      };
+    };
+  };
+  
+  # Steam for gaming
+  programs.steam = {
+    enable = true;
+    extraCompatPackages = [
+      pkgs.proton-ge-bin
+    ];
+  };
 
   # Optional: Hint Electron apps to use Wayland
   environment.sessionVariables.NIXOS_OZONE_WL = "1";

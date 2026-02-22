@@ -1,5 +1,8 @@
 * {
     border: none;
+    margin-top: 1px;
+    margin-left: 2px;
+    margin-right: 2px;
     border-radius: 0;
     font-family: "JetBrainsMonoNL Nerd Font", "Noto Sans", sans-serif;
     font-weight: bold;
@@ -15,12 +18,15 @@ window#waybar {
 
 #workspaces {
     background: linear-gradient(180deg, 
-        #2a202f 0%,
-        #28192e 100%
+        #3d2e45 0%,
+        #2a202f 12%,
+        #28192e 88%,
+        #1a101e 100%
     );
+    opacity: 0.9;
     color: #d5bfe2;
     padding: 2px 2px;
-    margin: 1px 1px;
+    margin: 1px 0px;
     border-radius: 10px;
     border-bottom: 0px solid #8e6ca0;
     transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.8s;
@@ -28,8 +34,9 @@ window#waybar {
 
 #workspaces button,
 #workspaces button.active {
+    opacity: 0.9;
     padding: 0px 10px;
-    margin: 1px 2px;
+    margin: 1px 1px;
     border-radius: 8px;
     min-width: 15px;
     border-bottom: 2px solid #8e6ca0;
@@ -52,12 +59,15 @@ window#waybar {
 #custom-skip,
 #bluetooth {
     background: linear-gradient(180deg, 
-        #2a202f 0%,
-        #28192e 100%
+        #3d2e45 0%,
+        #2a202f 12%,
+        #28192e 88%,
+        #1a101e 100%
     );
+    opacity: 0.9;
     color: #d5bfe2;
     padding: 5px 15px;
-    margin: 4px 4px;
+    margin: 4px 2px;
     border-radius: 8px;
     min-width: 15px;
     border-bottom: 2px solid #8e6ca0;
@@ -74,18 +84,22 @@ window#waybar {
 #idle_inhibitor,
 #mpd,
 /* NOT USED END */
+
 #custom-mod_switcher,
 #custom-keyboard,
 #custom-ddc1,
 #custom-tapo,
 #custom-ddc2 {
     background: linear-gradient(180deg, 
-        #d5bfe2 0%,
-        #c8b3d4 100%
+        #f0e6f5 0%,
+        #d5bfe2 12%,
+        #c8b3d4 88%,
+        #a392ad 100%
     );
+    opacity: 0.95;
     color: #2a202f;
     padding: 5px 15px;
-    margin: 4px 4px;
+    margin: 4px 2px;
     border-radius: 8px;
     min-width: 15px;
     border-bottom: 2px solid #88639b;
@@ -95,12 +109,14 @@ window#waybar {
 #custom-power,
 #custom-close_window {
     background: linear-gradient(180deg, 
-        #bb5353 0%,
-        #e26565 100%
+        #e17676 0%,
+        #bb5353 12%,
+        #e26565 88%,
+        #ab4d4d 100%
     );
     color: #ffffff;
     padding: 0 10px;
-    margin: 5px 5px 5px 5px;
+    margin: 5px 2px 5px 2px;
     border-radius: 8px;
     font-size: 16px;
     border-bottom: 2px solid #652e2e;
@@ -112,15 +128,19 @@ window#waybar {
 #custom-power:hover,
 #custom-close_window:hover {
     background: linear-gradient(180deg, 
-        rgb(168, 75, 75) 0%,
-        #ff8888 100%
+        #c45a5a 0%,
+        rgb(168, 75, 75) 12%,
+        #ff8888 88%,
+        #cc6d6d 100%
     );
 }
 
 #workspaces button.active {
     background: linear-gradient(180deg, 
-        #302536 0%,
-        #2a202f 100%
+        #4a3954 0%,
+        #302536 12%,
+        #2a202f 88%,
+        #1c1520 100%
     );
 }
 
@@ -130,8 +150,10 @@ window#waybar {
 #custom-tapo:hover,  
 #custom-ddc2:hover {
     background: linear-gradient(180deg, 
-        #bda6ca 0%,
-        #f4e7fc 100%
+        #d5bce3 0%,
+        #bda6ca 12%,
+        #f4e7fc 88%,
+        #c3b9c9 100%
     );
 }
 
@@ -154,8 +176,10 @@ window#waybar {
 #connections #network:hover,
 #tray-group #custom-tray_icon:hover {
     background: linear-gradient(180deg, 
-        #231a27 0%,
-        #593b67 100%
+        #1e1621 0%,
+        #231a27 12%,
+        #593b67 88%,
+        #543861 100%
     );
 }
 
