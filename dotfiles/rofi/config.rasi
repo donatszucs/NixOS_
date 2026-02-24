@@ -31,9 +31,9 @@ configuration {
 
 window {
     width: 50%;
-    border: 2px solid;
+    border: None;
     border-color: @accent;
-    background-color: rgba(42, 32, 47, 0.95);
+    background-color: rgba(42, 32, 47, 0.7);
     padding: 20px;
 }
 
@@ -41,18 +41,17 @@ inputbar {
     padding: 12px 15px;
     margin: 0 0 20px 0;
     border-radius: 6px;
-    background-color: rgba(80, 61, 90, 0.8);
-    border: 2px solid;
+    background-color: rgba(26, 21, 32, 0.7);
+    border: 0px 0px 2px 0px;
     border-color: @accent;
     children: [ entry ];
 }
 
 entry {
-    background-color: inherit;
     text-color: @fg;
     padding: 4px 10px;
     placeholder: " Search Apps...";
-    placeholder-color: rgba(213, 191, 226, 0.5);
+    placeholder-color: rgba(213, 191, 226, 0.9);
 }
 
 listview {
@@ -75,22 +74,22 @@ element {
 
 /* 1. Define the Standard and Alternate rows to be identical */
 element normal.normal, element alternate.normal {
-    background-color: rgba(26, 21, 32, 0.5);
+    background-color: rgba(26, 21, 32, 0.9);
     text-color: #b8a0cc;
 }
 
 /* 2. Define the Selected row */
 element selected.normal {
-    background-color: @accent;
+    background-color: rgba(171, 137, 190, 0.9);
     text-color: @bg;
     border: 1px solid;
-    border-color: @accent;
+    border-color: rgba(171, 137, 190, 0.9);
 }
 
 element-icon {
     size: 28px;
     padding: 5px 5px 5px 5px;
-    background-color: @accent;
+    background-color: transparent;
 }
 
 element-text {
@@ -100,7 +99,7 @@ element-text {
 
 message {
     enabled: true;
-    background-color: @bg;
+    background-color: rgba(42, 32, 47, 0.9);
     padding: 10px;
     border: 2px solid;
     border-color: @accent;

@@ -245,6 +245,7 @@
   spotify
   discord
   qalculate-gtk
+  texlive.combined.scheme-full
 
   # -- keyboard --
   wvkbd             # On-screen keyboard
@@ -255,6 +256,12 @@
 
   # -- File Management --
   xfce.thunar       # File manager
+  xfce.thunar-archive-plugin # Archive plugin for Thunar
+  file-roller       # Archive manager GUI
+  zip               # CLI zip tool
+  unzip             # CLI unzip tool
+  p7zip             # CLI 7z tool
+  unar              # CLI unar tool
 
   # -- Screenshots / Clipboard --
   grim              # Screenshot tool

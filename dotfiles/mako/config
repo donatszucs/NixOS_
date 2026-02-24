@@ -6,19 +6,21 @@ width=350
 height=150
 margin=20
 padding=15
-border-size=2
-border-radius=10
+border-size=0
+border-radius=8
+markup=1
 
-# --- Colors (Using your #604c6c with 80% transparency) ---
-background-color=#604c6ccc
-text-color=#cdd6f4
-border-color=#cba6f7
-progress-color=over #cba6f7
+# --- Colors ---
+background-color=#2a202fe6
+text-color=#d5bfe2
+border-color=#8e6ca0
+progress-color=over #8e6ca0
 
 # --- Behavior ---
 default-timeout=5000
 icons=1
 max-icon-size=64
+on-button-left=dismiss
 
 # --- Custom Urgency Levels ---
 [urgency=high]

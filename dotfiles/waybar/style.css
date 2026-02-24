@@ -3,10 +3,11 @@
     margin-top: 1px;
     margin-left: 2px;
     margin-right: 2px;
+    margin-bottom: 0px;
     border-radius: 0;
     font-family: "JetBrainsMonoNL Nerd Font", "Noto Sans", sans-serif;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 13px;
     min-height: 0;
 }
 
@@ -16,37 +17,44 @@ window#waybar {
     background: linear-gradient(180deg, rgba(13, 0, 21, 0.3) 0%, rgba(0,0,0,0) 100%);
 }
 
+/* WORKSPACES */
+
 #workspaces {
-    background: linear-gradient(180deg, 
-        #3d2e45 0%,
-        #2a202f 12%,
-        #28192e 88%,
-        #1a101e 100%
-    );
     opacity: 0.9;
+    background: linear-gradient(180deg, 
+        #4a3954 0%,
+        #2a202f 15%,
+        #28192e 85%,
+        #120b15 100%
+    );
+
     color: #d5bfe2;
     padding: 2px 2px;
     margin: 1px 0px;
     border-radius: 10px;
-    border-bottom: 0px solid #8e6ca0;
     transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.8s;
 }
 
-#workspaces button,
-#workspaces button.active {
-    opacity: 0.9;
-    padding: 0px 10px;
+#workspaces button {
+    padding: 5px 5px;
+    background: transparent;
+    color: #d5bfe2;
     margin: 1px 1px;
     border-radius: 8px;
     min-width: 15px;
-    border-bottom: 2px solid #8e6ca0;
+    transition: all cubic-bezier(0.075, 0.82, 0.165, 1) 0.05s;
 }
+
+#workspaces button.active {
+    padding: 0px 10px;
+}
+
+/* MODULES - Dark Purple Theme */
 
 #audio,
 #connections,
 #nowplaying,
 #tray-group,
-#custom-add_workspace,
 #custom-launcher,
 #custom-connections,
 #custom-tray_icon,
@@ -54,15 +62,16 @@ window#waybar {
 #network,
 #pulseaudio,
 #clock,
+#custom-add_workspace,
 #custom-audio_cycle,
 #custom-playpause,
 #custom-skip,
 #bluetooth {
     background: linear-gradient(180deg, 
-        #3d2e45 0%,
-        #2a202f 12%,
-        #28192e 88%,
-        #1a101e 100%
+        #4a3954 0%,
+        #2a202f 15%,
+        #28192e 85%,
+        #120b15 100%
     );
     opacity: 0.9;
     color: #d5bfe2;
@@ -74,16 +83,7 @@ window#waybar {
     transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.8s;
 }
 
-/* NOT USED START */
-#cpu,
-#memory,
-#disk,
-#temperature,
-#backlight,
-#mode,
-#idle_inhibitor,
-#mpd,
-/* NOT USED END */
+/* MODULES - Light Purple Theme */
 
 #custom-mod_switcher,
 #custom-keyboard,
@@ -106,7 +106,9 @@ window#waybar {
     transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.8s;
 }
 
-#custom-power,
+/* MODULES - Power & Close */
+
+#power,
 #custom-close_window {
     background: linear-gradient(180deg, 
         #e17676 0%,
@@ -114,6 +116,7 @@ window#waybar {
         #e26565 88%,
         #ab4d4d 100%
     );
+    opacity: 0.9;
     color: #ffffff;
     padding: 0 10px;
     margin: 5px 2px 5px 2px;
@@ -123,31 +126,12 @@ window#waybar {
     transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.8s;
 }
 
-/* CUSTOM STYLES */
-
-#custom-power:hover,
-#custom-close_window:hover {
-    background: linear-gradient(180deg, 
-        #c45a5a 0%,
-        rgb(168, 75, 75) 12%,
-        #ff8888 88%,
-        #cc6d6d 100%
-    );
-}
-
-#workspaces button.active {
-    background: linear-gradient(180deg, 
-        #4a3954 0%,
-        #302536 12%,
-        #2a202f 88%,
-        #1c1520 100%
-    );
-}
+/* HOVER STATES */
 
 #custom-mod_switcher:hover,
 #custom-keyboard:hover,
 #custom-ddc1:hover,
-#custom-tapo:hover,  
+#custom-tapo:hover,
 #custom-ddc2:hover {
     background: linear-gradient(180deg, 
         #d5bce3 0%,
@@ -157,9 +141,23 @@ window#waybar {
     );
 }
 
-#workspaces button:hover,
+#power #custom-shutdown:hover,
+#power #custom-reboot:hover,
+#power #custom-suspend:hover,
+#power #custom-lock:hover,
+#custom-close_window:hover {
+    background: linear-gradient(180deg, 
+        #c45a5a 0%,
+        rgb(168, 75, 75) 12%,
+        #ff8888 88%,
+        #cc6d6d 100%
+    );
+}
+
+/* active workspace added here */
+#workspaces button.active,
 #custom-add_workspace:hover,
-#workspaces button.active:hover,
+#workspaces button:hover,
 #custom-launcher:hover,
 #custom-tray_icon:hover,
 #custom-nowplaying:hover,
@@ -168,29 +166,31 @@ window#waybar {
 #clock:hover,
 #custom-audio_cycle:hover,
 #bluetooth:hover,
-#nowplaying #custom-playpause:hover,
-#nowplaying #custom-skip:hover,
 #audio #pulseaudio:hover,
 #audio #custom-audio_cycle:hover,
 #connections #bluetooth:hover,
 #connections #network:hover,
-#tray-group #custom-tray_icon:hover {
+#tray-group #custom-tray_icon:hover,
+#nowplaying #custom-playpause:hover,
+#nowplaying #custom-skip:hover {
     background: linear-gradient(180deg, 
-        #1e1621 0%,
-        #231a27 12%,
-        #593b67 88%,
-        #543861 100%
+        #2a1f2e 0%,
+        #231a27 15%,
+        #593b67 85%,
+        #422c4d 100%
     );
-}
-
-#workspaces button {
-    border-bottom: 0px solid transparent;
+    color: #d5bfe2;
 }
 
 /* CUSTOM PADDING */
 
-#custom-power {
+#custom-shutdown,
+#power #custom-shutdown,
+#power #custom-reboot,
+#power #custom-suspend,
+#power #custom-lock {
     padding: 0px 12px 0px 8px;
+    border-radius: 8px;
 }
 
 #custom-keyboard {
@@ -203,15 +203,17 @@ window#waybar {
 }
 
 #custom-add_workspace {
-    padding: 0 11px 0 9px;
+    padding: 0px 4px 0px 3px;
+    border-bottom: 0px;
 }
 
-/* DRAWER STYLES */
+/* DRAWER STYLES - Remove padding and borders for container */
 
 #audio,
 #nowplaying,
 #connections,
-#tray-group {
+#tray-group,
+#power {
     padding: 0;
 }
 
@@ -224,9 +226,12 @@ window#waybar {
 #connections #bluetooth,
 #connections #network,
 #tray-group #custom-tray_icon,
-#tray-group #tray {
+#tray-group #tray,
+#power #custom-shutdown,
+#power #custom-reboot,
+#power #custom-suspend,
+#power #custom-lock {
     background: transparent;
     border: none;
-    border-bottom: none;
     margin: 0;
 }
