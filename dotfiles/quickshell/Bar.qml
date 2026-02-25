@@ -133,7 +133,7 @@ PanelWindow {
     AudioModule {
         id: audioModule
         anchors {
-            right: trayModule.left
+            right: controlCenterModule.left
             rightMargin: Theme.moduleMarginV
             top: parent.top
         }
@@ -143,6 +143,22 @@ PanelWindow {
             property: "maskHeight"
             value: audioModule.implicitHeight
             when: audioModule.expanded
+            restoreMode: Binding.RestoreBindingOrValue
+        }
+    }
+    ControlCenter {
+        id: controlCenterModule
+        anchors {
+            right: trayModule.left
+            rightMargin: Theme.moduleMarginV
+            top: parent.top
+        }
+
+        Binding {
+            target: topPanel
+            property: "maskHeight"
+            value: controlCenterModule.implicitHeight
+            when: controlCenterModule.expanded
             restoreMode: Binding.RestoreBindingOrValue
         }
     }

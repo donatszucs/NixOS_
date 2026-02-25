@@ -1,12 +1,14 @@
 // Now Playing module — title + hover-to-reveal play/pause & skip controls
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Services.Mpris
 import Quickshell.Io
 
 ModuleButton {
-    id: root
+    id: nowPlayingModule
     noHoverColorChange: true
     property string titleText: "󰎆  Nothing playing"
+    property string authorText: "Unknown artist"
     property string playPauseIcon: "󰐊"
     property bool expanded: parentHover.hovered
 
@@ -14,211 +16,185 @@ ModuleButton {
         id: parentHover
     }
 
-    // Mirrors the script's $active / $CACHE logic entirely in QML
-    property string activePlayer: ""   // currently active player name
-    property string cachedPlayer: ""   // last known playing player
+    // Using MPRIS; legacy playerctl state removed
+    function refreshAll() { pickPlayer() }
 
-    function refreshAll() {
-        activeProc.running = true
-    }
+    // Called once we know current player — update metadata
+    function fetchMetadata() { updateFromPlayer() }
 
-    // Called once we know activePlayer — fetch title+status
-    function fetchMetadata() {
-        if (activePlayer === "") return
-        titleProc.running = true
-        statusProc.running = true
-    }
-
-    implicitHeight: 30
-    implicitWidth: expanded ? row.implicitWidth : titleBtn.implicitWidth
+    implicitHeight: expanded ? Theme.moduleHeight + artistInfoRow.implicitHeight : Theme.moduleHeight
+    implicitWidth: expanded ? (controlsRow.implicitWidth + nowPlayingModule.titleText.length * 8 + 16): titleBtn.implicitWidth
     clip: true
 
     Behavior on implicitWidth {
         NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
     }
 
-    RowLayout {
-        id: row
+    ColumnLayout {
+        id: column
+        anchors.fill: parent
+        spacing: 0
+
         anchors {
             left: parent.left
             top: parent.top
-            bottom: parent.bottom
-        }
-        spacing: 0
-        layoutDirection: Qt.RightToLeft
-        // Title
-        Text {
-            id: titleBtn
-            text: root.titleText
-            color: Theme.textPrimary
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize
-            font.bold: true
-            leftPadding: 15
-            rightPadding: 15
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: focusProc.running = true
-            }
         }
 
-        // Controls — only visible when expanded
         RowLayout {
-            visible: root.expanded
-            spacing: 2
+            id: row
+            spacing: 0
             layoutDirection: Qt.RightToLeft
+            // Title
+            ModuleButton {
+                variant: "transparentDark"
+                id: titleBtn
 
-            Repeater {
-                model: [
-                    { icon: "󰒭", action: "next" },
-                    { icon: "󰐊", action: "playpause" }
-                ]
-                delegate: ModuleButton {
-                    required property var modelData
+                topLeftRadius: nowPlayingModule.expanded ? 0 : Theme.moduleRadius
+                bottomLeftRadius: nowPlayingModule.expanded ? 0 : Theme.moduleRadius
+                bottomRightRadius: nowPlayingModule.expanded ? 0 : Theme.moduleRadius
 
-                    implicitWidth: 28
-                    implicitHeight: 24
-                    radius: 6
+                label: nowPlayingModule.titleText
+                implicitWidth: expanded ? nowPlayingModule.implicitWidth - controlsRow.implicitWidth : nowPlayingModule.titleText.length * 8 + 16
+                implicitHeight: Theme.moduleHeight
+                onClicked: focusNow()
+            }
 
-                    label: modelData.action === "playpause" ? root.playPauseIcon : modelData.icon
+            // Controls — only visible when expanded
+            RowLayout {
+                id: controlsRow
+                visible: nowPlayingModule.expanded
+                spacing: 0
+                layoutDirection: Qt.RightToLeft
 
-                    onClicked: {
-                            if (modelData.action === "playpause")
-                                playPauseProc.running = true
-                            else
-                                nextProc.running = true
+                Repeater {
+                    model: [
+                        { icon: "󰒭", action: "next" },
+                        { icon: "󰐊", action: "playpause" }
+                    ]
+                    delegate: ModuleButton {
+                        required property var modelData
+                        visible: (currentPlayer && currentPlayer.canGoNext && modelData.action === "next") || (currentPlayer && currentPlayer.canPause && modelData.action === "playpause")
+
+                        variant: "transparentDark"
+                        implicitHeight: Theme.moduleHeight
+                        radius: 0
+
+                        topLeftRadius: (modelData.action === "next") ? 0 : Theme.moduleRadius
+
+                        label: modelData.action === "playpause" ? nowPlayingModule.playPauseIcon : modelData.icon
+
+                        onClicked: {
+                                if (modelData.action === "playpause")
+                                    nowPlayingModule.doTogglePlay()
+                                else
+                                    nowPlayingModule.doNext()
+                        }
                     }
                 }
-            }
 
-            Item { implicitWidth: 6 }
-        }
-    }
-
-    // Step 1: find the first Playing player across all known players
-    // Output: one player name per line, we pick the first that is Playing
-    Process {
-        id: activeProc
-        command: ["bash", "-c",
-            "playerctl -l 2>/dev/null | while read -r p; do " +
-            "  if playerctl -p \"$p\" status 2>/dev/null | grep -q Playing; then echo \"$p\"; break; fi; " +
-            "done"
-        ]
-        running: true
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var found = text.trim()
-                if (found.length > 0) {
-                    // Active player found — update cache
-                    root.activePlayer = found
-                    root.cachedPlayer = found
-                } else {
-                    // Nothing playing — fall back to cached player if it still exists
-                    if (root.cachedPlayer.length > 0) {
-                        // verify cached player is still registered
-                        cacheCheckProc.running = true
-                        return
-                    } else {
-                        root.activePlayer = ""
-                        root.titleText = "󰎆  Nothing playing"
-                        root.playPauseIcon = "󰐊"
-                        return
-                    }
-                }
-                root.fetchMetadata()
+                Item { implicitWidth: 0 }
             }
         }
-    }
+        ColumnLayout {
+            id: artistInfoRow
+            implicitWidth: nowPlayingModule.implicitWidth
+            implicitHeight: Math.max(artistInfo.implicitHeight, trackArt.implicitHeight)
 
-    // Step 2a: verify the cached player still exists in playerctl -l
-    Process {
-        id: cacheCheckProc
-        command: ["bash", "-c",
-            "playerctl -l 2>/dev/null | grep -qx " + JSON.stringify(root.cachedPlayer) + " && echo yes || echo no"
-        ]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (text.trim() === "yes") {
-                    root.activePlayer = root.cachedPlayer
-                    root.fetchMetadata()
-                } else {
-                    // Cache is stale — clear it
-                    root.cachedPlayer = ""
-                    root.activePlayer = ""
-                    root.titleText = "󰎆  Nothing playing"
-                    root.playPauseIcon = "󰐊"
+            ModuleButton {
+                id: trackArt
+                visible: nowPlayingModule.expanded
+                variant: "transparentDark"
+                implicitWidth: albumArt.width + 30
+                implicitHeight: albumArt.height + 15
+                anchors.right: nowPlayingModule.right
+            
+                Image {
+                    id: albumArt
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    width: nowPlayingModule.implicitWidth - 30
+                    height: nowPlayingModule.implicitWidth - 30
+                    fillMode: Image.PreserveAspectCrop
+                    source: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
+                    visible: source !== ""
                 }
             }
-        }
-    }
+            ModuleButton {
+                id: artistInfo
+                visible: nowPlayingModule.expanded
+                variant: "transparentDark"
+                label: nowPlayingModule.authorText
+                Layout.alignment: Qt.AlignCenter
 
-    // Step 3: fetch title + artist for activePlayer, require both (handles closed Chrome tabs)
-    Process {
-        id: titleProc
-        command: ["bash", "-c",
-            "title=$(playerctl -p " + JSON.stringify(root.activePlayer) + " metadata --format '{{title}}' 2>/dev/null | head -c 40); " +
-            "artist=$(playerctl -p " + JSON.stringify(root.activePlayer) + " metadata --format '{{artist}}' 2>/dev/null); " +
-            "[ -n \"$title\" ] && [ -n \"$artist\" ] && echo \"$title\" || echo ''"
-        ]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var t = text.trim()
-                if (t.length > 0) {
-                    root.titleText = "󰎆  " + t
-                } else {
-                    // title/artist missing — treat as nothing playing
-                    root.titleText = "󰎆  Nothing playing"
-                    root.cachedPlayer = ""
-                    root.activePlayer = ""
-                }
             }
         }
     }
+    // Use Quickshell.Services.Mpris
+    readonly property var mpris: Mpris
+    property var currentPlayer: null
 
-    // Step 4: fetch status for play/pause icon
-    Process {
-        id: statusProc
-        command: ["bash", "-c",
-            "playerctl -p " + JSON.stringify(root.activePlayer) + " status 2>/dev/null"
-        ]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                root.playPauseIcon = text.trim() === "Playing" ? "󰏤" : "󰐊"
+    function pickPlayer() {
+        // prefer a playing player, otherwise first available
+        var pick = null
+        if (!Mpris || !Mpris.players) {
+            currentPlayer = null
+            nowPlayingModule.titleText = "󰎆  Nothing playing"
+            nowPlayingModule.authorText = "Unknown artist"
+            nowPlayingModule.playPauseIcon = "󰐊"
+            return
+        }
+        // dictionary-like with `values` array (observed structure)
+        else {
+            for (var vi = 0; vi < Mpris.players.values.length; vi++) {
+                var pv = Mpris.players.values[vi]
+                if (!pv) continue
+                if (pv.isPlaying) { pick = pv; break }
+                if (!pick) pick = pv
             }
         }
+
+        currentPlayer = pick
+        updateFromPlayer()
     }
 
-    Process {
-        id: playPauseProc
-        command: ["bash", "-c",
-            "playerctl -p " + JSON.stringify(root.activePlayer) + " play-pause"
-        ]
-        onRunningChanged: if (!running) root.refreshAll()
+    function updateFromPlayer() {
+        if (!currentPlayer) {
+            nowPlayingModule.titleText = "󰎆  Nothing playing"
+            nowPlayingModule.authorText = "Unknown artist"
+            nowPlayingModule.playPauseIcon = "󰐊"
+            return
+        }
+        nowPlayingModule.titleText = "󰎆  " + (currentPlayer.trackTitle || "Nothing playing")
+        nowPlayingModule.authorText = currentPlayer.trackArtist || "Unknown artist"
+        nowPlayingModule.playPauseIcon = currentPlayer.isPlaying ? "󰏤" : "󰐊"
     }
 
-    Process {
-        id: nextProc
-        command: ["bash", "-c",
-            "playerctl -p " + JSON.stringify(root.activePlayer) + " next"
-        ]
-        onRunningChanged: if (!running) root.refreshAll()
-    }
+    // We poll Mpris.players periodically; dynamic Connections caused issues in some builds
+
+    function doTogglePlay() { if (currentPlayer && currentPlayer.togglePlaying) currentPlayer.togglePlaying() }
+    function doNext() { if (currentPlayer && currentPlayer.next) currentPlayer.next() }
 
     Process {
         id: focusProc
-        command: ["bash", "-c", (function() {
-            var p = root.activePlayer
-            var cls = (p.match(/^chromium|^chrome/) ? "google-chrome" : p)
-            return "hyprctl dispatch focuswindow class:" + cls
-        })()]
+        // command will be set before running in focusNow()
+    }
+
+    function focusNow() {
+        if (!currentPlayer) return
+        var id = currentPlayer.identity.toLowerCase().trim()
+        var cls = (id.match(/chromium|chrome/)) ? "google-chrome" : id
+        focusProc.command = ["bash", "-c", "hyprctl dispatch focuswindow class:" + cls]
+        console.log("Running focus command:", focusProc.command)
+        focusProc.running = true
     }
 
     Timer {
-        interval: 2000
+        interval: 1000
         running: true
         repeat: true
-        onTriggered: root.refreshAll()
+        onTriggered: pickPlayer()
     }
+
+    Component.onCompleted: pickPlayer()
 }
 

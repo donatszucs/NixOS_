@@ -19,12 +19,12 @@
   ];
 
   home.sessionVariables = {
-      HYPRCURSOR_THEME = cursor-theme.name;
-      HYPRCURSOR_SIZE = cursor-theme.size;
+      HYPRCURSOR_THEME = "Bibata-Modern-Ice";
+      HYPRCURSOR_SIZE = 24;
 
       # Not used on Hyprland, HYPRCURSOR values takes precedence
-      XCURSOR_THEME = cursor-theme.name;
-      XCURSOR_SIZE = cursor-theme.size;
+      XCURSOR_THEME = "Bibata-Modern-Ice";
+      XCURSOR_SIZE = 24;
     };
   # Cursor Theme
   home.pointerCursor = {

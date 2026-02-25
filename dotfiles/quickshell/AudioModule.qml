@@ -9,8 +9,12 @@ ModuleButton {
     variant: "dark"
     noHoverColorChange: true
     property bool expanded: parentHover.hovered
-    property int maxSinkNameLength: 0
+    property int maxSinkBarLength: 0
 
+    HoverHandler {
+        id: parentHover
+    }
+    
     ListModel {
         id: sinksListModel
     }
@@ -40,18 +44,14 @@ ModuleButton {
                     }
                     if (desc.length > maxSinkLen) maxSinkLen = desc.length
                     sinksListModel.append({ "name": desc, "active": active, "id" : n.id })
-                    maxSinkNameLength = maxSinkLen * 9
+                    maxSinkBarLength = maxSinkLen * 9 - 90
                 }
             }
         }
     }
 
-    HoverHandler {
-        id: parentHover
-    }
-
     implicitHeight: expanded ? Theme.moduleHeight * (1 + sinksListModel.count) + divider.implicitHeight : Theme.moduleHeight
-    implicitWidth: expanded ? maxSinkNameLength : volumeButton.implicitWidth
+    implicitWidth: expanded ? (maxSinkBarLength + volumeButton.implicitWidth) : volumeButton.implicitWidth
 
     Behavior on implicitWidth {
         NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
@@ -76,13 +76,12 @@ ModuleButton {
             ModuleButton {
                 id: volumeButton
                 label: "100% "
-                
+                variant: "transparentDark"
                 textAlign: "right"
-                rightMargin: 10
+                rightMargin: 14
 
                 bottomRightRadius: expanded ? 0 : Theme.moduleRadius
                 topLeftRadius: expanded ? 0 : Theme.moduleRadius
-                color: "transparent"
 
                 function refresh() {
                     volProc.running = true
@@ -103,7 +102,7 @@ ModuleButton {
             }
             Rectangle {
                 visible: expanded
-                implicitWidth: audioModule.implicitWidth - volumeButton.implicitWidth
+                implicitWidth: expanded ? maxSinkBarLength : 0
                 implicitHeight: Theme.moduleHeight
                 color: "transparent"
                 Text {
@@ -134,7 +133,7 @@ ModuleButton {
                 delegate: ModuleButton {
                     required property var modelData
                     variant: modelData.active ? "light" : "transparentDark"
-                    implicitWidth: expanded ? maxSinkNameLength : 0
+                    implicitWidth: expanded ? maxSinkBarLength + volumeButton.implicitWidth : 0
 
                     label: modelData.name
 

@@ -1,11 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.SystemTray
 
 ModuleButton {
     id: root
-
     noHoverColorChange: true
     property int openMenus: 0
     property bool expanded: parentHover.hovered || openMenus > 0
@@ -18,11 +18,16 @@ ModuleButton {
     property var parentWindow: null 
 
     implicitHeight: 30
-    implicitWidth: expanded ? row.implicitWidth - 4 : 32
+    implicitWidth: expanded ? row.implicitWidth - 4 : notificationButton.implicitWidth
     clip: true
 
     Behavior on implicitWidth {
         NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+    }
+
+    Process {
+        id: missioncenterProcess
+        command: ["bash", "-c", "missioncenter"]
     }
 
     RowLayout {
@@ -35,15 +40,15 @@ ModuleButton {
         spacing: 0
         layoutDirection: Qt.RightToLeft
 
-        // Tray icon — always visible, fixed at the right
-        Text {
-            text: "󱊖"
-            color: Theme.textPrimary
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize + 1
-            font.bold: true
-            leftPadding: 11
-            rightPadding: 9
+        ModuleButton {
+            id: notificationButton
+            label: "󱊖"
+            noHoverColorChange: true
+            variant: "transparentDark"
+            rightMargin: 3
+
+            onClicked: missioncenterProcess.running = true
+
         }
 
         // Tray items — revealed by clip as width expands leftward
@@ -57,6 +62,7 @@ ModuleButton {
 
                 delegate: ModuleButton {
                     id: trayItemDelegate
+                    variant: "transparentDark"
                     required property var modelData
                     property bool menuOpen: false
 

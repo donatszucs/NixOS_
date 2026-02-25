@@ -17,8 +17,16 @@ Rectangle {
     property int topMargin: 0
     property int bottomMargin: 0
 
+    property int leftMarginButton: 0
+    property int rightMarginButton: 0
+    property int topMarginButton: Theme.moduleMarginH
+    property int bottomMarginButton: 0
+
     anchors {
-        topMargin: Theme.moduleMarginH
+        topMargin: topMarginButton
+        bottomMargin: bottomMarginButton
+        leftMargin: leftMarginButton
+        rightMargin: rightMarginButton
     }
     // ── Variant ──────────────────────────────────────────────────────
     // Set to one of: "dark" (default) | "light" | "danger" | "transparent"
@@ -50,17 +58,7 @@ Rectangle {
     radius: Theme.moduleRadius
     opacity: Theme.moduleOpacity
 
-    gradient: Gradient {
-        orientation: Gradient.Vertical
-        GradientStop {
-            position: 0.0
-            color: root.pressed ? root.pal.pressedTop : ((root.hovered && !root.noHoverColorChange) ? root.pal.hoverTop : root.pal.top)
-        }
-        GradientStop {
-            position: 1.0
-            color: root.pressed ? root.pal.pressedBottom : ((root.hovered && !root.noHoverColorChange) ? root.pal.hoverBottom : root.pal.bottom)
-        }
-    }
+    color: root.pressed ? root.pal.pressed : ((root.hovered && !root.noHoverColorChange) ? root.pal.hover : root.pal.base)
 
     clip: true
 

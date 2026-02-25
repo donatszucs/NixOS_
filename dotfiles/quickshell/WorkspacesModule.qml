@@ -32,8 +32,8 @@ ModuleButton {
                 required property var modelData
 
                 variant: active ? "light" : "dark"
-                implicitWidth: active ? 30 : 20
-                implicitHeight: 20
+                implicitWidth: active ? 30 : 25
+                implicitHeight: 22
 
                 radius: Theme.moduleRadius / 2
 
