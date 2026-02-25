@@ -87,6 +87,9 @@
   # 3. Force load the kernel module (Driver)
   boot.kernelModules = [ "btusb" ];
   
+  # Flakes support
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   # Flatpak support
   services.flatpak.enable = true;
 
@@ -238,6 +241,7 @@
   input-remapper   # Input remapping service
   pkgs.uv          # Python package manager
   jq               # Command-line JSON processor
+  quickshell        # A quick launcher for commands and scripts (like Rofi but for CLI)
 
   # -- Applications --
   vscode            
