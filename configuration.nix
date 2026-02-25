@@ -7,7 +7,7 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
+      /home/doni/nixos-config/hardware-configuration.nix
     ];
 
   # Bootloader.
@@ -259,8 +259,8 @@
   hyprlock          # Screen locker
 
   # -- File Management --
-  xfce.thunar       # File manager
-  xfce.thunar-archive-plugin # Archive plugin for Thunar
+  pkgs.thunar       # File manager
+  pkgs.thunar-archive-plugin # Archive plugin for Thunar
   file-roller       # Archive manager GUI
   zip               # CLI zip tool
   unzip             # CLI unzip tool
@@ -276,11 +276,6 @@
   # -- Task Management --
   btop              # The cool terminal one
   mission-center    # The Windows-style GUI one
-  
-  # -- Themeing --
-  dracula-theme
-  numix-cursor-theme
-  adwaita-icon-theme
   ];
 
   fonts = {
