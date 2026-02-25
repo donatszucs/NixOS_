@@ -2,6 +2,7 @@
 
 CONF_FILE="$HOME/.config/hypr/hyprpaper.conf"
 TEMPS_DIR="$HOME/.config/hypr/temps"
+DEFAULT="$HOME/nixos-config/scripts/default.jpg"
 
 # Create temps directory if it doesn't exist
 mkdir -p "$TEMPS_DIR"
@@ -15,15 +16,32 @@ MONITORS=$(hyprctl monitors -j | jq -r '.[] | .name')
 for MON in $MONITORS; do
     LINK="$TEMPS_DIR/wallpaper_$MON"
     
-    # Create a placeholder symlink if it doesn't exist 
+    # Create a placeholder symlink if it doesn't exist
     if [ ! -L "$LINK" ]; then
-        ln -s "$HOME/nixos-config/scripts/default.jpg" "$LINK"
+        ln -s "$DEFAULT" "$LINK"
     fi
 
-    # Append to the config file
-    echo "preload = $LINK" >> "$CONF_FILE"
-    echo "wallpaper = $MON,$LINK" >> "$CONF_FILE"
+    # Append wallpaper block to the config file
+    {
+        echo "wallpaper {"
+        echo "    monitor = $MON"
+        echo "    path = $LINK"
+        echo "    fit_mode = cover"
+        echo "}"
+        echo ""
+    } >> "$CONF_FILE"
 done
+
+# Append default (fallback) wallpaper block
+{
+    echo "wallpaper {"
+    echo "    monitor = "
+    echo "    path = $DEFAULT"
+    echo "    fit_mode = cover"
+    echo "}"
+    echo ""
+    echo "splash = false"
+} >> "$CONF_FILE"
 
 # Now start hyprpaper
 hyprpaper

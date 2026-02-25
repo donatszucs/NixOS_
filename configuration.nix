@@ -162,6 +162,9 @@
   # KDE Connect for phone integration
   programs.kdeconnect.enable = true;
 
+  # Enable dconf for application settings
+  programs.dconf.enable = true;
+
   programs.gamemode = {
     enable = true;
     settings = {

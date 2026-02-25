@@ -18,13 +18,22 @@
     # Put your quickshell, hyprland utilities, etc., here
   ];
 
+  home.sessionVariables = {
+      HYPRCURSOR_THEME = cursor-theme.name;
+      HYPRCURSOR_SIZE = cursor-theme.size;
+
+      # Not used on Hyprland, HYPRCURSOR values takes precedence
+      XCURSOR_THEME = cursor-theme.name;
+      XCURSOR_SIZE = cursor-theme.size;
+    };
   # Cursor Theme
   home.pointerCursor = {
-    name = "Numix-Cursor"; 
-    package = pkgs.numix-cursor-theme;
-    size = 24;
-    gtk.enable = true;
-    x11.enable = true;
+      name = "Bibata-Modern-Ice"; 
+      package = pkgs.bibata-cursors;
+      size = 24;
+      gtk.enable = true;
+      x11.enable = true;
+      hyprcursor.enable = true;
   };
   
   # 4. Theming (Your Dracula setup!)
@@ -42,7 +51,10 @@
 
   qt = {
     enable = true;
-    platformTheme.name = "gtk";
-    style.name = "gtk";
+    platformTheme.name = "kde";
+    style = {
+      name = "Dracula";
+      package = pkgs.dracula-theme;
+    };
   };
 }
