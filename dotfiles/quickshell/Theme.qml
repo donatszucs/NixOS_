@@ -12,17 +12,17 @@ QtObject {
     // Use as:  Theme.palette["dark"].top  or  Theme.dark.top
 
     readonly property QtObject dark: QtObject {
-        readonly property color base:        '#392347'
-        readonly property color hover:   '#271a2d'
-        readonly property color pressed: '#1e1323'
+        readonly property color base:        '#321c40'
+        readonly property color hover:   '#271330'
+        readonly property color pressed: '#120716'
         readonly property color text:       "#d5bfe2"
         readonly property color border:     "#8e6ca0"
     }
 
     readonly property QtObject transparentDark: QtObject {
         readonly property color base:     "transparent"
-        readonly property color hover:   '#271a2d'
-        readonly property color pressed: '#1e1323'
+        readonly property color hover:   '#271330'
+        readonly property color pressed: '#120716'
         readonly property color text:       "#d5bfe2"
         readonly property color border:     "#8e6ca0"
     }

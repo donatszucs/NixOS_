@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.Mpris
 import Quickshell.Io
+import QtQuick.Effects
 
 ModuleButton {
     id: nowPlayingModule
@@ -14,16 +15,15 @@ ModuleButton {
 
     HoverHandler {
         id: parentHover
+
     }
 
     // Using MPRIS; legacy playerctl state removed
     function refreshAll() { pickPlayer() }
 
-    // Called once we know current player — update metadata
-    function fetchMetadata() { updateFromPlayer() }
 
     implicitHeight: expanded ? Theme.moduleHeight + artistInfoRow.implicitHeight : Theme.moduleHeight
-    implicitWidth: expanded ? (controlsRow.implicitWidth + nowPlayingModule.titleText.length * 8 + 16): titleBtn.implicitWidth
+    implicitWidth: expanded ? (controlsRow.implicitWidth + titleBtn.implicitWidth): titleBtn.implicitWidth
     clip: true
 
     Behavior on implicitWidth {
@@ -53,10 +53,51 @@ ModuleButton {
                 bottomLeftRadius: nowPlayingModule.expanded ? 0 : Theme.moduleRadius
                 bottomRightRadius: nowPlayingModule.expanded ? 0 : Theme.moduleRadius
 
-                label: nowPlayingModule.titleText
-                implicitWidth: expanded ? nowPlayingModule.implicitWidth - controlsRow.implicitWidth : nowPlayingModule.titleText.length * 8 + 16
-                implicitHeight: Theme.moduleHeight
+                // 1. Clear the default label so it doesn't overlap our custom text
+                label: ""
+
+                // 2. Set your fixed width here
+                implicitWidth: expanded ? 200 : Math.min(200, scrollingText.paintedWidth + 30)
                 onClicked: focusNow()
+
+                // 3. Make the container a direct child (no contentItem:)
+                Item {
+                    id: textContainer
+                    clip: true 
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+
+                    Text {
+                        id: scrollingText
+                        text: nowPlayingModule.titleText
+                        
+                        // Try to match your theme's text color/font if needed:
+                        color: "white" 
+                        font.pixelSize: Theme.fontSize
+                        
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        SequentialAnimation on x {
+                            id: scrollAnim
+                            loops: Animation.Infinite
+                            running: scrollingText.paintedWidth > textContainer.width
+
+                            PauseAnimation { duration: 1500 }
+
+                            NumberAnimation {
+                                from: 0
+                                to: textContainer.width - scrollingText.paintedWidth
+                                // Adjust the multiplier (30) to make it scroll faster or slower
+                                duration: (scrollingText.paintedWidth - textContainer.width) * 30 
+                            }
+
+                            PauseAnimation { duration: 1500 }
+
+                            PropertyAction { target: scrollingText; property: "x"; value: 0 }
+                        }
+                    }
+                }
             }
 
             // Controls — only visible when expanded
@@ -77,6 +118,7 @@ ModuleButton {
 
                         variant: "transparentDark"
                         implicitHeight: Theme.moduleHeight
+                        implicitWidth: expanded ? 32 : 0
                         radius: 0
 
                         topLeftRadius: (modelData.action === "next") ? 0 : Theme.moduleRadius
@@ -88,6 +130,10 @@ ModuleButton {
                                     nowPlayingModule.doTogglePlay()
                                 else
                                     nowPlayingModule.doNext()
+                        }
+
+                        Behavior on implicitWidth {
+                            NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
                         }
                     }
                 }
@@ -104,19 +150,57 @@ ModuleButton {
                 id: trackArt
                 visible: nowPlayingModule.expanded
                 variant: "transparentDark"
-                implicitWidth: albumArt.width + 30
-                implicitHeight: albumArt.height + 15
+                implicitWidth: albumArtClip.width + 30
+                implicitHeight: albumArtClip.height + 15
                 anchors.right: nowPlayingModule.right
-            
-                Image {
-                    id: albumArt
+
+                // Changed to an Item since MultiEffect handles the drawing now
+                Item { 
+                    id: albumArtClip
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
+                    
+                    // 1. The fixed width you want
                     width: nowPlayingModule.implicitWidth - 30
-                    height: nowPlayingModule.implicitWidth - 30
-                    fillMode: Image.PreserveAspectCrop
-                    source: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
-                    visible: source !== ""
+                    
+                    // 2. Calculate the height dynamically using the image's source dimensions
+                    // Formula: Height = Width * (Original Height / Original Width)
+                    height: albumArt.sourceSize.width > 0 
+                            ? (width * (albumArt.sourceSize.height / albumArt.sourceSize.width)) 
+                            : width // Fallback: makes it a perfect square before the image finishes loading
+
+                    Image {
+                        id: albumArt
+                        anchors.fill: parent
+                        // Since the container now perfectly matches the image's ratio, 
+                        // PreserveAspectFit or Stretch will both work perfectly without cutting anything off.
+                        fillMode: Image.PreserveAspectFit
+                        source: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
+                        visible: false 
+                    }
+
+                    // 3. The Qt 6 way to apply masks and effects
+                    MultiEffect {
+                        source: albumArt
+                        anchors.fill: albumArt
+                        visible: albumArt.source.toString() !== ""
+                        maskEnabled: true
+                        maskSource: maskItem
+                    }
+
+                    // 4. The shape of our mask
+                    Item {
+                        id: maskItem
+                        anchors.fill: parent
+                        visible: false
+                        layer.enabled: true
+                        
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: Theme.moduleRadius
+                            color: "black" 
+                        }
+                    }
                 }
             }
             ModuleButton {
@@ -129,9 +213,11 @@ ModuleButton {
             }
         }
     }
+
     // Use Quickshell.Services.Mpris
     readonly property var mpris: Mpris
     property var currentPlayer: null
+    property string currentTrackId: ""
 
     function pickPlayer() {
         // prefer a playing player, otherwise first available
@@ -164,9 +250,15 @@ ModuleButton {
             nowPlayingModule.playPauseIcon = "󰐊"
             return
         }
-        nowPlayingModule.titleText = "󰎆  " + (currentPlayer.trackTitle || "Nothing playing")
-        nowPlayingModule.authorText = currentPlayer.trackArtist || "Unknown artist"
         nowPlayingModule.playPauseIcon = currentPlayer.isPlaying ? "󰏤" : "󰐊"
+
+        if (currentTrackId !== currentPlayer.trackTitle) {
+            currentTrackId = currentPlayer.trackTitle
+            nowPlayingModule.titleText = "󰎆  " + (currentPlayer.trackTitle || "Nothing playing")
+            nowPlayingModule.authorText = currentPlayer.trackArtist || "Unknown artist"
+            // Reset scrolling animation when the track actually changes
+            scrollAnim.restart()
+        }
     }
 
     // We poll Mpris.players periodically; dynamic Connections caused issues in some builds

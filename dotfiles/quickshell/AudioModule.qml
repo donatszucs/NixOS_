@@ -8,11 +8,14 @@ ModuleButton {
     id: audioModule
     variant: "dark"
     noHoverColorChange: true
-    property bool expanded: parentHover.hovered
+    property bool expanded: false
     property int maxSinkBarLength: 0
 
     HoverHandler {
         id: parentHover
+        onHoveredChanged: {
+            if (!parentHover.hovered && expanded) expanded = false
+        }
     }
     
     ListModel {
@@ -87,16 +90,21 @@ ModuleButton {
                     volProc.running = true
                 }
 
-                onClicked: pavu.running = true
+                onClicked: {
+                    expanded = !expanded
+                }
 
                 MouseArea {
                     anchors.fill: parent
-                    acceptedButtons: Qt.NoButton
+                    acceptedButtons: Qt.RightButton
                     onWheel: wheel => {
                         if (wheel.angleDelta.y > 0)
                             volUpProc.running = true
                         else
                             volDownProc.running = true
+                    }
+                    onPressed: mouse => {
+                        if (mouse.button === Qt.RightButton) pavu.running = true
                     }
                 }
             }

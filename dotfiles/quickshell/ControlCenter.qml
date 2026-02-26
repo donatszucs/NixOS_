@@ -9,26 +9,65 @@ import Quickshell.Bluetooth
 
 ModuleButton {
     id: controlCenter
-    noHoverColorChange: true
     property bool expanded: parentHover.hovered
 
-    HoverHandler { id: parentHover }
+    HoverHandler {
+        id: parentHover
+    }
 
     // ── State ──────────────────────────────────────────────────
     property string netIcon:     "󰈀"
     property string netName:     "..."
     property string netState:    "unknown"
+    property color netColor:     Theme.textPrimary
 
     // Bluetooth — live from Quickshell.Bluetooth
     readonly property var   btAdapter:   Bluetooth.defaultAdapter
     readonly property bool  btPowered:   btAdapter ? btAdapter.enabled : false
     readonly property var   btDevices:   btAdapter ? btAdapter.devices : null
-    readonly property var   btFirstDev:  (btDevices && btDevices.count > 0) ? btDevices.get(0) : null
-    readonly property string btConnected: btFirstDev ? btFirstDev.name : ""
+    // 1. The master boolean that controls your icon
+    property bool btDevicesConnected: false
 
+    // 2. The function that checks if ANY device in our invisible list is connected
+    function updateBtStatus() {
+        let anyConnected = false;
+        for (let i = 0; i < deviceTracker.count; ++i) {
+            let trackerObj = deviceTracker.objectAt(i);
+            if (trackerObj && trackerObj.isDeviceConnected) {
+                anyConnected = true;
+                break;
+            }
+        }
+        btDevicesConnected = anyConnected;
+    }
+
+    // 3. The exact same logic as your Repeater, but invisible
+    Instantiator {
+        id: deviceTracker
+        model: controlCenter.btDevices ? controlCenter.btDevices : []
+        
+        // QtObject is the cheapest non-visual element in QML. 
+        // It takes zero screen space.
+        delegate: QtObject {
+            required property var modelData
+            
+            // THIS is your working logic:
+            property bool isDeviceConnected: modelData && modelData.connected === true
+            
+            // Whenever this specific device changes state, update the master boolean
+            onIsDeviceConnectedChanged: updateBtStatus()
+            
+            // Make sure to check when devices are first added or removed
+            Component.onCompleted: updateBtStatus()
+            Component.onDestruction: updateBtStatus()
+        }
+    }
+
+    // 4. Your icon logic
+    property string btIcon: controlCenter.btPowered ? (btDevicesConnected ? "󰂱" : "󰂯") : "󰂲"
     // ── Sizing ─────────────────────────────────────────────────
-    implicitHeight: expanded ? dropdownWindow.height : Theme.moduleHeight
-    implicitWidth:  expanded ? dropdownWindow.width : labelRow.implicitWidth + 16
+    implicitHeight: expanded ? dropdownMenu.implicitHeight : Theme.moduleHeight
+    implicitWidth:  expanded ? dropdownMenu.implicitWidth : labelRow.implicitWidth + 16
 
     // ── Collapsed label ────────────────────────────────────────
     RowLayout {
@@ -39,15 +78,13 @@ ModuleButton {
 
         Text {
             text: controlCenter.netIcon
-            color: Theme.textPrimary
+            color: controlCenter.netColor
             font.family: Theme.font
             font.pixelSize: Theme.fontSize
             font.bold: true
         }
         Text {
-            text: controlCenter.btPowered
-                    ? (controlCenter.btConnected !== "" ? "󰂱" : "󰂯")
-                    : "󰂲"
+            text: btIcon
             color: controlCenter.btPowered ? "#80b0ff" : Qt.rgba(0.7,0.5,0.8,0.8)
             font.family: Theme.font
             font.pixelSize: Theme.fontSize
@@ -57,16 +94,13 @@ ModuleButton {
 
     // ── Popup dropdown ─────────────────────────────────────────
     ModuleButton {
-        id: dropdownWindow
+        id: dropdownMenu
         visible: controlCenter.expanded
         noHoverColorChange: true
+        color: "transparent"
 
-        property bool containsMouse: dropdownHover.hovered
-
-        HoverHandler { id: dropdownHover }
-
-        width:  220
-        height: popupCol.implicitHeight + 20
+        implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth) + 20
+        implicitHeight: popupCol.implicitHeight + 20
 
         ColumnLayout {
             id: popupCol
@@ -79,42 +113,32 @@ ModuleButton {
             spacing: 8
 
             // ── Network ──────────────────────────────────
-            Text {
-                text: "  Network"
-                color: Theme.accentBorder
-                font.family: Theme.font
-                font.pixelSize: 11
-                font.bold: true
-            }
-
             RowLayout {
-                Layout.fillWidth: true
-                spacing: 8
+                id: netRow
+                spacing: 0
 
-                Text {
-                    text: controlCenter.netIcon
-                    color: controlCenter.netState === "connected" ? "#a0e0a0" : Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: 18
-                    font.bold: true
+                ModuleButton {
+                    id: netStatusIcon
+                    label: controlCenter.netIcon
+                    variant: "transparentDark"
+                    textColor: controlCenter.netColor
+                    textFont: 24
+                    onClicked: netOpen.running = true
                 }
 
                 ColumnLayout {
+                    id: netInfoCol
                     spacing: 0
-                    Text {
-                        text: controlCenter.netName
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: 12
-                        font.bold: true
-                        elide: Text.ElideRight
-                        Layout.maximumWidth: 140
+                    ModuleButton {
+                        label: controlCenter.netName
+                        color: "transparent"
+                        textColor: controlCenter.netColor
+
                     }
-                    Text {
-                        text: controlCenter.netState
-                        color: controlCenter.netState === "connected" ? "#a0e0a0" : "#e09090"
-                        font.family: Theme.font
-                        font.pixelSize: 10
+                    ModuleButton {
+                        label: controlCenter.netState
+                        color: "transparent"
+                        textColor: controlCenter.netColor
                     }
                 }
             }
@@ -122,58 +146,79 @@ ModuleButton {
             Rectangle { Layout.fillWidth: true; height: 1; color: Qt.rgba(1,1,1,0.08) }
 
             // ── Bluetooth ─────────────────────────────────
-            Text {
-                text: "  Bluetooth"
-                color: Theme.accentBorder
-                font.family: Theme.font
-                font.pixelSize: 11
-                font.bold: true
-            }
-
             RowLayout {
+                id: btRow
                 Layout.fillWidth: true
                 spacing: 8
 
-                Text {
-                    text: controlCenter.btPowered
-                            ? (controlCenter.btConnected !== "" ? "󰂱" : "󰂯")
-                            : "󰂲"
-                    color: controlCenter.btPowered ? "#80b0ff" : Qt.rgba(0.6,0.4,0.7,0.7)
-                    font.family: Theme.font
-                    font.pixelSize: 18
-                    font.bold: true
-                }
-
                 ColumnLayout {
-                    spacing: 0
-                    Text {
-                        text: controlCenter.btPowered ? "Enabled" : "Disabled"
-                        color: controlCenter.btPowered ? "#80b0ff" : Qt.rgba(0.7,0.5,0.8,0.8)
-                        font.family: Theme.font
-                        font.pixelSize: 12
-                        font.bold: true
+
+                    ModuleButton {
+                        label: controlCenter.btIcon
+                        textColor: controlCenter.btPowered ? "#80b0ff" : Qt.rgba(0.6,0.4,0.7,0.7)
+                        variant: "transparentDark"
+                        textFont: 24
+
+                        onClicked: btOpen.running = true
                     }
-                    Text {
-                        visible: controlCenter.btConnected !== ""
-                        text: controlCenter.btConnected !== "" ? controlCenter.btConnected : " "
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: 10
-                        elide: Text.ElideRight
-                        Layout.maximumWidth: 120
+
+                    // Custom-styled switch (smaller, themed)
+                    Rectangle {
+                        id: btSwitch
+                        width: 40
+                        height: 22
+                        radius: height / 2
+                        color: controlCenter.btPowered ? "#80b0ff" : Qt.rgba(0.4,0.4,0.4,0.18)
+                        border.color: controlCenter.btPowered ? Qt.rgba(0.5,0.7,1,0.9) : Qt.rgba(0,0,0,0.08)
+                        border.width: 1
+                        anchors.horizontalCenter: parent.horizontalCenter
+
+                        property bool on: controlCenter.btPowered
+
+                        Rectangle {
+                            id: handle
+                            width: parent.height - 6
+                            height: parent.height - 6
+                            y: 3
+                            x: btSwitch.on ? parent.width - width - 3 : 3
+                            radius: height / 2
+                            color: "white"
+                            smooth: true
+                            Behavior on x { NumberAnimation { duration: 160; easing.type: Easing.InOutCubic } }
+                            Behavior on color { ColorAnimation { duration: 120 } }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                if (controlCenter.btAdapter) controlCenter.btAdapter.enabled = !controlCenter.btAdapter.enabled
+                            }
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                        }
                     }
                 }
+                ColumnLayout {
+                    Layout.fillWidth: true
 
-                Item { Layout.fillWidth: true }
+                    Repeater {
+                        model: controlCenter.btDevices ? controlCenter.btDevices : []
+                        delegate: ModuleButton {
+                            required property var modelData
+                            label: modelData.batteryAvailable ? modelData.name + " (" + modelData.battery * 100 + "%)" : modelData.name
+                            color: "transparent"
+                            textColor: Theme.textPrimary
+                            visible: modelData && modelData.connected === true
+                        }
+                    }
 
-                // Toggle switch
-                Switch {
-                    checked: controlCenter.btPowered
-                    onClicked: if (controlCenter.btAdapter) controlCenter.btAdapter.enabled = !controlCenter.btAdapter.enabled
+                    ModuleButton {
+                        visible: !controlCenter.btDevicesConnected
+                        label: "No devices"
+                        color: "transparent"
+                    }
                 }
             }
-
-            Item { implicitHeight: 2 }
         }
     }
 
@@ -191,11 +236,13 @@ ModuleButton {
                     controlCenter.netName  = "Disconnected"
                     controlCenter.netState = "disconnected"
                     controlCenter.netIcon  = "󰤭"
+                    controlCenter.netColor = "#e09090"
                     return
                 }
                 var parts = line.split(":")
                 controlCenter.netName  = parts[0] || "Unknown"
                 controlCenter.netState = (parts[2] || "").toLowerCase().includes("activated") ? "connected" : parts[2] || "unknown"
+                controlCenter.netColor = controlCenter.netState === "connected" ? "#a0e0a0" : "#e09090"
                 var t = (parts[1] || "").toLowerCase()
                 if      (t.includes("wifi") || t.includes("802-11"))      controlCenter.netIcon = "󰤨"
                 else if (t.includes("ethernet") || t.includes("802-3"))   controlCenter.netIcon = "󰈀"
@@ -209,5 +256,17 @@ ModuleButton {
         running: true
         repeat: true
         onTriggered: nmProc.running = true
+    }
+
+    Process {
+        id: netOpen
+        // Try nm-connection-editor first, fall back to gnome control center network
+        command: ["bash", "-c", "nm-connection-editor || gnome-control-center network || true"]
+    }
+
+    Process {
+        id: btOpen
+        // Try blueman-manager first, fall back to gnome control center bluetooth
+        command: ["bash", "-c", "blueman-manager || gnome-control-center bluetooth || true"]
     }
 }

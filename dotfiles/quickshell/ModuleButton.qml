@@ -11,6 +11,9 @@ Rectangle {
     // horizontal text alignment: "left" | "center" | "right"
     property string textAlign: "center"
 
+    property color textColor: root.pal.text
+    property int textFont: Theme.fontSize
+
     // margins
     property int leftMargin: 0
     property int rightMargin: 0
@@ -73,9 +76,9 @@ Rectangle {
             bottomMargin: root.bottomMargin
         }
         text: root.label
-        color: root.pal.text
+        color: root.textColor
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize
+        font.pixelSize: textFont
         font.bold: true
         horizontalAlignment: textAlign === "left" ? Text.AlignLeft : (textAlign === "right" ? Text.AlignRight : Text.AlignHCenter)
         verticalAlignment: Text.AlignVCenter
