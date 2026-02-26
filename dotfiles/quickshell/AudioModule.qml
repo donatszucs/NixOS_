@@ -22,6 +22,10 @@ ModuleButton {
         id: sinksListModel
     }
 
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
+    clip: true
+
     property alias sinksModel: sinksListModel
 
     function updateSinks() {
@@ -57,15 +61,17 @@ ModuleButton {
     implicitWidth: expanded ? (maxSinkBarLength + volumeButton.implicitWidth) : volumeButton.implicitWidth
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
     }
 
     Behavior on implicitHeight {
-        NumberAnimation { duration: 80; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
     ColumnLayout {
         id: baseColumn
         spacing: 0
+
+
 
         anchors {
             right: parent.right
@@ -83,8 +89,8 @@ ModuleButton {
                 textAlign: "right"
                 rightMargin: 14
 
-                bottomRightRadius: expanded ? 0 : Theme.moduleRadius
-                topLeftRadius: expanded ? 0 : Theme.moduleRadius
+                topLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
+                bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
 
                 function refresh() {
                     volProc.running = true
@@ -140,10 +146,23 @@ ModuleButton {
                 model: sinksListModel
                 delegate: ModuleButton {
                     required property var modelData
+                    
+                    // 1. We expose the index of the current item
+                    required property int index 
+
                     variant: modelData.active ? "light" : "transparentDark"
                     implicitWidth: expanded ? maxSinkBarLength + volumeButton.implicitWidth : 0
 
                     label: modelData.name
+
+                    // 2. THE MATHEMATICAL "CLIP":
+                    // Make top corners perfectly square to sit seamlessly flush with the item above
+                    topLeftRadius: 0
+                    topRightRadius: 0
+                    
+                    // Apply the parent's radius ONLY if this is the absolute last item in the list!
+                    bottomLeftRadius: index === sinksListModel.count - 1 ? audioModule.bottomLeftRadius : 0
+                    bottomRightRadius: index === sinksListModel.count - 1 ? audioModule.bottomRightRadius : 0
 
                     Process {
                         id: actionProc
@@ -151,7 +170,6 @@ ModuleButton {
                     }
 
                     onClicked: actionProc.running = true
-
                 }
             }
         }

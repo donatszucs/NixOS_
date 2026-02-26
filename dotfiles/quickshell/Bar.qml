@@ -18,6 +18,7 @@ PanelWindow {
     }
     // No space reservation here — handled by the spacer window below
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.keyboardFocus: launcherModule.expanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     // Modules write to this to extend the input region downward when they expand.
     // Use Math.max so multiple modules can contribute independently.
@@ -45,22 +46,36 @@ PanelWindow {
     // ── LEFT ─────────────────────────────────────────────────────────────
     ClockModule {
         id: clockModule
+        topLeftRadius: Theme.moduleEdgeRadius
+        bottomLeftRadius: Theme.moduleEdgeRadius
         anchors {
             left: parent.left
-            leftMargin: Theme.moduleMarginV
+            leftMargin: Theme.moduleEdgeMarginV
             top: parent.top
         }
     }
     LauncherModule {
         id: launcherModule
+        screenName: modelData.name
         anchors {
             left: clockModule.right
             leftMargin: Theme.moduleMarginV
             top: parent.top
         }
+
+        Binding {
+            target: topPanel
+            property: "maskHeight"
+            value: launcherModule.implicitHeight
+            when: launcherModule.expanded
+            restoreMode: Binding.RestoreBindingOrValue
+        }
     }
     NowPlayingModule {
         id: nowPlayingModule
+
+        topRightRadius: Theme.moduleEdgeRadius
+        bottomRightRadius: Theme.moduleEdgeRadius
         anchors {
             left: launcherModule.right
             leftMargin: Theme.moduleMarginV
@@ -70,25 +85,22 @@ PanelWindow {
 
     // ── CENTER ───────────────────────────────────────────────────────────
         CloseWindowModule {
-            radius: Theme.moduleRadius
-            topRightRadius: 0
-            bottomRightRadius: 0
+            topLeftRadius: Theme.moduleHeight / 2
+            bottomLeftRadius: Theme.moduleHeight / 2
             anchors {
                 right: workspacesModule.left
                 top: parent.top
             }
         }
         WorkspacesModule {
-            radius: 0
             id: workspacesModule
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             screenName: modelData.name
         }
         AddWorkspaceModule {
-            radius: Theme.moduleRadius
-            topLeftRadius: 0
-            bottomLeftRadius: 0
+            topRightRadius: Theme.moduleHeight / 2
+            bottomRightRadius: Theme.moduleHeight / 2
             id: addWorkspaceModule
             anchors {
                 left: workspacesModule.right
@@ -99,6 +111,8 @@ PanelWindow {
     // ── RIGHT ────────────────────────────────────────────────────────────
     LightSwitch {
         id: lightSwitchModule
+        topLeftRadius: Theme.moduleEdgeRadius
+        bottomLeftRadius: Theme.moduleEdgeRadius
         anchors {
             right: monitorBrightnessModule.left
             rightMargin: Theme.moduleMarginV
@@ -174,8 +188,10 @@ PanelWindow {
     
     PowerModule {
         id: powerModule
+        topRightRadius: Theme.moduleEdgeRadius
+        bottomRightRadius: Theme.moduleEdgeRadius
         anchors {
-            rightMargin: Theme.moduleMarginV
+            rightMargin: Theme.moduleEdgeMarginV
             right: parent.right
             top: parent.top
         }

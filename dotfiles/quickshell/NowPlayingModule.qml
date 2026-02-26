@@ -15,6 +15,10 @@ ModuleButton {
 
     HoverHandler {
         id: parentHover
+        onHoveredChanged: {
+            scrollAnim.stop()
+            scrollAnim.restart()
+        }
 
     }
 
@@ -27,8 +31,10 @@ ModuleButton {
     clip: true
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
     }
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : 0
+    bottomRightRadius: Theme.moduleEdgeRadius
 
     ColumnLayout {
         id: column
@@ -48,13 +54,8 @@ ModuleButton {
             ModuleButton {
                 variant: "transparentDark"
                 id: titleBtn
-
-                topLeftRadius: nowPlayingModule.expanded ? 0 : Theme.moduleRadius
-                bottomLeftRadius: nowPlayingModule.expanded ? 0 : Theme.moduleRadius
-                bottomRightRadius: nowPlayingModule.expanded ? 0 : Theme.moduleRadius
-
-                // 1. Clear the default label so it doesn't overlap our custom text
-                label: ""
+                Layout.alignment: Qt.AlignCenter
+                topRightRadius: expanded ? Theme.moduleEdgeRadius : 0
 
                 // 2. Set your fixed width here
                 implicitWidth: expanded ? 200 : Math.min(200, scrollingText.paintedWidth + 30)
@@ -65,15 +66,15 @@ ModuleButton {
                     id: textContainer
                     clip: true 
                     anchors.fill: parent
-                    anchors.leftMargin: 10
+                    anchors.leftMargin: 15
                     anchors.rightMargin: 10
 
                     Text {
                         id: scrollingText
                         text: nowPlayingModule.titleText
                         
-                        // Try to match your theme's text color/font if needed:
-                        color: "white" 
+                        color: Theme.textPrimary
+                        font.family: Theme.font
                         font.pixelSize: Theme.fontSize
                         
                         anchors.verticalCenter: parent.verticalCenter
@@ -119,9 +120,6 @@ ModuleButton {
                         variant: "transparentDark"
                         implicitHeight: Theme.moduleHeight
                         implicitWidth: expanded ? 32 : 0
-                        radius: 0
-
-                        topLeftRadius: (modelData.action === "next") ? 0 : Theme.moduleRadius
 
                         label: modelData.action === "playpause" ? nowPlayingModule.playPauseIcon : modelData.icon
 
@@ -133,7 +131,7 @@ ModuleButton {
                         }
 
                         Behavior on implicitWidth {
-                            NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
                         }
                     }
                 }
@@ -197,7 +195,7 @@ ModuleButton {
                         
                         Rectangle {
                             anchors.fill: parent
-                            radius: Theme.moduleRadius
+                            radius: Theme.moduleEdgeRadius
                             color: "black" 
                         }
                     }

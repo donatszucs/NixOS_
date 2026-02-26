@@ -10,6 +10,7 @@ import Quickshell.Bluetooth
 ModuleButton {
     id: controlCenter
     property bool expanded: parentHover.hovered
+    noHoverColorChange: true
 
     HoverHandler {
         id: parentHover
@@ -25,6 +26,7 @@ ModuleButton {
     readonly property var   btAdapter:   Bluetooth.defaultAdapter
     readonly property bool  btPowered:   btAdapter ? btAdapter.enabled : false
     readonly property var   btDevices:   btAdapter ? btAdapter.devices : null
+    property color btColor:     controlCenter.btPowered ? "#80b0ff" : Qt.rgba(0.6,0.4,0.7,0.7)
     // 1. The master boolean that controls your icon
     property bool btDevicesConnected: false
 
@@ -41,6 +43,8 @@ ModuleButton {
         btDevicesConnected = anyConnected;
     }
 
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
     // 3. The exact same logic as your Repeater, but invisible
     Instantiator {
         id: deviceTracker
@@ -67,28 +71,25 @@ ModuleButton {
     property string btIcon: controlCenter.btPowered ? (btDevicesConnected ? "󰂱" : "󰂯") : "󰂲"
     // ── Sizing ─────────────────────────────────────────────────
     implicitHeight: expanded ? dropdownMenu.implicitHeight : Theme.moduleHeight
-    implicitWidth:  expanded ? dropdownMenu.implicitWidth : labelRow.implicitWidth + 16
+    implicitWidth:  expanded ? dropdownMenu.implicitWidth : labelRow.implicitWidth
 
     // ── Collapsed label ────────────────────────────────────────
     RowLayout {
         visible: !controlCenter.expanded
         id: labelRow
         anchors.centerIn: parent
-        spacing: 4
+        spacing: 0
 
-        Text {
-            text: controlCenter.netIcon
-            color: controlCenter.netColor
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize
-            font.bold: true
+
+        ModuleButton {
+            color: "transparent"
+            label: controlCenter.netIcon
+            textColor: controlCenter.netColor
         }
-        Text {
-            text: btIcon
-            color: controlCenter.btPowered ? "#80b0ff" : Qt.rgba(0.7,0.5,0.8,0.8)
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize
-            font.bold: true
+        ModuleButton {
+            color: "transparent"
+            label: controlCenter.btIcon
+            textColor: controlCenter.btColor
         }
     }
 
@@ -123,6 +124,9 @@ ModuleButton {
                     variant: "transparentDark"
                     textColor: controlCenter.netColor
                     textFont: 24
+                    rightMargin: 6
+                    implicitWidth: textFont * 2
+                    radius: Theme.moduleEdgeRadius
                     onClicked: netOpen.running = true
                 }
 
@@ -143,7 +147,7 @@ ModuleButton {
                 }
             }
 
-            Rectangle { Layout.fillWidth: true; height: 1; color: Qt.rgba(1,1,1,0.08) }
+            Rectangle { Layout.fillWidth: true; height: 5; color: Qt.rgba(1,1,1,0.08); radius: Theme.moduleEdgeRadius }
 
             // ── Bluetooth ─────────────────────────────────
             RowLayout {
@@ -155,9 +159,11 @@ ModuleButton {
 
                     ModuleButton {
                         label: controlCenter.btIcon
-                        textColor: controlCenter.btPowered ? "#80b0ff" : Qt.rgba(0.6,0.4,0.7,0.7)
+                        textColor: controlCenter.btColor
                         variant: "transparentDark"
+                        radius: Theme.moduleEdgeRadius
                         textFont: 24
+                        implicitWidth: textFont * 2
 
                         onClicked: btOpen.running = true
                     }
@@ -168,8 +174,8 @@ ModuleButton {
                         width: 40
                         height: 22
                         radius: height / 2
-                        color: controlCenter.btPowered ? "#80b0ff" : Qt.rgba(0.4,0.4,0.4,0.18)
-                        border.color: controlCenter.btPowered ? Qt.rgba(0.5,0.7,1,0.9) : Qt.rgba(0,0,0,0.08)
+                        color: controlCenter.btColor
+                        border.color: controlCenter.btColor
                         border.width: 1
                         anchors.horizontalCenter: parent.horizontalCenter
 
@@ -214,12 +220,19 @@ ModuleButton {
 
                     ModuleButton {
                         visible: !controlCenter.btDevicesConnected
-                        label: "No devices"
+                        label: controlCenter.btPowered ? "No devices" : "disabled"
                         color: "transparent"
                     }
                 }
             }
         }
+    }
+
+    Behavior on implicitWidth {
+        NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
+    }
+    Behavior on implicitHeight {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
 
     // ── Data refresh ───────────────────────────────────────────

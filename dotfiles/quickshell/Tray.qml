@@ -22,7 +22,7 @@ ModuleButton {
     clip: true
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
     }
 
     Process {

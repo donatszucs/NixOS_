@@ -95,6 +95,6 @@ Rectangle {
     }
 
     Behavior on gradient {
-        ColorAnimation { duration: 150 }
+        ColorAnimation { duration: horizontalDuration }
     }
 }

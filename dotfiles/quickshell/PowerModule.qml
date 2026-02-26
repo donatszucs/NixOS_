@@ -13,15 +13,17 @@ ModuleButton {
         id: parentHover
     }
 
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
+
     implicitHeight: expanded ? Theme.moduleHeight * 4 : Theme.moduleHeight
     implicitWidth: expanded ? 100 : 32
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
     }
 
     Behavior on implicitHeight {
-        NumberAnimation { duration: 80; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
     Text {
         visible: !powerModule.expanded
@@ -37,7 +39,7 @@ ModuleButton {
         NumberAnimation on opacity {
                     from: 0.0
                     to: 1.0
-                    duration: 200
+                    duration: horizontalDuration
                     easing.type: Easing.OutCubic
                 }
     }
@@ -61,10 +63,9 @@ ModuleButton {
 
                 radius: 0
 
-                topRightRadius: (modelData.tip === "Shutdown") ? Theme.moduleRadius : 0
-                topLeftRadius: (modelData.tip === "Shutdown") ? Theme.moduleRadius : 0
-                bottomLeftRadius: (modelData.tip === "Lock") ? Theme.moduleRadius : 0
-                bottomRightRadius: (modelData.tip === "Lock") ? Theme.moduleRadius : 0
+                topRightRadius: (modelData.tip === "Shutdown") ? Theme.moduleEdgeRadius : 0
+                bottomLeftRadius: (modelData.tip === "Lock") ? Theme.moduleEdgeRadius : 0
+                bottomRightRadius: (modelData.tip === "Lock") ? Theme.moduleEdgeRadius : 0
 
                 rightMargin: 12
                 textAlign: "right"

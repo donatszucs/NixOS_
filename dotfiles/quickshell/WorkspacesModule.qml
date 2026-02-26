@@ -23,20 +23,24 @@ ModuleButton {
     RowLayout {
         id: workspacesRow
         anchors.centerIn: parent
-        spacing: 2
+        spacing: 0
 
         Repeater {
             model: root.monitorWorkspaces
 
             delegate: ModuleButton {
                 required property var modelData
-
-                variant: active ? "light" : "dark"
-                implicitWidth: active ? 30 : 25
+                required property int index
+                variant: "light"
+                opacity: active ? 1 : 0.7
+                implicitWidth: active ? 35 : 20
                 implicitHeight: 22
-
-                radius: Theme.moduleRadius / 2
-
+                
+                // Apply the parent's radius ONLY if this is the absolute last item in the list!
+                topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
+                bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
+                topRightRadius: index === root.monitorWorkspaces.length - 1 ? Theme.moduleEdgeRadius : 0
+                bottomRightRadius: index === root.monitorWorkspaces.length - 1 ? Theme.moduleEdgeRadius : 0
 
                 readonly property bool active:
                     Hyprland.focusedMonitor !== null &&
