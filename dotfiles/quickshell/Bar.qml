@@ -25,18 +25,32 @@ PanelWindow {
     property real maskHeight: Theme.barHeight
 
     mask: Region {
-        x: 0
-        y: 0
-        width: topPanel.width
-        height: topPanel.maskHeight
+        // Bar interaction region (top edge)
+        Region {
+            x: 0
+            y: 0
+            width: topPanel.width
+            height: topPanel.maskHeight
+        }
+        
+        // Wallpaper Picker interaction region (side edge)
+        Region {
+            x: topPanel.width - wallpaperPicker.implicitWidth
+            y: wallpaperPicker.y - Theme.moduleEdgeRadius 
+            width: wallpaperPicker.implicitWidth
+            height: wallpaperPicker.implicitHeight + (Theme.moduleEdgeRadius * 2)
+        }
     }
     color: "transparent"
 
     // Background MouseArea to close the launcher when clicking outside of it
     MouseArea {
         anchors.fill: parent
-        enabled: launcherModule.expanded
-        onClicked: launcherModule.expanded = false
+        enabled: launcherModule.expanded || wallpaperPicker.expanded
+        onClicked: {
+            launcherModule.expanded = false
+            wallpaperPicker.expanded = false
+        }
         z: -1
     }
 
@@ -106,7 +120,7 @@ PanelWindow {
 
     // ── CENTER ───────────────────────────────────────────────────────────
     CloseWindowModule {
-        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 + 2
+        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 - 2
         radius: Theme.moduleEdgeRadius
         anchors {
                 rightMargin: Theme.moduleEdgeMarginV + 2
@@ -114,15 +128,31 @@ PanelWindow {
             top: parent.top
         }
     }
+
+    InverseRadius {
+        cornerPosition: "topRight"
+        color: workspacesModule.color
+        anchors {
+            right: workspacesModule.left
+            top: parent.top
+        }
+    }
     WorkspacesModule {
-        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 + 2
         id: workspacesModule
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         screenName: modelData.name
     }
+    InverseRadius {
+        cornerPosition: "topLeft"
+        color: workspacesModule.color
+        anchors {
+            left: workspacesModule.right
+            top: parent.top
+        }
+    }
     AddWorkspaceModule {
-        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 + 2
+        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 - 2
         radius: Theme.moduleEdgeRadius
         id: addWorkspaceModule
         anchors {
@@ -240,6 +270,39 @@ PanelWindow {
             top: powerModule.bottom
             right: powerModule.right
         }
+    }
+
+
+    InverseRadius {
+        cornerPosition: "bottomRight"
+        color: Theme.dark.base
+        opacity: wallpaperPicker.implicitWidth / wallpaperPicker.targetWidth * Theme.moduleOpacity
+        anchors {
+            bottom: wallpaperPicker.top
+            right: wallpaperPicker.right
+        }
+        visible: wallpaperPicker.implicitWidth > 1
+    }
+
+    WallpaperPicker {
+        id: wallpaperPicker
+        anchors {
+            verticalCenter: parent.verticalCenter
+            right: parent.right
+            rightMargin: Theme.moduleEdgeMarginV
+        }
+        // Removed maskHeight binding here since Wayland Region is handled correctly at the top level
+    }
+
+    InverseRadius {
+        cornerPosition: "topRight"
+        color: Theme.dark.base
+        opacity: wallpaperPicker.implicitWidth / wallpaperPicker.targetWidth * Theme.moduleOpacity
+        anchors {
+            top: wallpaperPicker.bottom
+            right: wallpaperPicker.right
+        }
+        visible: wallpaperPicker.implicitWidth > 1
     }
 
     // Invisible spacer window — its sole job is to reserve barHeight so that

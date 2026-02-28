@@ -108,6 +108,19 @@ ModuleButton {
                 }
             }
 
+            ModuleButton {
+                variant: "transparentDark"
+                Layout.fillWidth: true
+                implicitHeight: Theme.moduleHeight
+                visible: launcherModule.expanded
+                label: "󰸉  Wallpaper Picker"
+
+                onClicked: {
+                    launcherModule.expanded = false;
+                    wallpaperPicker.expanded = !wallpaperPicker.expanded;
+                }
+            }
+
             // Search bar
             Rectangle {
                 visible: launcherModule.expanded

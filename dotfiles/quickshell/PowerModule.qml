@@ -57,6 +57,7 @@ ModuleButton {
                 { icon: "", cmd: "hyprlock",           tip: "Lock", }
             ]
             delegate: ModuleButton {
+                id: actionButton
                 required property var modelData
                 variant: "transparentRed"
                 implicitWidth: expanded ? 100 : 28

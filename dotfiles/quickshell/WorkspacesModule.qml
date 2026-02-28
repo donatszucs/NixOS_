@@ -3,12 +3,15 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Hyprland
 
+
 ModuleButton {
     id: root
-    noHoverColorChange: true
     property string screenName: ""
 
-    radius: Theme.moduleEdgeRadius + 2
+    color: Theme.palette("dark").base
+
+    bottomLeftRadius: Theme.moduleEdgeRadius + 2
+    bottomRightRadius: Theme.moduleEdgeRadius + 2
     property int overlay: 3
 
     implicitHeight: Theme.moduleHeight * 0.9
@@ -36,9 +39,10 @@ ModuleButton {
             delegate: ModuleButton {
                 required property var modelData
                 required property int index
-                variant: active ? "light" : "transparentDark"
+                variant: "light"
+                opacity: active ? 1.0 : 0.6
                 implicitHeight: root.implicitHeight - 2 * root.overlay
-                implicitWidth: active ? 35 : 20
+                implicitWidth: active ? 35 : 25
                 
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
                 topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
