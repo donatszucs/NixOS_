@@ -5,9 +5,13 @@ import Quickshell.Hyprland
 
 ModuleButton {
     id: root
-    color: "transparent"
     noHoverColorChange: true
     property string screenName: ""
+
+    radius: Theme.moduleEdgeRadius + 2
+    property int overlay: 3
+
+    implicitHeight: Theme.moduleHeight * 0.9
 
     // Only workspaces whose monitor name matches this bar's screen
     readonly property var monitorWorkspaces: {
@@ -19,7 +23,7 @@ ModuleButton {
         return out
     }
 
-    implicitWidth: workspacesRow.implicitWidth + 8
+    implicitWidth: workspacesRow.implicitWidth + 2 * overlay
 
     RowLayout {
         id: workspacesRow
@@ -32,7 +36,8 @@ ModuleButton {
             delegate: ModuleButton {
                 required property var modelData
                 required property int index
-                variant: active ? "light" : "dark"
+                variant: active ? "light" : "transparentDark"
+                implicitHeight: root.implicitHeight - 2 * root.overlay
                 implicitWidth: active ? 35 : 20
                 
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!

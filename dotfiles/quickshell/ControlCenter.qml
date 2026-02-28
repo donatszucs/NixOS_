@@ -71,7 +71,7 @@ ModuleButton {
     property string btIcon: controlCenter.btPowered ? (btDevicesConnected ? "󰂱" : "󰂯") : "󰂲"
     // ── Sizing ─────────────────────────────────────────────────
     implicitHeight: expanded ? dropdownMenu.implicitHeight : Theme.moduleHeight
-    implicitWidth:  expanded ? dropdownMenu.implicitWidth : labelRow.implicitWidth
+    implicitWidth:  expanded ? Math.ceil(dropdownMenu.implicitWidth) : Math.ceil(labelRow.implicitWidth)
 
     // ── Collapsed label ────────────────────────────────────────
     RowLayout {

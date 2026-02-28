@@ -63,9 +63,7 @@ ModuleButton {
 
                 radius: 0
 
-                topRightRadius: (modelData.tip === "Shutdown") ? Theme.moduleEdgeRadius : 0
                 bottomLeftRadius: (modelData.tip === "Lock") ? Theme.moduleEdgeRadius : 0
-                bottomRightRadius: (modelData.tip === "Lock") ? Theme.moduleEdgeRadius : 0
 
                 rightMargin: 12
                 textAlign: "right"

@@ -52,10 +52,16 @@ PanelWindow {
     }
 
     // ── LEFT ─────────────────────────────────────────────────────────────
+    InverseRadius {
+        cornerPosition: "topLeft"
+        color: clockModule.color
+        anchors {
+            top: clockModule.bottom
+            left: clockModule.left
+        }
+    }
     ClockModule {
         id: clockModule
-        topLeftRadius: Theme.moduleEdgeRadius
-        bottomLeftRadius: Theme.moduleEdgeRadius
         anchors {
             left: parent.left
             leftMargin: Theme.moduleEdgeMarginV
@@ -82,7 +88,6 @@ PanelWindow {
     NowPlayingModule {
         id: nowPlayingModule
 
-        topRightRadius: Theme.moduleEdgeRadius
         bottomRightRadius: Theme.moduleEdgeRadius
         anchors {
             left: launcherModule.right
@@ -90,36 +95,54 @@ PanelWindow {
             top: parent.top
         }
     }
+    InverseRadius {
+        cornerPosition: "topLeft"
+        color: nowPlayingModule.color
+        anchors {
+            left: nowPlayingModule.right
+            top: parent.top
+        }
+    }
 
     // ── CENTER ───────────────────────────────────────────────────────────
-        CloseWindowModule {
-            topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2
-            radius: Theme.moduleEdgeRadius
-            anchors {
+    CloseWindowModule {
+        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 + 2
+        radius: Theme.moduleEdgeRadius
+        anchors {
+                rightMargin: Theme.moduleEdgeMarginV + 2
                 right: workspacesModule.left
-                top: parent.top
-            }
+            top: parent.top
         }
-        WorkspacesModule {
-            id: workspacesModule
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            screenName: modelData.name
-        }
-        AddWorkspaceModule {
-            topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2
-            radius: Theme.moduleEdgeRadius
-            id: addWorkspaceModule
-            anchors {
+    }
+    WorkspacesModule {
+        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 + 2
+        id: workspacesModule
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        screenName: modelData.name
+    }
+    AddWorkspaceModule {
+        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 + 2
+        radius: Theme.moduleEdgeRadius
+        id: addWorkspaceModule
+        anchors {
                 left: workspacesModule.right
-                top: parent.top
-            }
+                leftMargin: Theme.moduleEdgeMarginV + 2
+            top: parent.top
         }
+    }
 
     // ── RIGHT ────────────────────────────────────────────────────────────
+    InverseRadius {
+        cornerPosition: "topRight"
+        color: lightSwitchModule.color
+        anchors {
+            right: lightSwitchModule.left
+            top: parent.top
+        }
+    }
     LightSwitch {
         id: lightSwitchModule
-        topLeftRadius: Theme.moduleEdgeRadius
         bottomLeftRadius: Theme.moduleEdgeRadius
         anchors {
             right: monitorBrightnessModule.left
@@ -196,8 +219,6 @@ PanelWindow {
     
     PowerModule {
         id: powerModule
-        topRightRadius: Theme.moduleEdgeRadius
-        bottomRightRadius: Theme.moduleEdgeRadius
         anchors {
             rightMargin: Theme.moduleEdgeMarginV
             right: parent.right
@@ -210,6 +231,14 @@ PanelWindow {
             value: powerModule.implicitHeight
             when: powerModule.expanded
             restoreMode: Binding.RestoreBindingOrValue
+        }
+    }
+    InverseRadius {
+        cornerPosition: "topRight"
+        color: powerModule.color
+        anchors {
+            top: powerModule.bottom
+            right: powerModule.right
         }
     }
 

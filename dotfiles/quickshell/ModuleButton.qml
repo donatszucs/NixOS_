@@ -57,7 +57,7 @@ Rectangle {
     signal clicked()
 
     implicitHeight: Theme.moduleHeight
-    implicitWidth: labelText.implicitWidth + 30
+    implicitWidth: Math.ceil(labelText.implicitWidth + 30)
     radius: Theme.moduleRadius
     opacity: Theme.moduleOpacity
 

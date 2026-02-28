@@ -55,7 +55,6 @@ ModuleButton {
                 variant: "transparentDark"
                 id: titleBtn
                 Layout.alignment: Qt.AlignCenter
-                topRightRadius: expanded ? Theme.moduleEdgeRadius : 0
 
                 // 2. Set your fixed width here
                 implicitWidth: expanded ? 200 : Math.min(200, scrollingText.paintedWidth + 30)

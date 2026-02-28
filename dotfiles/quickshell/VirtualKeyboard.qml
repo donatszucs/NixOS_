@@ -7,7 +7,6 @@ ModuleButton {
     id: virtualKbrd
     label: ""
     implicitWidth: 30
-    implicitHeight: 30
     property bool active: false
 
     rightMargin: 5

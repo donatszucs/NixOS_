@@ -89,9 +89,6 @@ ModuleButton {
                 textAlign: "right"
                 rightMargin: 14
 
-                topLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
-                bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
-
                 function refresh() {
                     volProc.running = true
                 }

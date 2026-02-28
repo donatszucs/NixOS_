@@ -5,7 +5,6 @@ import QtQuick
 
 ModuleButton {
     id: root
-    implicitHeight: 30
     property bool active: true
     variant: "light"
 

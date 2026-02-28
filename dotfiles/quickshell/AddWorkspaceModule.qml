@@ -3,10 +3,10 @@ import Quickshell.Hyprland
 
 ModuleButton {
     label: ""
-    variant: "light"
-    implicitWidth: 24
-    implicitHeight: 24
-    rightMargin: 3
+    variant: "dark"
+    implicitWidth: Theme.moduleHeight * 0.8
+    implicitHeight: Theme.moduleHeight * 0.7
+    rightMargin: 2
 
     onClicked: Hyprland.dispatch("workspace empty")
 }

@@ -5,7 +5,7 @@ QtObject {
     // ── Base colors ──────────────────────────────────────────────────
     readonly property color textPrimary:  "#d5bfe2"
     readonly property color textDark:     "#2a202f"
-    readonly property color accentBorder: "#8e6ca0"
+    readonly property color accentBorder: '#2a202f'
 
     // ── Variant palettes ─────────────────────────────────────────────
     // Each palette exposes: top, bottom, hoverTop, hoverBottom, text
@@ -68,18 +68,18 @@ QtObject {
     // ── Typography ───────────────────────────────────────────────────
     readonly property string font: "JetBrainsMonoNL Nerd Font"
     readonly property int    fontSize:  13
-    readonly property int    barHeight: 32
+    readonly property int    barHeight: 33
 
     // ── Module sizing ────────────────────────────────────────────────
-    readonly property real moduleHeight: 30
+    readonly property real moduleHeight: 33
     readonly property real moduleOpacity: 0.95
     readonly property int moduleRadius:   0
-    readonly property int moduleEdgeRadius:   7
+    readonly property int moduleEdgeRadius:   10
     readonly property int modulePaddingH: 15
     readonly property int modulePaddingV: 5
-    readonly property int moduleMarginH:  3
+    readonly property int moduleMarginH:  0
     readonly property int moduleMarginV:  0
-    readonly property int moduleEdgeMarginV:  3
+    readonly property int moduleEdgeMarginV:  0
 
     // ── Animations ─────────────────────────────────────────────────
     readonly property int verticalDuration: 150

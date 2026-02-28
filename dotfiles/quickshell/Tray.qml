@@ -17,7 +17,6 @@ ModuleButton {
     // This MUST be assigned when you create the component in your main file
     property var parentWindow: null 
 
-    implicitHeight: 30
     implicitWidth: expanded ? row.implicitWidth - 4 : notificationButton.implicitWidth
     clip: true
 
