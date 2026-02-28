@@ -245,6 +245,7 @@
   pkgs.uv          # Python package manager
   jq               # Command-line JSON processor
   quickshell        # A quick launcher for commands and scripts (like Rofi but for CLI)
+  baobab             # Disk usage analyzer
 
   # -- Applications --
   vscode            

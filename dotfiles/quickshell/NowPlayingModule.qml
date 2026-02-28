@@ -83,13 +83,21 @@ ModuleButton {
                             loops: Animation.Infinite
                             running: scrollingText.paintedWidth > textContainer.width
 
+                            onRunningChanged: {
+                                if (!running) {
+                                    scrollingText.x = 0;
+                                }
+                            }
+
+                            PropertyAction { target: scrollingText; property: "x"; value: 0 }
+
                             PauseAnimation { duration: 1500 }
 
                             NumberAnimation {
                                 from: 0
-                                to: textContainer.width - scrollingText.paintedWidth
+                                to: Math.min(0, textContainer.width - scrollingText.paintedWidth)
                                 // Adjust the multiplier (30) to make it scroll faster or slower
-                                duration: (scrollingText.paintedWidth - textContainer.width) * 30 
+                                duration: Math.max(0, scrollingText.paintedWidth - textContainer.width) * 30 
                             }
 
                             PauseAnimation { duration: 1500 }
