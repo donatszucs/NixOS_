@@ -18,7 +18,7 @@ PanelWindow {
     }
     // No space reservation here — handled by the spacer window below
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.keyboardFocus: launcherModule.expanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: launcherModule.expanded ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     // Modules write to this to extend the input region downward when they expand.
     // Use Math.max so multiple modules can contribute independently.
@@ -31,6 +31,14 @@ PanelWindow {
         height: topPanel.maskHeight
     }
     color: "transparent"
+
+    // Background MouseArea to close the launcher when clicking outside of it
+    MouseArea {
+        anchors.fill: parent
+        enabled: launcherModule.expanded
+        onClicked: launcherModule.expanded = false
+        z: -1
+    }
 
     // Subtle gradient background, like waybar's window#waybar
     Rectangle {
@@ -66,7 +74,7 @@ PanelWindow {
         Binding {
             target: topPanel
             property: "maskHeight"
-            value: launcherModule.implicitHeight
+            value: topPanel.height
             when: launcherModule.expanded
             restoreMode: Binding.RestoreBindingOrValue
         }
@@ -85,8 +93,8 @@ PanelWindow {
 
     // ── CENTER ───────────────────────────────────────────────────────────
         CloseWindowModule {
-            topLeftRadius: Theme.moduleHeight / 2
-            bottomLeftRadius: Theme.moduleHeight / 2
+            topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2
+            radius: Theme.moduleEdgeRadius
             anchors {
                 right: workspacesModule.left
                 top: parent.top
@@ -99,8 +107,8 @@ PanelWindow {
             screenName: modelData.name
         }
         AddWorkspaceModule {
-            topRightRadius: Theme.moduleHeight / 2
-            bottomRightRadius: Theme.moduleHeight / 2
+            topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2
+            radius: Theme.moduleEdgeRadius
             id: addWorkspaceModule
             anchors {
                 left: workspacesModule.right

@@ -6,7 +6,6 @@ import QtQuick
 ModuleButton {
     id: virtualKbrd
     label: ""
-    variant: "light"
     implicitWidth: 30
     implicitHeight: 30
     property bool active: false
@@ -27,10 +26,10 @@ ModuleButton {
         virtualKbrd.active = !virtualKbrd.active; // Toggle the state
         
         if (virtualKbrd.active) {
-            virtualKbrd.variant = "dark"
+            virtualKbrd.variant = "light"
             startProc.running = true;
         } else {
-            virtualKbrd.variant = "light"
+            virtualKbrd.variant = "dark"
             killProc.running = true;
         }
     }

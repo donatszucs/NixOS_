@@ -32,6 +32,4 @@ LINK_NAME="$CONF_DIR/temps/wallpaper_$MONITOR"
 ln -sf "$FULL_PATH" "$LINK_NAME"
 
 # 5. Apply immediately
-hyprctl hyprpaper preload "$FULL_PATH"
-hyprctl hyprpaper wallpaper "$MONITOR,$FULL_PATH"
-hyprctl hyprpaper unload unused
+pkill hyprpaper; hyprpaper & disown

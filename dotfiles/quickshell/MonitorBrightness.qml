@@ -5,8 +5,6 @@ import QtQuick
 
 ModuleButton {
     id: root
-    implicitHeight: 30
-    variant: "light"
 
     required property string screenName
     property int displayNumber: screenName === "DP-1" ? 1 : 2

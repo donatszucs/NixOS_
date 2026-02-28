@@ -27,7 +27,7 @@ ModuleButton {
     bottomRightRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
     clip: true
 
-    implicitWidth:  expanded ? dropPanel.implicitWidth  : collapsedRow.implicitWidth
+    implicitWidth:  expanded ? panelWidth : collapsedRow.implicitWidth
     implicitHeight: expanded ? dropPanel.implicitHeight : Theme.moduleHeight
 
     Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
@@ -75,23 +75,23 @@ ModuleButton {
         id: dropPanel
         noHoverColorChange: true
         color: "transparent"
+        topMarginButton: 0 // Removes default margin from ModuleButton
         anchors { left: parent.left; right: parent.right; top: parent.top }
-        implicitWidth:  launcherModule.panelWidth
-        implicitHeight: panelCol.implicitHeight + 10
+        implicitWidth:  launcherModule.expanded ? launcherModule.panelWidth : collapsedRow.implicitWidth
+        implicitHeight: expanded ? panelCol.implicitHeight + 10 : panelCol.implicitHeight
 
         ColumnLayout {
             id: panelCol
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10; topMargin: -3 }
+            anchors { left: parent.left; right: parent.right; top: parent.top } // Reset layout spacing
             spacing: 8
 
             // Header row (same height as collapsed bar, keeps visual alignment)
             ModuleButton {
                 id: collapsedRow
-                Layout.alignment: Qt.AlignCenter
-                color: "transparent"
-                
+                variant: "transparentDark"
+                Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
-                label: "  Menu"
+                label: "  Menu "
 
                 onClicked: {
                     if (expanded) {
@@ -112,6 +112,8 @@ ModuleButton {
             Rectangle {
                 visible: launcherModule.expanded
                 Layout.fillWidth: true
+                Layout.leftMargin: 10
+                Layout.rightMargin: 10
                 implicitHeight: Theme.moduleHeight
                 color: Theme.dark.hover
                 radius: Theme.moduleEdgeRadius
@@ -124,6 +126,11 @@ ModuleButton {
                     font.pixelSize: Theme.fontSize
                     verticalAlignment: TextInput.AlignVCenter
                     focus: true
+                    onActiveFocusChanged: {
+                        if (!activeFocus && launcherModule.expanded) {
+                            launcherModule.expanded = false;
+                        }
+                    }
                     onTextEdited: launcherModule.filterApps(text)
                     Keys.onEscapePressed: launcherModule.expanded = false
                     Keys.onReturnPressed: {
@@ -139,6 +146,8 @@ ModuleButton {
             Rectangle {
                 visible: launcherModule.expanded
                 Layout.fillWidth: true
+                Layout.leftMargin: 10
+                Layout.rightMargin: 10
                 height: 5
                 color: Qt.rgba(1, 1, 1, 0.08)
                 radius: Theme.moduleEdgeRadius
@@ -149,6 +158,8 @@ ModuleButton {
                 visible: launcherModule.expanded
                 id: appListRect
                 Layout.fillWidth: true
+                Layout.leftMargin: 10
+                Layout.rightMargin: 10
                 implicitHeight: Math.min(launcherModule.filteredApps.length, launcherModule.maxVisible) * Theme.moduleHeight
                 color: "transparent"
                 Behavior on implicitHeight {

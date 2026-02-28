@@ -12,7 +12,7 @@ QtObject {
     // Use as:  Theme.palette["dark"].top  or  Theme.dark.top
 
     readonly property QtObject dark: QtObject {
-        readonly property color base:        '#321c40'
+        readonly property color base:        '#32213c'
         readonly property color hover:   '#271330'
         readonly property color pressed: '#120716'
         readonly property color text:       "#d5bfe2"
@@ -36,8 +36,8 @@ QtObject {
     }
 
     readonly property QtObject danger: QtObject {
-        readonly property color base:       "#e17676"
-        readonly property color hover:      "#c04040"
+        readonly property color base:       '#cd5555'
+        readonly property color hover:      '#b33232'
         readonly property color pressed:    "#8f3939"
         readonly property color text:       "#2a202f"
         readonly property color border:     "#652e2e"
@@ -45,7 +45,7 @@ QtObject {
 
     readonly property QtObject transparentRed: QtObject {
         readonly property color base:        "transparent"
-        readonly property color hover:      "#c04040"
+        readonly property color hover:      "#b33232"
         readonly property color pressed:    "#8f3939"
         readonly property color text:       "#2a202f"
         readonly property color border:     "#652e2e"

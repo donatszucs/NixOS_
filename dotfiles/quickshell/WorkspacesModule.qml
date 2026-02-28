@@ -5,6 +5,7 @@ import Quickshell.Hyprland
 
 ModuleButton {
     id: root
+    color: "transparent"
     noHoverColorChange: true
     property string screenName: ""
 
@@ -31,10 +32,8 @@ ModuleButton {
             delegate: ModuleButton {
                 required property var modelData
                 required property int index
-                variant: "light"
-                opacity: active ? 1 : 0.7
+                variant: active ? "light" : "dark"
                 implicitWidth: active ? 35 : 20
-                implicitHeight: 22
                 
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
                 topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0

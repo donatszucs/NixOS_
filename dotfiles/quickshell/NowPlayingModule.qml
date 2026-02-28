@@ -66,7 +66,7 @@ ModuleButton {
                     id: textContainer
                     clip: true 
                     anchors.fill: parent
-                    anchors.leftMargin: 15
+                    anchors.leftMargin: 10
                     anchors.rightMargin: 10
 
                     Text {

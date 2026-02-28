@@ -4,10 +4,8 @@ import Quickshell.Io
 
 ModuleButton {
     id: root
-    variant: "light"
     label: "󰍽"
     implicitWidth: 30
-    implicitHeight: 30
 
     readonly property string device: "Keychron  Keychron Link "
     readonly property string preset: "SuperMouse"
@@ -55,11 +53,11 @@ ModuleButton {
         stdout: StdioCollector {
             onStreamFinished: {
                 if (text.trim() === "on") {
-                    root.variant = "light"
+                    root.variant = "dark"
                     root.label = "󰍽"
                     stopProc.running = true
                 } else {
-                    root.variant = "dark"
+                    root.variant = "light"
                     root.label = "󱗼"
                     startProc.running = true
                 }
