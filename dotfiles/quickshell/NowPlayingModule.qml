@@ -11,7 +11,8 @@ ModuleButton {
     property string titleText: "󰎆  Nothing playing"
     property string authorText: "Unknown artist"
     property string playPauseIcon: "󰐊"
-    property bool expanded: parentHover.hovered
+    property bool isPlaying: false
+    property bool expanded: isPlaying && parentHover.hovered
 
     HoverHandler {
         id: parentHover
@@ -27,7 +28,7 @@ ModuleButton {
 
 
     implicitHeight: expanded ? Theme.moduleHeight + artistInfoRow.implicitHeight : Theme.moduleHeight
-    implicitWidth: expanded ? (controlsRow.implicitWidth + titleBtn.implicitWidth): titleBtn.implicitWidth
+    implicitWidth: expanded ? Math.ceil(controlsRow.implicitWidth + titleBtn.implicitWidth): Math.ceil(titleBtn.implicitWidth)
     clip: true
 
     Behavior on implicitWidth {
@@ -250,13 +251,14 @@ ModuleButton {
 
     function updateFromPlayer() {
         if (!currentPlayer) {
+            nowPlayingModule.isPlaying = false
             nowPlayingModule.titleText = "󰎆  Nothing playing"
             nowPlayingModule.authorText = "Unknown artist"
             nowPlayingModule.playPauseIcon = "󰐊"
             return
         }
         nowPlayingModule.playPauseIcon = currentPlayer.isPlaying ? "󰏤" : "󰐊"
-
+        nowPlayingModule.isPlaying = true
         if (currentTrackId !== currentPlayer.trackTitle) {
             currentTrackId = currentPlayer.trackTitle
             nowPlayingModule.titleText = "󰎆  " + (currentPlayer.trackTitle || "Nothing playing")

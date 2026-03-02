@@ -1,0 +1,57 @@
+version = 1
+revision = 3
+requires-python = ">=3.14"
+
+[[package]]
+name = "python-dotenv"
+version = "1.2.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/82/ed/0301aeeac3e5353ef3d94b6ec08bbcabd04a72018415dcb29e588514bba8/python_dotenv-1.2.2.tar.gz", hash = "sha256:2c371a91fbd7ba082c2c1dc1f8bf89ca22564a087c2c287cd9b662adde799cf3", size = 50135, upload-time = "2026-03-01T16:00:26.196Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0b/d7/1959b9648791274998a9c3526f6d0ec8fd2233e4d4acce81bbae76b44b2a/python_dotenv-1.2.2-py3-none-any.whl", hash = "sha256:1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a", size = 22101, upload-time = "2026-03-01T16:00:25.09Z" },
+]
+
+[[package]]
+name = "tapo"
+version = "0.8.11"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a6/61/d99ecaae8f7c0d5aa5663655c9e1d21b170cf2fd896b47eb3d4631ec7f7a/tapo-0.8.11.tar.gz", hash = "sha256:e9dd053f74646754502d7549a6efd4b9e31eed1d0d5c1d12e8dfb4af067c84ef", size = 144732, upload-time = "2026-02-27T20:15:17.274Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6e/da/158741098d85b114be5da77e3b2bc4082644f6e8a2d7d7d913122e7a3db9/tapo-0.8.11-cp314-cp314-macosx_10_12_x86_64.whl", hash = "sha256:4f7a09fe3342f8b83836522da41309abada661ec1a8137971dd0a4fe9594a7d8", size = 3784498, upload-time = "2026-02-27T20:16:00.898Z" },
+    { url = "https://files.pythonhosted.org/packages/f7/43/47f932ab834e6b21267cccfb6efa67eba093a201bb54c98e0268d09567a7/tapo-0.8.11-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:15bbb027caad59d33ad6248f4e49315bcea0c9a115d038f5c0c0ab05f7386287", size = 3709703, upload-time = "2026-02-27T20:14:21.248Z" },
+    { url = "https://files.pythonhosted.org/packages/3a/7b/96f91b1c5a9d5d70adf101acf1b7ab17f1695e962f6b4113f460b12c457b/tapo-0.8.11-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3f31b56a9d943f0fe6b492b8834f03a7ff66d18741ad78f82c0b3ea3e3893635", size = 4060977, upload-time = "2026-02-27T20:14:57.557Z" },
+    { url = "https://files.pythonhosted.org/packages/8c/74/bc4ac4b8874305b6725f8302c947468e1d721f9502f6942afc60b0b33d3a/tapo-0.8.11-cp314-cp314-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:5a1df32eaaec5253590297c2fa578e6a4c6cc223385eb11e33a82eaaa24b3e41", size = 3944087, upload-time = "2026-02-27T20:14:36.812Z" },
+    { url = "https://files.pythonhosted.org/packages/c8/97/d8d3f758500046a240a05f95fa406875900f75815be912bc70b4a5344a86/tapo-0.8.11-cp314-cp314-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:95905f37240c47e5646a7478f4d0b8e461c70783fa9359872004fb7920ac4d83", size = 4278616, upload-time = "2026-02-27T20:14:02.477Z" },
+    { url = "https://files.pythonhosted.org/packages/60/9c/1f030ba7c6bca8cdc3c3a15fa9ab5b2a5e4e1a74313583a3ffded887e87f/tapo-0.8.11-cp314-cp314-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:3a6b899cca6b2ed4f52a66ceededc8c345c7ea0fbb5cf4810b2251daf8da1a7c", size = 4426284, upload-time = "2026-02-27T20:13:55.575Z" },
+    { url = "https://files.pythonhosted.org/packages/97/0b/48a7b0ac78fc6fedf610bc276bbcf524ed71b55a5233b7472332ba5e4a4f/tapo-0.8.11-cp314-cp314-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:0dfc81813cd1a27e5cd8c6ef7b56b288b9eac26e248c8e637bce132ca8be08c3", size = 4285583, upload-time = "2026-02-27T20:15:42.656Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/2a/9a3043cb06abb7b33db210e681d1a4969ec201ee650986e73dc574fac0a1/tapo-0.8.11-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4fe83d0484bc0590ea777aa040596a236b352cd30f0ccd1b7c643af22f1933b0", size = 3934175, upload-time = "2026-02-27T20:15:54.04Z" },
+    { url = "https://files.pythonhosted.org/packages/93/f1/5f267204cd7893f9b9208203fa7bb65f1b2dd6fdb84fdfa6f0ca59755cfe/tapo-0.8.11-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:111cb6ba5b8faf53955d42da5b17fab3d946dae197259febbcbb259145a3bc24", size = 4244961, upload-time = "2026-02-27T20:14:17.927Z" },
+    { url = "https://files.pythonhosted.org/packages/c1/0a/d8e2bf87ca0979d1063858058c070fb2227665bca4aff8eb22da34401ecb/tapo-0.8.11-cp314-cp314-musllinux_1_2_armv7l.whl", hash = "sha256:37cecd06ead71ff82559cca912e1794a329320f3ee40c2ce45726440bea7c73e", size = 4210234, upload-time = "2026-02-27T20:13:43.728Z" },
+    { url = "https://files.pythonhosted.org/packages/2d/5a/d115d077745b7c1e07988fab786bb64e8baede4cd230debab14d114e56c8/tapo-0.8.11-cp314-cp314-musllinux_1_2_i686.whl", hash = "sha256:801b68585ac4ee9c4ae26bba85f4c3a1678fcb0eaaa24da81632639deb5eae25", size = 4322636, upload-time = "2026-02-27T20:15:34.061Z" },
+    { url = "https://files.pythonhosted.org/packages/b1/09/337349f8c2c93f40be1307bd584cb4b7604f52c3f34cba33a1390aa6a0c0/tapo-0.8.11-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:1b20c614c8ac02512c2cab6b0dabfd20e97764ba65c0e5b167616d247e3114c5", size = 4298736, upload-time = "2026-02-27T20:13:45.308Z" },
+    { url = "https://files.pythonhosted.org/packages/31/81/e6c2f7c171efdd81791c0ae2cfa06427ac1ee75c65d6b9421e671d848b79/tapo-0.8.11-cp314-cp314-win_amd64.whl", hash = "sha256:b48c2c9b00cb2412ac1e0b21c16d0e64bdfbbf5cf0ae0e3e7ac506a678546635", size = 3446764, upload-time = "2026-02-27T20:13:42.216Z" },
+    { url = "https://files.pythonhosted.org/packages/30/33/fc4e38f70789c2b918d096b995555c62db2f2a885af0a0019e25e6ae05de/tapo-0.8.11-cp314-cp314-win_arm64.whl", hash = "sha256:4ecb70216bf63ccba03e2f825e1303cfddf6a52cf89e653cb83fd38166e3598d", size = 3212054, upload-time = "2026-02-27T20:15:44.19Z" },
+    { url = "https://files.pythonhosted.org/packages/33/70/87fd1d1c161b3270dcb4e60195861da54f5f85f5d16521c88a5ccb8d572e/tapo-0.8.11-cp314-cp314t-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:fd622e257a198b25b53f8b583a819134adae95344ae43551843939005a0d6856", size = 4078498, upload-time = "2026-02-27T20:15:57.408Z" },
+    { url = "https://files.pythonhosted.org/packages/46/bc/d4c0862afc797844936fad7af0ee4c292917349b6d450ad1f5e0844790ca/tapo-0.8.11-cp314-cp314t-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:3dbc72cc57902a6268763b186f6715c56be4f515cf996dd603314f50163bc5bf", size = 3936532, upload-time = "2026-02-27T20:15:37.698Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/e9/6db748ef9201cd438061679d6b142a2e13d0c2ded8cbced6d6e5ca698337/tapo-0.8.11-cp314-cp314t-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:8e9a815159a3e1a3fb85029cc02032b6aadc764b6b41e3b27c765b2bc5a8c4f5", size = 4442437, upload-time = "2026-02-27T20:14:08.874Z" },
+    { url = "https://files.pythonhosted.org/packages/7d/27/887afac83f098d4000c1a6c45f31241776eccfe66f20e4f84d21d03a60c7/tapo-0.8.11-cp314-cp314t-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:172e5b5706fbc7503c7a8ef1bc6b47a9d7533ce4ebf5645ef79a52816c05f9dc", size = 4296374, upload-time = "2026-02-27T20:14:10.508Z" },
+    { url = "https://files.pythonhosted.org/packages/6a/10/0e76ce723cf452aa9745a941637838327f29698f6f610af222ce105fadbb/tapo-0.8.11-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:5b321e2a47c33e0c24acfaaade03e3c9e072a9bf8c2fa0e096953027ddb392d5", size = 4259900, upload-time = "2026-02-27T20:15:12.44Z" },
+    { url = "https://files.pythonhosted.org/packages/f4/44/9df0482d63304cf99e0bee79a1ee3bcddf96ed962b36050c15e1ef2c9745/tapo-0.8.11-cp314-cp314t-musllinux_1_2_armv7l.whl", hash = "sha256:e94f06a740ebb148db819e861d0e3ae13653b7c8fbdf48b266435f90f8e07199", size = 4203125, upload-time = "2026-02-27T20:13:35.082Z" },
+    { url = "https://files.pythonhosted.org/packages/41/81/d5fd385127e95b7ebf9714b6e35ec411e17a563fe87f800481cc500666e2/tapo-0.8.11-cp314-cp314t-musllinux_1_2_i686.whl", hash = "sha256:6b3fdbe8c5a75291f4df112bd8f7f3b0e2c0ff50737c85cb28bc9e6327f0cd02", size = 4306702, upload-time = "2026-02-27T20:15:59.343Z" },
+    { url = "https://files.pythonhosted.org/packages/64/08/6540bd581fe3ebda95a0ec6ef1d653190680c244299eb8d30993038314a7/tapo-0.8.11-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:14d2a38a63597a9d53961fe9b68818bb399ec0884ecd6d1bde9d958e7da51fe8", size = 4306665, upload-time = "2026-02-27T20:15:03.156Z" },
+]
+
+[[package]]
+name = "tapolight"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "python-dotenv" },
+    { name = "tapo" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "python-dotenv", specifier = ">=1.2.2" },
+    { name = "tapo", specifier = ">=0.8.11" },
+]

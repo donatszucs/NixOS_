@@ -234,9 +234,7 @@
     
   # -- Essential Tools --
   kitty             # Terminal (default for Hyprland, needed to start debugging)
-  waybar            # Status bar (top bar)
   mako              # Notification daemon
-  rofi              # Application launcher
   brightnessctl     # Screen brightness control
   ddcutil           # Control monitor settings like brightness, contrast, etc.
   libnotify        # Notification library
@@ -250,6 +248,7 @@
   # -- Applications --
   vscode            
   google-chrome
+  inputs.zen-browser.packages."${pkgs.system}".default
   spotify
   discord
   qalculate-gtk
