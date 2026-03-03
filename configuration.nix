@@ -52,7 +52,7 @@
   xdg.portal = {
     enable = true;
     wlr.enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    extraPortals = [ pkgs.xdg-desktop-portal-hyprland pkgs.xdg-desktop-portal pkgs.xdg-desktop-portal-gtk ];
   };
 
 
@@ -250,7 +250,7 @@
   google-chrome
   inputs.zen-browser.packages."${pkgs.system}".default
   spotify
-  discord
+  pkgs.vesktop
   qalculate-gtk
   texlive.combined.scheme-full
 

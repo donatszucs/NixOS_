@@ -81,11 +81,14 @@ Item {
     property bool lightActive: true
     property string lightVariant: "light"
     property int lightBrightness: 100
+    property int lightHue: 30
+    property int lightSaturation: 0
     property string tapoScriptPath: "~/nixos-config/scripts/TapoLight/.venv/bin/python ~/nixos-config/scripts/TapoLight/tapo_control.py"
 
     function refreshLightStatus() {
         lightStatusProc.running = true
         lightBrightnessProc.running = true
+        lightColorProc.running = true
     }
 
     Process {
@@ -151,6 +154,38 @@ Item {
         id: lightSetBrightnessProc
         property int targetBrightness: 100
         command: ["bash", "-c", root.tapoScriptPath + " set " + targetBrightness]
+        onRunningChanged: if (!running) refreshLightStatus()
+    }
+
+    Process {
+        id: lightColorProc
+        command: ["bash", "-c", root.tapoScriptPath + " get_color"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var parts = text.trim().split(",")
+                if (parts.length === 2) {
+                    var h = parseInt(parts[0])
+                    var s = parseInt(parts[1])
+                    if (!isNaN(h)) root.lightHue = h
+                    if (!isNaN(s)) root.lightSaturation = s
+                }
+            }
+        }
+    }
+
+    function setLightColor(hue, sat) {
+        root.lightHue = hue
+        root.lightSaturation = sat
+        lightSetColorProc.targetHue = hue
+        lightSetColorProc.targetSat = sat
+        lightSetColorProc.running = true
+    }
+
+    Process {
+        id: lightSetColorProc
+        property int targetHue: 30
+        property int targetSat: 0
+        command: ["bash", "-c", root.tapoScriptPath + " color " + targetHue + " " + targetSat]
         onRunningChanged: if (!running) refreshLightStatus()
     }
 

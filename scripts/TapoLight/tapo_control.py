@@ -34,12 +34,26 @@ async def main():
             print(f"{info.brightness}")
         except Exception:
             print("OFF") # Fallback if device is unreachable
+    elif cmd == "color":
+        if len(sys.argv) > 3:
+            try:
+                h = int(sys.argv[2])
+                s = int(sys.argv[3])
+                await device.set_hue_saturation(h, s)
+            except ValueError:
+                pass
+    elif cmd == "get_color":
+        try:
+            info = await device.get_device_info()
+            print(f"{info.hue},{info.saturation}")
+        except Exception:
+            print("30,0")
     elif cmd == "status":
         try:
             info = await device.get_device_info()
             print(f"{'ON' if info.device_on else 'OFF'}")
         except Exception:
-            print("anyad") # Fallback if device is unreachable
+            print("OFF") # Fallback if device is unreachable
 
 if __name__ == "__main__":
     asyncio.run(main())

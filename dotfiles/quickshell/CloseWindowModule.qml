@@ -4,8 +4,8 @@ import Quickshell.Hyprland
 ModuleButton {
     label: ""
     variant: "danger"
-    implicitWidth: Theme.moduleHeight * 0.8
-    implicitHeight: Theme.moduleHeight * 0.7
+    implicitWidth: Math.ceil(Theme.moduleHeight * 0.8)
+    implicitHeight: Math.ceil(Theme.moduleHeight * 0.7)
 
     onClicked: Hyprland.dispatch("killactive")
     cursorShape: Qt.PointingHandCursor

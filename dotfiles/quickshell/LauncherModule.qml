@@ -146,12 +146,33 @@ ModuleButton {
                             launcherModule.expanded = false;
                         }
                     }
-                    onTextEdited: launcherModule.filterApps(text)
+                    onTextEdited: {
+                        launcherModule.filterApps(text)
+                        appList.currentIndex = -1
+                    }
                     Keys.onEscapePressed: launcherModule.expanded = false
                     Keys.onReturnPressed: {
+                        var idx = appList.currentIndex >= 0 ? appList.currentIndex : 0
                         if (launcherModule.filteredApps.length > 0) {
-                            launcherModule.filteredApps[0].execute()
+                            launcherModule.filteredApps[idx].execute()
                             launcherModule.expanded = false
+                        }
+                    }
+                    Keys.onDownPressed: {
+                        if (launcherModule.filteredApps.length > 0) {
+                            appList.currentIndex = Math.min(
+                                launcherModule.filteredApps.length - 1,
+                                appList.currentIndex + 1
+                            )
+                            appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
+                        }
+                    }
+                    Keys.onUpPressed: {
+                        if (appList.currentIndex > 0) {
+                            appList.currentIndex = appList.currentIndex - 1
+                            appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
+                        } else {
+                            appList.currentIndex = -1
                         }
                     }
                 }
@@ -187,6 +208,7 @@ ModuleButton {
                     model: launcherModule.filteredApps
                     clip: true
                     spacing: 0
+                    focus: false
                     delegate: ModuleButton {
                         required property var modelData
                         required property int index
@@ -199,6 +221,10 @@ ModuleButton {
                             modelData.execute()
                             launcherModule.expanded = false
                         }
+
+                        // Visual highlight when keyboard-selected
+                        property bool isCurrent: index === appList.currentIndex
+                        color: isCurrent ? Theme.dark.hover : "transparent"
 
                         RowLayout {
                             anchors { fill: parent; leftMargin: 10; rightMargin: 10 }

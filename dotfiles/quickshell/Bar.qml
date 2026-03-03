@@ -54,11 +54,9 @@ PanelWindow {
     // Background MouseArea to close the launcher when clicking outside of it
     MouseArea {
         anchors.fill: parent
-        enabled: launcherModule.expanded || wallpaperPicker.expanded || clipboardHistory.expanded
+        enabled: launcherModule.expanded
         onClicked: {
             launcherModule.expanded = false
-            wallpaperPicker.expanded = false
-            clipboardHistory.expanded = false
         }
         z: -1
     }
@@ -187,6 +185,14 @@ PanelWindow {
             right: monitorBrightnessModule.left
             rightMargin: Theme.moduleMarginV
             top: parent.top
+        }
+
+        Binding {
+            target: topPanel
+            property: "maskHeight"
+            value: lightSwitchModule.implicitHeight
+            when: lightSwitchModule.expanded
+            restoreMode: Binding.RestoreBindingOrValue
         }
     }
     MonitorBrightness {
