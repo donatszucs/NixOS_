@@ -24,6 +24,7 @@ ModuleButton {
         anchors.fill: parent
         propagateComposedEvents: true
         acceptedButtons: Qt.NoButton
+        cursorShape: Qt.PointingHandCursor
         
         onWheel: wheel => {
             if (wheel.angleDelta.y > 0) {

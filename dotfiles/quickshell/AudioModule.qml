@@ -100,6 +100,7 @@ ModuleButton {
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.RightButton
+                    cursorShape: Qt.PointingHandCursor
                     onWheel: wheel => {
                         if (wheel.angleDelta.y > 0)
                             volUpProc.running = true
@@ -146,7 +147,7 @@ ModuleButton {
                     
                     // 1. We expose the index of the current item
                     required property int index 
-
+                    cursorShape: Qt.PointingHandCursor
                     variant: modelData.active ? "light" : "transparentDark"
                     implicitWidth: expanded ? maxSinkBarLength + volumeButton.implicitWidth : 0
 

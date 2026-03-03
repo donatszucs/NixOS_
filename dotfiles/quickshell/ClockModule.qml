@@ -11,6 +11,8 @@ ModuleButton {
 
     Component.onCompleted: updateTime()
 
+    cursorShape: Qt.PointingHandCursor
+
     Timer {
         interval: 1000
         running: true
@@ -20,7 +22,7 @@ ModuleButton {
 
     Process {
         id: calendarProc
-        command: ["google-chrome-stable", "--app=https://calendar.google.com"]
+        command: ["zen", "--new-instance", "-P", "Calendar", "https://calendar.google.com"]
     }
 
     onClicked: calendarProc.running = true

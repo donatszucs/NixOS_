@@ -59,6 +59,7 @@ ModuleButton {
             delegate: ModuleButton {
                 id: actionButton
                 required property var modelData
+                cursorShape: Qt.PointingHandCursor
                 variant: "transparentRed"
                 implicitWidth: expanded ? 100 : 28
 

@@ -118,7 +118,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
-                spacing: 5
+                spacing: 0
                 
                 model: clipboardModel
                 
@@ -144,6 +144,7 @@ Rectangle {
                         id: itemMouseArea
                         anchors.fill: parent
                         hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             applyCliphist.targetLine = clipLine;
                             applyCliphist.running = true;
@@ -155,6 +156,7 @@ Rectangle {
             ModuleButton {
                 label: "Close"
                 Layout.alignment: Qt.AlignHCenter
+                cursorShape: Qt.PointingHandCursor
                 onClicked: clipboardPanel.expanded = false
                 radius: Theme.moduleEdgeRadius
             }

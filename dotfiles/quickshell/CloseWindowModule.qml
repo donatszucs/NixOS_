@@ -8,4 +8,5 @@ ModuleButton {
     implicitHeight: Theme.moduleHeight * 0.7
 
     onClicked: Hyprland.dispatch("killactive")
+    cursorShape: Qt.PointingHandCursor
 }

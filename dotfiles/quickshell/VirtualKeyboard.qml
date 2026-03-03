@@ -6,6 +6,7 @@ import QtQuick
 ModuleButton {
     id: virtualKbrd
     label: ""
+    cursorShape: Qt.PointingHandCursor
     implicitWidth: 30
     property bool active: false
 

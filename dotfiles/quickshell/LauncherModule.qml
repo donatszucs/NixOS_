@@ -92,6 +92,7 @@ ModuleButton {
                 Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
                 label: "  Menu "
+                cursorShape: Qt.PointingHandCursor
 
                 onClicked: {
                     if (expanded) {
@@ -114,6 +115,7 @@ ModuleButton {
                 implicitHeight: Theme.moduleHeight
                 visible: launcherModule.expanded
                 label: "󰸉  Wallpaper Picker"
+                cursorShape: Qt.PointingHandCursor
 
                 onClicked: {
                     launcherModule.expanded = false;

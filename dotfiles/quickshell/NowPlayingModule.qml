@@ -56,6 +56,7 @@ ModuleButton {
                 variant: "transparentDark"
                 id: titleBtn
                 Layout.alignment: Qt.AlignCenter
+                cursorShape: Qt.PointingHandCursor
 
                 // 2. Set your fixed width here
                 implicitWidth: expanded ? 200 : Math.min(200, scrollingText.paintedWidth + 30)
@@ -126,7 +127,8 @@ ModuleButton {
                     delegate: ModuleButton {
                         required property var modelData
                         visible: (currentPlayer && currentPlayer.canGoNext && modelData.action === "next") || (currentPlayer && currentPlayer.canPause && modelData.action === "playpause")
-
+                        cursorShape: Qt.PointingHandCursor
+                        
                         variant: "transparentDark"
                         implicitHeight: Theme.moduleHeight
                         implicitWidth: expanded ? 32 : 0

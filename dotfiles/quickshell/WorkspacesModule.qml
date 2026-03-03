@@ -46,6 +46,7 @@ ModuleButton {
                 opacity: active ? 1.0 : 0.6
                 implicitHeight: root.implicitHeight - 2 * root.overlay
                 implicitWidth: active ? 35 : 25
+                cursorShape: Qt.PointingHandCursor
                 
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
                 topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
@@ -84,6 +85,7 @@ ModuleButton {
                 opacity: active ? 1.0 : 0.6
                 implicitHeight: root.implicitHeight - 2 * root.overlay
                 implicitWidth: active ? 35 : 25
+                cursorShape: Qt.PointingHandCursor
                 
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
                 topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0

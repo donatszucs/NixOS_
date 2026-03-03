@@ -3,6 +3,7 @@ import QtQuick
 
 ModuleButton {
     id: root
+    cursorShape: Qt.PointingHandCursor
     label: SharedState.modLabel
     variant: SharedState.modVariant
     implicitWidth: 30

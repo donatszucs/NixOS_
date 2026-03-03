@@ -9,11 +9,14 @@ import Quickshell.Bluetooth
 
 ModuleButton {
     id: controlCenter
-    property bool expanded: parentHover.hovered
+    property bool expanded: false
     noHoverColorChange: true
 
     HoverHandler {
         id: parentHover
+        onHoveredChanged: {
+            if (!parentHover.hovered && expanded) expanded = false
+        }
     }
 
     // ── State ──────────────────────────────────────────────────
@@ -80,7 +83,6 @@ ModuleButton {
         anchors.centerIn: parent
         spacing: 0
 
-
         ModuleButton {
             color: "transparent"
             label: controlCenter.netIcon
@@ -90,6 +92,14 @@ ModuleButton {
             color: "transparent"
             label: controlCenter.btIcon
             textColor: controlCenter.btColor
+        }
+        
+        // Make the entire collapsed panel clickable
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: controlCenter.expanded = !controlCenter.expanded
         }
     }
 
@@ -121,6 +131,7 @@ ModuleButton {
                 ModuleButton {
                     id: netStatusIcon
                     label: controlCenter.netIcon
+                    cursorShape: Qt.PointingHandCursor
                     variant: "transparentDark"
                     textColor: controlCenter.netColor
                     textFont: 24
@@ -159,6 +170,7 @@ ModuleButton {
 
                     ModuleButton {
                         label: controlCenter.btIcon
+                        cursorShape: Qt.PointingHandCursor
                         textColor: controlCenter.btColor
                         variant: "transparentDark"
                         radius: Theme.moduleEdgeRadius

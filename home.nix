@@ -25,7 +25,19 @@
       # Not used on Hyprland, HYPRCURSOR values takes precedence
       XCURSOR_THEME = "Bibata-Modern-Ice";
       XCURSOR_SIZE = 24;
+
+      # Make Qt apps use KDE integration and prefer Breeze style
+      QT_QPA_PLATFORMTHEME = "kde";
+      QT_STYLE_OVERRIDE = "Dracula";
+
+      # Help apps detect a KDE-like desktop for choosing dark variant
+      XDG_CURRENT_DESKTOP = "KDE";
+      KDE_FULL_SESSION = "true";
     };
+
+  # Ensure GTK apps (and browsers) report dark mode
+  # Force GTK theme in the environment and write GTK settings files
+  home.sessionVariables.GTK_THEME = "Dracula";
   # Cursor Theme
   home.pointerCursor = {
       name = "Bibata-Modern-Ice"; 
@@ -36,7 +48,7 @@
       hyprcursor.enable = true;
   };
   
-  # 4. Theming (Your Dracula setup!)
+  # 4. Theming
   gtk = {
     enable = true;
     theme = {
@@ -49,12 +61,24 @@
     };
   };
 
+  # Also set the FreeDesktop/GNOME color-scheme portal preference
+  dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      color-scheme = "prefer-dark";
+    };
+  };
+
   qt = {
     enable = true;
     platformTheme.name = "kde";
     style = {
       name = "Dracula";
-      package = pkgs.dracula-theme;
     };
   };
+
+  # Write a minimal KDE config for the dark color scheme, which some Qt apps check for
+  home.file.".config/kdeglobals".text = ''
+  [General]
+  ColorScheme=Dracula
+  '';
 }

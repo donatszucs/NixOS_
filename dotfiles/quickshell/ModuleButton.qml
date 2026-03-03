@@ -38,6 +38,10 @@ Rectangle {
     // Whether to suppress the hover colour change
     property bool noHoverColorChange: false
 
+    // Cursor shape to use when hovering this button. Can be overridden by
+    // instances (e.g. `cursorShape: Qt.PointingHandCursor`). Default is arrow.
+    property int cursorShape: Qt.ArrowCursor
+
     // ── Deprecated shims (kept for compatibility) --------------------
     // Prefer setting `variant` directly in new code.
     property bool lightTheme:       false
@@ -87,6 +91,7 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: root.cursorShape
         onEntered: root.hovered = true
         onExited: root.hovered = false
         onPressed: root.pressed = true

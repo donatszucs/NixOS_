@@ -41,6 +41,7 @@ ModuleButton {
 
         ModuleButton {
             id: notificationButton
+            cursorShape: Qt.PointingHandCursor
             label: "󱊖"
             noHoverColorChange: true
             variant: "transparentDark"
@@ -79,7 +80,20 @@ ModuleButton {
 
                     Image {
                         anchors.centerIn: parent
-                        source: modelData.icon
+                        // Quickshell doesn't support the "iconName?path=..." format
+                        // that some apps (e.g. Spotify) use. Detect it and build
+                        // a direct file:// URL; fall back to the native value otherwise
+                        // so Quickshell's image provider still resolves XDG icon names.
+                        source: {
+                            var s = String(modelData.icon)
+                            var idx = s.indexOf("?path=")
+                            if (idx !== -1) {
+                                var nameOnly = s.substring(0, idx).split("/").pop()
+                                var dir = s.substring(idx + 6)
+                                return "file://" + dir + "/" + nameOnly + ".png"
+                            }
+                            return modelData.icon
+                        }
                         width: 20
                         height: 20
                         sourceSize.width: 20

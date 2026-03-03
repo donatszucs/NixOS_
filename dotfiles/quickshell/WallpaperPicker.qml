@@ -123,6 +123,7 @@ Rectangle {
                         id: itemMouseArea
                         anchors.fill: parent
                         hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             var rawPath = String(fileUrl).replace("file://", "");
                             applyProc.targetFile = rawPath;
@@ -134,6 +135,7 @@ Rectangle {
             
             ModuleButton {
                 label: "Close"
+                cursorShape: Qt.PointingHandCursor
                 Layout.alignment: Qt.AlignHCenter
                 onClicked: wallpaperPanel.expanded = false
                 radius: Theme.moduleEdgeRadius

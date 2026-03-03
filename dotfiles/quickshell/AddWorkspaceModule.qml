@@ -1,5 +1,6 @@
 // Add empty workspace button
 import Quickshell.Hyprland
+import QtQuick
 
 ModuleButton {
     label: ""
@@ -9,4 +10,5 @@ ModuleButton {
     rightMargin: 2
 
     onClicked: Hyprland.dispatch("workspace empty")
+    cursorShape: Qt.PointingHandCursor
 }
