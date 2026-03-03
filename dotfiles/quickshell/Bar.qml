@@ -69,7 +69,7 @@ PanelWindow {
         height: Theme.barHeight
         gradient: Gradient {
             orientation: Gradient.Vertical
-            GradientStop { position: 0.0; color: Qt.rgba(0.05, 0, 0.08, 0.30) }
+            GradientStop { position: 0.0; color: Qt.rgba(0.11, 0.02, 0.16, 0.42) }
             GradientStop { position: 1.0; color: "transparent" }
         }
     }

@@ -63,6 +63,7 @@ ModuleButton {
                 delegate: ModuleButton {
                     id: trayItemDelegate
                     variant: "transparentDark"
+                    noHoverColorChange: true
                     required property var modelData
                     property bool menuOpen: false
 
@@ -74,7 +75,7 @@ ModuleButton {
                         if (menuOpen) root.openMenus--
                     }
 
-                    implicitWidth: 28
+                    implicitWidth: 24
                     implicitHeight: 24
                     radius: 6
 
@@ -127,7 +128,7 @@ ModuleButton {
                             if (mouse.button === Qt.RightButton) {
                                 if (modelData.hasMenu && root.parentWindow !== null) {
                                     // Map the icon's local coordinates to the main scene (window)
-                                    let mapped = trayItemDelegate.mapToItem(null, 0, 25)
+                                    let mapped = trayItemDelegate.mapToItem(null, 0, 30)
                                     menuAnchor.anchor.rect.x = mapped.x
                                     menuAnchor.anchor.rect.y = mapped.y
                                     

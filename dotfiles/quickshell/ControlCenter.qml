@@ -10,7 +10,7 @@ import Quickshell.Bluetooth
 ModuleButton {
     id: controlCenter
     property bool expanded: false
-    noHoverColorChange: true
+    noHoverColorChange: expanded ? true : false
 
     HoverHandler {
         id: parentHover
@@ -260,7 +260,7 @@ ModuleButton {
                 if (line === "") {
                     controlCenter.netName  = "Disconnected"
                     controlCenter.netState = "disconnected"
-                    controlCenter.netIcon  = "󰤭"
+                    controlCenter.netIcon  = "󰈂"
                     controlCenter.netColor = "#e09090"
                     return
                 }
