@@ -222,9 +222,13 @@ ModuleButton {
                             launcherModule.expanded = false
                         }
 
-                        // Visual highlight when keyboard-selected
+                        // Visual highlight when keyboard-selected or mouse-hovered
                         property bool isCurrent: index === appList.currentIndex
                         color: isCurrent ? Theme.dark.hover : "transparent"
+
+                        HoverHandler {
+                            onHoveredChanged: if (hovered) appList.currentIndex = index
+                        }
 
                         RowLayout {
                             anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
