@@ -40,16 +40,25 @@ PanelWindow {
             width: wallpaperPicker.implicitWidth
             height: wallpaperPicker.implicitHeight + (Theme.moduleEdgeRadius * 2)
         }
+
+        // Clipboard History interaction region (left edge)
+        Region {
+            x: 0
+            y: clipboardHistory.y - Theme.moduleEdgeRadius
+            width: clipboardHistory.implicitWidth
+            height: clipboardHistory.implicitHeight + (Theme.moduleEdgeRadius * 2)
+        }
     }
     color: "transparent"
 
     // Background MouseArea to close the launcher when clicking outside of it
     MouseArea {
         anchors.fill: parent
-        enabled: launcherModule.expanded || wallpaperPicker.expanded
+        enabled: launcherModule.expanded || wallpaperPicker.expanded || clipboardHistory.expanded
         onClicked: {
             launcherModule.expanded = false
             wallpaperPicker.expanded = false
+            clipboardHistory.expanded = false
         }
         z: -1
     }
@@ -303,6 +312,38 @@ PanelWindow {
             right: wallpaperPicker.right
         }
         visible: wallpaperPicker.implicitWidth > 1
+    }
+
+    InverseRadius {
+        cornerPosition: "bottomLeft"
+        color: Theme.dark.base
+        opacity: clipboardHistory.implicitWidth / clipboardHistory.targetWidth * Theme.moduleOpacity
+        anchors {
+            bottom: clipboardHistory.top
+            left: clipboardHistory.left
+        }
+        visible: clipboardHistory.implicitWidth > 1
+    }
+
+    ClipboardHistory {
+        id: clipboardHistory
+        screenName: modelData.name
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.left
+            leftMargin: Theme.moduleEdgeMarginV
+        }
+    }
+
+    InverseRadius {
+        cornerPosition: "topLeft"
+        color: Theme.dark.base
+        opacity: clipboardHistory.implicitWidth / clipboardHistory.targetWidth * Theme.moduleOpacity
+        anchors {
+            top: clipboardHistory.bottom
+            left: clipboardHistory.left
+        }
+        visible: clipboardHistory.implicitWidth > 1
     }
 
     // Invisible spacer window — its sole job is to reserve barHeight so that

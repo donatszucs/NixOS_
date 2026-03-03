@@ -20,10 +20,13 @@ ModuleButton {
     readonly property var monitorWorkspaces: {
         var all = Hyprland.workspaces.values
         var out = []
+        var others = []
         for (var i = 0; i < all.length; i++)
             if (all[i].monitor && all[i].monitor.name === screenName)
                 out.push(all[i])
-        return out
+            else 
+                others.push(all[i])
+        return { workspaces: out, others: others }
     }
 
     implicitWidth: workspacesRow.implicitWidth + 2 * overlay
@@ -34,7 +37,7 @@ ModuleButton {
         spacing: 0
 
         Repeater {
-            model: root.monitorWorkspaces
+            model: root.monitorWorkspaces.workspaces
 
             delegate: ModuleButton {
                 required property var modelData
@@ -47,8 +50,46 @@ ModuleButton {
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
                 topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
                 bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
-                topRightRadius: index === root.monitorWorkspaces.length - 1 ? Theme.moduleEdgeRadius : 0
-                bottomRightRadius: index === root.monitorWorkspaces.length - 1 ? Theme.moduleEdgeRadius : 0
+                topRightRadius: index === root.monitorWorkspaces.workspaces.length - 1 ? Theme.moduleEdgeRadius : 0
+                bottomRightRadius: index === root.monitorWorkspaces.workspaces.length - 1 ? Theme.moduleEdgeRadius : 0
+
+                readonly property bool active:
+                    Hyprland.focusedMonitor !== null &&
+                    Hyprland.focusedMonitor.activeWorkspace !== null &&
+                    Hyprland.focusedMonitor.activeWorkspace.id === modelData.id
+
+                label: modelData.name
+
+                onClicked: Hyprland.dispatch("workspace " + modelData.id)
+
+                Behavior on implicitWidth {
+                    NumberAnimation { duration: 80; easing.type: Easing.OutCubic }
+                }
+            }
+        }
+        // Spacer between "my" workspaces and the others (if any)
+        Rectangle {
+            width: root.overlay
+            height: 1
+            color: "transparent"
+        }
+
+        Repeater {
+            model: root.monitorWorkspaces.others
+
+            delegate: ModuleButton {
+                required property var modelData
+                required property int index
+                variant: "light"
+                opacity: active ? 1.0 : 0.6
+                implicitHeight: root.implicitHeight - 2 * root.overlay
+                implicitWidth: active ? 35 : 25
+                
+                // Apply the parent's radius ONLY if this is the absolute last item in the list!
+                topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
+                bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
+                topRightRadius: index === root.monitorWorkspaces.others.length - 1 ? Theme.moduleEdgeRadius : 0
+                bottomRightRadius: index === root.monitorWorkspaces.others.length - 1 ? Theme.moduleEdgeRadius : 0
 
                 readonly property bool active:
                     Hyprland.focusedMonitor !== null &&

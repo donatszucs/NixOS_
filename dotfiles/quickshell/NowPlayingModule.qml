@@ -61,6 +61,8 @@ ModuleButton {
                 implicitWidth: expanded ? 200 : Math.min(200, scrollingText.paintedWidth + 30)
                 onClicked: focusNow()
 
+                bottomRightRadius: expanded ? 0 : Theme.moduleEdgeRadius
+
                 // 3. Make the container a direct child (no contentItem:)
                 Item {
                     id: textContainer
@@ -171,8 +173,8 @@ ModuleButton {
                     
                     // 2. Calculate the height dynamically using the image's source dimensions
                     // Formula: Height = Width * (Original Height / Original Width)
-                    height: albumArt.sourceSize.width > 0 
-                            ? (width * (albumArt.sourceSize.height / albumArt.sourceSize.width)) 
+                    height: albumArt.implicitWidth > 0 
+                            ? (width * (albumArt.implicitHeight / albumArt.implicitWidth)) 
                             : width // Fallback: makes it a perfect square before the image finishes loading
 
                     Image {
@@ -182,6 +184,8 @@ ModuleButton {
                         // PreserveAspectFit or Stretch will both work perfectly without cutting anything off.
                         fillMode: Image.PreserveAspectFit
                         source: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
+                        // Prevent constant re-decoding by using a fixed max size or just implicit sizing
+                        sourceSize.width: 200
                         visible: false 
                     }
 
@@ -281,7 +285,8 @@ ModuleButton {
     function focusNow() {
         if (!currentPlayer) return
         var id = currentPlayer.identity.toLowerCase().trim()
-        var cls = (id.match(/chromium|chrome/)) ? "google-chrome" : id
+        console.log("Focusing player with identity:", id)
+        var cls = (id.match(/mozilla zen/)) ? "zen" : id
         focusProc.command = ["bash", "-c", "hyprctl dispatch focuswindow class:" + cls]
         console.log("Running focus command:", focusProc.command)
         focusProc.running = true
