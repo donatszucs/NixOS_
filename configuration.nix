@@ -7,7 +7,7 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      /home/doni/nixos-config/hardware-configuration.nix
+      /etc/nixos/hardware-configuration.nix
       inputs.home-manager.nixosModules.default
     ];
 
@@ -248,7 +248,7 @@
   # -- Applications --
   vscode            
   google-chrome
-  inputs.zen-browser.packages."${pkgs.system}".default
+  inputs.zen-browser.packages."${builtins.currentSystem}".default
   spotify
   pkgs.vesktop
   qalculate-gtk
@@ -279,6 +279,9 @@
   # -- Task Management --
   btop              # The cool terminal one
   mission-center    # The Windows-style GUI one
+
+  # -- Headset Control --
+  hidapi            # HID access library (needed for HyperX Cloud II Wireless script)
   ];
 
   fonts = {
@@ -296,6 +299,11 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
+
+  # udev rule for HyperX Cloud II Wireless 0x03f0:0x018b
+  services.udev.extraRules = ''
+    SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03f0", ATTRS{idProduct}=="018b", MODE="0666"
+  '';
 
   # List services that you want to enable:
 

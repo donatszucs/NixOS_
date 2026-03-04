@@ -70,9 +70,6 @@ echo -e "\n[3/3] Making scripts executable..."
 find "$SCRIPT_DIR/scripts" -type f -name "*.sh" -exec chmod +x {} \;
 echo "🔧 Scripts in $SCRIPT_DIR/scripts are now executable."
 
-find "$DOTFILES_DIR/waybar/scripts" -type f -name "*.sh" -exec chmod +x {} \;
-echo "🔧 Scripts in $DOTFILES_DIR/waybar/scripts are now executable."
-
 chmod +x "$SCRIPT_DIR/link_dotfiles.sh"
 echo "🔧 $SCRIPT_DIR/link_dotfiles.sh is now executable."
 

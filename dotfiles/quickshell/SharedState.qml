@@ -83,7 +83,7 @@ Item {
     property int lightBrightness: 100
     property int lightHue: 30
     property int lightSaturation: 0
-    property string tapoScriptPath: "~/nixos-config/scripts/TapoLight/.venv/bin/python ~/nixos-config/scripts/TapoLight/tapo_control.py"
+    property string tapoScriptPath: "~/nixos-config/scripts/scriptsEnv/.venv/bin/python ~/nixos-config/scripts/TapoLight/tapo_control.py"
 
     function refreshLightStatus() {
         lightStatusProc.running = true

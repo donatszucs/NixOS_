@@ -33,6 +33,12 @@ ModuleButton {
     // 1. The master boolean that controls your icon
     property bool btDevicesConnected: false
 
+    // Headset battery
+    property bool headsetBatteryAvailable: false
+    property int  headsetBatteryPercent: -1
+    property string headsetBatteryState: "unknown"
+    property string headsetBatteryLabel: headsetBatteryPercent >= 0 ? ( "HyprX Cloud II: " + headsetBatteryPercent + "%") : "—"
+
     // 2. The function that checks if ANY device in our invisible list is connected
     function updateBtStatus() {
         let anyConnected = false;
@@ -110,7 +116,7 @@ ModuleButton {
         noHoverColorChange: true
         color: "transparent"
 
-        implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth) + 20
+        implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth) + 20
         implicitHeight: popupCol.implicitHeight + 20
 
         ColumnLayout {
@@ -119,9 +125,36 @@ ModuleButton {
                 left:    parent.left
                 right:   parent.right
                 top:     parent.top
-                margins: 10
+                leftMargin: 10
+                rightMargin: 10
+                topMargin: 0
+                bottomMargin: 0
             }
             spacing: 8
+
+            Rectangle {
+                visible: controlCenter.expanded
+                implicitWidth: parent.width
+                implicitHeight: Theme.moduleHeight
+                color: "transparent"
+                Text {
+                    anchors.centerIn: parent
+                    text: "Control Center"
+                    color: Theme.textPrimary
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize + 1
+                    font.bold: true
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onPressed: mouse => {
+                        controlCenter.expanded = false
+                    }
+                }
+
+            }
 
             // ── Network ──────────────────────────────────
             RowLayout {
@@ -223,7 +256,7 @@ ModuleButton {
                         model: controlCenter.btDevices ? controlCenter.btDevices : []
                         delegate: ModuleButton {
                             required property var modelData
-                            label: modelData.batteryAvailable ? modelData.name + " (" + modelData.battery * 100 + "%)" : modelData.name
+                            label: modelData.batteryAvailable ? modelData.name + ": " + modelData.battery * 100 + "%" : modelData.name
                             color: "transparent"
                             textColor: Theme.textPrimary
                             visible: modelData && modelData.connected === true
@@ -234,6 +267,40 @@ ModuleButton {
                         visible: !controlCenter.btDevicesConnected
                         label: controlCenter.btPowered ? "No devices" : "disabled"
                         color: "transparent"
+                    }
+                }
+            }
+
+            Rectangle { Layout.fillWidth: true; height: 5; color: Qt.rgba(1,1,1,0.08); radius: Theme.moduleEdgeRadius }
+
+            // ── Headset ──────────────────────────────────
+            RowLayout {
+                id: headsetRow
+                spacing: 0
+
+                ModuleButton {
+                    label: ""
+                    textColor: controlCenter.headsetBatteryAvailable ? (controlCenter.headsetBatteryPercent > 20 ? "#a0e0a0" : "#e09090") : Theme.textPrimary
+                    cursorShape: Qt.PointingHandCursor
+                    variant: "transparentDark"
+                    textFont: 24
+                    rightMargin: 6
+                    implicitWidth: textFont * 2
+                    radius: Theme.moduleEdgeRadius
+                    onClicked: headsetProc.running = true
+                }
+                
+                ColumnLayout {
+                    spacing: 0
+                    ModuleButton {
+                        color: "transparent"
+                        textColor: Theme.textPrimary
+                        label: controlCenter.headsetBatteryLabel
+                    }
+                    ModuleButton {
+                        color: "transparent"
+                        textColor: Theme.textPrimary
+                        label: controlCenter.headsetBatteryState
                     }
                 }
             }
@@ -293,5 +360,43 @@ ModuleButton {
         id: btOpen
         // Try blueman-manager first, fall back to gnome control center bluetooth
         command: ["bash", "-c", "blueman-manager || gnome-control-center bluetooth || true"]
+    }
+
+    // Headset battery probe (calls wrapper script)
+    Process {
+        id: headsetProc
+        command: ["bash", "-c", "~/nixos-config/scripts/HyprHeadset/headset-battery 2>/dev/null || true"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var line = text.trim()
+                if (line === "") {
+                    controlCenter.headsetBatteryAvailable = false
+                    controlCenter.headsetBatteryPercent = -1
+                    controlCenter.headsetBatteryState = "unknown"
+                    return
+                }
+                // Expected: "Battery: 45%  (Charging)"
+                var re = /Battery:\s*(\d+)%\s*\(([^)]+)\)/
+                var m = re.exec(line)
+                if (m) {
+                    controlCenter.headsetBatteryAvailable = true
+                    controlCenter.headsetBatteryPercent = parseInt(m[1])
+                    controlCenter.headsetBatteryState = m[2]
+                } else {
+                    controlCenter.headsetBatteryAvailable = false
+                    controlCenter.headsetBatteryPercent = -1
+                    controlCenter.headsetBatteryState = line
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: headsetTimer
+        interval: 10000
+        running: true
+        repeat: true
+        onTriggered: headsetProc.running = true
     }
 }

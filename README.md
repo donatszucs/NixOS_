@@ -12,8 +12,6 @@ Notes:
 
 SuperMouse preset needs to be added in Input Remapper
 
-Tapo light setup:
+Python scripts setup:
 
-    - uv init, add tapo/python-dotenv
-
-    - .env in the scripts folder with the variables
+    - In scripts folder: uv init scriptsEnv
