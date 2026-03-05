@@ -22,7 +22,7 @@ PanelWindow {
     }
     // No space reservation here — handled by the spacer window below
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.keyboardFocus: launcherModule.expanded ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: (launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
 
     mask: Region {
@@ -88,6 +88,14 @@ PanelWindow {
             y: 0
             width: powerModule.implicitWidth
             height: powerModule.implicitHeight
+        }
+
+        // RbwMenu expanded region (drops below bar from center)
+        Region {
+            x: rbwMenu.x
+            y: rbwMenu.y
+            width: rbwMenu.implicitWidth
+            height: rbwMenu.implicitHeight
         }
     }
     color: "transparent"
@@ -230,7 +238,7 @@ PanelWindow {
             cornerPosition: "topRight"
             color: lightSwitchModule.color
         }
-        LightSwitch {
+        LightSwitchModule {
             Layout.alignment: Qt.AlignTop
             id: lightSwitchModule
             bottomLeftRadius: Theme.moduleEdgeRadius
@@ -240,12 +248,12 @@ PanelWindow {
             rightColor: monitorBrightnessModule.color
             rightExpanded: lightSwitchModule.expanded
         }
-        MonitorBrightness {
+        MonitorBrightnessModule {
             Layout.alignment: Qt.AlignTop
             screenName: modelData.name
             id: monitorBrightnessModule
         }
-        VirtualKeyboard {
+        VirtualKeyboardModule {
             Layout.alignment: Qt.AlignTop
             id: virtualKeyboardModule
 
@@ -272,7 +280,7 @@ PanelWindow {
             rightColor: audioModule.color
             rightExpanded: audioModule.expanded
         }
-        ControlCenter {
+        ControlCenterModule {
             Layout.alignment: Qt.AlignTop
             id: controlCenterModule
         }
@@ -281,7 +289,7 @@ PanelWindow {
             rightColor: controlCenterModule.color
             rightExpanded: controlCenterModule.expanded
         }
-        Tray {
+        TrayModule {
             Layout.alignment: Qt.AlignTop
             id: trayModule
             parentWindow: topPanel 
@@ -304,16 +312,6 @@ PanelWindow {
     }
 
     // ── OTHER MODULES ────────────────────────────────────────────────────────────
-    InverseRadius {
-        cornerPosition: "bottomRight"
-        color: Theme.dark.base
-        opacity: wallpaperPicker.implicitWidth / wallpaperPicker.targetWidth * Theme.moduleOpacity
-        anchors {
-            bottom: wallpaperPicker.top
-            right: wallpaperPicker.right
-        }
-        visible: wallpaperPicker.implicitWidth > 1
-    }
 
     WallpaperPicker {
         id: wallpaperPicker
@@ -322,28 +320,6 @@ PanelWindow {
             right: parent.right
             rightMargin: Theme.moduleEdgeMarginV
         }
-    }
-
-    InverseRadius {
-        cornerPosition: "topRight"
-        color: Theme.dark.base
-        opacity: wallpaperPicker.implicitWidth / wallpaperPicker.targetWidth * Theme.moduleOpacity
-        anchors {
-            top: wallpaperPicker.bottom
-            right: wallpaperPicker.right
-        }
-        visible: wallpaperPicker.implicitWidth > 1
-    }
-
-    InverseRadius {
-        cornerPosition: "bottomLeft"
-        color: Theme.dark.base
-        opacity: clipboardHistory.implicitWidth / clipboardHistory.targetWidth * Theme.moduleOpacity
-        anchors {
-            bottom: clipboardHistory.top
-            left: clipboardHistory.left
-        }
-        visible: clipboardHistory.implicitWidth > 1
     }
 
     ClipboardHistory {
@@ -356,15 +332,13 @@ PanelWindow {
         }
     }
 
-    InverseRadius {
-        cornerPosition: "topLeft"
-        color: Theme.dark.base
-        opacity: clipboardHistory.implicitWidth / clipboardHistory.targetWidth * Theme.moduleOpacity
+    RbwMenu {
+        id: rbwMenu
+        screenName: modelData.name
         anchors {
-            top: clipboardHistory.bottom
-            left: clipboardHistory.left
+            bottom: parent.bottom
+            horizontalCenter: parent.horizontalCenter
         }
-        visible: clipboardHistory.implicitWidth > 1
     }
 
     // Invisible spacer window — its sole job is to reserve barHeight so that

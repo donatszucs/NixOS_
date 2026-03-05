@@ -13,6 +13,8 @@ Rectangle {
     property real targetWidth: 400
     property real targetHeight: 650
     property bool expanded: false
+    property int selectedIndex: -1
+    focus: expanded
     property string screenName: ""
     
     color: "transparent"
@@ -44,6 +46,8 @@ Rectangle {
         }
         onExited: {
             clipboardPanel.expanded = true;
+            clipboardPanel.selectedIndex = clipboardModel.count > 0 ? 0 : -1;
+            list.currentIndex = clipboardPanel.selectedIndex;
         }
     }
 
@@ -54,6 +58,7 @@ Rectangle {
         command: ["bash", "-c", "printf '%s\\n' \"$0\" | cliphist decode | wl-copy", targetLine]
         onExited: {
             clipboardPanel.expanded = false;
+            clipboardPanel.selectedIndex = -1;
         }
     }
 
@@ -77,7 +82,35 @@ Rectangle {
             }
         }
     }
-    
+
+    Keys.onPressed: {
+        if (!expanded) return;
+        if (clipboardModel.count === 0) return;
+        if (event.key === Qt.Key_Down) {
+            if (clipboardPanel.selectedIndex < clipboardModel.count - 1) clipboardPanel.selectedIndex++;
+            else clipboardPanel.selectedIndex = 0;
+            list.currentIndex = clipboardPanel.selectedIndex;
+            list.positionViewAtIndex(clipboardPanel.selectedIndex, ListView.Visible);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Up) {
+            if (clipboardPanel.selectedIndex > 0) clipboardPanel.selectedIndex--;
+            else clipboardPanel.selectedIndex = clipboardModel.count - 1;
+            list.currentIndex = clipboardPanel.selectedIndex;
+            list.positionViewAtIndex(clipboardPanel.selectedIndex, ListView.Visible);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            var item = clipboardModel.get(clipboardPanel.selectedIndex);
+            if (item) {
+                applyCliphist.targetLine = item.clipLine;
+                applyCliphist.running = true;
+            }
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Escape) {
+            clipboardPanel.expanded = false;
+            event.accepted = true;
+        }
+    }
+
     Rectangle {
         id: containerRect
         // Anchor to the left, so it slides out
@@ -127,7 +160,7 @@ Rectangle {
                 delegate: Rectangle {
                     width: list.width
                     height: 50
-                    color: itemMouseArea.containsMouse ? Theme.dark.hover : Theme.dark.base
+                    color: index === clipboardPanel.selectedIndex ? Theme.dark.hover : Theme.dark.base
                     radius: Theme.moduleEdgeRadius
                     
                     Text {
@@ -147,6 +180,7 @@ Rectangle {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
+                        onEntered: clipboardPanel.selectedIndex = index;
                         onClicked: {
                             applyCliphist.targetLine = clipLine;
                             applyCliphist.running = true;

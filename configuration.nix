@@ -244,7 +244,10 @@
   jq               # Command-line JSON processor
   quickshell        # A quick launcher for commands and scripts (like Rofi but for CLI)
   baobab             # Disk usage analyzer
-
+  wtype             # CLI keyboard input tool
+  rbw               # CLI password manager
+  pinentry-qt     # Qt5 pinentry for rbw
+  
   # -- Applications --
   vscode            
   google-chrome
