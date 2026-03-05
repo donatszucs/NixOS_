@@ -4,6 +4,8 @@ import QtQuick.Layouts
 import Quickshell.Io
 import Quickshell.Services.Pipewire
 
+import "../elements"
+
 ModuleButton {
     id: audioModule
     variant: "dark"
@@ -61,7 +63,7 @@ ModuleButton {
     implicitWidth: expanded ? (maxSinkBarLength + volumeButton.implicitWidth) : volumeButton.implicitWidth
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }
 
     Behavior on implicitHeight {
@@ -70,8 +72,6 @@ ModuleButton {
     ColumnLayout {
         id: baseColumn
         spacing: 0
-
-
 
         anchors {
             right: parent.right
@@ -85,17 +85,17 @@ ModuleButton {
             ModuleButton {
                 id: volumeButton
                 label: "100% "
-                variant: "transparentDark"
+                variant: expanded ? "dark" : "transparentDark"
                 textAlign: "right"
-                rightMargin: 14
+                rightMargin: Theme.modulePaddingH + 4
+
+                bottomRightRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
 
                 function refresh() {
                     volProc.running = true
                 }
 
-                onClicked: {
-                    expanded = !expanded
-                }
+                onClicked: expanded = !expanded
 
                 MouseArea {
                     anchors.fill: parent
@@ -107,24 +107,18 @@ ModuleButton {
                         else
                             volDownProc.running = true
                     }
-                    onPressed: mouse => {
-                        if (mouse.button === Qt.RightButton) pavu.running = true
-                    }
                 }
             }
-            Rectangle {
+            ModuleButton {
                 visible: expanded
                 implicitWidth: expanded ? maxSinkBarLength : 0
                 implicitHeight: Theme.moduleHeight
-                color: "transparent"
-                Text {
-                    anchors.centerIn: parent
-                    text: "Output Devices:"
-                    color: Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize + 1
-                    font.bold: true
-                }
+                bottomLeftRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
+
+                cursorShape: Qt.PointingHandCursor
+                onClicked: pavu.running = true
+
+                label: "Audio Center"
 
             }
         }
@@ -187,11 +181,11 @@ ModuleButton {
                     if (isNaN(v)) return
 
                     if (v === 0) {
-                        volumeButton.label = v + "%  "
+                        volumeButton.label = v + "% "
                     } else if (v > 0 && v < 50) {
-                        volumeButton.label = v + "%  "
+                        volumeButton.label = v + "% "
                     } else {
-                        volumeButton.label = v + "%  "
+                        volumeButton.label = v + "% "
                     }
                 }
             }

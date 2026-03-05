@@ -1,6 +1,8 @@
 // Close active window button
 import Quickshell.Hyprland
 
+import "../elements"
+
 ModuleButton {
     label: ""
     variant: "danger"

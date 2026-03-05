@@ -3,6 +3,10 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Layouts
 
+import "./modules"
+import "./elements"
+import "./apps"
+
 PanelWindow {
     id: topPanel
 
@@ -20,9 +24,6 @@ PanelWindow {
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
     WlrLayershell.keyboardFocus: launcherModule.expanded ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-    // Modules write to this to extend the input region downward when they expand.
-    // Use Math.max so multiple modules can contribute independently.
-    property real maskHeight: Theme.barHeight
 
     mask: Region {
         // Bar interaction region (top edge)
@@ -30,13 +31,13 @@ PanelWindow {
             x: 0
             y: 0
             width: topPanel.width
-            height: topPanel.maskHeight
+            height: topPanel.Theme.barHeight
         }
-        
+
         // Wallpaper Picker interaction region (side edge)
         Region {
             x: topPanel.width - wallpaperPicker.implicitWidth
-            y: wallpaperPicker.y - Theme.moduleEdgeRadius 
+            y: wallpaperPicker.y - Theme.moduleEdgeRadius
             width: wallpaperPicker.implicitWidth
             height: wallpaperPicker.implicitHeight + (Theme.moduleEdgeRadius * 2)
         }
@@ -47,6 +48,46 @@ PanelWindow {
             y: clipboardHistory.y - Theme.moduleEdgeRadius
             width: clipboardHistory.implicitWidth
             height: clipboardHistory.implicitHeight + (Theme.moduleEdgeRadius * 2)
+        }
+
+        // Launcher expanded region (full screen when open)
+        Region {
+            x: leftRow.x + launcherModule.x
+            y: 0
+            width: launcherModule.implicitWidth
+            height: launcherModule.implicitHeight
+        }
+
+        // LightSwitch expanded region
+        Region {
+            x: rightRow.x + lightSwitchModule.x
+            y: 0
+            width: lightSwitchModule.implicitWidth
+            height: lightSwitchModule.implicitHeight
+        }
+
+        // Audio Module expanded region
+        Region {
+            x: rightRow.x + audioModule.x
+            y: 0
+            width: audioModule.implicitWidth
+            height: audioModule.implicitHeight
+        }
+
+        // Control Center expanded region
+        Region {
+            x: rightRow.x + controlCenterModule.x
+            y: 0
+            width: controlCenterModule.implicitWidth
+            height: controlCenterModule.implicitHeight
+        }
+
+        // Power Module expanded region
+        Region {
+            x: rightRow.x + powerModule.x
+            y: 0
+            width: powerModule.implicitWidth
+            height: powerModule.implicitHeight
         }
     }
     color: "transparent"
@@ -73,64 +114,70 @@ PanelWindow {
     }
 
     // ── LEFT ─────────────────────────────────────────────────────────────
-    InverseRadius {
-        cornerPosition: "topLeft"
-        color: clockModule.color
-        anchors {
-            top: clockModule.bottom
-            left: clockModule.left
-        }
-    }
-    ClockModule {
-        id: clockModule
+    RowLayout {
+        id: leftRow
         anchors {
             left: parent.left
-            leftMargin: Theme.moduleEdgeMarginV
             top: parent.top
         }
-    }
-    LauncherModule {
-        id: launcherModule
-        screenName: modelData.name
-        anchors {
-            left: clockModule.right
-            leftMargin: Theme.moduleMarginV
-            top: parent.top
-        }
+        spacing: 0
 
-        Binding {
-            target: topPanel
-            property: "maskHeight"
-            value: topPanel.height
-            when: launcherModule.expanded
-            restoreMode: Binding.RestoreBindingOrValue
+        ModuleGap {
+            Layout.alignment: Qt.AlignTop
+            rightColor: clockModule.color
         }
-    }
-    NowPlayingModule {
-        id: nowPlayingModule
+        ClockModule {
+            Layout.alignment: Qt.AlignTop
+            id: clockModule
+        }
+        ModuleGap {
+            Layout.alignment: Qt.AlignTop
+            leftColor: launcherModule.color
+            leftExpanded: launcherModule.expanded
+        }
+        LauncherModule {
+            Layout.alignment: Qt.AlignTop
+            id: launcherModule
+            screenName: modelData.name
+        }
+        ModuleGap {
+            Layout.alignment: Qt.AlignTop
 
-        bottomRightRadius: Theme.moduleEdgeRadius
-        anchors {
-            left: launcherModule.right
-            leftMargin: Theme.moduleMarginV
-            top: parent.top
+            rightColor: launcherModule.color
+            rightExpanded: launcherModule.expanded
+
+            leftColor: nowPlayingModule.color
+            leftExpanded: nowPlayingModule.expanded
+
+            Rectangle {
+                anchors.fill: parent
+                opacity: Theme.moduleOpacity
+                color: Theme.palette("dark").base
+            }
+
+            Behavior on implicitWidth {
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
+            implicitWidth: launcherModule.expanded && nowPlayingModule.expanded ? Theme.moduleEdgeRadius * 2 : 0
         }
-    }
-    InverseRadius {
-        cornerPosition: "topLeft"
-        color: nowPlayingModule.color
-        anchors {
-            left: nowPlayingModule.right
-            top: parent.top
+        NowPlayingModule {
+            Layout.alignment: Qt.AlignTop
+            id: nowPlayingModule
+            bottomRightRadius: Theme.moduleEdgeRadius
+        }
+        InverseRadius {
+            Layout.alignment: Qt.AlignTop
+            cornerPosition: "topLeft"
+            color: nowPlayingModule.color
         }
     }
 
     // ── CENTER ───────────────────────────────────────────────────────────
     CloseWindowModule {
-        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 - 2
+        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 
         radius: Theme.moduleEdgeRadius
         anchors {
-                rightMargin: Theme.moduleEdgeMarginV + 2
+                rightMargin: Theme.moduleEdgeMarginV + 4
                 right: workspacesModule.left
             top: parent.top
         }
@@ -159,135 +206,104 @@ PanelWindow {
         }
     }
     AddWorkspaceModule {
-        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 - 2
+        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2
         radius: Theme.moduleEdgeRadius
         id: addWorkspaceModule
         anchors {
                 left: workspacesModule.right
-                leftMargin: Theme.moduleEdgeMarginV + 2
+                leftMargin: Theme.moduleEdgeMarginV + 4
             top: parent.top
         }
     }
 
     // ── RIGHT ────────────────────────────────────────────────────────────
-    InverseRadius {
-        cornerPosition: "topRight"
-        color: lightSwitchModule.color
+    RowLayout {
+        id: rightRow
         anchors {
-            right: lightSwitchModule.left
-            top: parent.top
-        }
-    }
-    LightSwitch {
-        id: lightSwitchModule
-        bottomLeftRadius: Theme.moduleEdgeRadius
-        anchors {
-            right: monitorBrightnessModule.left
-            rightMargin: Theme.moduleMarginV
-            top: parent.top
-        }
-
-        Binding {
-            target: topPanel
-            property: "maskHeight"
-            value: lightSwitchModule.implicitHeight
-            when: lightSwitchModule.expanded
-            restoreMode: Binding.RestoreBindingOrValue
-        }
-    }
-    MonitorBrightness {
-        screenName: modelData.name
-        id: monitorBrightnessModule
-        anchors {
-            right: virtualKeyboardModule.left
-            rightMargin: Theme.moduleMarginV
-            top: parent.top
-        }
-    }
-    VirtualKeyboard {
-        id: virtualKeyboardModule
-        anchors {
-            right: modSwitcherModule.left
-            rightMargin: Theme.moduleMarginV
-            top: parent.top
-        }
-    }
-    ModSwitcherModule {
-        id: modSwitcherModule
-        anchors {
-            right: audioModule.left
-            rightMargin: Theme.moduleMarginV
-            top: parent.top
-        }
-    }
-    AudioModule {
-        id: audioModule
-        anchors {
-            right: controlCenterModule.left
-            rightMargin: Theme.moduleMarginV
-            top: parent.top
-        }
-
-        Binding {
-            target: topPanel
-            property: "maskHeight"
-            value: audioModule.implicitHeight
-            when: audioModule.expanded
-            restoreMode: Binding.RestoreBindingOrValue
-        }
-    }
-    ControlCenter {
-        id: controlCenterModule
-        anchors {
-            right: trayModule.left
-            rightMargin: Theme.moduleMarginV
-            top: parent.top
-        }
-
-        Binding {
-            target: topPanel
-            property: "maskHeight"
-            value: controlCenterModule.implicitHeight
-            when: controlCenterModule.expanded
-            restoreMode: Binding.RestoreBindingOrValue
-        }
-    }
-    Tray { 
-        id: trayModule
-        parentWindow: topPanel 
-        anchors {
-            right: powerModule.left
-            rightMargin: Theme.moduleMarginV
-            top: parent.top
-        }
-    }
-    
-    PowerModule {
-        id: powerModule
-        anchors {
-            rightMargin: Theme.moduleEdgeMarginV
             right: parent.right
             top: parent.top
         }
+        spacing: 0
 
-        Binding {
-            target: topPanel
-            property: "maskHeight"
-            value: powerModule.implicitHeight
-            when: powerModule.expanded
-            restoreMode: Binding.RestoreBindingOrValue
+        InverseRadius {
+            Layout.alignment: Qt.AlignTop
+            cornerPosition: "topRight"
+            color: lightSwitchModule.color
+        }
+        LightSwitch {
+            Layout.alignment: Qt.AlignTop
+            id: lightSwitchModule
+            bottomLeftRadius: Theme.moduleEdgeRadius
+        }
+        ModuleGap {
+            Layout.alignment: Qt.AlignTop
+            rightColor: monitorBrightnessModule.color
+            rightExpanded: lightSwitchModule.expanded
+        }
+        MonitorBrightness {
+            Layout.alignment: Qt.AlignTop
+            screenName: modelData.name
+            id: monitorBrightnessModule
+        }
+        VirtualKeyboard {
+            Layout.alignment: Qt.AlignTop
+            id: virtualKeyboardModule
+
+        }
+        ModSwitcherModule {
+            Layout.alignment: Qt.AlignTop
+            id: modSwitcherModule
+        }
+        ModuleGap {
+            Layout.alignment: Qt.AlignTop
+            leftColor: modSwitcherModule.color
+            leftExpanded: audioModule.expanded
+        }
+        AudioModule {
+            Layout.alignment: Qt.AlignTop
+            id: audioModule
+        }
+        ModuleGap {
+            Layout.alignment: Qt.AlignTop
+
+            leftColor: controlCenterModule.color
+            leftExpanded: controlCenterModule.expanded
+
+            rightColor: audioModule.color
+            rightExpanded: audioModule.expanded
+        }
+        ControlCenter {
+            Layout.alignment: Qt.AlignTop
+            id: controlCenterModule
+        }
+        ModuleGap {
+            Layout.alignment: Qt.AlignTop
+            rightColor: controlCenterModule.color
+            rightExpanded: controlCenterModule.expanded
+        }
+        Tray {
+            Layout.alignment: Qt.AlignTop
+            id: trayModule
+            parentWindow: topPanel 
+        }
+        ModuleGap {
+            Layout.alignment: Qt.AlignTop
+            leftColor: trayModule.color
+            leftExpanded: powerModule.expanded
+        }
+        PowerModule {
+            Layout.alignment: Qt.AlignTop
+            id: powerModule
+        }
+        ModuleGap {
+            Layout.alignment: Qt.AlignTop
+            leftColor: powerModule.color
+
+            implicitHeight: powerModule.implicitHeight
         }
     }
-    InverseRadius {
-        cornerPosition: "topRight"
-        color: powerModule.color
-        anchors {
-            top: powerModule.bottom
-            right: powerModule.right
-        }
-    }
 
-
+    // ── OTHER MODULES ────────────────────────────────────────────────────────────
     InverseRadius {
         cornerPosition: "bottomRight"
         color: Theme.dark.base
@@ -306,7 +322,6 @@ PanelWindow {
             right: parent.right
             rightMargin: Theme.moduleEdgeMarginV
         }
-        // Removed maskHeight binding here since Wayland Region is handled correctly at the top level
     }
 
     InverseRadius {

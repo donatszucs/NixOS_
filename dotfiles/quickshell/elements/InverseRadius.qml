@@ -2,8 +2,10 @@ import QtQuick
 
 Canvas {
     id: root
-    width: Theme.moduleEdgeRadius
-    height: Theme.moduleEdgeRadius
+    property bool expandingV: true
+    property bool expandingH: true
+    width: expandingH ? Theme.moduleEdgeRadius : 0
+    height: expandingV ? Theme.moduleEdgeRadius : 0
 
     property color color: Theme.palette("dark").base
     // Where is the solid corner located within this block?
@@ -53,5 +55,19 @@ Canvas {
             ctx.closePath();
         }
         ctx.fill();
+    }
+
+    Behavior on width {
+        NumberAnimation {
+            duration: Theme.verticalDuration
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    Behavior on height {
+        NumberAnimation {
+            duration: Theme.verticalDuration
+            easing.type: Easing.OutCubic
+        }
     }
 }

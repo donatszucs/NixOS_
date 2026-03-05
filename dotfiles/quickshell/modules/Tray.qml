@@ -4,6 +4,8 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.SystemTray
 
+import "../elements"
+
 ModuleButton {
     id: root
     noHoverColorChange: true
@@ -21,7 +23,7 @@ ModuleButton {
     clip: true
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }
 
     Process {
@@ -43,9 +45,8 @@ ModuleButton {
             id: notificationButton
             cursorShape: Qt.PointingHandCursor
             label: "󱊖"
-            noHoverColorChange: true
             variant: "transparentDark"
-            rightMargin: 3
+            leftMargin: -3
 
             onClicked: missioncenterProcess.running = true
 

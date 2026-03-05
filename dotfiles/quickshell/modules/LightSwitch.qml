@@ -2,6 +2,8 @@
 import QtQuick
 import QtQuick.Layouts
 
+import "../elements"
+
 ModuleButton {
     id: root
     noHoverColorChange: expanded ? true : false
@@ -48,8 +50,8 @@ ModuleButton {
             id: labelText
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.leftMargin: 12
-            Layout.rightMargin: 12
+            Layout.leftMargin: Theme.modulePaddingH
+            Layout.rightMargin: SharedState.lightActive ? 0 : Theme.modulePaddingH
             text: SharedState.lightActive
                 ? SharedState.lightBrightness + "% 󱩒"
                 : "Off 󱩎"
@@ -71,11 +73,12 @@ ModuleButton {
         Rectangle {
             id: colorSwatch
             visible: SharedState.lightActive
-            width: 16
-            height: 16
-            radius: 8
+            width: Math.ceil(Theme.moduleHeight * 0.6)
+            height: width
+            radius: height / 2
             Layout.alignment: Qt.AlignVCenter
-            Layout.rightMargin: 12
+            Layout.leftMargin: Theme.modulePaddingH / 2
+            Layout.rightMargin: Theme.modulePaddingH / 2
             color: SharedState.lightSaturation === 0
                 ? "white"
                 : Qt.hsla(SharedState.lightHue / 360, 1.0, 0.5, 1.0)
@@ -210,8 +213,9 @@ ModuleButton {
     MouseArea {
         anchors.fill: parent
         propagateComposedEvents: true
-        acceptedButtons: Qt.NoButton
+        acceptedButtons: Qt.LeftButton
         cursorShape: Qt.PointingHandCursor
+        onPressedChanged: root.pressed = !root.pressed
 
         onWheel: wheel => {
             if (wheel.angleDelta.y > 0) {

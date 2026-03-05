@@ -7,6 +7,8 @@ import Quickshell._Window
 import Quickshell.Io
 import Quickshell.Bluetooth
 
+import "../elements"
+
 ModuleButton {
     id: controlCenter
     property bool expanded: false
@@ -18,7 +20,9 @@ ModuleButton {
             if (!parentHover.hovered && expanded) expanded = false
         }
     }
-
+    
+    cursorShape: Qt.PointingHandCursor
+    onClicked: expanded = !expanded
     // ── State ──────────────────────────────────────────────────
     property string netIcon:     "󰈀"
     property string netName:     "..."
@@ -29,7 +33,7 @@ ModuleButton {
     readonly property var   btAdapter:   Bluetooth.defaultAdapter
     readonly property bool  btPowered:   btAdapter ? btAdapter.enabled : false
     readonly property var   btDevices:   btAdapter ? btAdapter.devices : null
-    property color btColor:     controlCenter.btPowered ? "#80b0ff" : Qt.rgba(0.6,0.4,0.7,0.7)
+    property color btColor:     controlCenter.btPowered ? Theme.statusBlue : Theme.statusDisabled
     // 1. The master boolean that controls your icon
     property bool btDevicesConnected: false
 
@@ -89,23 +93,19 @@ ModuleButton {
         anchors.centerIn: parent
         spacing: 0
 
-        ModuleButton {
-            color: "transparent"
-            label: controlCenter.netIcon
-            textColor: controlCenter.netColor
-        }
-        ModuleButton {
-            color: "transparent"
-            label: controlCenter.btIcon
-            textColor: controlCenter.btColor
-        }
-        
-        // Make the entire collapsed panel clickable
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: controlCenter.expanded = !controlCenter.expanded
+        Text {
+            text: controlCenter.netIcon
+            color: controlCenter.netColor
+            font.family: Theme.font
+            
+            // Add padding here if your ModuleButton had specific padding
+            leftPadding: Theme.modulePaddingH; rightPadding: 10
+    }
+        Text {
+            text: controlCenter.btIcon
+            color: controlCenter.btColor
+            font.family: Theme.font
+            leftPadding: 10; rightPadding: Theme.modulePaddingH
         }
     }
 
@@ -132,28 +132,17 @@ ModuleButton {
             }
             spacing: 8
 
-            Rectangle {
+            ModuleButton {
                 visible: controlCenter.expanded
                 implicitWidth: parent.width
                 implicitHeight: Theme.moduleHeight
-                color: "transparent"
-                Text {
-                    anchors.centerIn: parent
-                    text: "Control Center"
-                    color: Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize + 1
-                    font.bold: true
-                }
+                label: "Control Center"
+                
+                bottomLeftRadius: Theme.moduleEdgeRadius
+                bottomRightRadius: Theme.moduleEdgeRadius
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onPressed: mouse => {
-                        controlCenter.expanded = false
-                    }
-                }
-
+                cursorShape: Qt.PointingHandCursor
+                onClicked: controlCenter.expanded = false
             }
 
             // ── Network ──────────────────────────────────
@@ -191,7 +180,7 @@ ModuleButton {
                 }
             }
 
-            Rectangle { Layout.fillWidth: true; height: 5; color: Qt.rgba(1,1,1,0.08); radius: Theme.moduleEdgeRadius }
+            Rectangle { Layout.fillWidth: true; height: 5; color: Theme.divider; radius: Theme.moduleEdgeRadius }
 
             // ── Bluetooth ─────────────────────────────────
             RowLayout {
@@ -271,7 +260,7 @@ ModuleButton {
                 }
             }
 
-            Rectangle { Layout.fillWidth: true; height: 5; color: Qt.rgba(1,1,1,0.08); radius: Theme.moduleEdgeRadius }
+            Rectangle { Layout.fillWidth: true; height: 5; color: Theme.divider; radius: Theme.moduleEdgeRadius }
 
             // ── Headset ──────────────────────────────────
             RowLayout {
@@ -280,7 +269,7 @@ ModuleButton {
 
                 ModuleButton {
                     label: ""
-                    textColor: controlCenter.headsetBatteryAvailable ? (controlCenter.headsetBatteryPercent > 20 ? "#a0e0a0" : "#e09090") : Theme.textPrimary
+                    textColor: controlCenter.headsetBatteryAvailable ? (controlCenter.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed) : Theme.textPrimary
                     cursorShape: Qt.PointingHandCursor
                     variant: "transparentDark"
                     textFont: 24
@@ -308,7 +297,7 @@ ModuleButton {
     }
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -328,13 +317,13 @@ ModuleButton {
                     controlCenter.netName  = "Disconnected"
                     controlCenter.netState = "disconnected"
                     controlCenter.netIcon  = "󰈂"
-                    controlCenter.netColor = "#e09090"
+                    controlCenter.netColor = Theme.statusRed
                     return
                 }
                 var parts = line.split(":")
                 controlCenter.netName  = parts[0] || "Unknown"
                 controlCenter.netState = (parts[2] || "").toLowerCase().includes("activated") ? "connected" : parts[2] || "unknown"
-                controlCenter.netColor = controlCenter.netState === "connected" ? "#a0e0a0" : "#e09090"
+                controlCenter.netColor = controlCenter.netState === "connected" ? Theme.statusGreen : Theme.statusRed
                 var t = (parts[1] || "").toLowerCase()
                 if      (t.includes("wifi") || t.includes("802-11"))      controlCenter.netIcon = "󰤨"
                 else if (t.includes("ethernet") || t.includes("802-3"))   controlCenter.netIcon = "󰈀"
@@ -371,7 +360,7 @@ ModuleButton {
             onStreamFinished: {
                 var line = text.trim()
                 if (line === "") {
-                    controlCenter.headsetBatteryAvailable = false
+                    controlCenter.headsetBatteryAvailable = false 
                     controlCenter.headsetBatteryPercent = -1
                     controlCenter.headsetBatteryState = "unknown"
                     return

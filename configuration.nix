@@ -7,7 +7,7 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      /etc/nixos/hardware-configuration.nix
+      /home/doni/nixos-config/hardware-configuration.nix
       inputs.home-manager.nixosModules.default
     ];
 

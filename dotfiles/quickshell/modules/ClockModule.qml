@@ -2,6 +2,8 @@
 import QtQuick
 import Quickshell.Io
 
+import "../elements"
+
 ModuleButton {
     id: root
 

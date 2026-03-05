@@ -2,6 +2,8 @@ pragma Singleton
 import QtQuick
 import Quickshell.Io
 
+import "../elements"
+
 Item {
     id: root
 

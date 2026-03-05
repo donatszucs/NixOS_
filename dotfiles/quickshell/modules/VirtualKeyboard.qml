@@ -3,11 +3,12 @@ import Quickshell.Io
 import Quickshell
 import QtQuick
 
+import "../elements"
+
 ModuleButton {
     id: virtualKbrd
     label: ""
     cursorShape: Qt.PointingHandCursor
-    implicitWidth: 30
     property bool active: false
 
     rightMargin: 5

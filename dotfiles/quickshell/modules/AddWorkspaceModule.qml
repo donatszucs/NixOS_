@@ -1,5 +1,6 @@
 // Add empty workspace button
 import Quickshell.Hyprland
+import "../elements"
 
 ModuleButton {
     label: ""

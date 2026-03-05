@@ -5,6 +5,8 @@ import Quickshell.Services.Mpris
 import Quickshell.Io
 import QtQuick.Effects
 
+import "../elements"
+
 ModuleButton {
     id: nowPlayingModule
     noHoverColorChange: true
@@ -28,11 +30,14 @@ ModuleButton {
 
 
     implicitHeight: expanded ? Theme.moduleHeight + artistInfoRow.implicitHeight : Theme.moduleHeight
-    implicitWidth: expanded ? Math.ceil(controlsRow.implicitWidth + titleBtn.implicitWidth): Math.ceil(titleBtn.implicitWidth)
+    implicitWidth: expanded ? Math.ceil(controlsRow.implicitWidth + titleBtn.implicitWidth + 15) : Math.ceil(titleBtn.implicitWidth)
     clip: true
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+    }
+    Behavior on implicitHeight {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
     bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : 0
     bottomRightRadius: Theme.moduleEdgeRadius
@@ -53,7 +58,7 @@ ModuleButton {
             layoutDirection: Qt.RightToLeft
             // Title
             ModuleButton {
-                variant: "transparentDark"
+                variant: expanded ? "dark" : "transparentDark"
                 id: titleBtn
                 Layout.alignment: Qt.AlignCenter
                 cursorShape: Qt.PointingHandCursor
@@ -62,7 +67,7 @@ ModuleButton {
                 implicitWidth: expanded ? 200 : Math.min(200, scrollingText.paintedWidth + 30)
                 onClicked: focusNow()
 
-                bottomRightRadius: expanded ? 0 : Theme.moduleEdgeRadius
+                bottomRightRadius: Theme.moduleEdgeRadius
 
                 // 3. Make the container a direct child (no contentItem:)
                 Item {
@@ -129,11 +134,11 @@ ModuleButton {
                         visible: (currentPlayer && currentPlayer.canGoNext && modelData.action === "next") || (currentPlayer && currentPlayer.canPause && modelData.action === "playpause")
                         cursorShape: Qt.PointingHandCursor
                         
-                        variant: "transparentDark"
                         implicitHeight: Theme.moduleHeight
                         implicitWidth: expanded ? 32 : 0
 
                         label: modelData.action === "playpause" ? nowPlayingModule.playPauseIcon : modelData.icon
+                        bottomLeftRadius: modelData.action === "playpause" ? Theme.moduleEdgeRadius : 0
 
                         onClicked: {
                                 if (modelData.action === "playpause")
@@ -143,7 +148,7 @@ ModuleButton {
                         }
 
                         Behavior on implicitWidth {
-                            NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
                         }
                     }
                 }
@@ -159,7 +164,7 @@ ModuleButton {
             ModuleButton {
                 id: trackArt
                 visible: nowPlayingModule.expanded
-                variant: "transparentDark"
+                color: "transparent"
                 implicitWidth: albumArtClip.width + 30
                 implicitHeight: albumArtClip.height + 15
                 anchors.right: nowPlayingModule.right
@@ -170,8 +175,9 @@ ModuleButton {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
                     
-                    // 1. The fixed width you want
-                    width: nowPlayingModule.implicitWidth - 30
+                    // 1. The fixed width you want — decoupled from the animating implicitWidth
+                    //    so height expansion starts immediately alongside width expansion
+                    width: Math.ceil(controlsRow.implicitWidth + titleBtn.implicitWidth - 15)
                     
                     // 2. Calculate the height dynamically using the image's source dimensions
                     // Formula: Height = Width * (Original Height / Original Width)
@@ -218,7 +224,7 @@ ModuleButton {
             ModuleButton {
                 id: artistInfo
                 visible: nowPlayingModule.expanded
-                variant: "transparentDark"
+                color: "transparent"
                 label: nowPlayingModule.authorText
                 Layout.alignment: Qt.AlignCenter
 

@@ -39,7 +39,7 @@ Rectangle {
     property bool noHoverColorChange: false
 
     // Cursor shape to use when hovering this button. Can be overridden by
-    // instances (e.g. `cursorShape: Qt.PointingHandCursor`). Default is arrow.
+    // instances (e.g. `Qt.PointingHandCursor: Qt.PointingHandCursor`). Default is arrow.
     property int cursorShape: Qt.ArrowCursor
 
     // ── Deprecated shims (kept for compatibility) --------------------
@@ -100,6 +100,18 @@ Rectangle {
     }
 
     Behavior on gradient {
-        ColorAnimation { duration: horizontalDuration }
+        ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+    }
+
+    Behavior on color {
+        ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+    }
+
+    Behavior on bottomLeftRadius {
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+    }
+
+    Behavior on bottomRightRadius {
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }
 }

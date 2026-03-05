@@ -3,6 +3,8 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
 
+import "../elements"
+
 ModuleButton {
     id: powerModule
     variant: "danger"
@@ -19,7 +21,7 @@ ModuleButton {
     implicitWidth: expanded ? 100 : 32
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: horizontalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }
 
     Behavior on implicitHeight {
@@ -39,7 +41,7 @@ ModuleButton {
         NumberAnimation on opacity {
                     from: 0.0
                     to: 1.0
-                    duration: horizontalDuration
+                    duration: Theme.horizontalDuration
                     easing.type: Easing.OutCubic
                 }
     }
@@ -67,7 +69,7 @@ ModuleButton {
 
                 bottomLeftRadius: (modelData.tip === "Lock") ? Theme.moduleEdgeRadius : 0
 
-                rightMargin: 12
+                rightMargin: Theme.modulePaddingH
                 textAlign: "right"
 
                 label: expanded ? modelData.tip + " " + modelData.icon : modelData.icon

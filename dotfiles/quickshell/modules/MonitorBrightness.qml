@@ -3,15 +3,17 @@ import Quickshell.Io
 import Quickshell
 import QtQuick
 
+import "../elements"
+
 ModuleButton {
     id: root
-
+    
     required property string screenName
     property int displayNumber: screenName === "DP-1" ? 1 : 2
     property int brightness: 50
     property string cacheFile: "/tmp/ddc_brightness_disp" + displayNumber
 
-    label: brightness + "% "
+    label: brightness + "%  "
 
     // Read brightness from cache on startup
     Component.onCompleted: {

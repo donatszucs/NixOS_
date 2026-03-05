@@ -6,6 +6,8 @@ import Quickshell.Widgets
 import Quickshell.Io
 import Quickshell.Hyprland
 
+import "../elements"
+
 ModuleButton {
     id: launcherModule
     label: ""
@@ -88,11 +90,13 @@ ModuleButton {
             // Header row (same height as collapsed bar, keeps visual alignment)
             ModuleButton {
                 id: collapsedRow
-                variant: "transparentDark"
+                variant: expanded ? "dark" : "transparentDark"
                 Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
                 label: "  Menu "
                 cursorShape: Qt.PointingHandCursor
+                bottomLeftRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0
+                bottomRightRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0
 
                 onClicked: {
                     if (expanded) {
@@ -185,7 +189,7 @@ ModuleButton {
                 Layout.leftMargin: 10
                 Layout.rightMargin: 10
                 height: 5
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.divider
                 radius: Theme.moduleEdgeRadius
             }
 
@@ -212,6 +216,7 @@ ModuleButton {
                     delegate: ModuleButton {
                         required property var modelData
                         required property int index
+                        cursorShape: Qt.PointingHandCursor
                         width: appList.width
                         topLeftRadius:    0
                         topRightRadius:   0
@@ -256,4 +261,7 @@ ModuleButton {
         }
     }
 
+    Component.onCompleted: {
+        filterApps("")
+    }
 }
