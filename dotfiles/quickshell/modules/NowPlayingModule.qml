@@ -167,7 +167,6 @@ ModuleButton {
                 color: "transparent"
                 implicitWidth: albumArtClip.width + 30
                 implicitHeight: albumArtClip.height + 15
-                anchors.right: nowPlayingModule.right
 
                 // Changed to an Item since MultiEffect handles the drawing now
                 Item { 

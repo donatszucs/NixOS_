@@ -197,14 +197,14 @@ ModuleButton {
 
     Connections {
         target: Pipewire
-        onReadyChanged: audioModule.updateSinks()
-        onDefaultAudioSinkChanged: audioModule.updateSinks()
+        function onReadyChanged() { audioModule.updateSinks() }
+        function onDefaultAudioSinkChanged() { audioModule.updateSinks() }
     }
 
     Connections {
         target: Pipewire.nodes
-        onObjectInsertedPost: audioModule.updateSinks()
-        onObjectRemovedPost: audioModule.updateSinks()
+        function onObjectInsertedPost() { audioModule.updateSinks() }
+        function onObjectRemovedPost() { audioModule.updateSinks() }
     }
 
     Timer {

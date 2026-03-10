@@ -71,6 +71,8 @@
   # 1. Enable firmware (Critical for WiFi/Bluetooth)
   hardware.enableAllFirmware = true;
 
+  hardware.enableRedistributableFirmware = true;
+
   # 2. Bluetooth Settings
   hardware.bluetooth = {
     enable = true;
@@ -247,6 +249,7 @@
   wtype             # CLI keyboard input tool
   rbw               # CLI password manager
   pinentry-qt     # Qt5 pinentry for rbw
+  usbutils          # For lsusb and other USB tools
   
   # -- Applications --
   vscode            
@@ -307,7 +310,7 @@
   services.udev.extraRules = ''
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03f0", ATTRS{idProduct}=="018b", MODE="0666"
   '';
-
+  
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.

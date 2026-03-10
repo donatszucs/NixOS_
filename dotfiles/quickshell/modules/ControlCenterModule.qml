@@ -211,7 +211,7 @@ ModuleButton {
                         color: controlCenter.btColor
                         border.color: controlCenter.btColor
                         border.width: 1
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        Layout.alignment: Qt.AlignHCenter
 
                         property bool on: controlCenter.btPowered
 

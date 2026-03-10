@@ -19,7 +19,7 @@ ModuleButton {
     // This MUST be assigned when you create the component in your main file
     property var parentWindow: null 
 
-    implicitWidth: expanded ? row.implicitWidth - 4 : notificationButton.implicitWidth
+    implicitWidth: expanded ? row.implicitWidth : notificationButton.implicitWidth
     clip: true
 
     Behavior on implicitWidth {
@@ -145,7 +145,9 @@ ModuleButton {
                 }
             }
 
-            Item { implicitWidth: 6 }
+            Item { implicitWidth: 3 }
         }
+
+        Rectangle { width: 5; height: Theme.moduleHeight * 0.7; color: Theme.divider; radius: Theme.moduleEdgeRadius }
     }
 }

@@ -116,7 +116,7 @@ PanelWindow {
         height: Theme.barHeight
         gradient: Gradient {
             orientation: Gradient.Vertical
-            GradientStop { position: 0.0; color: Qt.rgba(0.11, 0.02, 0.16, 0.42) }
+            GradientStop { position: 0.0; color: Qt.rgba(0.33, 0.27, 0.37, 0.13) }
             GradientStop { position: 1.0; color: "transparent" }
         }
     }
@@ -341,6 +341,26 @@ PanelWindow {
         }
     }
 
+    // Borders
+
+    InverseRadius {
+        cornerPosition: "bottomLeft"
+        color: Theme.palette("dark").base
+        anchors {
+            bottom: parent.bottom
+            left: parent.left
+        }
+    }
+
+    InverseRadius {
+        cornerPosition: "bottomRight"
+        color: Theme.palette("dark").base
+
+        anchors {
+            bottom: parent.bottom
+            right: parent.right
+        }
+    }
     // Invisible spacer window — its sole job is to reserve barHeight so that
     // tiled/maximised windows start below the bar
     PanelWindow {
