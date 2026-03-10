@@ -1,8 +1,8 @@
 pragma Singleton
 import QtQuick
 import Quickshell.Io
-
-import "../elements"
+import Quickshell.Hyprland
+import Quickshell.Services.Notifications as Notif
 
 Item {
     id: root
@@ -190,10 +190,15 @@ Item {
         command: ["bash", "-c", root.tapoScriptPath + " color " + targetHue + " " + targetSat]
         onRunningChanged: if (!running) refreshLightStatus()
     }
+    
+    // ==========================================
+    // Notification Expire State
+    // ==========================================
+    property var expireFlags: ({})
 
-    // Init
-    Component.onCompleted: {
-        refreshModSwitcher()
-        refreshLightStatus()
+    function setFlag(notifId, isReady) {
+        var temp = expireFlags;
+        temp[notifId] = isReady;
+        expireFlags = temp;
     }
 }

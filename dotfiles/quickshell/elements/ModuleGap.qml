@@ -6,10 +6,14 @@ Item {
     // Pass the colors of the modules on either side
     property color leftColor: "transparent"
     property color rightColor: "transparent"
-    
+    property color leftColorBottom: "transparent"
+    property color rightColorBottom: "transparent"
+
     // Pass the expanded state if the corners need to move vertically
     property bool leftExpanded: true
     property bool rightExpanded: true
+    property bool leftExpandedBottom: true
+    property bool rightExpandedBottom: true
 
     // The physical gap size between modules
     implicitWidth: 0
@@ -39,6 +43,32 @@ Item {
 
             left: parent.left
             top: parent.bottom // Or whatever vertical anchor you were using
+        }
+    }
+    // 3. The Right-facing corner (attaches to the Left module)
+    InverseRadius {
+        cornerPosition: "bottomRight"
+        color: root.leftColorBottom
+        expandingV: root.leftExpandedBottom
+        
+        anchors {
+            // Anchor to the very right edge of this gap
+            right: parent.right  
+            bottom: parent.bottom 
+        }
+    }
+
+    // 4. The Left-facing corner (attaches to the Right module)
+    InverseRadius {
+        cornerPosition: "bottomLeft"
+        color: root.rightColorBottom
+        expandingV: root.rightExpandedBottom
+        
+        anchors {
+            // Anchor to the very left edge of this gap
+
+            left: parent.left
+            bottom: parent.bottom // Or whatever vertical anchor you were using
         }
     }
 }

@@ -52,14 +52,21 @@ Rectangle {
     }
 
     // Process to decode and copy
+    Timer {
+        id: applyCliphistTimer
+        interval: Theme.horizontalDuration * 1.5
+        repeat: false
+        onTriggered: {
+
+            clipboardPanel.expanded = false;
+            clipboardPanel.selectedIndex = -1;
+            applyCliphist.running = true;
+        }
+    }
     Process {
         id: applyCliphist
         property string targetLine: ""
-        command: ["bash", "-c", "printf '%s\\n' \"$0\" | cliphist decode | wl-copy", targetLine]
-        onExited: {
-            clipboardPanel.expanded = false;
-            clipboardPanel.selectedIndex = -1;
-        }
+        command: ["bash", "-c", "printf '%s\\n' \"$0\" | cliphist decode | wl-copy && sleep 0.1 && wtype -M ctrl -k v -m ctrl", targetLine]
     }
 
     // IPC Trigger for Super+V
@@ -83,7 +90,7 @@ Rectangle {
         }
     }
 
-    Keys.onPressed: {
+    Keys.onPressed: event => {
         if (!expanded) return;
         if (clipboardModel.count === 0) return;
         if (event.key === Qt.Key_Down) {
@@ -102,7 +109,7 @@ Rectangle {
             var item = clipboardModel.get(clipboardPanel.selectedIndex);
             if (item) {
                 applyCliphist.targetLine = item.clipLine;
-                applyCliphist.running = true;
+                applyCliphistTimer.start();
             }
             event.accepted = true;
         } else if (event.key === Qt.Key_Escape) {
@@ -153,28 +160,20 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
-                spacing: 0
+                spacing: 5
                 
                 model: clipboardModel
                 
-                delegate: Rectangle {
-                    width: list.width
-                    height: 50
+                delegate: ModuleButton {
+                    implicitWidth: list.width
+                    implicitHeight: 50
                     color: index === clipboardPanel.selectedIndex ? Theme.dark.hover : Theme.dark.base
                     radius: Theme.moduleEdgeRadius
                     
-                    Text {
-                        anchors.fill: parent
-                        anchors.leftMargin: 15
-                        anchors.rightMargin: 15
-                        text: clipContent
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
-                        elide: Text.ElideRight
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                    
+                    label: clipContent.length > 38? clipContent.substring(0, 38) + "..." : clipContent
+                    textAlign: "left"
+                    leftMargin: 20
+
                     MouseArea {
                         id: itemMouseArea
                         anchors.fill: parent
@@ -183,7 +182,7 @@ Rectangle {
                         onEntered: clipboardPanel.selectedIndex = index;
                         onClicked: {
                             applyCliphist.targetLine = clipLine;
-                            applyCliphist.running = true;
+                            applyCliphistTimer.start();
                         }
                     }
                 }

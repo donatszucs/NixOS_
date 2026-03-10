@@ -26,76 +26,47 @@ PanelWindow {
 
 
     mask: Region {
-        // Bar interaction region (top edge)
+        
+        // Left modules interaction region
         Region {
-            x: 0
-            y: 0
-            width: topPanel.width
-            height: topPanel.Theme.barHeight
+            item: leftRow
+        }
+
+        // Center modules interaction region
+        Region {
+            item: closeWindowModule
+        }
+
+        Region {
+            item: workspacesModule
+        }
+
+        Region {
+            item: addWorkspaceModule
+        }
+
+        // Right modules interaction region
+        Region {
+            item: rightRow
         }
 
         // Wallpaper Picker interaction region (side edge)
         Region {
-            x: topPanel.width - wallpaperPicker.implicitWidth
-            y: wallpaperPicker.y - Theme.moduleEdgeRadius
-            width: wallpaperPicker.implicitWidth
-            height: wallpaperPicker.implicitHeight + (Theme.moduleEdgeRadius * 2)
+            item: wallpaperPicker
         }
 
         // Clipboard History interaction region (left edge)
         Region {
-            x: 0
-            y: clipboardHistory.y - Theme.moduleEdgeRadius
-            width: clipboardHistory.implicitWidth
-            height: clipboardHistory.implicitHeight + (Theme.moduleEdgeRadius * 2)
+            item: clipboardHistory
         }
-
-        // Launcher expanded region (full screen when open)
-        Region {
-            x: leftRow.x + launcherModule.x
-            y: 0
-            width: launcherModule.implicitWidth
-            height: launcherModule.implicitHeight
-        }
-
-        // LightSwitch expanded region
-        Region {
-            x: rightRow.x + lightSwitchModule.x
-            y: 0
-            width: lightSwitchModule.implicitWidth
-            height: lightSwitchModule.implicitHeight
-        }
-
-        // Audio Module expanded region
-        Region {
-            x: rightRow.x + audioModule.x
-            y: 0
-            width: audioModule.implicitWidth
-            height: audioModule.implicitHeight
-        }
-
-        // Control Center expanded region
-        Region {
-            x: rightRow.x + controlCenterModule.x
-            y: 0
-            width: controlCenterModule.implicitWidth
-            height: controlCenterModule.implicitHeight
-        }
-
-        // Power Module expanded region
-        Region {
-            x: rightRow.x + powerModule.x
-            y: 0
-            width: powerModule.implicitWidth
-            height: powerModule.implicitHeight
-        }
-
         // RbwMenu expanded region (drops below bar from center)
         Region {
-            x: rbwMenu.x
-            y: rbwMenu.y
-            width: rbwMenu.implicitWidth
-            height: rbwMenu.implicitHeight
+            item: rbwMenu
+        }
+
+        // Notification Center region (bottom-right)
+        Region {
+            item: notificationCenter
         }
     }
     color: "transparent"
@@ -182,6 +153,7 @@ PanelWindow {
 
     // ── CENTER ───────────────────────────────────────────────────────────
     CloseWindowModule {
+        id: closeWindowModule
         topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 
         radius: Theme.moduleEdgeRadius
         anchors {
@@ -341,6 +313,17 @@ PanelWindow {
         }
     }
 
+
+    NotificationCenter {
+        id: notificationCenter 
+
+        anchors {
+            bottom: parent.bottom
+            right: parent.right
+        }
+    }
+
+
     // Borders
 
     InverseRadius {
@@ -352,15 +335,6 @@ PanelWindow {
         }
     }
 
-    InverseRadius {
-        cornerPosition: "bottomRight"
-        color: Theme.palette("dark").base
-
-        anchors {
-            bottom: parent.bottom
-            right: parent.right
-        }
-    }
     // Invisible spacer window — its sole job is to reserve barHeight so that
     // tiled/maximised windows start below the bar
     PanelWindow {

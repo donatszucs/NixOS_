@@ -4,8 +4,10 @@ Canvas {
     id: root
     property bool expandingV: true
     property bool expandingH: true
-    width: expandingH ? Theme.moduleEdgeRadius : 0
-    height: expandingV ? Theme.moduleEdgeRadius : 0
+    // Set false to disable the built-in Behavior so width/height can be bound externally
+    property bool animated: true
+    implicitWidth: expandingH ? Theme.moduleEdgeRadius : 0
+    implicitHeight: expandingV ? Theme.moduleEdgeRadius : 0
 
     property color color: Theme.palette("dark").base
     // Where is the solid corner located within this block?
@@ -57,14 +59,16 @@ Canvas {
         ctx.fill();
     }
 
-    Behavior on width {
+    Behavior on implicitWidth {
+        enabled: root.animated
         NumberAnimation {
             duration: Theme.verticalDuration
             easing.type: Easing.OutCubic
         }
     }
 
-    Behavior on height {
+    Behavior on implicitHeight {
+        enabled: root.animated
         NumberAnimation {
             duration: Theme.verticalDuration
             easing.type: Easing.OutCubic

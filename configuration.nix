@@ -236,7 +236,6 @@
     
   # -- Essential Tools --
   kitty             # Terminal (default for Hyprland, needed to start debugging)
-  mako              # Notification daemon
   brightnessctl     # Screen brightness control
   ddcutil           # Control monitor settings like brightness, contrast, etc.
   libnotify        # Notification library
@@ -310,7 +309,26 @@
   services.udev.extraRules = ''
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03f0", ATTRS{idProduct}=="018b", MODE="0666"
   '';
-  
+
+  services.keyd = {
+    enable = true;
+    keyboards = {
+      default = {
+        ids = [ "*" ];
+        settings = {
+          main = {
+            # Explicitly tell keyd to keep capslock normal by default
+            capslock = "capslock";
+          };
+          meta = {
+            # When Super (meta) is held, make it F13
+            capslock = "f13";
+          };
+        };
+      };
+    };
+  };
+
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
