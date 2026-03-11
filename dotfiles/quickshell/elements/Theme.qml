@@ -35,7 +35,7 @@ QtObject {
     }
 
     readonly property QtObject light: QtObject {
-        readonly property color base:       "#d5bce3"
+        readonly property color base:       '#bda5cb'
         readonly property color hover:      '#eee2f5'
         readonly property color pressed:    '#a68bb6'
         readonly property color text:       "#2a202f"

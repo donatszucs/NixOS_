@@ -1,4 +1,4 @@
-// NotificationServer.qml — DBus notification server replacing mako entirely
+// NotificationServer.qml — DBus notification server
 // Renders a stack of toast notifications in the bottom-right corner of the Bar.
 import QtQuick
 import QtQuick.Layouts
@@ -16,19 +16,12 @@ Item {
 
     property int notificationNumber: 0
     // Whether any notifications are currently shown (used by Bar.qml for InverseRadius visibility)
-    readonly property bool noNotifications: notificationNumber === 0
+    property bool noNotifications: (SharedState.notificationCounter === 0 || innerLayout.implicitHeight === 0)
 
-    implicitWidth:  !noNotifications ? notifWidth : 0
+    implicitWidth:  notifRow.implicitWidth
     implicitHeight: notifColumn.implicitHeight
-    
-    Behavior on implicitHeight {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-    }
-    Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-    }
 
-    // ── DBus notification server (replaces mako) ─────────────────────
+    // ── DBus notification server ─────────────────────
     Notif.NotificationServer {
         id: server
         keepOnReload: false
@@ -40,17 +33,14 @@ Item {
     // ── Notification stack ───────────────────────────────────────────────
     RowLayout {
         id: notifRow
-        anchors {
-            bottom: parent.bottom
-            right: parent.right
-        }
         spacing: root.notifSpacing
 
         InverseRadius {
             Layout.alignment: Qt.AlignBottom
             cornerPosition: "bottomRight"
+            size: containerRect.implicitHeight / 8
             color: Theme.palette("dark").base
-            expandingV: !noNotifications
+            expandingV: notifColumn.implicitHeight !== 0
         }
         ColumnLayout {
             id: notifColumn
@@ -59,17 +49,81 @@ Item {
             InverseRadius {
                 Layout.alignment: Qt.AlignRight
                 cornerPosition: "bottomRight"
+                size: innerLayout.implicitWidth === 0 ? Theme.moduleEdgeRadius : (containerRect.implicitWidth / 8)
                 color: Theme.palette("dark").base
             }
 
-            Repeater {
-                model: server.trackedNotifications
-                delegate: NotificationToast {
-                    required property var modelData
-                    required property int index
-                    notif: modelData
-                    notifIndex: index
-                    toastWidth: root.notifWidth
+            Rectangle {
+                id: containerRect
+                color: Theme.palette("dark").base
+                clip: true
+                opacity: Theme.moduleOpacity
+                topLeftRadius: Theme.moduleEdgeRadius + 5
+                implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? 0 : (innerLayout.implicitWidth + 20)
+                implicitHeight: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? 0 : (innerLayout.implicitHeight + 25)
+                
+                Behavior on implicitHeight {
+                    NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
+                }
+                Behavior on implicitWidth {
+                    NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutCubic }
+                }
+                ColumnLayout {
+                    id: innerLayout
+                    anchors {
+                        centerIn: parent
+                    }
+
+                    layoutDirection: Qt.RightToLeft
+                    spacing: 0
+                    clip: true
+
+                    ModuleButton {
+                        id: headerButton
+                        visible: implicitHeight > 0
+                        Layout.alignment: Qt.AlignHCenter
+                        textFont: 20
+                        color: "transparent"
+                        label: "󰎟 Notification Center"
+                        implicitHeight: hoverHandler.hovered ? 30 : 0
+                        implicitWidth: hoverHandler.hovered ? notifWidth : 0
+
+
+                        Behavior on implicitHeight {
+                            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                        }
+                        Behavior on implicitWidth {
+                            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+                        }
+
+                    }
+
+                    Repeater {
+                        model: server.trackedNotifications
+                        delegate: ColumnLayout {
+                            required property var modelData
+                            required property int index
+                            spacing: 0
+                            layoutDirection: Qt.RightToLeft
+
+                            Rectangle {
+                                color: "transparent"
+                                implicitWidth: toast.implicitWidth
+                                implicitHeight: (toast.isShowing && parent.index !== 0) ? 10 : 0
+
+                                Behavior on implicitHeight {
+                                    NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
+                                }
+                            }
+
+                            NotificationToast {
+                                id: toast
+                                notif: parent.modelData
+                                notifIndex: parent.index
+                                toastWidth: root.notifWidth
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -88,6 +142,10 @@ Item {
         // Enter state used to animate from zero size to full size
         property bool entered: false
         property bool expiring: false
+        property bool forceClose: false
+
+        visible: implicitWidth > 0 && implicitHeight > 0
+        property bool isShowing: (hoverHandler.hovered || entered && !expiring) && !forceClose
 
         // ── Urgency helpers ──────────────────────────────────────────
         readonly property bool isCritical:
@@ -102,42 +160,30 @@ Item {
             : (toastRow.notif && toastRow.notif.expireTimeout > 0 ? toastRow.notif.expireTimeout : 5000)
 
         // ── Sizing & shape ────────────────────────────────────────────
-        implicitHeight: toastRow.entered ? (contentLayout.implicitHeight + 24) : 0
+        implicitHeight: toastRow.isShowing ? (contentLayout.implicitHeight + 20) : 0
+        implicitWidth: toastRow.isShowing ? toastWidth : 0
         clip: true
-        topLeftRadius:     toastRow.notifIndex === 0 ? Theme.moduleEdgeRadius : 0
-        topRightRadius:    0
-        bottomLeftRadius:  0
-        bottomRightRadius: 0
+
+        radius: Theme.moduleEdgeRadius
 
         // ── Colors ────────────────────────────────────────────────────
-        variant: isCritical ? "danger" : "dark"
+        variant: isCritical ? "danger" : "light"
         border.color: "#f38ba8"
         border.width: isCritical ? 2 : 0
 
         // ── Enter animation: slide in from the right ─────────────────
         Component.onCompleted: {
             root.notificationNumber++
-            SharedState.setFlag(toastRow.notif.id, false)
+            SharedState.notificationCounter = root.notificationNumber
             toastRow.entered = true
         }
 
-        Behavior on topLeftRadius {
-            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-        }
         Behavior on implicitHeight {
             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
         }
         Behavior on implicitWidth {
-            NumberAnimation { duration: toastRow.notifIndex === 0 ? Theme.horizontalDuration : 0; easing.type: Easing.OutCubic }
+            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
-
-        // Animate vertical position so existing toasts slide up/down smoothly
-        Behavior on y {
-            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-        }
-
-        // Expand horizontally from the right edge (so new toasts appear from bottom-right)
-        implicitWidth: (toastRow.entered || toastRow.expiring) ? toastWidth : 0
 
         Timer {
             id: expireTimer
@@ -146,59 +192,73 @@ Item {
             running: toastRow.effectiveTimeout > 0
             repeat: false
 
-            onTriggered: {
-                if (SharedState.expireFlags[toastRow.notif.id] === false && toastRow.notif)
-                    toastRow.requestExpire()
-            }
+            onTriggered: toastRow.entered = false
+
         }
 
-        onClicked: toastRow.requestExpire()
+        onClicked: {
+            toastRow.forceClose = true
+            toastRow.requestDismiss()
+        }
 
         // ── Content ────────────────────────────────────────────────────
         RowLayout {
             id: contentLayout
             anchors {
-                top:    parent.top
-                left:   parent.left
-                right:  parent.right
-                margins: 12
+                centerIn: parent
             }
-            spacing: 10
+            width: parent.width - 20
+            spacing: 15
 
-            // Image block: shows notification image if available, otherwise app icon; hidden if neither are provided
-            Item {
+            ColumnLayout {
+                spacing: 0
 
-                readonly property bool hasImage: toastRow.notif && toastRow.notif.image !== ""
-                readonly property bool hasIcon:  toastRow.notif && toastRow.notif.appIcon !== ""
-                visible: hasImage || hasIcon
+                // Image block: shows notification image if available, otherwise app icon; hidden if neither are provided
+                Item {
 
-                implicitHeight: hasImage ? 50 : hasIcon ? 30 : 0
-                implicitWidth: implicitHeight
+                    readonly property bool hasImage: toastRow.notif && toastRow.notif.image !== ""
+                    readonly property bool hasIcon:  toastRow.notif && toastRow.notif.appIcon !== ""
+                    visible: hasImage || hasIcon
 
-                Image {
-                    anchors.fill: parent
-                    source: toastRow.notif ? toastRow.notif.image : ("image://icon/" + toastRow.notif.appIcon)
-                    fillMode: Image.PreserveAspectFit
-                    smooth: true
+                    implicitHeight: hasImage ? 50 : hasIcon ? 30 : 0
+                    implicitWidth: implicitHeight
+
+                    Image {
+                        anchors.fill: parent
+                        source: parent.hasImage ? toastRow.notif.image : ("image://icon/" + toastRow.notif.appIcon)
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                        cache: false
+                    }
+                }
+
+                Text {
+                    text: Qt.formatDateTime(new Date(), "HH:mm")
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize - 3
+                    font.bold: true
+                    color: toastRow.textColor
+                    opacity: 0.5
+                    elide: Text.ElideRight
+                    Layout.alignment: Qt.AlignHCenter
                 }
             }
 
             // Text block
             ColumnLayout {
+                spacing: 0
                 Layout.fillWidth: true
-                spacing: 3
+                
                 // app name
                 Text {
                     text: toastRow.notif ? toastRow.notif.appName : ""
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize - 1
                     font.bold: true
-                    color: toastRow.isCritical ? Theme.statusRed
-                            : toastRow.isLow      ? Theme.statusDisabled
-                            :              Theme.textPrimary
+                    color: toastRow.textColor
                     opacity: 0.7
-                    elide: Text.ElideRight
                     Layout.fillWidth: true
+                    elide: Text.ElideRight
                 }
 
                 // Summary
@@ -206,9 +266,9 @@ Item {
                     visible: toastRow.notif && toastRow.notif.summary !== ""
                     text: toastRow.notif ? toastRow.notif.summary : ""
                     font.family:    Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: toastRow.Theme.fontSize
                     font.bold:      true
-                    color:          Theme.textPrimary
+                    color:          toastRow.textColor
                     wrapMode:       Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -219,39 +279,35 @@ Item {
                     text: toastRow.notif ? toastRow.notif.body : ""
                     font.family:    Theme.font
                     font.pixelSize: Theme.fontSize - 1
-                    color:          Theme.textPrimary
+                    color:          toastRow.textColor
                     opacity: 0.7
                     wrapMode:       Text.WordWrap
-                    Layout.fillWidth: true
                     maximumLineCount: 4
                     elide: Text.ElideRight
+                    Layout.fillWidth: true
                 }
             }
         }
 
-        MouseArea {
-            id: hoverTracker
-            anchors.fill: parent
-            hoverEnabled: true
-            acceptedButtons: Qt.NoButton
-            z: 999 
-            
-            onEntered: {
-                SharedState.setFlag(toastRow.notif.id, true)
-            }
-
-            onExited: { 
-                SharedState.setFlag(toastRow.notif.id, false)
-                toastRow.requestExpire()
-            }
+        function requestDismiss() {
+            if (!toastRow.notif || toastRow.expiring) return
+            toastRow.entered = false
+            toastRow.expiring = true
+            expireCallTimer.start()
         }
 
-        function requestExpire() {
-            if (!toastRow.notif || toastRow.expiring) return
-            root.notificationNumber--
-            toastRow.expiring = true
-            toastRow.entered = false
-            expireCallTimer.start()
+        function revive() {
+            toastRow.forceClose = false
+            toastRow.expiring = false
+            toastRow.entered = true
+            expireCallTimer.stop()
+            expireTimer.restart()
+        }
+
+        Connections {
+            target: toastRow.notif
+            function onBodyChanged()    { toastRow.revive() }
+            function onSummaryChanged() { toastRow.revive() }
         }
 
         Timer {
@@ -259,8 +315,13 @@ Item {
             interval: Theme.verticalDuration + 20
             repeat: false
             onTriggered: {
-                if (toastRow.notif) toastRow.notif.expire()
+                root.notificationNumber--
+                SharedState.notificationCounter = root.notificationNumber
+                if (toastRow.notif) toastRow.notif.dismiss()
             }
         }
+    }
+    HoverHandler {
+        id: hoverHandler
     }
 }

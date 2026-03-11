@@ -17,12 +17,16 @@ Rectangle {
     focus: expanded
     property string screenName: ""
     
+    // Fixed corner cap size — must not depend on animated implicitWidth
+    property real cornerSize: targetWidth / 8
+
     color: "transparent"
-    
+    clip: true
+
     // Animate width for side sliding!
     implicitWidth: expanded ? targetWidth : 0
     Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
-    implicitHeight: targetHeight
+    implicitHeight: targetHeight + cornerSize * 2
     
     // List model for the clipboard history
     ListModel {
@@ -118,106 +122,102 @@ Rectangle {
         }
     }
 
-    Rectangle {
-        id: containerRect
-        // Anchor to the left, so it slides out
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        width: clipboardPanel.implicitWidth
-        
-        color: Theme.dark.base
-        opacity: Theme.moduleOpacity
-        
-        topRightRadius: Theme.moduleEdgeRadius
-        bottomRightRadius: Theme.moduleEdgeRadius
-        topLeftRadius: 0
-        bottomLeftRadius: 0
-        
-        clip: true
-        
-        // Hide content when collapsed to prevent rendering overlap
-        visible: clipboardPanel.implicitWidth > 10
-        
-        ColumnLayout {
-            width: clipboardPanel.targetWidth - 40 // Take into account margins
-            height: clipboardPanel.targetHeight - 40
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: 20
-            spacing: 15
-            
-            Text {
-                text: " Clipboard History"
-                font.family: Theme.font
-                font.pixelSize: 24
-                color: Theme.textPrimary
-                Layout.alignment: Qt.AlignHCenter
-            }
-            
-            ListView {
-                id: list
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                clip: true
-                spacing: 5
-                
-                model: clipboardModel
-                
-                delegate: ModuleButton {
-                    implicitWidth: list.width
-                    implicitHeight: 50
-                    color: index === clipboardPanel.selectedIndex ? Theme.dark.hover : Theme.dark.base
-                    radius: Theme.moduleEdgeRadius
-                    
-                    label: clipContent.length > 38? clipContent.substring(0, 38) + "..." : clipContent
-                    textAlign: "left"
-                    leftMargin: 20
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 0
 
-                    MouseArea {
-                        id: itemMouseArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onEntered: clipboardPanel.selectedIndex = index;
-                        onClicked: {
-                            applyCliphist.targetLine = clipLine;
-                            applyCliphistTimer.start();
+        InverseRadius {
+            cornerPosition: "bottomLeft"
+            implicitWidth: clipboardPanel.cornerSize
+            implicitHeight: clipboardPanel.cornerSize
+            color: Theme.dark.base
+            opacity: Theme.moduleOpacity
+            Layout.alignment: Qt.AlignLeft
+            expandingH: clipboardPanel.expanded
+        }
+
+        // ── Visual panel (slides out from the left) ───────────────────────────
+        Rectangle {
+            id: containerRect
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            color: Theme.dark.base
+            opacity: Theme.moduleOpacity
+
+            topRightRadius: Theme.moduleEdgeRadius
+            bottomRightRadius: Theme.moduleEdgeRadius
+            topLeftRadius: 0
+            bottomLeftRadius: 0
+
+            clip: true
+
+            ColumnLayout {
+                anchors {
+                    fill: parent
+                    margins: 20
+                }
+                spacing: 15
+            
+                Text {
+                    text: " Clipboard History"
+                    font.family: Theme.font
+                    font.pixelSize: 24
+                    color: Theme.textPrimary
+                }
+                
+                ListView {
+                    id: list
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    spacing: 5
+                    
+                    model: clipboardModel
+                    delegate: ModuleButton {
+                        implicitWidth: list.width
+                        variant: "light"
+                        implicitHeight: 50
+                        opacity: clipboardPanel.selectedIndex === index ? 1 : 0.7
+                        radius: Theme.moduleEdgeRadius
+                        
+                        label: clipContent.length > 38? clipContent.substring(0, 38) + "..." : clipContent
+                        textAlign: "left"
+                        leftMargin: 20
+
+                        MouseArea {
+                            id: itemMouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onEntered: clipboardPanel.selectedIndex = index;
+                            onClicked: {
+                                applyCliphist.targetLine = clipLine;
+                                applyCliphistTimer.start();
+                            }
                         }
                     }
                 }
-            }
-            
-            ModuleButton {
-                label: "Close"
-                Layout.alignment: Qt.AlignHCenter
-                cursorShape: Qt.PointingHandCursor
-                onClicked: clipboardPanel.expanded = false
-                radius: Theme.moduleEdgeRadius
+                
+                ModuleButton {
+                    label: "Close"
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.fillWidth: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: clipboardPanel.expanded = false
+                    radius: Theme.moduleEdgeRadius
+                }
             }
         }
-    }
-    
-    // Inverse radiuses attached directly to this component to automatically track it
-    InverseRadius {
-        cornerPosition: "bottomLeft"
-        color: Theme.dark.base
-        opacity: Theme.moduleOpacity
-        anchors {
-            bottom: containerRect.top
-            left: containerRect.left
-        }
-        visible: containerRect.visible
-    }
 
-    InverseRadius {
-        cornerPosition: "topLeft"
-        color: Theme.dark.base
-        opacity: Theme.moduleOpacity
-        anchors {
-            top: containerRect.bottom
-            left: containerRect.left
+        InverseRadius {
+            cornerPosition: "topLeft"
+            implicitWidth: clipboardPanel.cornerSize
+            implicitHeight: clipboardPanel.cornerSize
+            color: Theme.dark.base
+            opacity: Theme.moduleOpacity
+            Layout.alignment: Qt.AlignLeft
+            expandingH: clipboardPanel.expanded
         }
-        visible: containerRect.visible
     }
 }

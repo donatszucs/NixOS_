@@ -12,11 +12,13 @@ Rectangle {
     id: wallpaperPanel
     
     // Fit 4 columns (210 cellWidth * 4 = 840 + 40 margins = 880)
-    property real targetWidth: 880
+    property real targetWidth: 520
     // Fit 3 rows + padding
-    property real targetHeight: 650
+    property real targetHeight: 800
     property bool expanded: false
     
+    property real cornerSize: targetWidth / 8
+
     color: "transparent"
     
     // Animate width for side sliding!
@@ -24,108 +26,93 @@ Rectangle {
     Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
     
     implicitHeight: targetHeight
-    
-    Rectangle {
-        id: containerRect
-        // Anchor to the right, so it slides out
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        width: wallpaperPanel.implicitWidth
-        
-        color: Theme.dark.base
-        opacity: Theme.moduleOpacity
-        
-        topLeftRadius: Theme.moduleEdgeRadius
-        bottomLeftRadius: Theme.moduleEdgeRadius
-        topRightRadius: 0
-        bottomRightRadius: 0
-        
-        clip: true
-        
-        // Hide content when collapsed to prevent rendering overlap
-        visible: wallpaperPanel.implicitWidth > 10
-        
-        ColumnLayout {
-            // Give it a fixed size based on target boundaries so the inner items don't jitter while animating
-            width: wallpaperPanel.targetWidth - 40 // Take into account margins
-            height: wallpaperPanel.targetHeight - 40
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: 20
-            spacing: 15
+
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 0
+
+        InverseRadius {
+            cornerPosition: "bottomRight"
+            implicitWidth: wallpaperPanel.cornerSize
+            implicitHeight: wallpaperPanel.cornerSize
+            color: Theme.dark.base
+            opacity: Theme.moduleOpacity
+            Layout.alignment: Qt.AlignRight
+            expandingH: wallpaperPanel.expanded
+        }
+
+        Rectangle {
+            id: containerRect
+
+            width: wallpaperPanel.implicitWidth
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            color: Theme.dark.base
+            opacity: Theme.moduleOpacity
             
-            Text {
-                text: "󰸉 Select Wallpaper"
-                font.family: Theme.font
-                font.pixelSize: 24
-                color: Theme.textPrimary
-                Layout.alignment: Qt.AlignHCenter
-            }
+            topLeftRadius: Theme.moduleEdgeRadius
+            bottomLeftRadius: Theme.moduleEdgeRadius
+            topRightRadius: 0
+            bottomRightRadius: 0
             
-            GridView {
-                id: grid
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                cellWidth: 210
-                cellHeight: 180
-                clip: true
+            clip: true
+            
+            // Hide content when collapsed to prevent rendering overlap
+            visible: wallpaperPanel.implicitWidth > 10
+            
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 20
+                spacing: 15
                 
-                model: FolderListModel {
-                    folder: "file://" + Quickshell.env("HOME") + "/Pictures/wallpapers"
-                    nameFilters: ["*.png", "*.jpg", "*.jpeg"]
+                Text {
+                    text: "󰸉 Select Wallpaper"
+                    font.family: Theme.font
+                    font.pixelSize: 24
+                    color: Theme.textPrimary
+                    Layout.alignment: Qt.AlignHCenter
                 }
                 
-                delegate: Rectangle {
-                    width: 200
-                    height: 170
-                    color: itemMouseArea.containsMouse ? Theme.dark.hover : "transparent"
-                    radius: Theme.moduleEdgeRadius
+                GridView {
+                    id: grid
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    cellWidth: 240
+                    cellHeight: 210
+                    clip: true
                     
-                    Image {
-                        id: preview
-                        anchors.top: parent.top
-                        anchors.topMargin: 10
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: 180
-                        height: 110
+                    model: FolderListModel {
+                        folder: "file://" + Quickshell.env("HOME") + "/Pictures/wallpapers"
+                        nameFilters: ["*.png", "*.jpg", "*.jpeg"]
+                    }
+                    
+                    delegate: ModuleButton {
+                        implicitWidth: 220
+                        implicitHeight: 190
+                        variant: "light"
+                        radius: Theme.moduleEdgeRadius
                         
-                        // PERFORMANCE FIX: Decode images at thumbnail size to save VRAM 
-                        sourceSize.width: 180
-                        sourceSize.height: 110
-                        asynchronous: true // Load off the main thread to prevent UI stutter
-                        
-                        source: fileUrl
-                        fillMode: Image.PreserveAspectCrop
-                        clip: true
-                        
-                        Rectangle {
-                            anchors.fill: parent
-                            color: "transparent"
-                            border.color: Theme.dark.border
-                            border.width: 1
-                            radius: 4
+                        Image {
+                            id: preview
+                            anchors.top: parent.top
+                            anchors.topMargin: 20
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: 180
+                            height: 110
+                            
+                            // PERFORMANCE FIX: Decode images at thumbnail size to save VRAM 
+                            sourceSize.width: 180
+                            sourceSize.height: 110
+                            asynchronous: true // Load off the main thread to prevent UI stutter
+                            
+                            source: fileUrl
+                            fillMode: Image.PreserveAspectCrop
+                            clip: true
                         }
-                    }
-                    
-                    Text {
-                        anchors.top: preview.bottom
-                        anchors.topMargin: 10
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: parent.width - 20
-                        text: fileName
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
-                        elide: Text.ElideRight
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-                    
-                    MouseArea {
-                        id: itemMouseArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
+                        
+                        label: fileName
+                        topMargin: 130
+                        
                         onClicked: {
                             var rawPath = String(fileUrl).replace("file://", "");
                             applyProc.targetFile = rawPath;
@@ -133,39 +120,26 @@ Rectangle {
                         }
                     }
                 }
-            }
-            
-            ModuleButton {
-                label: "Close"
-                cursorShape: Qt.PointingHandCursor
-                Layout.alignment: Qt.AlignHCenter
-                onClicked: wallpaperPanel.expanded = false
-                radius: Theme.moduleEdgeRadius
+                
+                ModuleButton {
+                    label: "Close"
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: wallpaperPanel.expanded = false
+                    radius: Theme.moduleEdgeRadius
+                    Layout.fillWidth: true
+                }
             }
         }
-    }
-    
-    // Inverse radiuses attached directly to this component to automatically track it
-    InverseRadius {
-        cornerPosition: "bottomRight"
-        color: Theme.dark.base
-        opacity: Theme.moduleOpacity
-        anchors {
-            bottom: containerRect.top
-            right: containerRect.right
-        }
-        visible: containerRect.visible
-    }
 
-    InverseRadius {
-        cornerPosition: "topRight"
-        color: Theme.dark.base
-        opacity: Theme.moduleOpacity
-        anchors {
-            top: containerRect.bottom
-            right: containerRect.right
+        InverseRadius {
+            cornerPosition: "topRight"
+            implicitWidth: wallpaperPanel.cornerSize
+            implicitHeight: wallpaperPanel.cornerSize
+            color: Theme.dark.base
+            opacity: Theme.moduleOpacity
+            Layout.alignment: Qt.AlignRight
+            expandingH: wallpaperPanel.expanded
         }
-        visible: containerRect.visible
     }
 
     Process {

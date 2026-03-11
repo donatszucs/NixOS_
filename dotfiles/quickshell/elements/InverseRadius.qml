@@ -4,10 +4,11 @@ Canvas {
     id: root
     property bool expandingV: true
     property bool expandingH: true
+    property int size: Theme.moduleEdgeRadius
     // Set false to disable the built-in Behavior so width/height can be bound externally
     property bool animated: true
-    implicitWidth: expandingH ? Theme.moduleEdgeRadius : 0
-    implicitHeight: expandingV ? Theme.moduleEdgeRadius : 0
+    implicitWidth: expandingH ? size : 0
+    implicitHeight: expandingV ? size : 0
 
     property color color: Theme.palette("dark").base
     // Where is the solid corner located within this block?

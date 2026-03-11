@@ -194,11 +194,5 @@ Item {
     // ==========================================
     // Notification Expire State
     // ==========================================
-    property var expireFlags: ({})
-
-    function setFlag(notifId, isReady) {
-        var temp = expireFlags;
-        temp[notifId] = isReady;
-        expireFlags = temp;
-    }
+    property int notificationCounter: 0
 }

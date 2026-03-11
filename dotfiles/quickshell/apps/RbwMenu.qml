@@ -16,12 +16,15 @@ Rectangle {
     property var allItems: []
     property var filteredItems: []
 
+    // Fixed corner cap size — must not depend on animated implicitHeight
+    property real cornerSize: targetHeight / 8
+
     focus: expanded
     color: "transparent"
 
-    implicitWidth: targetWidth
     // Drop down from below the bar — animate height growth downward
-    implicitHeight: expanded ? Theme.barHeight + targetHeight : 0
+    implicitHeight: expanded ? targetHeight : 0
+    implicitWidth: targetWidth + cornerSize * 2
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
@@ -141,178 +144,168 @@ Rectangle {
         autofillTimer.pendingItem = itemId;
         autofillTimer.start();
     }
-
-    // ── Visual panel (drops below the bar) ────────────────────────────────
-    Rectangle {
-        id: containerRect
-        anchors {
-            top: parent.top
-            topMargin: Theme.barHeight
-            left: parent.left
-            right: parent.right
+    RowLayout {
+        id: mainLayout
+        anchors.fill: parent
+        spacing: 0
+        InverseRadius {
+            cornerPosition: "bottomRight"
+            implicitHeight: rbwPanel.cornerSize
+            implicitWidth: rbwPanel.cornerSize
+            opacity: Theme.moduleOpacity
+            Layout.alignment: Qt.AlignBottom
+            expandingV: rbwPanel.expanded
         }
-        height: rbwPanel.implicitHeight - Theme.barHeight
+        
+        // ── Visual panel (drops below the bar) ────────────────────────────────
+        Rectangle {
+            id: containerRect
+            implicitHeight: rbwPanel.implicitHeight
+            Layout.fillWidth: true
+            color: Theme.dark.base
+            opacity: Theme.moduleOpacity
+            topLeftRadius: Theme.moduleEdgeRadius
+            topRightRadius: Theme.moduleEdgeRadius
+            clip: true
 
-        color: Theme.dark.base
-        opacity: Theme.moduleOpacity
-        topLeftRadius: Theme.moduleEdgeRadius
-        topRightRadius: Theme.moduleEdgeRadius
-        clip: true
-        visible: height > 2
-
-        ColumnLayout {
-            width: rbwPanel.targetWidth - 40
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                top: parent.top
-                topMargin: 20
-                bottom: parent.bottom
-                bottomMargin: 20
-            }
-            spacing: 12
-
-            Text {
-                text: "󰌆 Bitwarden"
-                font.family: Theme.font
-                font.pixelSize: 22
-                color: Theme.textPrimary
-                Layout.alignment: Qt.AlignHCenter
-            }
-
-            // Search field
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 36
-                color: Theme.dark.hover
-                radius: Theme.moduleEdgeRadius
-
-                TextInput {
-                    id: searchInput
-                    anchors {
-                        fill: parent
-                        leftMargin: 12
-                        rightMargin: 12
-                    }
-                    verticalAlignment: TextInput.AlignVCenter
-                    color: Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
-                    clip: true
-
-                    Text {
-                        anchors.fill: parent
-                        verticalAlignment: Text.AlignVCenter
-                        text: "Search..."
-                        color: Theme.textPrimary
-                        opacity: 0.5
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
-                        visible: !searchInput.text.length
-                    }
-
-                    onTextChanged: {
-                        var q = text.toLowerCase();
-                        rbwPanel.filteredItems = q.length === 0
-                            ? rbwPanel.allItems.slice()
-                            : rbwPanel.allItems.filter(i =>
-                                i.name.toLowerCase().includes(q) ||
-                                i.user.toLowerCase().includes(q)
-                              );
-                        rbwPanel.selectedIndex = rbwPanel.filteredItems.length > 0 ? 0 : -1;
-                        resultsList.currentIndex = rbwPanel.selectedIndex;
-                    }
-
-                    // Forward arrow keys / enter / escape to the panel
-                    Keys.forwardTo: [rbwPanel]
+            ColumnLayout {
+                anchors {
+                    fill: parent
+                    margins: 20
                 }
-            }
+                spacing: 12
 
-            // Results list
-            ListView {
-                id: resultsList
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                clip: true
-                spacing: 2
-                model: rbwPanel.filteredItems
+                Text {
+                    text: "󰌆 Bitwarden"
+                    font.family: Theme.font
+                    font.pixelSize: 22
+                    color: Theme.textPrimary
+                    Layout.alignment: Qt.AlignHCenter
+                }
 
-                delegate: Rectangle {
-                    width: resultsList.width
-                    height: modelData.user ? 54 : 44
-                    color: index === rbwPanel.selectedIndex ? Theme.dark.hover : "transparent"
+                // Search field
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 36
+                    color: Theme.dark.hover
                     radius: Theme.moduleEdgeRadius
 
-                    Column {
+                    TextInput {
+                        id: searchInput
                         anchors {
-                            verticalCenter: parent.verticalCenter
-                            left: parent.left
-                            right: parent.right
+                            fill: parent
                             leftMargin: 12
                             rightMargin: 12
                         }
-                        spacing: 2
+                        verticalAlignment: TextInput.AlignVCenter
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        clip: true
 
                         Text {
-                            width: parent.width
-                            text: modelData.name
-                            color: Theme.textPrimary
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
-                            elide: Text.ElideRight
-                        }
-
-                        Text {
-                            width: parent.width
-                            text: modelData.user
+                            anchors.fill: parent
+                            verticalAlignment: Text.AlignVCenter
+                            text: "Search..."
                             color: Theme.textPrimary
                             opacity: 0.5
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize - 2
-                            elide: Text.ElideRight
-                            visible: modelData.user !== ""
+                            font.pixelSize: Theme.fontSize
+                            visible: !searchInput.text.length
                         }
-                    }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onEntered: rbwPanel.selectedIndex = index
-                        onClicked: rbwPanel.executeAutofill(modelData.id)
+                        onTextChanged: {
+                            var q = text.toLowerCase();
+                            rbwPanel.filteredItems = q.length === 0
+                                ? rbwPanel.allItems.slice()
+                                : rbwPanel.allItems.filter(i =>
+                                    i.name.toLowerCase().includes(q) ||
+                                    i.user.toLowerCase().includes(q)
+                                );
+                            rbwPanel.selectedIndex = rbwPanel.filteredItems.length > 0 ? 0 : -1;
+                            resultsList.currentIndex = rbwPanel.selectedIndex;
+                        }
+
+                        // Forward arrow keys / enter / escape to the panel
+                        Keys.forwardTo: [rbwPanel]
                     }
                 }
+
+                // Results list
+                ListView {
+                    id: resultsList
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    spacing: 2
+                    model: rbwPanel.filteredItems
+
+                    delegate: Rectangle {
+                        width: resultsList.width
+                        height: modelData.user ? 54 : 44
+                        color: index === rbwPanel.selectedIndex ? Theme.dark.hover : "transparent"
+                        radius: Theme.moduleEdgeRadius
+
+                        Column {
+                            anchors {
+                                verticalCenter: parent.verticalCenter
+                                left: parent.left
+                                right: parent.right
+                                leftMargin: 12
+                                rightMargin: 12
+                            }
+                            spacing: 2
+
+                            Text {
+                                width: parent.width
+                                text: modelData.name
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize
+                                elide: Text.ElideRight
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: modelData.user
+                                color: Theme.textPrimary
+                                opacity: 0.5
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize - 2
+                                elide: Text.ElideRight
+                                visible: modelData.user !== ""
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onEntered: rbwPanel.selectedIndex = index
+                            onClicked: rbwPanel.executeAutofill(modelData.id)
+                        }
+                    }
+                }
+
+                ModuleButton {
+                    label: "Close"
+                    Layout.alignment: Qt.AlignHCenter
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: rbwPanel.closeMenu()
+                    radius: Theme.moduleEdgeRadius
+                }
             }
-
-            ModuleButton {
-                label: "Close"
-                Layout.alignment: Qt.AlignHCenter
-                cursorShape: Qt.PointingHandCursor
-                onClicked: rbwPanel.closeMenu()
-                radius: Theme.moduleEdgeRadius
-            }
         }
-    }
 
-    // Inverse radius caps at the bar edge (top of the dropping panel)
-    InverseRadius {
-        cornerPosition: "bottomLeft"
-        color: Theme.dark.base
-        opacity: Theme.moduleOpacity
-        anchors {
-            bottom: containerRect.bottom
-            left: containerRect.right
+        // Inverse radius caps at the bar edge (top of the dropping panel)
+        InverseRadius {
+            cornerPosition: "bottomLeft"
+            implicitHeight: rbwPanel.cornerSize
+            implicitWidth: rbwPanel.cornerSize
+            color: Theme.dark.base
+            opacity: Theme.moduleOpacity
+            Layout.alignment: Qt.AlignBottom
+            expandingV: rbwPanel.expanded
         }
-        visible: containerRect.visible
-    }
-
-    InverseRadius {
-        cornerPosition: "bottomRight"
-        color: Theme.dark.base
-        opacity: Theme.moduleOpacity
-        anchors {
-            bottom: containerRect.bottom
-            right: containerRect.left
-        }
-        visible: containerRect.visible
-    }
+}
 }
