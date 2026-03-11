@@ -237,13 +237,14 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
-                    spacing: 2
+                    spacing: 5
                     model: rbwPanel.filteredItems
 
-                    delegate: Rectangle {
+                    delegate: ModuleButton {
                         width: resultsList.width
                         height: modelData.user ? 54 : 44
-                        color: index === rbwPanel.selectedIndex ? Theme.dark.hover : "transparent"
+                        variant: "light"
+                        opacity: index === rbwPanel.selectedIndex ? 1 : 0.7
                         radius: Theme.moduleEdgeRadius
 
                         Column {
@@ -259,7 +260,7 @@ Rectangle {
                             Text {
                                 width: parent.width
                                 text: modelData.name
-                                color: Theme.textPrimary
+                                color: parent.textColor
                                 font.family: Theme.font
                                 font.pixelSize: Theme.fontSize
                                 elide: Text.ElideRight
@@ -268,7 +269,7 @@ Rectangle {
                             Text {
                                 width: parent.width
                                 text: modelData.user
-                                color: Theme.textPrimary
+                                color: parent.textColor
                                 opacity: 0.5
                                 font.family: Theme.font
                                 font.pixelSize: Theme.fontSize - 2
@@ -290,6 +291,7 @@ Rectangle {
                 ModuleButton {
                     label: "Close"
                     Layout.alignment: Qt.AlignHCenter
+                    Layout.fillWidth: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: rbwPanel.closeMenu()
                     radius: Theme.moduleEdgeRadius
