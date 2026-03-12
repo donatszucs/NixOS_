@@ -19,8 +19,8 @@ QtObject {
     // Use as:  Theme.palette["dark"].top  or  Theme.dark.top
 
     readonly property QtObject dark: QtObject {
-        readonly property color base:        '#29252d'
-        readonly property color hover:   '#1f1c22'
+        readonly property color base:        '#1f1c22'
+        readonly property color hover:   '#3a363e'
         readonly property color pressed: '#0e0a10'
         readonly property color text:       "#d5bfe2"
         readonly property color border:     "#8e6ca0"
@@ -28,14 +28,14 @@ QtObject {
 
     readonly property QtObject transparentDark: QtObject {
         readonly property color base:     "transparent"
-        readonly property color hover:   '#1f1c22'
+        readonly property color hover:   '#3a363e'
         readonly property color pressed: '#0e0a10'
         readonly property color text:       "#d5bfe2"
         readonly property color border:     "#8e6ca0"
     }
 
     readonly property QtObject light: QtObject {
-        readonly property color base:       '#bda5cb'
+        readonly property color base:       '#a896b3'
         readonly property color hover:      '#eee2f5'
         readonly property color pressed:    '#a68bb6'
         readonly property color text:       "#2a202f"
@@ -82,7 +82,7 @@ QtObject {
 
     // ── Typography ───────────────────────────────────────────────────
     readonly property string font: "JetBrainsMonoNL Nerd Font"
-    readonly property int    fontSize:  13
+    readonly property int    fontSize:  14
     readonly property int    barHeight: 33
 
     // ── Module sizing ────────────────────────────────────────────────
@@ -98,5 +98,5 @@ QtObject {
 
     // ── Animations ─────────────────────────────────────────────────
     readonly property int verticalDuration: 250
-    readonly property int horizontalDuration: 250
+    readonly property int horizontalDuration: verticalDuration
 }

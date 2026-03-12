@@ -40,13 +40,16 @@ Item {
             cornerPosition: "bottomRight"
             size: containerRect.implicitHeight / 8
             color: Theme.palette("dark").base
-            expandingV: notifColumn.implicitHeight !== 0
+            expandingH: containerRect.implicitHeight !== 0
+            expandingV: expandingH
+            animationDuration: Theme.verticalDuration / 2
         }
         ColumnLayout {
             id: notifColumn
             spacing: root.notifSpacing
 
             InverseRadius {
+                id: topRadius
                 Layout.alignment: Qt.AlignRight
                 cornerPosition: "bottomRight"
                 size: innerLayout.implicitWidth === 0 ? Theme.moduleEdgeRadius : (containerRect.implicitWidth / 8)
@@ -59,8 +62,8 @@ Item {
                 clip: true
                 opacity: Theme.moduleOpacity
                 topLeftRadius: Theme.moduleEdgeRadius + 5
-                implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? 0 : (innerLayout.implicitWidth + 20)
-                implicitHeight: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? 0 : (innerLayout.implicitHeight + 25)
+                implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (innerLayout.implicitWidth + 20)
+                implicitHeight: (innerLayout.implicitHeight === 0 && !hoverHandler.hovered) ? 0 : (innerLayout.implicitHeight + 25)
                 
                 Behavior on implicitHeight {
                     NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
@@ -168,6 +171,7 @@ Item {
 
         // ── Colors ────────────────────────────────────────────────────
         variant: isCritical ? "danger" : "light"
+        opacity: Theme.moduleOpacity
         border.color: "#f38ba8"
         border.width: isCritical ? 2 : 0
 

@@ -152,7 +152,7 @@ ModuleButton {
                     }
                     onTextEdited: {
                         launcherModule.filterApps(text)
-                        appList.currentIndex = -1
+                        appList.currentIndex = 0
                     }
                     Keys.onEscapePressed: launcherModule.expanded = false
                     Keys.onReturnPressed: {

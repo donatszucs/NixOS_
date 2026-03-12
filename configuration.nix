@@ -256,6 +256,7 @@
   inputs.zen-browser.packages."${builtins.currentSystem}".default
   spotify
   pkgs.vesktop
+  discord
   qalculate-gtk
   texlive.combined.scheme-full
 

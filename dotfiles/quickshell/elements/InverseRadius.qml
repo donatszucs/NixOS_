@@ -5,6 +5,7 @@ Canvas {
     property bool expandingV: true
     property bool expandingH: true
     property int size: Theme.moduleEdgeRadius
+    property int animationDuration: Theme.verticalDuration
     // Set false to disable the built-in Behavior so width/height can be bound externally
     property bool animated: true
     implicitWidth: expandingH ? size : 0
@@ -63,7 +64,7 @@ Canvas {
     Behavior on implicitWidth {
         enabled: root.animated
         NumberAnimation {
-            duration: Theme.verticalDuration
+            duration: root.animationDuration
             easing.type: Easing.OutCubic
         }
     }
@@ -71,7 +72,7 @@ Canvas {
     Behavior on implicitHeight {
         enabled: root.animated
         NumberAnimation {
-            duration: Theme.verticalDuration
+            duration: root.animationDuration
             easing.type: Easing.OutCubic
         }
     }
