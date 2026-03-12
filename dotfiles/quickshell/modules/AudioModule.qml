@@ -53,14 +53,14 @@ ModuleButton {
                     }
                     if (desc.length > maxSinkLen) maxSinkLen = desc.length
                     sinksListModel.append({ "name": desc, "active": active, "id" : n.id })
-                    maxSinkBarLength = maxSinkLen * 9 - 90
+                    maxSinkBarLength = maxSinkLen * 9
                 }
             }
         }
     }
 
-    implicitHeight: expanded ? Theme.moduleHeight * (1 + sinksListModel.count) + divider.implicitHeight : Theme.moduleHeight
-    implicitWidth: expanded ? (maxSinkBarLength + volumeButton.implicitWidth) : volumeButton.implicitWidth
+    implicitHeight: expanded ? baseColumn.implicitHeight : Theme.moduleHeight
+    implicitWidth: expanded ? baseColumn.implicitWidth : volumeButton.implicitWidth
 
     Behavior on implicitWidth {
         NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
@@ -71,7 +71,7 @@ ModuleButton {
     }
     ColumnLayout {
         id: baseColumn
-        spacing: 0
+        spacing: 10
 
         anchors {
             right: parent.right
@@ -85,7 +85,7 @@ ModuleButton {
             ModuleButton {
                 id: volumeButton
                 label: "100% "
-                variant: expanded ? "dark" : "transparentDark"
+                colorOverride: !expanded
                 textAlign: "right"
                 rightMargin: Theme.modulePaddingH + 4
 
@@ -111,7 +111,7 @@ ModuleButton {
             }
             ModuleButton {
                 visible: expanded
-                implicitWidth: expanded ? maxSinkBarLength : 0
+                implicitWidth: expanded ? maxSinkBarLength - volumeButton.implicitWidth + 20: 0
                 implicitHeight: Theme.moduleHeight
                 bottomLeftRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
 
@@ -122,47 +122,35 @@ ModuleButton {
 
             }
         }
-        Rectangle {
-            id: divider
-            visible: expanded
-            implicitWidth: audioModule.implicitWidth
-            implicitHeight: 10
-            color: "transparent"
-        }
         // Action buttons — revealed by clip as width expands leftward
-        ColumnLayout {
+        ListView {
             id: actionColumn
-            visible: audioModule.expanded
-            spacing: 0
-            Repeater {
-                model: sinksListModel
-                delegate: ModuleButton {
-                    required property var modelData
-                    
-                    // 1. We expose the index of the current item
-                    required property int index 
-                    cursorShape: Qt.PointingHandCursor
-                    variant: modelData.active ? "light" : "transparentDark"
-                    implicitWidth: expanded ? maxSinkBarLength + volumeButton.implicitWidth : 0
+            model: sinksListModel
+            clip: true
+            spacing: 5
+            focus: false
+            Layout.fillWidth: true
+            Layout.margins: 10
+            implicitHeight: contentHeight
+            delegate: ModuleButton {
+                required property var modelData
+                required property int index
 
-                    label: modelData.name
-
-                    // 2. THE MATHEMATICAL "CLIP":
-                    // Make top corners perfectly square to sit seamlessly flush with the item above
-                    topLeftRadius: 0
-                    topRightRadius: 0
-                    
-                    // Apply the parent's radius ONLY if this is the absolute last item in the list!
-                    bottomLeftRadius: index === sinksListModel.count - 1 ? audioModule.bottomLeftRadius : 0
-                    bottomRightRadius: index === sinksListModel.count - 1 ? audioModule.bottomRightRadius : 0
-
-                    Process {
-                        id: actionProc
-                        command: ["bash", "-c", "wpctl set-default " + modelData.id]
-                    }
-
-                    onClicked: actionProc.running = true
+                variant: "light"
+                cursorShape: Qt.PointingHandCursor
+                implicitWidth: expanded ? maxSinkBarLength : 0
+                implicitHeight: Theme.moduleHeight
+                radius: Theme.moduleEdgeRadius
+                colorOverride: modelData.active
+                overrideColor: "white"
+                Process {
+                    id: actionProc
+                    command: ["bash", "-c", "wpctl set-default " + modelData.id]
                 }
+
+                onClicked: actionProc.running = true
+
+                label: modelData.name
             }
         }
 

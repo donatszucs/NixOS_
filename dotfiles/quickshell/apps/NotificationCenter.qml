@@ -147,6 +147,9 @@ Item {
         property bool expiring: false
         property bool forceClose: false
 
+        // Cached image: set on first load, only updated if a new notification brings its own image
+        property string cachedImage: ""
+
         visible: implicitWidth > 0 && implicitHeight > 0
         property bool isShowing: (hoverHandler.hovered || entered && !expiring) && !forceClose
 
@@ -169,6 +172,8 @@ Item {
 
         radius: Theme.moduleEdgeRadius
 
+        cursorShape: Qt.PointingHandCursor
+
         // ── Colors ────────────────────────────────────────────────────
         variant: isCritical ? "danger" : "light"
         opacity: Theme.moduleOpacity
@@ -180,6 +185,8 @@ Item {
             root.notificationNumber++
             SharedState.notificationCounter = root.notificationNumber
             toastRow.entered = true
+            if (toastRow.notif && toastRow.notif.image !== "")
+                toastRow.cachedImage = toastRow.notif.image
         }
 
         Behavior on implicitHeight {
@@ -220,7 +227,7 @@ Item {
                 // Image block: shows notification image if available, otherwise app icon; hidden if neither are provided
                 Item {
 
-                    readonly property bool hasImage: toastRow.notif && toastRow.notif.image !== ""
+                    readonly property bool hasImage: toastRow.cachedImage !== ""
                     readonly property bool hasIcon:  toastRow.notif && toastRow.notif.appIcon !== ""
                     visible: hasImage || hasIcon
 
@@ -229,10 +236,10 @@ Item {
 
                     Image {
                         anchors.fill: parent
-                        source: parent.hasImage ? toastRow.notif.image : ("image://icon/" + toastRow.notif.appIcon)
+                        source: parent.hasImage ? toastRow.cachedImage : ("image://icon/" + toastRow.notif.appIcon)
                         fillMode: Image.PreserveAspectFit
                         smooth: true
-                        cache: false
+                        cache: true
                     }
                 }
 
@@ -244,6 +251,7 @@ Item {
                     color: toastRow.textColor
                     opacity: 0.5
                     elide: Text.ElideRight
+                    Layout.topMargin: 5
                     Layout.alignment: Qt.AlignHCenter
                 }
             }
@@ -301,6 +309,8 @@ Item {
         }
 
         function revive() {
+            if (toastRow.notif && toastRow.notif.image !== "")
+                toastRow.cachedImage = toastRow.notif.image
             toastRow.forceClose = false
             toastRow.expiring = false
             toastRow.entered = true

@@ -178,7 +178,8 @@ Rectangle {
                         implicitWidth: list.width
                         variant: "light"
                         implicitHeight: 50
-                        opacity: clipboardPanel.selectedIndex === index ? 1 : 0.7
+                        colorOverride: clipboardPanel.selectedIndex === index
+                        overrideColor: "white"
                         radius: Theme.moduleEdgeRadius
                         
                         label: clipContent.length > 38? clipContent.substring(0, 38) + "..." : clipContent

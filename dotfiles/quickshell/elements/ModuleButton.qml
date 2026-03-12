@@ -38,18 +38,15 @@ Rectangle {
     // Whether to suppress the hover colour change
     property bool noHoverColorChange: false
 
+    property bool colorOverride: false
+    property color overrideColor: "transparent"
+
     // Cursor shape to use when hovering this button. Can be overridden by
     // instances (e.g. `Qt.PointingHandCursor: Qt.PointingHandCursor`). Default is arrow.
     property int cursorShape: Qt.ArrowCursor
 
-    // ── Deprecated shims (kept for compatibility) --------------------
-    // Prefer setting `variant` directly in new code.
-    property bool lightTheme:       false
-    property bool redTheme:         false
-    property bool transparentRed:   false
-
     // ── variant and palette --------------------------------
-    readonly property var pal: Theme.palette(variant)
+    property var pal: Theme.palette(variant)
 
     HoverHandler {
         id: rootHover
@@ -65,7 +62,7 @@ Rectangle {
     radius: Theme.moduleRadius
     opacity: Theme.moduleOpacity
 
-    color: root.pressed ? root.pal.pressed : ((root.hovered && !root.noHoverColorChange) ? root.pal.hover : root.pal.base)
+    color: root.pressed ? root.pal.pressed : ((root.hovered && !root.noHoverColorChange) ? root.pal.hover : colorOverride ? root.overrideColor : root.pal.base)
 
     clip: true
 
@@ -90,10 +87,7 @@ Rectangle {
 
     MouseArea {
         anchors.fill: parent
-        hoverEnabled: true
         cursorShape: root.cursorShape
-        onEntered: root.hovered = true
-        onExited: root.hovered = false
         onPressed: root.pressed = true
         onReleased: root.pressed = false
         onClicked: root.clicked()

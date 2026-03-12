@@ -58,7 +58,7 @@ ModuleButton {
             layoutDirection: Qt.RightToLeft
             // Title
             ModuleButton {
-                variant: expanded ? "dark" : "transparentDark"
+                colorOverride: !expanded
                 id: titleBtn
                 Layout.alignment: Qt.AlignCenter
                 cursorShape: Qt.PointingHandCursor
@@ -120,7 +120,6 @@ ModuleButton {
             // Controls — only visible when expanded
             RowLayout {
                 id: controlsRow
-                visible: nowPlayingModule.expanded
                 spacing: 0
                 layoutDirection: Qt.RightToLeft
 
@@ -135,7 +134,7 @@ ModuleButton {
                         cursorShape: Qt.PointingHandCursor
                         
                         implicitHeight: Theme.moduleHeight
-                        implicitWidth: expanded ? 32 : 0
+                        implicitWidth: nowPlayingModule.expanded ? 32 : 0
 
                         label: modelData.action === "playpause" ? nowPlayingModule.playPauseIcon : modelData.icon
                         bottomLeftRadius: modelData.action === "playpause" ? Theme.moduleEdgeRadius : 0

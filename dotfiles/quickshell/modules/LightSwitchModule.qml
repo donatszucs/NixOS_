@@ -227,4 +227,6 @@ ModuleButton {
             wheel.accepted = true
         }
     }
+
+    Component.onCompleted: SharedState.refreshLightStatus()
 }

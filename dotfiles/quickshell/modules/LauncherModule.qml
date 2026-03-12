@@ -19,14 +19,14 @@ ModuleButton {
     HoverHandler {
         id: parentHover
     }
-    property int  panelWidth:  320
+    property int  panelWidth:  400
     property int  maxVisible:  8
 
     // JS array of DesktopEntry objects matching the current search
     property var filteredApps: []
 
-    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
+    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
+    bottomRightRadius: bottomLeftRadius
     clip: true
 
     implicitWidth:  expanded ? panelWidth : collapsedRow.implicitWidth
@@ -80,17 +80,17 @@ ModuleButton {
         topMarginButton: 0 // Removes default margin from ModuleButton
         anchors { left: parent.left; right: parent.right; top: parent.top }
         implicitWidth:  launcherModule.expanded ? launcherModule.panelWidth : collapsedRow.implicitWidth
-        implicitHeight: expanded ? panelCol.implicitHeight + 10 : panelCol.implicitHeight
+        implicitHeight: expanded ? panelCol.implicitHeight + 5 : panelCol.implicitHeight
 
         ColumnLayout {
             id: panelCol
             anchors { left: parent.left; right: parent.right; top: parent.top } // Reset layout spacing
-            spacing: 8
+            spacing: 5
 
             // Header row (same height as collapsed bar, keeps visual alignment)
             ModuleButton {
                 id: collapsedRow
-                variant: expanded ? "dark" : "transparentDark"
+                colorOverride: !launcherModule.expanded
                 Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
                 label: "  Menu "
@@ -114,7 +114,7 @@ ModuleButton {
             }
 
             ModuleButton {
-                variant: "transparentDark"
+                colorOverride: true
                 Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
                 visible: launcherModule.expanded
@@ -131,8 +131,8 @@ ModuleButton {
             Rectangle {
                 visible: launcherModule.expanded
                 Layout.fillWidth: true
-                Layout.leftMargin: 10
-                Layout.rightMargin: 10
+                Layout.leftMargin: 5
+                Layout.rightMargin: 5
                 implicitHeight: Theme.moduleHeight
                 color: Theme.dark.hover
                 radius: Theme.moduleEdgeRadius
@@ -176,7 +176,7 @@ ModuleButton {
                             appList.currentIndex = appList.currentIndex - 1
                             appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
                         } else {
-                            appList.currentIndex = -1
+                            appList.currentIndex = 0
                         }
                     }
                 }
@@ -211,17 +211,17 @@ ModuleButton {
                     anchors.fill: parent
                     model: launcherModule.filteredApps
                     clip: true
-                    spacing: 0
+                    spacing: 5
                     focus: false
                     delegate: ModuleButton {
                         required property var modelData
                         required property int index
+
+                        variant: "light"
+                        noHoverColorChange: true
                         cursorShape: Qt.PointingHandCursor
                         width: appList.width
-                        topLeftRadius:    0
-                        topRightRadius:   0
-                        bottomLeftRadius:  index === launcherModule.filteredApps.length - 1 ? Theme.moduleEdgeRadius : 0
-                        bottomRightRadius: index === launcherModule.filteredApps.length - 1 ? Theme.moduleEdgeRadius : 0
+                        radius: Theme.moduleEdgeRadius
                         onClicked: {
                             modelData.execute()
                             launcherModule.expanded = false
@@ -229,7 +229,8 @@ ModuleButton {
 
                         // Visual highlight when keyboard-selected or mouse-hovered
                         property bool isCurrent: index === appList.currentIndex
-                        color: isCurrent ? Theme.dark.hover : "transparent"
+                        colorOverride: isCurrent
+                        overrideColor: "white"
 
                         HoverHandler {
                             onHoveredChanged: if (hovered) appList.currentIndex = index
@@ -248,7 +249,7 @@ ModuleButton {
                             Text {
                                 Layout.fillWidth: true
                                 text: modelData.name
-                                color: Theme.textPrimary
+                                color: textColor
                                 font.family: Theme.font
                                 font.pixelSize: Theme.fontSize
                                 font.bold: true

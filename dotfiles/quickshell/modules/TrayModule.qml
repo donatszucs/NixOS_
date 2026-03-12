@@ -10,7 +10,7 @@ ModuleButton {
     id: root
     noHoverColorChange: true
     property int openMenus: 0
-    property bool expanded: parentHover.hovered || openMenus > 0
+    property bool expanded: parentHover.hovered
 
     HoverHandler {
         id: parentHover
@@ -45,7 +45,7 @@ ModuleButton {
             id: notificationButton
             cursorShape: Qt.PointingHandCursor
             label: "󱊖"
-            variant: "transparentDark"
+            colorOverride: true
             leftMargin: -3
 
             onClicked: missioncenterProcess.running = true
@@ -63,7 +63,7 @@ ModuleButton {
 
                 delegate: ModuleButton {
                     id: trayItemDelegate
-                    variant: "transparentDark"
+                    colorOverride: true
                     noHoverColorChange: true
                     required property var modelData
                     property bool menuOpen: false

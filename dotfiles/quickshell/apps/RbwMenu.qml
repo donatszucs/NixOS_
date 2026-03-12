@@ -244,7 +244,8 @@ Rectangle {
                         width: resultsList.width
                         height: modelData.user ? 54 : 44
                         variant: "light"
-                        opacity: index === rbwPanel.selectedIndex ? 1 : 0.7
+                        colorOverride: index === rbwPanel.selectedIndex
+                        overrideColor: "white"
                         radius: Theme.moduleEdgeRadius
 
                         Column {

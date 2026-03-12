@@ -7,72 +7,77 @@ import "../elements"
 
 ModuleButton {
     id: powerModule
-    variant: "danger"
-    noHoverColorChange: true
-    property bool expanded: parentHover.hovered
+    variant: "dark"
+    noHoverColorChange: powerModule.expanded
+    property bool expanded: false
+    property color buttonColor: mainButton.color
+
+    topMarginButton: 0 // Removes default margin from ModuleButton
 
     HoverHandler {
         id: parentHover
+        onHoveredChanged: {
+            if (!parentHover.hovered && expanded) expanded = false
+        }
     }
 
     bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
 
-    implicitHeight: expanded ? Theme.moduleHeight * 4 : Theme.moduleHeight
-    implicitWidth: expanded ? 100 : 32
-
-    Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-    }
+    implicitHeight: expanded ? actionColumn.implicitHeight + 10: Theme.moduleHeight
+    implicitWidth: expanded ? actionColumn.implicitWidth + 20 : actionColumn.implicitWidth
 
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-    }
-    Text {
-        visible: !powerModule.expanded
-        id: powerIcon
-        text: ""
-        color: Theme.transparentRed.text
-        font.family: Theme.font
-        font.pixelSize: Theme.fontSize
-        font.bold: true
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        NumberAnimation on opacity {
-                    from: 0.0
-                    to: 1.0
-                    duration: Theme.horizontalDuration
-                    easing.type: Easing.OutCubic
-                }
     }
 
     // Action buttons — revealed by clip as width expands leftward
     ColumnLayout {
         id: actionColumn
-        visible: powerModule.expanded
-        spacing: 0
+        spacing: 5
+        anchors { left: parent.left; right: parent.right; top: parent.top }
+
+        ModuleButton {
+            id: mainButton
+            colorOverride: !expanded
+            noHoverColorChange: !powerModule.expanded            
+            bottomLeftRadius: powerModule.expanded ? Theme.moduleEdgeRadius : 0
+            bottomRightRadius: bottomLeftRadius
+            Layout.alignment: Qt.AlignHCenter
+            label: powerModule.expanded ? " Power Menu" : ""
+            rightMargin: powerModule.expanded ? 0: 3
+            
+
+            cursorShape: Qt.PointingHandCursor
+            onClicked: powerModule.expanded = !powerModule.expanded
+
+            Behavior on implicitWidth {
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
+        }
+
         Repeater {
             model: [
-                { icon: "", cmd: "systemctl poweroff",   tip: "Shutdown", },
-                { icon: "", cmd: "systemctl reboot",   tip: "Reboot", },
-                { icon: "", cmd: "systemctl suspend",  tip: "Suspend", },
-                { icon: "", cmd: "hyprlock",           tip: "Lock", }
+                { index: 0, text: "  Shutdown", cmd: "systemctl poweroff", },
+                { index: 1, text: "  Reboot", cmd: "systemctl reboot", },
+                { index: 2, text: "  Suspend", cmd: "systemctl suspend", },
+                { index: 3, text: "  Lock", cmd: "hyprlock", }
             ]
             delegate: ModuleButton {
                 id: actionButton
+                visible: powerModule.expanded
                 required property var modelData
                 cursorShape: Qt.PointingHandCursor
-                variant: "transparentRed"
-                implicitWidth: expanded ? 100 : 28
+                variant: "danger"
 
-                radius: 0
+                implicitWidth: mainButton.implicitWidth
 
-                bottomLeftRadius: (modelData.tip === "Lock") ? Theme.moduleEdgeRadius : 0
+                Layout.alignment: Qt.AlignHCenter
 
-                rightMargin: Theme.modulePaddingH
-                textAlign: "right"
+                radius: Theme.moduleEdgeRadius
 
-                label: expanded ? modelData.tip + " " + modelData.icon : modelData.icon
+                label: modelData.text
+                textAlign: "left"
+                leftMargin: 20
 
                 Process {
                     id: actionProc
@@ -85,8 +90,7 @@ ModuleButton {
         }
     }
 
-    Process {
-        id: powerOffProc
-        command: ["bash", "-c", "systemctl poweroff"]
+    Behavior on color {
+        ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
 }

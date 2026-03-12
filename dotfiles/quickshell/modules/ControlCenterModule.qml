@@ -154,7 +154,7 @@ ModuleButton {
                     id: netStatusIcon
                     label: controlCenter.netIcon
                     cursorShape: Qt.PointingHandCursor
-                    variant: "transparentDark"
+                    colorOverride: true
                     textColor: controlCenter.netColor
                     textFont: 24
                     rightMargin: 6
@@ -194,7 +194,7 @@ ModuleButton {
                         label: controlCenter.btIcon
                         cursorShape: Qt.PointingHandCursor
                         textColor: controlCenter.btColor
-                        variant: "transparentDark"
+                        colorOverride: true
                         radius: Theme.moduleEdgeRadius
                         textFont: 24
                         implicitWidth: textFont * 2
@@ -271,7 +271,7 @@ ModuleButton {
                     label: ""
                     textColor: controlCenter.headsetBatteryAvailable ? (controlCenter.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed) : Theme.textPrimary
                     cursorShape: Qt.PointingHandCursor
-                    variant: "transparentDark"
+                    colorOverride: true
                     textFont: 24
                     rightMargin: 6
                     implicitWidth: textFont * 2

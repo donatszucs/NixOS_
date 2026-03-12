@@ -19,33 +19,17 @@ QtObject {
     // Use as:  Theme.palette["dark"].top  or  Theme.dark.top
 
     readonly property QtObject dark: QtObject {
-        readonly property color base:        '#1f1c22'
+        readonly property color base:        '#171617'
         readonly property color hover:   '#3a363e'
-        readonly property color pressed: '#0e0a10'
-        readonly property color text:       "#d5bfe2"
-        readonly property color border:     "#8e6ca0"
-    }
-
-    readonly property QtObject transparentDark: QtObject {
-        readonly property color base:     "transparent"
-        readonly property color hover:   '#3a363e'
-        readonly property color pressed: '#0e0a10'
+        readonly property color pressed: '#4a484c'
         readonly property color text:       "#d5bfe2"
         readonly property color border:     "#8e6ca0"
     }
 
     readonly property QtObject light: QtObject {
-        readonly property color base:       '#a896b3'
+        readonly property color base:       '#c6aad7'
         readonly property color hover:      '#eee2f5'
-        readonly property color pressed:    '#a68bb6'
-        readonly property color text:       "#2a202f"
-        readonly property color border:     "#c8b3d4"
-    }
-
-    readonly property QtObject transparentLight: QtObject {
-        readonly property color base:       "transparent"
-        readonly property color hover:      '#eee2f5'
-        readonly property color pressed:    '#a68bb6'
+        readonly property color pressed:    '#929192'
         readonly property color text:       "#2a202f"
         readonly property color border:     "#c8b3d4"
     }
@@ -58,21 +42,11 @@ QtObject {
         readonly property color border:     "#652e2e"
     }
 
-    readonly property QtObject transparentRed: QtObject {
-        readonly property color base:        "transparent"
-        readonly property color hover:      "#a36067"
-        readonly property color pressed:    "#8f3939"
-        readonly property color text:       "#2a202f"
-        readonly property color border:     "#652e2e"
-    }
-
     // Helper: resolve a variant name string → palette object
     // Usage: Theme.palette("dark").top
     function palette(name) {
         if (name === "light")       return Theme.light
         if (name === "danger")      return Theme.danger
-        if (name === "transparentRed") return Theme.transparentRed
-        if (name === "transparentDark") return Theme.transparentDark
         return Theme.dark
     }
 
