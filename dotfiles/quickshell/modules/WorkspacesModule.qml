@@ -12,6 +12,7 @@ ModuleButton {
     property string screenName: ""
 
     color: Theme.palette("dark").base
+    opacity: Theme.moduleOpacity
 
     bottomLeftRadius: Theme.moduleEdgeRadius + 2
     bottomRightRadius: Theme.moduleEdgeRadius + 2
@@ -49,7 +50,7 @@ ModuleButton {
                 variant: "light"
                 opacity: active ? 1.0 : 0.6
                 implicitHeight: root.implicitHeight - 2 * root.overlay
-                implicitWidth: wsContentRow.implicitWidth + 20
+                implicitWidth: active ? 20 + wsContentRow.implicitWidth : 15 + wsContentRow.implicitWidth
                 cursorShape: Qt.PointingHandCursor
 
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
@@ -70,7 +71,7 @@ ModuleButton {
                 RowLayout {
                     id: wsContentRow
                     anchors.centerIn: parent
-                    spacing: 5
+                    spacing: active ? 10 : 5
 
                     Text {
                         text: wsButton.modelData.name
@@ -113,12 +114,16 @@ ModuleButton {
                 }
 
                 Behavior on implicitWidth {
-                    NumberAnimation { duration: 80; easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.OutCubic }
+                }
+                Behavior on opacity {
+                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                 }
             }
         }
         // Spacer between "my" workspaces and the others (if any)
         Rectangle {
+            visible: root.monitorWorkspaces.others.length > 0
             width: root.overlay
             height: 1
             color: "transparent"
@@ -133,7 +138,7 @@ ModuleButton {
                 variant: "light"
                 opacity: active ? 1.0 : 0.6
                 implicitHeight: root.implicitHeight - 2 * root.overlay
-                implicitWidth: active ? 35 : 25
+                implicitWidth: 25
                 cursorShape: Qt.PointingHandCursor
                 
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
@@ -153,6 +158,9 @@ ModuleButton {
 
                 Behavior on implicitWidth {
                     NumberAnimation { duration: 80; easing.type: Easing.OutCubic }
+                }
+                Behavior on opacity {
+                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                 }
             }
         }

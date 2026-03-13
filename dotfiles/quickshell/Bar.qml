@@ -13,6 +13,8 @@ PanelWindow {
     required property var modelData
     screen: modelData
 
+    color: "transparent"
+
     // Cover the full screen so children can render below the bar strip
     anchors {
         top: true
@@ -69,7 +71,6 @@ PanelWindow {
             item: notificationCenter
         }
     }
-    color: "transparent"
 
     // Background MouseArea to close the launcher when clicking outside of it
     MouseArea {
@@ -79,17 +80,6 @@ PanelWindow {
             launcherModule.expanded = false
         }
         z: -1
-    }
-
-    // Subtle gradient background, like waybar's window#waybar
-    Rectangle {
-        anchors { top: parent.top; left: parent.left; right: parent.right }
-        height: Theme.barHeight
-        gradient: Gradient {
-            orientation: Gradient.Vertical
-            GradientStop { position: 0.0; color: Qt.rgba(0.33, 0.27, 0.37, 0.13) }
-            GradientStop { position: 1.0; color: "transparent" }
-        }
     }
 
     // ── LEFT ─────────────────────────────────────────────────────────────

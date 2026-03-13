@@ -8,6 +8,7 @@ import "../elements"
 ModuleButton {
     id: powerModule
     variant: "dark"
+    opacity: Theme.moduleOpacity
     noHoverColorChange: powerModule.expanded
     property bool expanded: false
     property color buttonColor: mainButton.color

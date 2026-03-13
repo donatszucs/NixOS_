@@ -6,6 +6,7 @@ import "../elements"
 
 ModuleButton {
     id: root
+    opacity: Theme.moduleOpacity
 
     function updateTime() {
         label = Qt.formatDateTime(new Date(), "HH:mm:ss")

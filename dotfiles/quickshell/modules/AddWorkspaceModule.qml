@@ -5,6 +5,7 @@ import "../elements"
 ModuleButton {
     label: ""
     variant: "dark"
+    opacity: Theme.moduleOpacity
     implicitWidth: Math.ceil(Theme.moduleHeight * 0.8)
     implicitHeight: Math.ceil(Theme.moduleHeight * 0.7)
     rightMargin: 2

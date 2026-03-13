@@ -27,10 +27,10 @@ QtObject {
     }
 
     readonly property QtObject light: QtObject {
-        readonly property color base:       '#c6aad7'
+        readonly property color base:       '#d5bfe2'
         readonly property color hover:      '#eee2f5'
         readonly property color pressed:    '#929192'
-        readonly property color text:       "#2a202f"
+        readonly property color text:       "#171617"
         readonly property color border:     "#c8b3d4"
     }
 
@@ -61,7 +61,7 @@ QtObject {
 
     // ── Module sizing ────────────────────────────────────────────────
     readonly property real moduleHeight: 33
-    readonly property real moduleOpacity: 0.9
+    readonly property real moduleOpacity: 0.85
     readonly property int moduleRadius:   0
     readonly property int moduleEdgeRadius:   18
     readonly property int modulePaddingH: 15

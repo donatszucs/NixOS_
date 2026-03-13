@@ -10,6 +10,7 @@ ModuleButton {
     // We manage our own content; keep the inherited label empty
     label: ""
     variant: SharedState.lightVariant
+    opacity: Theme.moduleOpacity
 
     // ── Expand / collapse colour picker ────────────────────────────
     property bool expanded: false

@@ -14,6 +14,7 @@ ModuleButton {
     property string cacheFile: "/tmp/ddc_brightness_disp" + displayNumber
 
     label: brightness + "%  "
+    opacity: Theme.moduleOpacity
 
     // Read brightness from cache on startup
     Component.onCompleted: {

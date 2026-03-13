@@ -8,6 +8,7 @@ ModuleButton {
     cursorShape: Qt.PointingHandCursor
     label: SharedState.modLabel
     variant: SharedState.modVariant
+    opacity: Theme.moduleOpacity
 
     onClicked: SharedState.toggleModSwitcher()
 }

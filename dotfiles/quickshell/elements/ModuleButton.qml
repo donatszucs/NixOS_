@@ -60,7 +60,6 @@ Rectangle {
     implicitHeight: Theme.moduleHeight
     implicitWidth: Math.ceil(labelText.implicitWidth + 30)
     radius: Theme.moduleRadius
-    opacity: Theme.moduleOpacity
 
     color: root.pressed ? root.pal.pressed : ((root.hovered && !root.noHoverColorChange) ? root.pal.hover : colorOverride ? root.overrideColor : root.pal.base)
 

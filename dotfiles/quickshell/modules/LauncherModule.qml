@@ -19,6 +19,9 @@ ModuleButton {
     HoverHandler {
         id: parentHover
     }
+
+    opacity: Theme.moduleOpacity
+
     property int  panelWidth:  400
     property int  maxVisible:  8
 
@@ -27,6 +30,7 @@ ModuleButton {
 
     bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
     bottomRightRadius: bottomLeftRadius
+    
     clip: true
 
     implicitWidth:  expanded ? panelWidth : collapsedRow.implicitWidth
@@ -85,7 +89,7 @@ ModuleButton {
         ColumnLayout {
             id: panelCol
             anchors { left: parent.left; right: parent.right; top: parent.top } // Reset layout spacing
-            spacing: 5
+            spacing: 15
 
             // Header row (same height as collapsed bar, keeps visual alignment)
             ModuleButton {
@@ -131,8 +135,8 @@ ModuleButton {
             Rectangle {
                 visible: launcherModule.expanded
                 Layout.fillWidth: true
-                Layout.leftMargin: 5
-                Layout.rightMargin: 5
+                Layout.leftMargin: 10
+                Layout.rightMargin: 10
                 implicitHeight: Theme.moduleHeight
                 color: Theme.dark.hover
                 radius: Theme.moduleEdgeRadius
@@ -149,6 +153,22 @@ ModuleButton {
                         if (!activeFocus && launcherModule.expanded) {
                             launcherModule.expanded = false;
                         }
+                    }
+
+                    Text {
+                        anchors {
+                            left: parent.left
+                            verticalCenter: parent.verticalCenter
+                        }
+                        text: " Search apps..."
+                        color: Theme.text
+                        opacity: 0.5 // Make it look faded like a placeholder
+                        font.family: parent.font.family
+                        font.pixelSize: parent.font.pixelSize
+                        
+                        // The magic trick: Hide it if the user has typed anything!
+                        // (You can also add `&& !replyInput.activeFocus` if you want it to hide as soon as they click the box)
+                        visible: searchField.text.length === 0
                     }
                     onTextEdited: {
                         launcherModule.filterApps(text)

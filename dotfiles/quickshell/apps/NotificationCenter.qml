@@ -25,6 +25,7 @@ Item {
     Notif.NotificationServer {
         id: server
         keepOnReload: false
+        actionsSupported: true
         onNotification: notification => {
             notification.tracked = true
         }
@@ -297,6 +298,37 @@ Item {
                     maximumLineCount: 4
                     elide: Text.ElideRight
                     Layout.fillWidth: true
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 5
+                    spacing: 8
+                    
+                    // Only show this row if the notification actually has actions
+                    visible: toastRow.notif && toastRow.notif.actions.length > 0
+
+                    Repeater {
+                        model: toastRow.notif ? toastRow.notif.actions : []
+
+                        delegate: ModuleButton {
+                            // Basic button styling (adjust to match your theme!)
+                            Layout.fillWidth: true
+                            implicitHeight: 28
+                            radius: Theme.moduleEdgeRadius
+                            
+                            onClicked: modelData.invoke()
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: modelData.text // The label provided by the app (e.g. "Reply", "Mark as Read")
+                                color: textColor
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize - 2
+                                font.bold: true
+                            }
+                        }
+                    }
                 }
             }
         }

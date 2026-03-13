@@ -9,6 +9,7 @@ import "../elements"
 ModuleButton {
     id: audioModule
     variant: "dark"
+    opacity: Theme.moduleOpacity
     noHoverColorChange: true
     property bool expanded: false
     property int maxSinkBarLength: 0

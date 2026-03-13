@@ -15,6 +15,7 @@ ModuleButton {
     property string playPauseIcon: "󰐊"
     property bool isPlaying: false
     property bool expanded: isPlaying && parentHover.hovered
+    opacity: Theme.moduleOpacity
 
     HoverHandler {
         id: parentHover
