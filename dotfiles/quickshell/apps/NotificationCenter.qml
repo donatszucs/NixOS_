@@ -113,7 +113,7 @@ Item {
                             Rectangle {
                                 color: "transparent"
                                 implicitWidth: toast.implicitWidth
-                                implicitHeight: (toast.isShowing && parent.index !== 0) ? 5 : 0
+                                implicitHeight: toast.isShowing && (parent.index !== 0|| (parent.index === 0 && hoverHandler.hovered)) ? 5 : 0
 
                                 Behavior on implicitHeight {
                                     NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
