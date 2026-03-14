@@ -37,7 +37,7 @@ ModuleButton {
             implicitWidth: root.expanded ? root.textFont * 8 : 0
             radius: Theme.moduleEdgeRadius
             implicitHeight: Math.ceil(Theme.moduleHeight * 0.75)
-            opacity: root.expanded ? 1 : 0
+            opacity: root.expanded ? Theme.moduleOpacity : 0
 
             cursorShape: Qt.PointingHandCursor
             onClicked: calendarProc.running = true
@@ -63,6 +63,7 @@ ModuleButton {
         ModuleButton {
             label: root.time
             variant: "light"
+            opacity: Theme.moduleOpacity
             implicitWidth: textFont * 8
             radius: Theme.moduleEdgeRadius
             implicitHeight: Math.ceil(Theme.moduleHeight * 0.75)

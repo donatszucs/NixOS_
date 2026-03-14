@@ -43,6 +43,7 @@ ModuleButton {
         ModuleButton {
             id: mainButton
             variant: "light"
+            opacity: Theme.moduleOpacity
             noHoverColorChange: !powerModule.expanded
             
             radius: Theme.moduleEdgeRadius

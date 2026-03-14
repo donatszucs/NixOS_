@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Widgets
+import Quickshell.Io
 
 import "../elements"
 
@@ -83,32 +84,81 @@ ModuleButton {
 
                     Repeater {
                         model: wsButton.modelData.toplevels.values
-                        delegate: IconImage {
+                        delegate: Image {
+                            id: windowIcon
                             required property var modelData
-                            readonly property string appId: modelData.wayland ? modelData.wayland.appId : ""
+                            // Use x11 appId if wayland one is empty or missing (e.g. for Steam games running via XWayland)
+                            readonly property string appId: {
+                                if (modelData.wayland && modelData.wayland.appId !== "") return modelData.wayland.appId;
+                                if (modelData.x11 && modelData.x11.appId !== "") return modelData.x11.appId;
+                                return "";
+                            }
+                            
+                            readonly property bool isSteam: appId.toLowerCase().indexOf("steam_app_") === 0
+                            readonly property string steamId: isSteam ? appId.substring(10) : ""
+                            property string steamImagePath: ""
 
                             // Look up the desktop entry by appId to get the correct icon name,
                             // exactly like LauncherModule does via DesktopEntries.
                             readonly property string resolvedIcon: {
                                 if (appId === "") return ""
+                                else if (isSteam) 
+                                {
+                                    steamIconProc.exec([
+                                        "bash", 
+                                        "/home/doni/nixos-config/scripts/SteamIcon/SteamIconSearch.sh", 
+                                        "/home/doni/.steam/root/appcache/librarycache/" + steamId
+                                    ]);
+                                    return steamImagePath !== "" ? steamImagePath : "image://icon/steam";
+                                }
+                                
                                 var entries = DesktopEntries.applications.values
                                 for (var i = 0; i < entries.length; i++) {
                                     if (entries[i].id.toLowerCase() === appId.toLowerCase())
-                                        return entries[i].icon !== "" ? entries[i].icon : appId
+                                        return "image://icon/" + (entries[i].icon !== "" ? entries[i].icon : appId)
                                 }
                                 // fallback: match by display name
                                 for (var j = 0; j < entries.length; j++) {
                                     if (entries[j].name.toLowerCase() === appId.toLowerCase())
-                                        return entries[j].icon !== "" ? entries[j].icon : appId
+                                        return "image://icon/" + (entries[j].icon !== "" ? entries[j].icon : appId)
                                 }
-                                return appId
+                                return "image://icon/" + appId
                             }
 
-                            implicitSize: Theme.moduleHeight - 15
-                            source: resolvedIcon !== "" ? ("image://icon/" + resolvedIcon) : ""
+                            height: Theme.moduleHeight - 15
+
+                            // Check if we are loading a system icon or a local Steam file
+                            readonly property bool isSystemIcon: String(source).indexOf("image://icon/") === 0
+
+                            // If it's a system icon, force a square. If it's Steam, use the real aspect ratio.
+                            width: {
+                                if (isSystemIcon) {
+                                    return height; 
+                                }
+                                return implicitHeight > 0 ? (implicitWidth / implicitHeight) * height : height;
+                            }
+
+                            sourceSize.height: height
+                            sourceSize.width: isSystemIcon ? height : 0
+
+                            fillMode: Image.PreserveAspectFit
+
+                            source: resolvedIcon
+                            
                             visible: appId !== ""
                             asynchronous: true
                             mipmap: true
+                            
+                            Process {
+                                id: steamIconProc
+                                
+                                stdout: StdioCollector {
+                                    onStreamFinished: {
+                                        var output = text.trim(); 
+                                        windowIcon.steamImagePath = output;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
