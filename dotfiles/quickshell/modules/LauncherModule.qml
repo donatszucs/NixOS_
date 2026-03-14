@@ -16,10 +16,6 @@ ModuleButton {
     property bool expanded: false
     property string screenName: ""
 
-    HoverHandler {
-        id: parentHover
-    }
-
     opacity: Theme.moduleOpacity
 
     property int  panelWidth:  400
@@ -121,7 +117,6 @@ ModuleButton {
                 colorOverride: true
                 Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
-                visible: launcherModule.expanded
                 label: "󰸉  Wallpaper Picker"
                 cursorShape: Qt.PointingHandCursor
 
@@ -133,7 +128,6 @@ ModuleButton {
 
             // Search bar
             Rectangle {
-                visible: launcherModule.expanded
                 Layout.fillWidth: true
                 Layout.leftMargin: 10
                 Layout.rightMargin: 10
@@ -161,7 +155,7 @@ ModuleButton {
                             verticalCenter: parent.verticalCenter
                         }
                         text: " Search apps..."
-                        color: Theme.text
+                        color: launcherModule.textColor
                         opacity: 0.5 // Make it look faded like a placeholder
                         font.family: parent.font.family
                         font.pixelSize: parent.font.pixelSize
@@ -204,7 +198,6 @@ ModuleButton {
 
             // Divider
             Rectangle {
-                visible: launcherModule.expanded
                 Layout.fillWidth: true
                 Layout.leftMargin: 10
                 Layout.rightMargin: 10
@@ -215,7 +208,6 @@ ModuleButton {
 
             // App list
             Rectangle {
-                visible: launcherModule.expanded
                 id: appListRect
                 Layout.fillWidth: true
                 Layout.leftMargin: 10

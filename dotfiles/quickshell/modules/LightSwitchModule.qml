@@ -101,7 +101,6 @@ ModuleButton {
     // ── Colour wheel dropdown ───────────────────────────────────────
     Item {
         id: colorWheelArea
-        visible: root.expanded
         implicitWidth: colorWheel.width + 20
         height: colorWheel.height + 12
         anchors {

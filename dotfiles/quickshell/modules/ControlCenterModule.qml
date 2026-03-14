@@ -41,8 +41,8 @@ ModuleButton {
     // Headset battery
     property bool headsetBatteryAvailable: false
     property int  headsetBatteryPercent: -1
-    property string headsetBatteryState: "unknown"
-    property string headsetBatteryLabel: headsetBatteryPercent >= 0 ? ( "HyprX Cloud II: " + headsetBatteryPercent + "%") : "—"
+    property string headsetBatteryState: "not available"
+    property string headsetBatteryLabel: headsetBatteryPercent >= 0 ? ( "HyprX Cloud II: " + headsetBatteryPercent + "%") : "HyprX Cloud II"
 
     // 2. The function that checks if ANY device in our invisible list is connected
     function updateBtStatus() {
@@ -274,7 +274,7 @@ ModuleButton {
                     cursorShape: Qt.PointingHandCursor
                     colorOverride: true
                     textFont: 24
-                    rightMargin: 6
+                    rightMargin: 8
                     implicitWidth: textFont * 2
                     radius: Theme.moduleEdgeRadius
                     onClicked: headsetProc.running = true
@@ -363,7 +363,7 @@ ModuleButton {
                 if (line === "") {
                     controlCenter.headsetBatteryAvailable = false 
                     controlCenter.headsetBatteryPercent = -1
-                    controlCenter.headsetBatteryState = "unknown"
+                    controlCenter.headsetBatteryState = "not available"
                     return
                 }
                 // Expected: "Battery: 45%  (Charging)"

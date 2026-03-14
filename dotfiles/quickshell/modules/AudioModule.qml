@@ -111,8 +111,7 @@ ModuleButton {
                 }
             }
             ModuleButton {
-                visible: expanded
-                implicitWidth: expanded ? maxSinkBarLength - volumeButton.implicitWidth + 20: 0
+                implicitWidth: maxSinkBarLength - volumeButton.implicitWidth + 20
                 implicitHeight: Theme.moduleHeight
                 bottomLeftRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
 
@@ -139,7 +138,7 @@ ModuleButton {
 
                 variant: "light"
                 cursorShape: Qt.PointingHandCursor
-                implicitWidth: expanded ? maxSinkBarLength : 0
+                implicitWidth: maxSinkBarLength
                 implicitHeight: Theme.moduleHeight
                 radius: Theme.moduleEdgeRadius
                 colorOverride: modelData.active

@@ -267,7 +267,7 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            leftColor: powerModule.expanded ? powerModule.color : Qt.tint(powerModule.color, powerModule.buttonColor)
+            leftColor: powerModule.color
             implicitHeight: powerModule.implicitHeight
         }
     }

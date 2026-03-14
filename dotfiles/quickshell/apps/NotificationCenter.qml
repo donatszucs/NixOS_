@@ -39,10 +39,10 @@ Item {
         InverseRadius {
             Layout.alignment: Qt.AlignBottom
             cornerPosition: "bottomRight"
-            size: containerRect.implicitHeight / 8
+            size: notifColumn.implicitHeight / 8
             color: Theme.palette("dark").base
-            expandingH: containerRect.implicitHeight !== 0
-            expandingV: expandingH
+            expandingH: (containerRect.implicitWidth !== 0 || hoverHandler.hovered)
+            expandingV: (containerRect.implicitWidth !== 0 || hoverHandler.hovered)
             animationDuration: Theme.verticalDuration / 2
         }
         ColumnLayout {
@@ -84,14 +84,12 @@ Item {
 
                     ModuleButton {
                         id: headerButton
-                        visible: implicitHeight > 0
                         Layout.alignment: Qt.AlignHCenter
                         textFont: 20
                         color: "transparent"
                         label: "󰎟 Notification Center"
                         implicitHeight: hoverHandler.hovered ? 30 : 0
                         implicitWidth: hoverHandler.hovered ? notifWidth : 0
-
 
                         Behavior on implicitHeight {
                             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -103,6 +101,7 @@ Item {
                     }
 
                     Repeater {
+                        id: notificationRepeater
                         model: server.trackedNotifications
                         delegate: ColumnLayout {
                             required property var modelData
@@ -124,7 +123,6 @@ Item {
                                 id: toast
                                 notif: parent.modelData
                                 notifIndex: parent.index
-                                toastWidth: root.notifWidth
                             }
                         }
                     }
@@ -140,8 +138,6 @@ Item {
 
         property var notif: null
         property int notifIndex: 0
-        // Width to expand to (provided by parent)
-        property int toastWidth: root.notifWidth
 
         // Enter state used to animate from zero size to full size
         property bool entered: false
@@ -167,8 +163,10 @@ Item {
             : (toastRow.notif && toastRow.notif.expireTimeout > 0 ? toastRow.notif.expireTimeout : 5000)
 
         // ── Sizing & shape ────────────────────────────────────────────
-        implicitHeight: toastRow.isShowing ? (contentLayout.implicitHeight + 20) : 0
-        implicitWidth: toastRow.isShowing ? toastWidth : 0
+        implicitHeight: toastRow.isShowing ? (contentColumn.implicitHeight + 20) : 0
+        implicitWidth: toastRow.isShowing ? contentColumn.implicitWidth : 0
+
+        Layout.minimumWidth: toastRow.isShowing ? root.notifWidth : 0
         clip: true
 
         radius: Theme.moduleEdgeRadius
@@ -214,120 +212,126 @@ Item {
         }
 
         // ── Content ────────────────────────────────────────────────────
-        RowLayout {
-            id: contentLayout
-            anchors {
-                centerIn: parent
-            }
-            width: parent.width - 20
-            spacing: 15
+        ColumnLayout {
+            id: contentColumn
 
-            ColumnLayout {
-                spacing: 0
+            anchors.centerIn: parent
+            anchors.fill: parent
 
-                // Image block: shows notification image if available, otherwise app icon; hidden if neither are provided
-                Item {
+            spacing: 0
+            
+            RowLayout {
+                id: contentLayout
+                
+                spacing: Theme.modulePaddingH
 
-                    readonly property bool hasImage: toastRow.cachedImage !== ""
-                    readonly property bool hasIcon:  toastRow.notif && toastRow.notif.appIcon !== ""
-                    visible: hasImage || hasIcon
+                ColumnLayout {
+                    id: imageColumn
+                    spacing: 0
+                    Layout.alignment: Qt.AlignLeft
+                    Layout.leftMargin: Theme.modulePaddingH
 
-                    implicitHeight: hasImage ? 50 : hasIcon ? 30 : 0
-                    implicitWidth: implicitHeight
+                    // Image block: shows notification image if available, otherwise app icon; hidden if neither are provided
+                    Item {
 
-                    Image {
-                        anchors.fill: parent
-                        source: parent.hasImage ? toastRow.cachedImage : ("image://icon/" + toastRow.notif.appIcon)
-                        fillMode: Image.PreserveAspectFit
-                        smooth: true
-                        cache: true
+                        readonly property bool hasImage: toastRow.cachedImage !== ""
+                        readonly property bool hasIcon:  toastRow.notif && toastRow.notif.appIcon !== ""
+                        visible: hasImage || hasIcon
+
+                        implicitHeight: hasImage || hasIcon ? 50 : 0
+                        implicitWidth: implicitHeight
+
+                        Image {
+                            anchors.fill: parent
+                            source: parent.hasImage ? toastRow.cachedImage : ("image://icon/" + toastRow.notif.appIcon)
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
+                            cache: true
+                        }
+                    }
+
+                    Text {
+                        text: Qt.formatDateTime(new Date(), "HH:mm")
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize - 3
+                        font.bold: true
+                        color: toastRow.textColor
+                        opacity: 0.8
+                        elide: Text.ElideRight
+                        Layout.topMargin: 5
+                        Layout.alignment: Qt.AlignHCenter
                     }
                 }
 
-                Text {
-                    text: Qt.formatDateTime(new Date(), "HH:mm")
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 3
-                    font.bold: true
-                    color: toastRow.textColor
-                    opacity: 0.5
-                    elide: Text.ElideRight
-                    Layout.topMargin: 5
-                    Layout.alignment: Qt.AlignHCenter
+                // Text block
+                ColumnLayout {
+                    spacing: 0
+                    Layout.fillWidth: true
+                    Layout.rightMargin: Theme.modulePaddingH
+                    
+                    // app name
+                    Text {
+                        text: toastRow.notif ? toastRow.notif.appName : ""
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize - 1
+                        font.bold: true
+                        color: toastRow.textColor
+                        opacity: 0.7
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                    }
+
+                    // Summary
+                    Text {
+                        visible: toastRow.notif && toastRow.notif.summary !== ""
+                        text: toastRow.notif ? toastRow.notif.summary : ""
+                        font.family:    Theme.font
+                        font.pixelSize: toastRow.Theme.fontSize
+                        font.bold:      true
+                        color:          toastRow.textColor
+                        wrapMode:       Text.WordWrap
+                        Layout.fillWidth: true
+                    }
+
+                    // Body
+                    Text {
+                        visible: toastRow.notif && toastRow.notif.body !== ""
+                        text: toastRow.notif ? toastRow.notif.body : ""
+                        font.family:    Theme.font
+                        font.pixelSize: Theme.fontSize - 1
+                        color:          toastRow.textColor
+                        opacity: 0.7
+                        wrapMode:       Text.WrapAtWordBoundaryOrAnywhere
+                        maximumLineCount: 4
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                        Layout.maximumWidth: Math.max(actionRow.implicitWidth - imageColumn.implicitWidth, root.notifWidth - imageColumn.implicitWidth - Theme.modulePaddingH * 4)
+                    }
                 }
             }
 
-            // Text block
-            ColumnLayout {
-                spacing: 0
+            RowLayout {
+                id: actionRow
                 Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                Layout.leftMargin: Theme.modulePaddingH
+                Layout.rightMargin: Theme.modulePaddingH
+                Layout.bottomMargin: Theme.modulePaddingH
+                spacing: 8
                 
-                // app name
-                Text {
-                    text: toastRow.notif ? toastRow.notif.appName : ""
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 1
-                    font.bold: true
-                    color: toastRow.textColor
-                    opacity: 0.7
-                    Layout.fillWidth: true
-                    elide: Text.ElideRight
-                }
+                // Only show this row if the notification actually has actions
+                visible: toastRow.notif && toastRow.notif.actions.length > 0
 
-                // Summary
-                Text {
-                    visible: toastRow.notif && toastRow.notif.summary !== ""
-                    text: toastRow.notif ? toastRow.notif.summary : ""
-                    font.family:    Theme.font
-                    font.pixelSize: toastRow.Theme.fontSize
-                    font.bold:      true
-                    color:          toastRow.textColor
-                    wrapMode:       Text.WordWrap
-                    Layout.fillWidth: true
-                }
+                Repeater {
+                    model: toastRow.notif ? toastRow.notif.actions : []
 
-                // Body
-                Text {
-                    visible: toastRow.notif && toastRow.notif.body !== ""
-                    text: toastRow.notif ? toastRow.notif.body : ""
-                    font.family:    Theme.font
-                    font.pixelSize: Theme.fontSize - 1
-                    color:          toastRow.textColor
-                    opacity: 0.7
-                    wrapMode:       Text.WordWrap
-                    maximumLineCount: 4
-                    elide: Text.ElideRight
-                    Layout.fillWidth: true
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 5
-                    spacing: 8
-                    
-                    // Only show this row if the notification actually has actions
-                    visible: toastRow.notif && toastRow.notif.actions.length > 0
-
-                    Repeater {
-                        model: toastRow.notif ? toastRow.notif.actions : []
-
-                        delegate: ModuleButton {
-                            // Basic button styling (adjust to match your theme!)
-                            Layout.fillWidth: true
-                            implicitHeight: 28
-                            radius: Theme.moduleEdgeRadius
-                            
-                            onClicked: modelData.invoke()
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: modelData.text // The label provided by the app (e.g. "Reply", "Mark as Read")
-                                color: textColor
-                                font.family: Theme.font
-                                font.pixelSize: Theme.fontSize - 2
-                                font.bold: true
-                            }
-                        }
+                    delegate: ModuleButton {
+                        label: modelData.text
+                        implicitHeight: 28
+                        radius: Theme.moduleEdgeRadius
+                        textFont: Theme.fontSize - 2
+                        
+                        onClicked: modelData.invoke()
                     }
                 }
             }

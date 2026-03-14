@@ -7,9 +7,9 @@ import "../elements"
 
 ModuleButton {
     id: powerModule
-    variant: "dark"
+    color: Theme.palette("dark").base
     opacity: Theme.moduleOpacity
-    noHoverColorChange: powerModule.expanded
+    noHoverColorChange: true
     property bool expanded: false
     property color buttonColor: mainButton.color
 
@@ -25,7 +25,7 @@ ModuleButton {
     bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
 
     implicitHeight: expanded ? actionColumn.implicitHeight + 10: Theme.moduleHeight
-    implicitWidth: expanded ? actionColumn.implicitWidth + 20 : actionColumn.implicitWidth
+    implicitWidth: expanded ? actionColumn.implicitWidth : actionColumn.implicitWidth
 
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -35,18 +35,32 @@ ModuleButton {
     ColumnLayout {
         id: actionColumn
         spacing: 5
-        anchors { left: parent.left; right: parent.right; top: parent.top }
+        anchors {
+            top: parent.top
+            right: parent.right
+        }
 
         ModuleButton {
             id: mainButton
-            colorOverride: !expanded
-            noHoverColorChange: !powerModule.expanded            
-            bottomLeftRadius: powerModule.expanded ? Theme.moduleEdgeRadius : 0
-            bottomRightRadius: bottomLeftRadius
-            Layout.alignment: Qt.AlignHCenter
-            label: powerModule.expanded ? " Power Menu" : ""
-            rightMargin: powerModule.expanded ? 0: 3
+            variant: "light"
+            noHoverColorChange: !powerModule.expanded
             
+            radius: Theme.moduleEdgeRadius
+
+            topLeftRadius: !powerModule.expanded ? Theme.moduleEdgeRadius : 0
+            topRightRadius: !powerModule.expanded ? Theme.moduleEdgeRadius : 0
+            
+            property int padding: (Theme.moduleHeight - Math.ceil(Theme.moduleHeight * 0.75)) / 2
+
+            Layout.alignment: Qt.AlignCenter
+            Layout.rightMargin: 6
+            Layout.topMargin: powerModule.expanded ? 0 : padding
+            Layout.leftMargin: 6
+            label: powerModule.expanded ? " Power Menu" : ""
+            rightMargin: powerModule.expanded ? 0: 4
+            
+            implicitHeight: powerModule.expanded ? Theme.moduleHeight: Math.ceil(Theme.moduleHeight * 0.75)
+            implicitWidth: powerModule.expanded ? textFont * 10 : Math.ceil(Theme.moduleHeight * 1.25)
 
             cursorShape: Qt.PointingHandCursor
             onClicked: powerModule.expanded = !powerModule.expanded
@@ -54,9 +68,18 @@ ModuleButton {
             Behavior on implicitWidth {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
+
+            Behavior on implicitHeight {
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
+
+            Behavior on Layout.topMargin {
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
         }
 
         Repeater {
+
             model: [
                 { index: 0, text: "  Shutdown", cmd: "systemctl poweroff", },
                 { index: 1, text: "  Reboot", cmd: "systemctl reboot", },
@@ -65,12 +88,13 @@ ModuleButton {
             ]
             delegate: ModuleButton {
                 id: actionButton
-                visible: powerModule.expanded
+
                 required property var modelData
                 cursorShape: Qt.PointingHandCursor
                 variant: "danger"
 
                 implicitWidth: mainButton.implicitWidth
+                implicitHeight: powerModule.expanded ? Theme.moduleHeight : 0
 
                 Layout.alignment: Qt.AlignHCenter
 

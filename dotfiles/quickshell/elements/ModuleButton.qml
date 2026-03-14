@@ -107,4 +107,13 @@ Rectangle {
     Behavior on bottomRightRadius {
         NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }
+
+    Behavior on topLeftRadius {
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+    }
+
+    Behavior on topRightRadius {
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+    }
+
 }

@@ -11,11 +11,7 @@ ModuleButton {
     noHoverColorChange: true
     opacity: Theme.moduleOpacity
     property int openMenus: 0
-    property bool expanded: parentHover.hovered
-
-    HoverHandler {
-        id: parentHover
-    }
+    property bool expanded: hovered
 
     // This MUST be assigned when you create the component in your main file
     property var parentWindow: null 
@@ -39,7 +35,7 @@ ModuleButton {
             top: parent.top
             bottom: parent.bottom
         }
-        spacing: 0
+        spacing: 5
         layoutDirection: Qt.RightToLeft
 
         ModuleButton {
@@ -55,7 +51,6 @@ ModuleButton {
 
         // Tray items — revealed by clip as width expands leftward
         RowLayout {
-            visible: root.expanded
             spacing: 6
             layoutDirection: Qt.RightToLeft
 
@@ -145,8 +140,6 @@ ModuleButton {
                     }
                 }
             }
-
-            Item { implicitWidth: 3 }
         }
 
         Rectangle { width: 5; height: Theme.moduleHeight * 0.7; color: Theme.divider; radius: Theme.moduleEdgeRadius }
