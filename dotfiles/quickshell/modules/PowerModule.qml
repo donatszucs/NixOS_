@@ -94,7 +94,7 @@ ModuleButton {
                 variant: "danger"
 
                 implicitWidth: mainButton.implicitWidth
-                implicitHeight: powerModule.expanded ? Theme.moduleHeight : 0
+                implicitHeight: Theme.moduleHeight
 
                 Layout.alignment: Qt.AlignHCenter
 

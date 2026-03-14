@@ -28,6 +28,8 @@ Item {
         actionsSupported: true
         onNotification: notification => {
             notification.tracked = true
+
+            Quickshell.execDetached(["pw-play", "--volume", "2.0", "/home/doni/nixos-config/misc/ping.ogg"])
         }
     }
 
@@ -289,8 +291,9 @@ Item {
                         font.pixelSize: toastRow.Theme.fontSize
                         font.bold:      true
                         color:          toastRow.textColor
-                        wrapMode:       Text.WordWrap
+                        wrapMode:       Text.WrapAtWordBoundaryOrAnywhere
                         Layout.fillWidth: true
+                        Layout.maximumWidth: Math.max(actionRow.implicitWidth - imageColumn.implicitWidth, root.notifWidth - imageColumn.implicitWidth - Theme.modulePaddingH * 4)
                     }
 
                     // Body

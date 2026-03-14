@@ -136,8 +136,8 @@ PanelWindow {
         }
         InverseRadius {
             Layout.alignment: Qt.AlignTop
-            cornerPosition: "topLeft"
             color: nowPlayingModule.color
+            cornerPosition: "topLeft"
         }
     }
 

@@ -8,9 +8,9 @@ import "../elements"
 
 ModuleButton {
     id: audioModule
-    variant: "dark"
+    color: implicitHeight === Theme.moduleHeight ? "transparent" : Theme.palette("dark").base
+    dontAnimateColor: true
     opacity: Theme.moduleOpacity
-    noHoverColorChange: true
     property bool expanded: false
     property int maxSinkBarLength: 0
 
@@ -86,9 +86,9 @@ ModuleButton {
             ModuleButton {
                 id: volumeButton
                 label: "100% "
-                colorOverride: !expanded
                 textAlign: "right"
-                rightMargin: Theme.modulePaddingH + 4
+                
+                rightMargin: Theme.modulePaddingH + 8
 
                 bottomRightRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
 

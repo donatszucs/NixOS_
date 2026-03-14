@@ -9,7 +9,8 @@ import "../elements"
 
 ModuleButton {
     id: nowPlayingModule
-    noHoverColorChange: true
+    noHoverColorChange: expanded
+    noPressColorChange: true
     property string titleText: "󰎆  Nothing playing"
     property string authorText: "Unknown artist"
     property string playPauseIcon: "󰐊"
@@ -60,6 +61,8 @@ ModuleButton {
             // Title
             ModuleButton {
                 colorOverride: !expanded
+                noHoverColorChange: !expanded
+                noPressColorChange: !expanded
                 id: titleBtn
                 Layout.alignment: Qt.AlignCenter
                 cursorShape: Qt.PointingHandCursor

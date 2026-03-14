@@ -37,9 +37,12 @@ Rectangle {
 
     // Whether to suppress the hover colour change
     property bool noHoverColorChange: false
+    property bool noPressColorChange: false
 
     property bool colorOverride: false
     property color overrideColor: "transparent"
+
+    property bool dontAnimateColor: false
 
     // Cursor shape to use when hovering this button. Can be overridden by
     // instances (e.g. `Qt.PointingHandCursor: Qt.PointingHandCursor`). Default is arrow.
@@ -61,7 +64,7 @@ Rectangle {
     implicitWidth: Math.ceil(labelText.implicitWidth + 30)
     radius: Theme.moduleRadius
 
-    color: root.pressed ? root.pal.pressed : ((root.hovered && !root.noHoverColorChange) ? root.pal.hover : colorOverride ? root.overrideColor : root.pal.base)
+    color: (root.pressed && !root.noPressColorChange) ? root.pal.pressed : ((root.hovered && !root.noHoverColorChange) ? root.pal.hover : colorOverride ? root.overrideColor : root.pal.base)
 
     clip: true
 
@@ -97,6 +100,7 @@ Rectangle {
     }
 
     Behavior on color {
+        enabled: !root.dontAnimateColor
         ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }
 

@@ -11,8 +11,8 @@ import "../elements"
 ModuleButton {
     id: launcherModule
     label: ""
-    noHoverColorChange: true
-
+    noHoverColorChange: expanded
+    noPressColorChange: true
     property bool expanded: false
     property string screenName: ""
 
@@ -25,7 +25,7 @@ ModuleButton {
     property var filteredApps: []
 
     bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
-    bottomRightRadius: bottomLeftRadius
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
     
     clip: true
 
@@ -90,7 +90,9 @@ ModuleButton {
             // Header row (same height as collapsed bar, keeps visual alignment)
             ModuleButton {
                 id: collapsedRow
-                colorOverride: !launcherModule.expanded
+                colorOverride: !expanded
+                noHoverColorChange: !expanded
+                noPressColorChange: !expanded
                 Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
                 label: "  Menu "
@@ -132,7 +134,7 @@ ModuleButton {
                 Layout.leftMargin: 10
                 Layout.rightMargin: 10
                 implicitHeight: Theme.moduleHeight
-                color: Theme.dark.hover
+                color: Theme.dark.pressed
                 radius: Theme.moduleEdgeRadius
 
                 TextInput {
