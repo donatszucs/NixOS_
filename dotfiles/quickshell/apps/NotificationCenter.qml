@@ -15,6 +15,7 @@ Item {
     readonly property int notifSpacing: 0
 
     property int notificationNumber: 0
+    property bool inlineReplyInputFocused: false
     // Whether any notifications are currently shown (used by Bar.qml for InverseRadius visibility)
     property bool noNotifications: (SharedState.notificationCounter === 0 || innerLayout.implicitHeight === 0)
 
@@ -26,6 +27,7 @@ Item {
         id: server
         keepOnReload: false
         actionsSupported: true
+        inlineReplySupported: true
         onNotification: notification => {
             notification.tracked = true
 
@@ -152,6 +154,9 @@ Item {
         visible: implicitWidth > 0 && implicitHeight > 0
         property bool isShowing: (hoverHandler.hovered || entered && !expiring) && !forceClose
 
+        readonly property bool hasInlineReply:
+            toastRow.notif && toastRow.notif.hasInlineReply
+
         // ── Urgency helpers ──────────────────────────────────────────
         readonly property bool isCritical:
             toastRow.notif && toastRow.notif.urgency === Notif.NotificationUrgency.Critical
@@ -211,6 +216,14 @@ Item {
         onClicked: {
             toastRow.forceClose = true
             toastRow.requestDismiss()
+        }
+
+        function submitInlineReply() {
+            if (!toastRow.notif || !toastRow.hasInlineReply) return
+            var replyText = replyInput.text.trim()
+            if (replyText.length === 0) return
+            toastRow.notif.sendInlineReply(replyText)
+            replyInput.text = ""
         }
 
         // ── Content ────────────────────────────────────────────────────
@@ -319,7 +332,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.leftMargin: Theme.modulePaddingH
                 Layout.rightMargin: Theme.modulePaddingH
-                Layout.bottomMargin: Theme.modulePaddingH
+                Layout.bottomMargin: toastRow.hasInlineReply ? 8 : Theme.modulePaddingH
                 spacing: 8
                 
                 // Only show this row if the notification actually has actions
@@ -338,12 +351,64 @@ Item {
                     }
                 }
             }
+            Rectangle {
+                id: inlineReplyRow
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                Layout.leftMargin: Theme.modulePaddingH
+                Layout.rightMargin: Theme.modulePaddingH
+                Layout.bottomMargin: Theme.modulePaddingH
+                visible: toastRow.hasInlineReply
+                implicitHeight: 30
+                color: Theme.dark.hover
+                radius: Theme.moduleEdgeRadius
+
+                TextInput {
+                    id: replyInput
+                    anchors {
+                        fill: parent
+                        leftMargin: 10
+                        rightMargin: 10
+                    }
+                    verticalAlignment: TextInput.AlignVCenter
+                    color: toastRow.textColor
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize - 1
+                    clip: true
+
+                    Text {
+                        anchors.fill: parent
+                        verticalAlignment: Text.AlignVCenter
+                        text: (toastRow.notif && toastRow.notif.inlineReplyPlaceholder !== "")
+                                ? toastRow.notif.inlineReplyPlaceholder
+                                : "Reply..."
+                        color: toastRow.textColor
+                        opacity: 0.7
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize - 1
+                        visible: !replyInput.text.length
+                    }
+
+                    Keys.onReturnPressed: {
+                        root.inlineReplyInputFocused = false
+                        toastRow.submitInlineReply()
+                        }
+                    onActiveFocusChanged: {
+                        if (activeFocus) {
+                            root.inlineReplyInputFocused = true
+                        } else {
+                            root.inlineReplyInputFocused = false
+                        }
+                    }
+                }
+            }
         }
 
         function requestDismiss() {
             if (!toastRow.notif || toastRow.expiring) return
             toastRow.entered = false
             toastRow.expiring = true
+            root.inlineReplyInputFocused = false
             expireCallTimer.start()
         }
 
@@ -376,5 +441,11 @@ Item {
     }
     HoverHandler {
         id: hoverHandler
+
+        onHoveredChanged: {
+            if (!hoverHandler.hovered) {
+                root.inlineReplyInputFocused = false
+            }
+        }
     }
 }

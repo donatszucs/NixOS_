@@ -24,7 +24,7 @@ PanelWindow {
     }
     // No space reservation here — handled by the spacer window below
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.keyboardFocus: (launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: (launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || notificationCenter.inlineReplyInputFocused) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
 
     mask: Region {
