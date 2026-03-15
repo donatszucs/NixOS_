@@ -166,7 +166,7 @@ ModuleButton {
 
             ModuleButton {
                 id: trackArt
-                visible: nowPlayingModule.expanded
+                visible: nowPlayingModule.expanded && albumArt.source.toString() !== ""
                 color: "transparent"
                 implicitWidth: albumArtClip.width + 30
                 implicitHeight: albumArtClip.height + 15
@@ -228,6 +228,7 @@ ModuleButton {
                 visible: nowPlayingModule.expanded
                 color: "transparent"
                 label: nowPlayingModule.authorText
+                Layout.fillWidth: true
                 Layout.alignment: Qt.AlignCenter
 
             }

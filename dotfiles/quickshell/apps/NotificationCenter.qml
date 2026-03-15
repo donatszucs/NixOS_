@@ -178,8 +178,6 @@ Item {
 
         radius: Theme.moduleEdgeRadius
 
-        cursorShape: Qt.PointingHandCursor
-
         // ── Colors ────────────────────────────────────────────────────
         variant: isCritical ? "danger" : "light"
         opacity: Theme.moduleOpacity
@@ -329,7 +327,7 @@ Item {
             RowLayout {
                 id: actionRow
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignHCenter
+                Layout.alignment: Qt.AlignLeft
                 Layout.leftMargin: Theme.modulePaddingH
                 Layout.rightMargin: Theme.modulePaddingH
                 Layout.bottomMargin: toastRow.hasInlineReply ? 8 : Theme.modulePaddingH
@@ -347,11 +345,12 @@ Item {
                         radius: Theme.moduleEdgeRadius
                         textFont: Theme.fontSize - 2
                         
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: modelData.invoke()
                     }
                 }
             }
-            Rectangle {
+            ModuleButton {
                 id: inlineReplyRow
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignHCenter
@@ -360,8 +359,11 @@ Item {
                 Layout.bottomMargin: Theme.modulePaddingH
                 visible: toastRow.hasInlineReply
                 implicitHeight: 30
-                color: Theme.dark.hover
+
+                variant: "dark"
+                noHoverColorChange: true
                 radius: Theme.moduleEdgeRadius
+                cursorShape: Qt.PointingHandCursor
 
                 TextInput {
                     id: replyInput
@@ -371,7 +373,7 @@ Item {
                         rightMargin: 10
                     }
                     verticalAlignment: TextInput.AlignVCenter
-                    color: toastRow.textColor
+                    color: Theme.palette("dark").text
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize - 1
                     clip: true
@@ -382,7 +384,7 @@ Item {
                         text: (toastRow.notif && toastRow.notif.inlineReplyPlaceholder !== "")
                                 ? toastRow.notif.inlineReplyPlaceholder
                                 : "Reply..."
-                        color: toastRow.textColor
+                        color: Theme.palette("dark").text
                         opacity: 0.7
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize - 1
