@@ -190,9 +190,6 @@
     ];
   };
 
-  # Optional: Hint Electron apps to use Wayland
-  environment.sessionVariables.NIXOS_OZONE_WL = "1";
-
   # Enable display manager with hyprlock
   services.displayManager = {
     autoLogin = {
@@ -260,6 +257,15 @@
   discord
   qalculate-gtk
   texlive.combined.scheme-full
+
+  (prismlauncher.override {
+    jdks = [ 
+      jdk8 
+      jdk17 
+      jdk21 
+    ];
+  })
+
 
   # -- keyboard --
   wvkbd             # On-screen keyboard

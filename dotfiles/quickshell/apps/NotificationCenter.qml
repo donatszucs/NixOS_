@@ -422,6 +422,7 @@ Item {
             toastRow.entered = true
             expireCallTimer.stop()
             expireTimer.restart()
+            Quickshell.execDetached(["pw-play", "--volume", "2.0", "/home/doni/nixos-config/misc/ping.ogg"])
         }
 
         Connections {

@@ -33,6 +33,11 @@
       # Help apps detect a KDE-like desktop for choosing dark variant
       XDG_CURRENT_DESKTOP = "KDE";
       KDE_FULL_SESSION = "true";
+
+      QSG_RHI_BACKEND = "vulkan";
+      MOZ_ENABLE_WAYLAND = "1";
+
+      NIXOS_OZONE_WL = "1";
     };
 
   # Ensure GTK apps (and browsers) report dark mode
