@@ -190,9 +190,4 @@ Item {
         command: ["bash", "-c", root.tapoScriptPath + " color " + targetHue + " " + targetSat]
         onRunningChanged: if (!running) refreshLightStatus()
     }
-    
-    // ==========================================
-    // Notification Expire State
-    // ==========================================
-    property int notificationCounter: 0
 }

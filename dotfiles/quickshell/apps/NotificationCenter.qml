@@ -12,12 +12,8 @@ Item {
 
     // ── Geometry ────────────────────────────────────────────────────────
     readonly property int notifWidth:   300
-    readonly property int notifSpacing: 0
 
-    property int notificationNumber: 0
     property bool inlineReplyInputFocused: false
-    // Whether any notifications are currently shown (used by Bar.qml for InverseRadius visibility)
-    property bool noNotifications: (SharedState.notificationCounter === 0 || innerLayout.implicitHeight === 0)
 
     implicitWidth:  notifGrid.implicitWidth
     implicitHeight: notifGrid.implicitHeight
@@ -39,8 +35,8 @@ Item {
     GridLayout {
         id: notifGrid
         columns: 2
-        columnSpacing: root.notifSpacing
-        rowSpacing: root.notifSpacing
+        columnSpacing: 0
+        rowSpacing: 0
 
         // [Row 0, Col 1] Top Radius
         InverseRadius {
@@ -114,27 +110,28 @@ Item {
                     }
                 }
 
+                // NEW: Animates new elements appearing
+                add: Transition {
+                    ParallelAnimation {
+                        NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                        NumberAnimation { property: "scale"; from: 0.2; to: 1.0; duration: Theme.verticalDuration; easing.type: Easing.OutBack }
+                    }
+                }
+
                 ModuleButton {
                     id: headerButton
                     anchors.horizontalCenter: parent.horizontalCenter 
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
                     
-                    visible: height > 0 || hoverHandler.hovered
+                    visible: hoverHandler.hovered
                     textFont: 20
                     color: "transparent"
                     label: "󰎟 Notification Center"
                     
                     // Use standard height/width instead of Layout.preferred
-                    height: hoverHandler.hovered ? 30 : 0
-                    width: hoverHandler.hovered ? root.notifWidth : 0
-
-                    Behavior on height {
-                        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-                    }
-                    Behavior on width {
-                        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-                    }
+                    height: 30
+                    width: root.notifWidth
                 }
                 
                 Repeater {
@@ -174,7 +171,7 @@ Item {
         // Cached image: set on first load, only updated if a new notification brings its own image
         property string cachedImage: ""
 
-        visible: width > 0 && height > 0
+        visible: isShowing
         property bool isShowing: (hoverHandler.hovered || entered && !expiring) && !forceClose
 
         readonly property bool hasInlineReply:
@@ -193,8 +190,8 @@ Item {
             : (toastRow.notif && toastRow.notif.expireTimeout > 0 ? toastRow.notif.expireTimeout : 5000)
 
         // ── Sizing & shape ────────────────────────────────────────────
-        height: toastRow.isShowing ? (contentGrid.implicitHeight + Theme.modulePaddingH * 2) : 0
-        width: toastRow.isShowing ? (contentGrid.implicitWidth + Theme.modulePaddingH * 2) : 0
+        height: contentGrid.implicitHeight + Theme.modulePaddingH * 2
+        width: contentGrid.implicitWidth + Theme.modulePaddingH * 2
 
         clip: true
 
@@ -208,18 +205,9 @@ Item {
 
         // ── Enter animation: slide in from the right ─────────────────
         Component.onCompleted: {
-            root.notificationNumber++
-            SharedState.notificationCounter = root.notificationNumber
             toastRow.entered = true
             if (toastRow.notif && toastRow.notif.image !== "")
                 toastRow.cachedImage = toastRow.notif.image
-        }
-
-        Behavior on height {
-            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-        }
-        Behavior on width {
-            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
 
         Timer {
@@ -469,8 +457,6 @@ Item {
             interval: Theme.verticalDuration + 20
             repeat: false
             onTriggered: {
-                root.notificationNumber--
-                SharedState.notificationCounter = root.notificationNumber
                 if (toastRow.notif) toastRow.notif.dismiss()
             }
         }
