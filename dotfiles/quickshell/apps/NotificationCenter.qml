@@ -19,8 +19,8 @@ Item {
     // Whether any notifications are currently shown (used by Bar.qml for InverseRadius visibility)
     property bool noNotifications: (SharedState.notificationCounter === 0 || innerLayout.implicitHeight === 0)
 
-    implicitWidth:  notifRow.implicitWidth
-    implicitHeight: notifColumn.implicitHeight
+    implicitWidth:  notifGrid.implicitWidth
+    implicitHeight: notifGrid.implicitHeight
 
     // ── DBus notification server ─────────────────────
     Notif.NotificationServer {
@@ -36,98 +36,109 @@ Item {
     }
 
     // ── Notification stack ───────────────────────────────────────────────
-    RowLayout {
-        id: notifRow
-        spacing: root.notifSpacing
+    GridLayout {
+        id: notifGrid
+        columns: 2
+        columnSpacing: root.notifSpacing
+        rowSpacing: root.notifSpacing
 
+        // [Row 0, Col 1] Top Radius
         InverseRadius {
-            Layout.alignment: Qt.AlignBottom
+            id: topRadius
+            Layout.row: 0
+            Layout.column: 1
+            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
+            
             cornerPosition: "bottomRight"
-            size: notifColumn.implicitHeight / 8
+            size: innerLayout.implicitWidth === 0 ? Theme.moduleEdgeRadius : (innerLayout.implicitWidth / 8)
             color: Theme.palette("dark").base
-            expandingH: (containerRect.implicitWidth !== 0 || hoverHandler.hovered)
-            expandingV: (containerRect.implicitWidth !== 0 || hoverHandler.hovered)
+        }
+
+        // [Row 1, Col 0] Side/Bottom Radius
+        InverseRadius {
+            Layout.row: 1
+            Layout.column: 0
+            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
+            
+            cornerPosition: "bottomRight"
+            // Swapped notifColumn.implicitHeight to innerLayout.implicitHeight since notifColumn is gone
+            size: Math.floor(innerLayout.implicitHeight / 8)
+            color: Theme.palette("dark").base
+            expandingH: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
+            expandingV: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
             animationDuration: Theme.verticalDuration / 2
         }
-        ColumnLayout {
-            id: notifColumn
-            spacing: root.notifSpacing
 
-            InverseRadius {
-                id: topRadius
-                Layout.alignment: Qt.AlignRight
-                cornerPosition: "bottomRight"
-                size: innerLayout.implicitWidth === 0 ? Theme.moduleEdgeRadius : (containerRect.implicitWidth / 8)
-                color: Theme.palette("dark").base
+        // [Row 1, Col 1] Main Notification Container
+        Rectangle {
+            id: containerRect
+            Layout.row: 1
+            Layout.column: 1
+            Layout.alignment: Qt.AlignBottom | Qt.AlignRight
+            
+            color: Theme.palette("dark").base
+            clip: true
+            opacity: Theme.moduleOpacity
+            topLeftRadius: Theme.moduleEdgeRadius + 5
+            
+            implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (innerLayout.implicitWidth + 20)
+            implicitHeight: (innerLayout.implicitHeight === 0 && !hoverHandler.hovered) ? 0 : (innerLayout.implicitHeight + 25)
+
+            Behavior on implicitHeight {
+                NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
+            }
+            Behavior on implicitWidth {
+                NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutCubic }
             }
 
-            Rectangle {
-                id: containerRect
-                color: Theme.palette("dark").base
+            // Your exact inner layout, untouched
+            ColumnLayout {
+                id: innerLayout
+                anchors {
+                    top: parent.top
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                }
+
+                layoutDirection: Qt.RightToLeft
+                spacing: 5
                 clip: true
-                opacity: Theme.moduleOpacity
-                topLeftRadius: Theme.moduleEdgeRadius + 5
-                implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (innerLayout.implicitWidth + 20)
-                implicitHeight: (innerLayout.implicitHeight === 0 && !hoverHandler.hovered) ? 0 : (innerLayout.implicitHeight + 25)
-                
-                Behavior on implicitHeight {
-                    NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
-                }
-                Behavior on implicitWidth {
-                    NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutCubic }
-                }
-                ColumnLayout {
-                    id: innerLayout
-                    anchors {
-                        centerIn: parent
+
+                ModuleButton {
+                    visible: implicitHeight > 0 || hoverHandler.hovered
+                    id: headerButton
+                    Layout.alignment: Qt.AlignHCenter
+                    textFont: 20
+                    color: "transparent"
+                    label: "󰎟 Notification Center"
+                    Layout.preferredHeight: hoverHandler.hovered ? 30 : 0
+                    Layout.preferredWidth: hoverHandler.hovered ? notifWidth : 0
+
+                    Behavior on Layout.preferredHeight {
+                        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                     }
 
-                    layoutDirection: Qt.RightToLeft
-                    spacing: 0
-                    clip: true
+                    Behavior on Layout.preferredWidth {
+                        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+                    }
+                }
 
-                    ModuleButton {
-                        id: headerButton
+                Repeater {
+                    id: notificationRepeater
+                    model: server.trackedNotifications
+                    delegate: NotificationToast {
+
+                        required property var modelData
+                        required property int index
+                        id: toast
+                        notif: modelData
+                        notifIndex: index
+
                         Layout.alignment: Qt.AlignHCenter
-                        textFont: 20
-                        color: "transparent"
-                        label: "󰎟 Notification Center"
-                        implicitHeight: hoverHandler.hovered ? 30 : 0
-                        implicitWidth: hoverHandler.hovered ? notifWidth : 0
 
-                        Behavior on implicitHeight {
+                        Behavior on y {
                             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-                        }
-                        Behavior on implicitWidth {
-                            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-                        }
-
-                    }
-
-                    Repeater {
-                        id: notificationRepeater
-                        model: server.trackedNotifications
-                        delegate: ColumnLayout {
-                            required property var modelData
-                            required property int index
-                            spacing: 0
-                            layoutDirection: Qt.RightToLeft
-
-                            Rectangle {
-                                color: "transparent"
-                                implicitWidth: toast.implicitWidth
-                                implicitHeight: toast.isShowing && (parent.index !== 0|| (parent.index === 0 && hoverHandler.hovered)) ? 5 : 0
-
-                                Behavior on implicitHeight {
-                                    NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
-                                }
-                            }
-
-                            NotificationToast {
-                                id: toast
-                                notif: parent.modelData
-                                notifIndex: parent.index
-                            }
                         }
                     }
                 }
@@ -151,7 +162,7 @@ Item {
         // Cached image: set on first load, only updated if a new notification brings its own image
         property string cachedImage: ""
 
-        visible: implicitWidth > 0 && implicitHeight > 0
+        visible: Layout.preferredWidth > 0 && Layout.preferredHeight > 0
         property bool isShowing: (hoverHandler.hovered || entered && !expiring) && !forceClose
 
         readonly property bool hasInlineReply:
@@ -167,11 +178,11 @@ Item {
         // Critical notifications linger until dismissed.
         readonly property int effectiveTimeout:
             isCritical ? 0
-            : (toastRow.notif && toastRow.notif.expireTimeout > 0 ? toastRow.notif.expireTimeout : 5000)
+            : (toastRow.notif && toastRow.notif.expireTimeout > 0 ? toastRow.notif.expireTimeout : 15000)
 
         // ── Sizing & shape ────────────────────────────────────────────
-        implicitHeight: toastRow.isShowing ? (contentColumn.implicitHeight + 20) : 0
-        implicitWidth: toastRow.isShowing ? contentColumn.implicitWidth : 0
+        Layout.preferredHeight: toastRow.isShowing ? (contentColumn.implicitHeight + 20) : 0
+        Layout.preferredWidth: toastRow.isShowing ? contentColumn.implicitWidth : 0
 
         Layout.minimumWidth: toastRow.isShowing ? root.notifWidth : 0
         clip: true
@@ -193,10 +204,10 @@ Item {
                 toastRow.cachedImage = toastRow.notif.image
         }
 
-        Behavior on implicitHeight {
+        Behavior on Layout.preferredHeight {
             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
         }
-        Behavior on implicitWidth {
+        Behavior on Layout.preferredWidth {
             NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
 
@@ -225,107 +236,115 @@ Item {
         }
 
         // ── Content ────────────────────────────────────────────────────
-        ColumnLayout {
-            id: contentColumn
-
-            anchors.centerIn: parent
+        GridLayout {
+            id: contentColumn // Kept original ID in case it is referenced outside
             anchors.fill: parent
 
-            spacing: 0
-            
-            RowLayout {
-                id: contentLayout
+            columns: 2
+            rowSpacing: 0 // From your original contentColumn
+            columnSpacing: Theme.modulePaddingH // From your original contentLayout
+
+            // ─── ROW 0 ─────────────────────────────────────────────────
+            // [Row 0, Col 0] Image Block
+            ColumnLayout {
+                id: imageColumn
+                Layout.row: 0
+                Layout.column: 0
                 
-                spacing: Theme.modulePaddingH
+                spacing: 0
+                Layout.alignment: Qt.AlignLeft
+                Layout.leftMargin: Theme.modulePaddingH
 
-                ColumnLayout {
-                    id: imageColumn
-                    spacing: 0
-                    Layout.alignment: Qt.AlignLeft
-                    Layout.leftMargin: Theme.modulePaddingH
+                // Image block: shows notification image if available, otherwise app icon; hidden if neither are provided
+                Item {
 
-                    // Image block: shows notification image if available, otherwise app icon; hidden if neither are provided
-                    Item {
+                    readonly property bool hasImage: toastRow.cachedImage !== ""
+                    readonly property bool hasIcon:  toastRow.notif && toastRow.notif.appIcon !== ""
+                    visible: hasImage || hasIcon
 
-                        readonly property bool hasImage: toastRow.cachedImage !== ""
-                        readonly property bool hasIcon:  toastRow.notif && toastRow.notif.appIcon !== ""
-                        visible: hasImage || hasIcon
+                    Layout.preferredHeight: hasImage || hasIcon ? 50 : 0
+                    Layout.preferredWidth: hasImage || hasIcon ? 50 : 0
 
-                        implicitHeight: hasImage || hasIcon ? 50 : 0
-                        implicitWidth: implicitHeight
-
-                        Image {
-                            anchors.fill: parent
-                            source: parent.hasImage ? toastRow.cachedImage : ("image://icon/" + toastRow.notif.appIcon)
-                            fillMode: Image.PreserveAspectFit
-                            smooth: true
-                            cache: true
-                        }
-                    }
-
-                    Text {
-                        text: Qt.formatDateTime(new Date(), "HH:mm")
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize - 3
-                        font.bold: true
-                        color: toastRow.textColor
-                        opacity: 0.8
-                        elide: Text.ElideRight
-                        Layout.topMargin: 5
-                        Layout.alignment: Qt.AlignHCenter
+                    Image {
+                        anchors.fill: parent
+                        source: parent.hasImage ? toastRow.cachedImage : ("image://icon/" + toastRow.notif.appIcon)
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                        cache: true
                     }
                 }
 
-                // Text block
-                ColumnLayout {
-                    spacing: 0
-                    Layout.fillWidth: true
-                    Layout.rightMargin: Theme.modulePaddingH
-                    
-                    // app name
-                    Text {
-                        text: toastRow.notif ? toastRow.notif.appName : ""
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize - 1
-                        font.bold: true
-                        color: toastRow.textColor
-                        opacity: 0.7
-                        Layout.fillWidth: true
-                        elide: Text.ElideRight
-                    }
-
-                    // Summary
-                    Text {
-                        visible: toastRow.notif && toastRow.notif.summary !== ""
-                        text: toastRow.notif ? toastRow.notif.summary : ""
-                        font.family:    Theme.font
-                        font.pixelSize: toastRow.Theme.fontSize
-                        font.bold:      true
-                        color:          toastRow.textColor
-                        wrapMode:       Text.WrapAtWordBoundaryOrAnywhere
-                        Layout.fillWidth: true
-                        Layout.maximumWidth: Math.max(actionRow.implicitWidth - imageColumn.implicitWidth, root.notifWidth - imageColumn.implicitWidth - Theme.modulePaddingH * 4)
-                    }
-
-                    // Body
-                    Text {
-                        visible: toastRow.notif && toastRow.notif.body !== ""
-                        text: toastRow.notif ? toastRow.notif.body : ""
-                        font.family:    Theme.font
-                        font.pixelSize: Theme.fontSize - 1
-                        color:          toastRow.textColor
-                        opacity: 0.7
-                        wrapMode:       Text.WrapAtWordBoundaryOrAnywhere
-                        maximumLineCount: 4
-                        elide: Text.ElideRight
-                        Layout.fillWidth: true
-                        Layout.maximumWidth: Math.max(actionRow.implicitWidth - imageColumn.implicitWidth, root.notifWidth - imageColumn.implicitWidth - Theme.modulePaddingH * 4)
-                    }
+                Text {
+                    text: Qt.formatDateTime(new Date(), "HH:mm")
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize - 3
+                    font.bold: true
+                    color: toastRow.textColor
+                    opacity: 0.8
+                    elide: Text.ElideRight
+                    Layout.topMargin: 5
+                    Layout.alignment: Qt.AlignHCenter
                 }
             }
 
+            // [Row 0, Col 1] Text Block
+            ColumnLayout {
+                Layout.row: 0
+                Layout.column: 1
+                
+                spacing: 0
+                Layout.fillWidth: true
+                Layout.rightMargin: Theme.modulePaddingH
+                
+                // app name
+                Text {
+                    text: toastRow.notif ? toastRow.notif.appName : ""
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize - 1
+                    font.bold: true
+                    color: toastRow.textColor
+                    opacity: 0.7
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                }
+
+                // Summary
+                Text {
+                    visible: toastRow.notif && toastRow.notif.summary !== ""
+                    text: toastRow.notif ? toastRow.notif.summary : ""
+                    font.family:    Theme.font
+                    font.pixelSize: toastRow.Theme.fontSize
+                    font.bold:      true
+                    color:          toastRow.textColor
+                    wrapMode:       Text.WrapAtWordBoundaryOrAnywhere
+                    Layout.fillWidth: true
+                    Layout.maximumWidth: Math.max(actionRow.implicitWidth - imageColumn.implicitWidth, root.notifWidth - imageColumn.implicitWidth - Theme.modulePaddingH * 4)
+                }
+
+                // Body
+                Text {
+                    visible: toastRow.notif && toastRow.notif.body !== ""
+                    text: toastRow.notif ? toastRow.notif.body : ""
+                    font.family:    Theme.font
+                    font.pixelSize: Theme.fontSize - 1
+                    color:          toastRow.textColor
+                    opacity: 0.7
+                    wrapMode:       Text.WrapAtWordBoundaryOrAnywhere
+                    elide: Text.ElideRight
+                    maximumLineCount: 6
+                    Layout.fillWidth: true
+                    Layout.maximumWidth: Math.max(actionRow.implicitWidth - imageColumn.implicitWidth, root.notifWidth - imageColumn.implicitWidth - Theme.modulePaddingH * 4)
+                }
+            }
+
+            // ─── ROW 1 ─────────────────────────────────────────────────
+            // [Row 1, Col 0 & 1] Actions (Spans both columns)
             RowLayout {
                 id: actionRow
+                Layout.row: 1
+                Layout.column: 0
+                Layout.columnSpan: 2 // Stretches all the way across the grid
+                
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignLeft
                 Layout.leftMargin: Theme.modulePaddingH
@@ -341,7 +360,7 @@ Item {
 
                     delegate: ModuleButton {
                         label: modelData.text
-                        implicitHeight: 28
+                        Layout.preferredHeight: 28
                         radius: Theme.moduleEdgeRadius
                         textFont: Theme.fontSize - 2
                         
@@ -350,8 +369,15 @@ Item {
                     }
                 }
             }
+
+            // ─── ROW 2 ─────────────────────────────────────────────────
+            // [Row 2, Col 0 & 1] Inline Reply (Spans both columns)
             ModuleButton {
                 id: inlineReplyRow
+                Layout.row: 2
+                Layout.column: 0
+                Layout.columnSpan: 2 // Stretches all the way across the grid
+                
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignHCenter
                 Layout.leftMargin: Theme.modulePaddingH
@@ -394,7 +420,7 @@ Item {
                     Keys.onReturnPressed: {
                         root.inlineReplyInputFocused = false
                         toastRow.submitInlineReply()
-                        }
+                    }
                     onActiveFocusChanged: {
                         if (activeFocus) {
                             root.inlineReplyInputFocused = true

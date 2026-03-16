@@ -80,7 +80,7 @@ ModuleButton {
         topMarginButton: 0 // Removes default margin from ModuleButton
         anchors { left: parent.left; right: parent.right; top: parent.top }
         implicitWidth:  launcherModule.expanded ? launcherModule.panelWidth : collapsedRow.implicitWidth
-        implicitHeight: expanded ? panelCol.implicitHeight + 5 : panelCol.implicitHeight
+        implicitHeight: expanded ? panelCol.implicitHeight + 5 : Theme.moduleHeight
 
         ColumnLayout {
             id: panelCol
