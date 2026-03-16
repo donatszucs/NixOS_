@@ -62,11 +62,11 @@ Item {
             
             cornerPosition: "bottomRight"
             // Swapped notifColumn.implicitHeight to innerLayout.implicitHeight since notifColumn is gone
-            size: Math.floor(innerLayout.implicitHeight / 8)
+            size: Math.max(Theme.moduleEdgeRadius, Math.floor(innerLayout.implicitHeight / 8))
             color: Theme.palette("dark").base
             expandingH: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
             expandingV: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
-            animationDuration: Theme.verticalDuration / 2
+            animationDuration: Theme.verticalDuration
         }
 
         // [Row 1, Col 1] Main Notification Container
@@ -193,8 +193,8 @@ Item {
             : (toastRow.notif && toastRow.notif.expireTimeout > 0 ? toastRow.notif.expireTimeout : 5000)
 
         // ── Sizing & shape ────────────────────────────────────────────
-        height: toastRow.isShowing ? (contentColumn.implicitHeight + 20) : 0
-        width: toastRow.isShowing ? contentColumn.implicitWidth : 0
+        height: toastRow.isShowing ? (contentGrid.implicitHeight + 20) : 0
+        width: toastRow.isShowing ? contentGrid.implicitWidth : 0
 
         clip: true
 
@@ -248,12 +248,16 @@ Item {
 
         // ── Content ────────────────────────────────────────────────────
         GridLayout {
-            id: contentColumn // Kept original ID in case it is referenced outside
-            anchors.fill: parent
+            id: contentGrid
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             columns: 2
-            rowSpacing: 0 // From your original contentColumn
-            columnSpacing: Theme.modulePaddingH // From your original contentLayout
+            rowSpacing: 10
+            columnSpacing: 10
+            anchors.margins: Theme.modulePaddingH
 
             // ─── ROW 0 ─────────────────────────────────────────────────
             // [Row 0, Col 0] Image Block
@@ -262,9 +266,8 @@ Item {
                 Layout.row: 0
                 Layout.column: 0
                 
-                spacing: 0
-                Layout.alignment: Qt.AlignLeft
-                Layout.leftMargin: Theme.modulePaddingH
+                spacing: 5
+                Layout.alignment: Qt.AlignCenter
 
                 // Image block: shows notification image if available, otherwise app icon; hidden if neither are provided
                 Item {
@@ -282,6 +285,9 @@ Item {
                         fillMode: Image.PreserveAspectFit
                         smooth: true
                         cache: true
+
+                        sourceSize.width: 50
+                        sourceSize.height: 50
                     }
                 }
 
@@ -293,8 +299,7 @@ Item {
                     color: toastRow.textColor
                     opacity: 0.8
                     elide: Text.ElideRight
-                    Layout.topMargin: 5
-                    Layout.alignment: Qt.AlignHCenter
+                    Layout.alignment: Qt.AlignCenter
                 }
             }
 
@@ -304,8 +309,7 @@ Item {
                 Layout.column: 1
                 
                 spacing: 0
-                Layout.fillWidth: true
-                Layout.rightMargin: Theme.modulePaddingH
+                Layout.alignment: Qt.AlignCenter
                 
                 // app name
                 Text {
@@ -358,9 +362,6 @@ Item {
                 
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignLeft
-                Layout.leftMargin: Theme.modulePaddingH
-                Layout.rightMargin: Theme.modulePaddingH
-                Layout.bottomMargin: toastRow.hasInlineReply ? 8 : Theme.modulePaddingH
                 spacing: 8
                 
                 // Only show this row if the notification actually has actions
@@ -390,10 +391,7 @@ Item {
                 Layout.columnSpan: 2 // Stretches all the way across the grid
                 
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignHCenter
-                Layout.leftMargin: Theme.modulePaddingH
-                Layout.rightMargin: Theme.modulePaddingH
-                Layout.bottomMargin: Theme.modulePaddingH
+                Layout.alignment: Qt.AlignCenter
                 visible: toastRow.hasInlineReply
                 implicitHeight: 30
 

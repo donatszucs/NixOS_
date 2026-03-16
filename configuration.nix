@@ -21,6 +21,10 @@
   # Supported filesystems for the initrd (for mounting /boot and other partitions)
   boot.supportedFilesystems = ["ntfs"];
   
+  boot.kernelParams = [
+    "nvidia.NVreg_RegistryDwords=RMUseSwI2c=0x01;RMI2cSpeed=100"
+  ];
+
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
