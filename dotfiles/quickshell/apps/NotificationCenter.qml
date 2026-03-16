@@ -82,64 +82,76 @@ Item {
             topLeftRadius: Theme.moduleEdgeRadius + 5
             
             implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (innerLayout.implicitWidth + 20)
-            implicitHeight: (innerLayout.implicitHeight === 0 && !hoverHandler.hovered) ? 0 : (innerLayout.implicitHeight + 25)
+            implicitHeight: innerLayout.implicitHeight === 0 ? 0 : (innerLayout.implicitHeight + 20)
 
             Behavior on implicitHeight {
-                NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
             Behavior on implicitWidth {
-                NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
 
             // Your exact inner layout, untouched
-            ColumnLayout {
+            Column {
                 id: innerLayout
                 anchors {
                     top: parent.top
+                    topMargin: 10
                     left: parent.left
                     right: parent.right
                     bottom: parent.bottom
+                    bottomMargin: 10
                 }
 
-                layoutDirection: Qt.RightToLeft
-                spacing: 5
+                spacing: 10
                 clip: true
 
+                move: Transition {
+                    NumberAnimation { 
+                        properties: "y" 
+                        duration: Theme.verticalDuration 
+                        easing.type: Easing.OutCubic 
+                    }
+                }
+
                 ModuleButton {
-                    visible: implicitHeight > 0 || hoverHandler.hovered
                     id: headerButton
-                    Layout.alignment: Qt.AlignHCenter
+                    anchors.horizontalCenter: parent.horizontalCenter 
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    
+                    visible: height > 0 || hoverHandler.hovered
                     textFont: 20
                     color: "transparent"
                     label: "󰎟 Notification Center"
-                    Layout.preferredHeight: hoverHandler.hovered ? 30 : 0
-                    Layout.preferredWidth: hoverHandler.hovered ? notifWidth : 0
+                    
+                    // Use standard height/width instead of Layout.preferred
+                    height: hoverHandler.hovered ? 30 : 0
+                    width: hoverHandler.hovered ? 300 : 0
 
-                    Behavior on Layout.preferredHeight {
+                    Behavior on height {
                         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                     }
-
-                    Behavior on Layout.preferredWidth {
+                    Behavior on width {
                         NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
                     }
                 }
-
+                
                 Repeater {
                     id: notificationRepeater
                     model: server.trackedNotifications
                     delegate: NotificationToast {
-
+                        id: toast
                         required property var modelData
                         required property int index
-                        id: toast
+                        
                         notif: modelData
                         notifIndex: index
 
-                        Layout.alignment: Qt.AlignHCenter
-
-                        Behavior on y {
-                            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-                        }
+                        // Replaced Layout.alignment with standard anchors
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
                     }
                 }
             }
@@ -162,7 +174,7 @@ Item {
         // Cached image: set on first load, only updated if a new notification brings its own image
         property string cachedImage: ""
 
-        visible: Layout.preferredWidth > 0 && Layout.preferredHeight > 0
+        visible: width > 0 && height > 0
         property bool isShowing: (hoverHandler.hovered || entered && !expiring) && !forceClose
 
         readonly property bool hasInlineReply:
@@ -178,13 +190,12 @@ Item {
         // Critical notifications linger until dismissed.
         readonly property int effectiveTimeout:
             isCritical ? 0
-            : (toastRow.notif && toastRow.notif.expireTimeout > 0 ? toastRow.notif.expireTimeout : 15000)
+            : (toastRow.notif && toastRow.notif.expireTimeout > 0 ? toastRow.notif.expireTimeout : 5000)
 
         // ── Sizing & shape ────────────────────────────────────────────
-        Layout.preferredHeight: toastRow.isShowing ? (contentColumn.implicitHeight + 20) : 0
-        Layout.preferredWidth: toastRow.isShowing ? contentColumn.implicitWidth : 0
+        height: toastRow.isShowing ? (contentColumn.implicitHeight + 20) : 0
+        width: toastRow.isShowing ? contentColumn.implicitWidth : 0
 
-        Layout.minimumWidth: toastRow.isShowing ? root.notifWidth : 0
         clip: true
 
         radius: Theme.moduleEdgeRadius
@@ -204,10 +215,10 @@ Item {
                 toastRow.cachedImage = toastRow.notif.image
         }
 
-        Behavior on Layout.preferredHeight {
+        Behavior on height {
             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
         }
-        Behavior on Layout.preferredWidth {
+        Behavior on width {
             NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
 
