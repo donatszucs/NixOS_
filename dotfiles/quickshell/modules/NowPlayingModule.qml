@@ -31,8 +31,8 @@ ModuleButton {
     function refreshAll() { pickPlayer() }
 
 
-    implicitHeight: expanded ? Theme.moduleHeight + artistInfoRow.implicitHeight : Theme.moduleHeight
-    implicitWidth: expanded ? Math.ceil(controlsRow.implicitWidth + titleBtn.implicitWidth + 15) : Math.ceil(titleBtn.implicitWidth)
+    implicitHeight: expanded ? column.implicitHeight + 10 : Theme.moduleHeight
+    implicitWidth: expanded ? Math.ceil(topRow.implicitWidth + 30) : Math.ceil(topRow.implicitWidth)
     clip: true
 
     Behavior on implicitWidth {
@@ -47,16 +47,21 @@ ModuleButton {
     ColumnLayout {
         id: column
         anchors.fill: parent
-        spacing: 0
+        spacing: 10
 
         anchors {
             left: parent.left
             top: parent.top
+            bottomMargin: 10
         }
 
         RowLayout {
-            id: row
+            id: topRow
             spacing: 0
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                top: parent.top
+            }
             layoutDirection: Qt.RightToLeft
             // Title
             ModuleButton {
@@ -159,79 +164,74 @@ ModuleButton {
                 Item { implicitWidth: 0 }
             }
         }
-        ColumnLayout {
-            id: artistInfoRow
-            implicitWidth: nowPlayingModule.implicitWidth
-            implicitHeight: Math.max(artistInfo.implicitHeight, trackArt.implicitHeight)
 
-            ModuleButton {
-                id: trackArt
-                visible: nowPlayingModule.expanded && albumArt.source.toString() !== ""
-                color: "transparent"
-                implicitWidth: albumArtClip.width + 30
-                implicitHeight: albumArtClip.height + 15
+        ModuleButton {
+            anchors.horizontalCenter: parent.horizontalCenter
+            id: trackArt
+            visible: nowPlayingModule.expanded && albumArt.source.toString() !== ""
+            color: "transparent"
+            implicitWidth: albumArtClip.width
+            implicitHeight: albumArtClip.height
 
-                // Changed to an Item since MultiEffect handles the drawing now
-                Item { 
-                    id: albumArtClip
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: parent.bottom
+            // Changed to an Item since MultiEffect handles the drawing now
+            Item { 
+                id: albumArtClip
+                anchors.centerIn: parent
+                
+                // 1. The fixed width you want — decoupled from the animating implicitWidth
+                //    so height expansion starts immediately alongside width expansion
+                width: Math.ceil(topRow.implicitWidth)
+                
+                // 2. Calculate the height dynamically using the image's source dimensions
+                // Formula: Height = Width * (Original Height / Original Width)
+                height: albumArt.implicitWidth > 0 
+                        ? (width * (albumArt.implicitHeight / albumArt.implicitWidth)) 
+                        : width // Fallback: makes it a perfect square before the image finishes loading
+
+                Image {
+                    id: albumArt
+                    anchors.fill: parent
+                    // Since the container now perfectly matches the image's ratio, 
+                    // PreserveAspectFit or Stretch will both work perfectly without cutting anything off.
+                    fillMode: Image.PreserveAspectFit
+                    source: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
+                    // Prevent constant re-decoding by using a fixed max size or just implicit sizing
+                    sourceSize.width: 200
+                    visible: false 
+                }
+
+                // 3. The Qt 6 way to apply masks and effects
+                MultiEffect {
+                    source: albumArt
+                    anchors.fill: albumArt
+                    visible: albumArt.source.toString() !== ""
+                    maskEnabled: true
+                    maskSource: maskItem
+                }
+
+                // 4. The shape of our mask
+                Item {
+                    id: maskItem
+                    anchors.fill: parent
+                    visible: false
+                    layer.enabled: true
                     
-                    // 1. The fixed width you want — decoupled from the animating implicitWidth
-                    //    so height expansion starts immediately alongside width expansion
-                    width: Math.ceil(controlsRow.implicitWidth + titleBtn.implicitWidth - 15)
-                    
-                    // 2. Calculate the height dynamically using the image's source dimensions
-                    // Formula: Height = Width * (Original Height / Original Width)
-                    height: albumArt.implicitWidth > 0 
-                            ? (width * (albumArt.implicitHeight / albumArt.implicitWidth)) 
-                            : width // Fallback: makes it a perfect square before the image finishes loading
-
-                    Image {
-                        id: albumArt
+                    Rectangle {
                         anchors.fill: parent
-                        // Since the container now perfectly matches the image's ratio, 
-                        // PreserveAspectFit or Stretch will both work perfectly without cutting anything off.
-                        fillMode: Image.PreserveAspectFit
-                        source: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
-                        // Prevent constant re-decoding by using a fixed max size or just implicit sizing
-                        sourceSize.width: 200
-                        visible: false 
-                    }
-
-                    // 3. The Qt 6 way to apply masks and effects
-                    MultiEffect {
-                        source: albumArt
-                        anchors.fill: albumArt
-                        visible: albumArt.source.toString() !== ""
-                        maskEnabled: true
-                        maskSource: maskItem
-                    }
-
-                    // 4. The shape of our mask
-                    Item {
-                        id: maskItem
-                        anchors.fill: parent
-                        visible: false
-                        layer.enabled: true
-                        
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: Theme.moduleEdgeRadius
-                            color: "black" 
-                        }
+                        radius: Theme.moduleEdgeRadius
+                        color: "black" 
                     }
                 }
             }
-            ModuleButton {
-                id: artistInfo
-                visible: nowPlayingModule.expanded
-                color: "transparent"
-                label: nowPlayingModule.authorText
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignCenter
-
-            }
+        }
+        ModuleButton {
+            id: artistInfo
+            visible: nowPlayingModule.expanded
+            color: "transparent"
+            label: nowPlayingModule.authorText
+            Layout.fillWidth: true
+            Layout.preferredHeight: 30
+            Layout.alignment: Qt.AlignCenter
         }
     }
 

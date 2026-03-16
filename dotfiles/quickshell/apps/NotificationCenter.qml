@@ -11,7 +11,7 @@ Item {
     id: root
 
     // ── Geometry ────────────────────────────────────────────────────────
-    readonly property int notifWidth:   360
+    readonly property int notifWidth:   300
     readonly property int notifSpacing: 0
 
     property int notificationNumber: 0
@@ -127,7 +127,7 @@ Item {
                     
                     // Use standard height/width instead of Layout.preferred
                     height: hoverHandler.hovered ? 30 : 0
-                    width: hoverHandler.hovered ? 300 : 0
+                    width: hoverHandler.hovered ? root.notifWidth : 0
 
                     Behavior on height {
                         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -193,8 +193,8 @@ Item {
             : (toastRow.notif && toastRow.notif.expireTimeout > 0 ? toastRow.notif.expireTimeout : 5000)
 
         // ── Sizing & shape ────────────────────────────────────────────
-        height: toastRow.isShowing ? (contentGrid.implicitHeight + 20) : 0
-        width: toastRow.isShowing ? contentGrid.implicitWidth : 0
+        height: toastRow.isShowing ? (contentGrid.implicitHeight + Theme.modulePaddingH * 2) : 0
+        width: toastRow.isShowing ? (contentGrid.implicitWidth + Theme.modulePaddingH * 2) : 0
 
         clip: true
 
@@ -252,11 +252,10 @@ Item {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            anchors.right: parent.right
 
             columns: 2
-            rowSpacing: 10
-            columnSpacing: 10
+            rowSpacing: Theme.modulePaddingH
+            columnSpacing: Theme.modulePaddingH
             anchors.margins: Theme.modulePaddingH
 
             // ─── ROW 0 ─────────────────────────────────────────────────
@@ -309,7 +308,9 @@ Item {
                 Layout.column: 1
                 
                 spacing: 0
-                Layout.alignment: Qt.AlignCenter
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                Layout.minimumWidth: root.notifWidth - 50
+                Layout.maximumWidth: Math.max(root.notifWidth - 50, contentGrid.implicitWidth - imageColumn.implicitWidth - (Theme.modulePaddingH * 4))
                 
                 // app name
                 Text {
@@ -328,12 +329,11 @@ Item {
                     visible: toastRow.notif && toastRow.notif.summary !== ""
                     text: toastRow.notif ? toastRow.notif.summary : ""
                     font.family:    Theme.font
-                    font.pixelSize: toastRow.Theme.fontSize
+                    font.pixelSize: Theme.fontSize
                     font.bold:      true
                     color:          toastRow.textColor
                     wrapMode:       Text.WrapAtWordBoundaryOrAnywhere
                     Layout.fillWidth: true
-                    Layout.maximumWidth: Math.max(actionRow.implicitWidth - imageColumn.implicitWidth, root.notifWidth - imageColumn.implicitWidth - Theme.modulePaddingH * 4)
                 }
 
                 // Body
@@ -348,7 +348,6 @@ Item {
                     elide: Text.ElideRight
                     maximumLineCount: 6
                     Layout.fillWidth: true
-                    Layout.maximumWidth: Math.max(actionRow.implicitWidth - imageColumn.implicitWidth, root.notifWidth - imageColumn.implicitWidth - Theme.modulePaddingH * 4)
                 }
             }
 
@@ -360,7 +359,6 @@ Item {
                 Layout.column: 0
                 Layout.columnSpan: 2 // Stretches all the way across the grid
                 
-                Layout.fillWidth: true
                 Layout.alignment: Qt.AlignLeft
                 spacing: 8
                 
