@@ -39,7 +39,7 @@ ModuleButton {
     RowLayout {
         id: workspacesRow
         anchors.centerIn: parent
-        spacing: 0
+        spacing: root.overlay - 1
 
         Repeater {
             model: root.monitorWorkspaces.workspaces
@@ -55,10 +55,10 @@ ModuleButton {
                 cursorShape: Qt.PointingHandCursor
 
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
-                topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
-                bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
-                topRightRadius: index === root.monitorWorkspaces.workspaces.length - 1 ? Theme.moduleEdgeRadius : 0
-                bottomRightRadius: index === root.monitorWorkspaces.workspaces.length - 1 ? Theme.moduleEdgeRadius : 0
+                topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
+                bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
+                topRightRadius: index === root.monitorWorkspaces.workspaces.length - 1 ? Theme.moduleEdgeRadius : 5
+                bottomRightRadius: index === root.monitorWorkspaces.workspaces.length - 1 ? Theme.moduleEdgeRadius : 5
 
                 readonly property bool active:
                     Hyprland.focusedMonitor !== null &&
@@ -80,6 +80,14 @@ ModuleButton {
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize
                         font.bold: true
+                    }
+
+                    Rectangle {
+                        width: root.overlay + 1
+                        height: Theme.moduleHeight - 15
+                        color: Theme.palette("dark").base
+                        opacity: 0.5
+                        radius: 2
                     }
 
                     Repeater {
@@ -192,10 +200,10 @@ ModuleButton {
                 cursorShape: Qt.PointingHandCursor
                 
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
-                topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
-                bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 0
-                topRightRadius: index === root.monitorWorkspaces.others.length - 1 ? Theme.moduleEdgeRadius : 0
-                bottomRightRadius: index === root.monitorWorkspaces.others.length - 1 ? Theme.moduleEdgeRadius : 0
+                topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
+                bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
+                topRightRadius: index === root.monitorWorkspaces.others.length - 1 ? Theme.moduleEdgeRadius : 5
+                bottomRightRadius: index === root.monitorWorkspaces.others.length - 1 ? Theme.moduleEdgeRadius : 5
 
                 readonly property bool active:
                     Hyprland.focusedMonitor !== null &&
