@@ -61,9 +61,7 @@ Rectangle {
         interval: Theme.horizontalDuration * 1.5
         repeat: false
         onTriggered: {
-
-            clipboardPanel.expanded = false;
-            clipboardPanel.selectedIndex = -1;
+            clipboardPanel.closeMenu();
             applyCliphist.running = true;
         }
     }
@@ -71,6 +69,17 @@ Rectangle {
         id: applyCliphist
         property string targetLine: ""
         command: ["bash", "-c", "printf '%s\\n' \"$0\" | cliphist decode | wl-copy && sleep 0.1 && wtype -M ctrl -k v -m ctrl", targetLine]
+    }
+
+    // ── Public API ────────────────────────────────────────────────────────
+    function openMenu() {
+        clipboardModel.clear();
+        fetchCliphist.running = true;
+    }
+
+    function closeMenu() {
+        clipboardPanel.expanded = false;
+        clipboardPanel.selectedIndex = -1;
     }
 
     // IPC Trigger for Super+V
@@ -85,10 +94,9 @@ Rectangle {
         stdout: SplitParser {
             onRead: _ => {
                 if (clipboardPanel.expanded) {
-                    clipboardPanel.expanded = false;
+                    closeMenu();
                 } else {
-                    clipboardModel.clear();
-                    fetchCliphist.running = true;
+                    openMenu();
                 }
             }
         }
@@ -117,7 +125,7 @@ Rectangle {
             }
             event.accepted = true;
         } else if (event.key === Qt.Key_Escape) {
-            clipboardPanel.expanded = false;
+            clipboardPanel.closeMenu();
             event.accepted = true;
         }
     }
@@ -205,7 +213,7 @@ Rectangle {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.fillWidth: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: clipboardPanel.expanded = false
+                    onClicked: clipboardPanel.closeMenu()
                     radius: Theme.moduleEdgeRadius
                 }
             }

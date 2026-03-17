@@ -58,11 +58,9 @@ ModuleButton {
         RowLayout {
             id: topRow
             spacing: 0
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                top: parent.top
-            }
+            Layout.alignment: Qt.AlignTop
             layoutDirection: Qt.RightToLeft
+            Layout.leftMargin: nowPlayingModule.expanded ? 15 : 0
             // Title
             ModuleButton {
                 colorOverride: !expanded
@@ -163,6 +161,10 @@ ModuleButton {
 
                 Item { implicitWidth: 0 }
             }
+
+            Behavior on Layout.leftMargin {
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
         }
 
         ModuleButton {
@@ -230,7 +232,7 @@ ModuleButton {
             color: "transparent"
             label: nowPlayingModule.authorText
             Layout.fillWidth: true
-            Layout.preferredHeight: 30
+            Layout.preferredHeight: Theme.fontSize
             Layout.alignment: Qt.AlignCenter
         }
     }

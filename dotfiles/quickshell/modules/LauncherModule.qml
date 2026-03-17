@@ -20,6 +20,7 @@ ModuleButton {
 
     property int  panelWidth:  400
     property int  maxVisible:  8
+    property int  padding:    10
 
     // JS array of DesktopEntry objects matching the current search
     property var filteredApps: []
@@ -80,12 +81,12 @@ ModuleButton {
         topMarginButton: 0 // Removes default margin from ModuleButton
         anchors { left: parent.left; right: parent.right; top: parent.top }
         implicitWidth:  launcherModule.expanded ? launcherModule.panelWidth : collapsedRow.implicitWidth
-        implicitHeight: expanded ? panelCol.implicitHeight + 5 : Theme.moduleHeight
+        implicitHeight: expanded ? panelCol.implicitHeight + 10 : Theme.moduleHeight
 
         ColumnLayout {
             id: panelCol
             anchors { left: parent.left; right: parent.right; top: parent.top } // Reset layout spacing
-            spacing: 15
+            spacing: launcherModule.padding
 
             // Header row (same height as collapsed bar, keeps visual alignment)
             ModuleButton {
@@ -115,27 +116,73 @@ ModuleButton {
                 }
             }
 
-            ModuleButton {
-                colorOverride: true
+            RowLayout {
                 Layout.fillWidth: true
-                implicitHeight: Theme.moduleHeight
-                label: "󰸉  Wallpaper Picker"
-                cursorShape: Qt.PointingHandCursor
+                spacing: launcherModule.padding
+                Layout.leftMargin: launcherModule.padding
+                Layout.rightMargin: launcherModule.padding
+            
+                ModuleButton {
+                    Layout.fillWidth: true
+                    implicitHeight: Theme.moduleHeight
+                    label: "󰸉  Wallpaper"
+                    cursorShape: Qt.PointingHandCursor
 
-                onClicked: {
-                    launcherModule.expanded = false;
-                    wallpaperPicker.expanded = !wallpaperPicker.expanded;
+                    radius: Theme.moduleEdgeRadius
+
+                    onClicked: {
+                        launcherModule.expanded = false;
+                        wallpaperPicker.expanded = !wallpaperPicker.expanded;
+                    }
                 }
+            
+                ModuleButton {
+                    Layout.fillWidth: true
+                    implicitHeight: Theme.moduleHeight
+                    label: "󰌆 Bitwarden"
+                    cursorShape: Qt.PointingHandCursor
+
+                    radius: Theme.moduleEdgeRadius
+
+                    onClicked: {
+                        launcherModule.expanded = false;
+                        if (rbwMenu.expanded) {
+                            rbwMenu.closeMenu();
+                        } else {
+                            rbwMenu.openMenu();
+                        }
+                    }
+                }
+
+                ModuleButton {
+                    Layout.fillWidth: true
+                    implicitHeight: Theme.moduleHeight
+                    label: " Clipboard"
+                    cursorShape: Qt.PointingHandCursor
+
+                    radius: Theme.moduleEdgeRadius
+                    
+                    onClicked: {
+                        launcherModule.expanded = false;
+                        if (clipboardHistory.expanded) {
+                            clipboardHistory.closeMenu();
+                        } else {
+                            clipboardHistory.openMenu();
+                        }
+                    }
+                }
+
             }
 
             // Search bar
-            Rectangle {
+            ModuleButton {
                 Layout.fillWidth: true
-                Layout.leftMargin: 10
-                Layout.rightMargin: 10
+                Layout.leftMargin: launcherModule.padding
+                Layout.rightMargin: launcherModule.padding
                 implicitHeight: Theme.moduleHeight
                 color: Theme.dark.pressed
                 radius: Theme.moduleEdgeRadius
+                cursorShape: Qt.PointingHandCursor
 
                 TextInput {
                     id: searchField
@@ -201,8 +248,8 @@ ModuleButton {
             // Divider
             Rectangle {
                 Layout.fillWidth: true
-                Layout.leftMargin: 10
-                Layout.rightMargin: 10
+                Layout.leftMargin: launcherModule.padding
+                Layout.rightMargin: launcherModule.padding
                 height: 5
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
@@ -212,8 +259,8 @@ ModuleButton {
             Rectangle {
                 id: appListRect
                 Layout.fillWidth: true
-                Layout.leftMargin: 10
-                Layout.rightMargin: 10
+                Layout.leftMargin: launcherModule.padding
+                Layout.rightMargin: launcherModule.padding
                 implicitHeight: Math.min(launcherModule.filteredApps.length, launcherModule.maxVisible) * Theme.moduleHeight
                 color: "transparent"
                 Behavior on implicitHeight {

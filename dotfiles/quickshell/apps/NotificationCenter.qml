@@ -171,8 +171,7 @@ Item {
         // Cached image: set on first load, only updated if a new notification brings its own image
         property string cachedImage: ""
 
-        visible: isShowing
-        property bool isShowing: (hoverHandler.hovered || entered && !expiring) && !forceClose
+        visible: (hoverHandler.hovered || entered && !expiring) && !forceClose
 
         readonly property bool hasInlineReply:
             toastRow.notif && toastRow.notif.hasInlineReply
