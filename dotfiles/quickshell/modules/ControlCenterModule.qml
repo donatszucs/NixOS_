@@ -117,7 +117,7 @@ ModuleButton {
         noHoverColorChange: true
         color: "transparent"
 
-        implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth) + 20
+        implicitWidth: Math.max(netModule.implicitWidth, btModule.implicitWidth, headsetModule.implicitWidth) + 20
         implicitHeight: popupCol.implicitHeight + 10
 
         ColumnLayout {
@@ -131,7 +131,7 @@ ModuleButton {
                 topMargin: 0
                 bottomMargin: 0
             }
-            spacing: 8
+            spacing: 10
 
             ModuleButton {
                 visible: controlCenter.expanded
@@ -147,155 +147,211 @@ ModuleButton {
             }
 
             // ── Network ──────────────────────────────────
-            RowLayout {
-                id: netRow
-                spacing: 0
+            ModuleButton {
+                id: netModule
+                visible: controlCenter.expanded
+                color: Theme.divider
+                radius: Theme.moduleEdgeRadius
 
-                ModuleButton {
-                    id: netStatusIcon
-                    label: controlCenter.netIcon
-                    cursorShape: Qt.PointingHandCursor
-                    colorOverride: true
-                    textColor: controlCenter.netColor
-                    textFont: 24
-                    rightMargin: 6
-                    implicitWidth: textFont * 2
-                    radius: Theme.moduleEdgeRadius
-                    onClicked: netOpen.running = true
-                }
+                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth) + 20
+                implicitHeight: netRow.implicitHeight + 20
 
-                ColumnLayout {
-                    id: netInfoCol
+                RowLayout {
+                    id: netRow
+
+                    anchors {
+                        left:    parent.left
+                        right:   parent.right
+                        top:     parent.top
+                        leftMargin: 10
+                        rightMargin: 10
+                        topMargin: 10
+                        bottomMargin: 10
+                    }
+
                     spacing: 0
-                    ModuleButton {
-                        label: controlCenter.netName
-                        color: "transparent"
-                        textColor: controlCenter.netColor
-
-                    }
-                    ModuleButton {
-                        label: controlCenter.netState
-                        color: "transparent"
-                        textColor: controlCenter.netColor
-                    }
-                }
-            }
-
-            Rectangle { Layout.fillWidth: true; height: 5; color: Theme.divider; radius: Theme.moduleEdgeRadius }
-
-            // ── Bluetooth ─────────────────────────────────
-            RowLayout {
-                id: btRow
-                Layout.fillWidth: true
-                spacing: 8
-
-                ColumnLayout {
 
                     ModuleButton {
-                        label: controlCenter.btIcon
+                        id: netStatusIcon
+                        label: controlCenter.netIcon
                         cursorShape: Qt.PointingHandCursor
-                        textColor: controlCenter.btColor
                         colorOverride: true
-                        radius: Theme.moduleEdgeRadius
+                        textColor: controlCenter.netColor
                         textFont: 24
+                        rightMargin: 6
                         implicitWidth: textFont * 2
-
-                        onClicked: btOpen.running = true
+                        radius: Theme.moduleEdgeRadius
+                        onClicked: netOpen.running = true
                     }
 
-                    // Custom-styled switch (smaller, themed)
-                    Rectangle {
-                        id: btSwitch
-                        width: 40
-                        height: 22
-                        radius: height / 2
-                        color: controlCenter.btColor
-                        border.color: controlCenter.btColor
-                        border.width: 1
-                        Layout.alignment: Qt.AlignHCenter
-
-                        property bool on: controlCenter.btPowered
-
-                        Rectangle {
-                            id: handle
-                            width: parent.height - 6
-                            height: parent.height - 6
-                            y: 3
-                            x: btSwitch.on ? parent.width - width - 3 : 3
-                            radius: height / 2
-                            color: "white"
-                            smooth: true
-                            Behavior on x { NumberAnimation { duration: 160; easing.type: Easing.InOutCubic } }
-                            Behavior on color { ColorAnimation { duration: 120 } }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                if (controlCenter.btAdapter) controlCenter.btAdapter.enabled = !controlCenter.btAdapter.enabled
-                            }
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                        }
-                    }
-                }
-                ColumnLayout {
-                    Layout.fillWidth: true
-
-                    Repeater {
-                        model: controlCenter.btDevices ? controlCenter.btDevices : []
-                        delegate: ModuleButton {
-                            required property var modelData
-                            label: modelData.batteryAvailable ? modelData.name + ": " + modelData.battery * 100 + "%" : modelData.name
+                    ColumnLayout {
+                        id: netInfoCol
+                        spacing: 0
+                        ModuleButton {
+                            label: controlCenter.netName
                             color: "transparent"
-                            textColor: Theme.textPrimary
-                            visible: modelData && modelData.connected === true
-                        }
-                    }
+                            textColor: controlCenter.netColor
 
-                    ModuleButton {
-                        visible: !controlCenter.btDevicesConnected
-                        label: controlCenter.btPowered ? "No devices" : "disabled"
-                        color: "transparent"
+                        }
+                        ModuleButton {
+                            label: controlCenter.netState
+                            color: "transparent"
+                            textColor: controlCenter.netColor
+                        }
                     }
                 }
             }
+                            
+            // ── Bluetooth ──────────────────────────────────
+            ModuleButton {
+                id: btModule
+                visible: controlCenter.expanded
+                color: Theme.divider
+                radius: Theme.moduleEdgeRadius
 
-            Rectangle { Layout.fillWidth: true; height: 5; color: Theme.divider; radius: Theme.moduleEdgeRadius }
+                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth) + 20
+                implicitHeight: btRow.implicitHeight + 20
+
+                RowLayout {
+                    id: btRow
+                    
+                    anchors {
+                        left:    parent.left
+                        right:   parent.right
+                        top:     parent.top
+                        leftMargin: 10
+                        rightMargin: 10
+                        topMargin: 10
+                        bottomMargin: 10
+                    }
+
+                    spacing: 8
+
+                    ColumnLayout {
+
+                        ModuleButton {
+                            label: controlCenter.btIcon
+                            cursorShape: Qt.PointingHandCursor
+                            textColor: controlCenter.btColor
+                            colorOverride: true
+                            radius: Theme.moduleEdgeRadius
+                            textFont: 24
+                            implicitWidth: textFont * 2
+
+                            onClicked: btOpen.running = true
+                        }
+
+                        // Custom-styled switch (smaller, themed)
+                        Rectangle {
+                            id: btSwitch
+                            width: 40
+                            height: 22
+                            radius: height / 2
+                            color: controlCenter.btColor
+                            border.color: controlCenter.btColor
+                            border.width: 1
+                            Layout.alignment: Qt.AlignHCenter
+
+                            property bool on: controlCenter.btPowered
+
+                            Rectangle {
+                                id: handle
+                                width: parent.height - 6
+                                height: parent.height - 6
+                                y: 3
+                                x: btSwitch.on ? parent.width - width - 3 : 3
+                                radius: height / 2
+                                color: "white"
+                                smooth: true
+                                Behavior on x { NumberAnimation { duration: 160; easing.type: Easing.InOutCubic } }
+                                Behavior on color { ColorAnimation { duration: 120 } }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    if (controlCenter.btAdapter) controlCenter.btAdapter.enabled = !controlCenter.btAdapter.enabled
+                                }
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                            }
+                        }
+                    }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+
+                        Repeater {
+                            model: controlCenter.btDevices ? controlCenter.btDevices : []
+                            delegate: ModuleButton {
+                                required property var modelData
+                                label: modelData.batteryAvailable ? modelData.name + ": " + modelData.battery * 100 + "%" : modelData.name
+                                color: "transparent"
+                                textColor: Theme.textPrimary
+                                visible: modelData && modelData.connected === true
+                            }
+                        }
+
+                        ModuleButton {
+                            visible: !controlCenter.btDevicesConnected
+                            label: controlCenter.btPowered ? "No devices" : "disabled"
+                            color: "transparent"
+                        }
+                    }
+                }
+            }
 
             // ── Headset ──────────────────────────────────
-            RowLayout {
-                id: headsetRow
-                spacing: 0
+            ModuleButton {
+                id: headsetModule
+                visible: controlCenter.expanded
+                color: Theme.divider
+                radius: Theme.moduleEdgeRadius
 
-                ModuleButton {
-                    label: ""
-                    textColor: controlCenter.headsetBatteryAvailable ? (controlCenter.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed) : Theme.textPrimary
-                    cursorShape: Qt.PointingHandCursor
-                    colorOverride: true
-                    textFont: 24
-                    rightMargin: 8
-                    implicitWidth: textFont * 2
-                    radius: Theme.moduleEdgeRadius
-                    onClicked: headsetProc.running = true
-                }
+                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth) + 20
+                implicitHeight: headsetRow.implicitHeight + 20
                 
-                ColumnLayout {
-                    spacing: 0
-                    ModuleButton {
-                        color: "transparent"
-                        textColor: Theme.textPrimary
-                        label: controlCenter.headsetBatteryLabel
+                RowLayout {
+                    id: headsetRow
+
+                    anchors {
+                        left:    parent.left
+                        right:   parent.right
+                        top:     parent.top
+                        leftMargin: 10
+                        rightMargin: 10
+                        topMargin: 10
+                        bottomMargin: 10
                     }
+                     
+                    spacing: 0
+
                     ModuleButton {
-                        color: "transparent"
-                        textColor: Theme.textPrimary
-                        label: controlCenter.headsetBatteryState
+                        label: ""
+                        textColor: controlCenter.headsetBatteryAvailable ? (controlCenter.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed) : Theme.textPrimary
+                        cursorShape: Qt.PointingHandCursor
+                        colorOverride: true
+                        textFont: 24
+                        rightMargin: 8
+                        implicitWidth: textFont * 2
+                        radius: Theme.moduleEdgeRadius
+                        onClicked: headsetProc.running = true
+                    }
+                    
+                    ColumnLayout {
+                        spacing: 0
+                        ModuleButton {
+                            color: "transparent"
+                            textColor: Theme.textPrimary
+                            label: controlCenter.headsetBatteryLabel
+                        }
+                        ModuleButton {
+                            color: "transparent"
+                            textColor: Theme.textPrimary
+                            label: controlCenter.headsetBatteryState
+                        }
                     }
                 }
             }
-
-            Rectangle { Layout.fillWidth: true; height: 5; color: Theme.divider; radius: Theme.moduleEdgeRadius }
 
             // ── System actions ─────────────────────────────
             RowLayout {
