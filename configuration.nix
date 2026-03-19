@@ -7,12 +7,15 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      /home/doni/nixos-config/hardware-configuration.nix
+
       inputs.home-manager.nixosModules.default
-      ./modules/system/core.nix
-      ./modules/system/hardware.nix
-      ./modules/system/desktop.nix
-      ./modules/system/packages.nix
+
+      /home/doni/nixos-config/hardware-configuration.nix
+
+      /home/doni/nixos-config/nix_modules/core.nix
+      /home/doni/nixos-config/nix_modules/hardware.nix
+      /home/doni/nixos-config/nix_modules/desktop.nix
+      /home/doni/nixos-config/nix_modules/packages.nix
     ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.

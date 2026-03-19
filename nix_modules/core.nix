@@ -6,7 +6,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Use latest kernel.
-  boot.kernelPackages = pkgs.linuxPackages_6_18;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
   
   # Supported filesystems for the initrd (for mounting /boot and other partitions)
   boot.supportedFilesystems = ["ntfs"];

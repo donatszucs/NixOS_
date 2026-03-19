@@ -24,7 +24,7 @@ ModuleButton {
 
     bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
 
-    implicitHeight: expanded ? actionColumn.implicitHeight + 10: Theme.moduleHeight
+    implicitHeight: expanded ? actionColumn.implicitHeight + 6: Theme.moduleHeight
     implicitWidth: expanded ? actionColumn.implicitWidth : actionColumn.implicitWidth
 
     Behavior on implicitHeight {

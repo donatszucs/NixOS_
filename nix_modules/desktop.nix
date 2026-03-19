@@ -10,9 +10,6 @@
   # Enable Hyprland
   programs.hyprland.enable = true;
 
-  # KDE Connect for phone integration
-  programs.kdeconnect.enable = true;
-
   # Enable dconf for application settings
   programs.dconf.enable = true;
 
@@ -26,9 +23,6 @@
       enable = true;
     };
   };
-
-  # Enable input remapper service
-  services.input-remapper.enable = true;
 
   fonts = {
     fontDir.enable = true;

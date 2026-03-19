@@ -9,6 +9,12 @@
 
   programs.nix-ld.enable = true;
 
+  # KDE Connect for phone integration
+  programs.kdeconnect.enable = true;
+  
+  # Enable input remapper service
+  services.input-remapper.enable = true;
+  
   programs.gamemode = {
     enable = true;
     settings = {
@@ -22,7 +28,7 @@
       };
     };
   };
-  
+
   # Steam for gaming
   programs.steam = {
     enable = true;
