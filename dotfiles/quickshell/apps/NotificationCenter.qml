@@ -320,7 +320,7 @@ Item {
                 Layout.column: 0
                 
                 spacing: 5
-                Layout.alignment: Qt.AlignCenter
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
 
                 // Image block: shows notification image if available, otherwise app icon; hidden if neither are provided
                 Item {
@@ -361,7 +361,7 @@ Item {
                 Layout.row: 0
                 Layout.column: 1
                 
-                spacing: 0
+                spacing: 3
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 Layout.minimumWidth: root.notifWidth - 50
                 Layout.maximumWidth: Math.max(root.notifWidth - 50, contentGrid.implicitWidth - imageColumn.implicitWidth - (Theme.modulePaddingH * 4))
@@ -392,6 +392,7 @@ Item {
 
                 // Body
                 Text {
+                    id: bodyText
                     visible: toastRow.notif && toastRow.notif.body !== ""
                     text: toastRow.notif ? toastRow.notif.body : ""
                     font.family:    Theme.font
@@ -402,6 +403,23 @@ Item {
                     elide: Text.ElideRight
                     maximumLineCount: 6
                     Layout.fillWidth: true
+                }
+
+                ModuleButton {
+                    visible: bodyText.visible && bodyText.text.length > 100
+                    label: "Show More"
+                    radius: Theme.moduleEdgeRadius
+
+                    onClicked: {
+                        if (bodyText.maximumLineCount === 6) {
+                            bodyText.maximumLineCount = 1000
+                            label = "Show Less"
+                        } else {
+                            bodyText.maximumLineCount = 6
+                            label = "Show More"
+                        }
+                    }
+
                 }
             }
 
@@ -491,6 +509,10 @@ Item {
                     }
                 }
             }
+        }
+
+        Behavior on height {
+            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
         }
 
         function requestDismiss() {

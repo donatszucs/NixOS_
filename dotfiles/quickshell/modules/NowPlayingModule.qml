@@ -168,7 +168,7 @@ ModuleButton {
         }
 
         ModuleButton {
-            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.alignment: Qt.AlignHCenter
             id: trackArt
             visible: nowPlayingModule.expanded && albumArt.source.toString() !== ""
             color: "transparent"
