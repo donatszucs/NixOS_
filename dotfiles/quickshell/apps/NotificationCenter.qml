@@ -186,41 +186,15 @@ Item {
                                     textFont: 20
 
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        SharedState.muted = !SharedState.muted
-                                        console.log("Muted:", SharedState.muted, "Volume:", SharedState.notifVolume)
-                                    }
+                                    onClicked: SharedState.muted = !SharedState.muted
                                 }
 
-                                Slider {
-                                    Layout.fillWidth: true
+                                StyledSlider {
                                     from: 0.0
                                     to: 1.0
                                     value: SharedState.notifVolume
                                     onValueChanged: SharedState.notifVolume = value
 
-                                    background: Rectangle {
-                                        x: parent.leftPadding
-                                        y: parent.topPadding + parent.availableHeight / 2 - height / 2
-                                        implicitWidth: 200
-                                        implicitHeight: 14
-                                        width: parent.availableWidth
-                                        height: implicitHeight
-                                        radius: 7
-                                        color: Theme.palette("dark").hover
-
-                                        Rectangle {
-                                            id: progressFill
-                                            width: parent.parent.visualPosition * parent.width
-                                            height: parent.height
-                                            color: parent.pressed ? Theme.palette("dark").hover : Theme.palette("light").base
-                                            radius: 7
-                                        }
-                                    }
-
-                                    handle: Rectangle {
-                                        color: "transparent"
-                                    }
                                 }
                             }
                         }
