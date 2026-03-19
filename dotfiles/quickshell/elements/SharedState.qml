@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Services.Notifications as Notif
@@ -189,5 +190,15 @@ Item {
         property int targetSat: 0
         command: ["bash", "-c", root.tapoScriptPath + " color " + targetHue + " " + targetSat]
         onRunningChanged: if (!running) refreshLightStatus()
+    }
+
+    property bool muted: false
+    property double notifVolume: 0.3
+
+    function playNotificationSound() {
+        console.log("Playing notification sound. Muted:", root.muted, "Volume:", root.notifVolume)
+        if (!root.muted){
+            Quickshell.execDetached(["pw-play", "--volume", root.notifVolume, "/home/doni/nixos-config/misc/ping.ogg"])
+        }
     }
 }

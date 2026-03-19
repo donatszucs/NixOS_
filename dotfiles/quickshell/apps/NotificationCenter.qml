@@ -3,6 +3,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import QtQuick.Controls
 import Quickshell.Services.Notifications as Notif
 
 import "../elements"
@@ -27,7 +28,7 @@ Item {
         onNotification: notification => {
             notification.tracked = true
 
-            Quickshell.execDetached(["pw-play", "--volume", "2.0", "/home/doni/nixos-config/misc/ping.ogg"])
+            SharedState.playNotificationSound()
         }
     }
 
@@ -118,20 +119,112 @@ Item {
                     }
                 }
 
-                ModuleButton {
+                Rectangle {
                     id: headerButton
+                    
                     anchors.horizontalCenter: parent.horizontalCenter 
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    
+
                     visible: hoverHandler.hovered
-                    textFont: 20
-                    color: "transparent"
-                    label: "󰎟 Notification Center"
-                    
-                    // Use standard height/width instead of Layout.preferred
-                    height: 30
-                    width: root.notifWidth
+                    implicitWidth: root.notifWidth + 20
+                    implicitHeight: headerColumn.implicitHeight + 15
+                    radius: Theme.moduleEdgeRadius
+                    color: Theme.divider
+
+                    ColumnLayout {
+                        id: headerColumn
+
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.topMargin: 10
+                        anchors.bottomMargin: 10
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+                        
+                        ModuleButton {
+                            
+                            textFont: 20
+                            variant: "dark"
+                            color: "transparent"
+                            label: "󰎟 Notification Center"
+
+                            radius: Theme.moduleEdgeRadius
+                            
+                            // Use standard height/width instead of Layout.preferred
+                            implicitHeight: 30
+                            implicitWidth: root.notifWidth
+
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: volumeSliderContainer.showing = !volumeSliderContainer.showing
+                        }
+
+                        Item {
+                            id: volumeSliderContainer
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.preferredWidth: root.notifWidth * 0.9
+                            Layout.preferredHeight: showing ? 40 : 0
+                            
+                            property bool showing: false
+                            clip: true
+                            opacity: showing ? Theme.moduleOpacity : 0
+
+                            Behavior on Layout.preferredHeight {
+                                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                            }
+                            Behavior on opacity {
+                                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                            }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                spacing: 10
+
+                                ModuleButton {
+                                    label: SharedState.muted ? "󰖁" : "󰕾"
+                                    color: "transparent"
+
+                                    implicitWidth: 30
+                                    textFont: 20
+
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        SharedState.muted = !SharedState.muted
+                                        console.log("Muted:", SharedState.muted, "Volume:", SharedState.notifVolume)
+                                    }
+                                }
+
+                                Slider {
+                                    Layout.fillWidth: true
+                                    from: 0.0
+                                    to: 1.0
+                                    value: SharedState.notifVolume
+                                    onValueChanged: SharedState.notifVolume = value
+
+                                    background: Rectangle {
+                                        x: parent.leftPadding
+                                        y: parent.topPadding + parent.availableHeight / 2 - height / 2
+                                        implicitWidth: 200
+                                        implicitHeight: 14
+                                        width: parent.availableWidth
+                                        height: implicitHeight
+                                        radius: 7
+                                        color: Theme.palette("dark").hover
+
+                                        Rectangle {
+                                            id: progressFill
+                                            width: parent.parent.visualPosition * parent.width
+                                            height: parent.height
+                                            color: parent.pressed ? Theme.palette("dark").hover : Theme.palette("light").base
+                                            radius: 7
+                                        }
+                                    }
+
+                                    handle: Rectangle {
+                                        color: "transparent"
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 
                 Repeater {
@@ -442,7 +535,8 @@ Item {
             toastRow.entered = true
             expireCallTimer.stop()
             expireTimer.restart()
-            Quickshell.execDetached(["pw-play", "--volume", "2.0", "/home/doni/nixos-config/misc/ping.ogg"])
+            
+            SharedState.playNotificationSound()
         }
 
         Connections {
