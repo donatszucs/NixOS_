@@ -454,12 +454,12 @@ ModuleButton {
 
     Process {
         id: rebuildProc
-        command: ["bash", "-c", "kitty -e bash -lc 'cd ~/nixos-config && sudo nixos-rebuild switch --flake .#doni --impure; notify-send 'Rebuild finished'"]
+        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config && sudo nixos-rebuild switch --flake .#doni --impure; notify-send 'Rebuild finished'"]
     }
 
     Process {
         id: updateProc
-        command: ["bash", "-c", "kitty -e bash -lc 'cd ~/nixos-config && sudo nix flake update; notify-send 'Flake update finished'"]
+        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config && sudo nix flake update; notify-send 'Flake update finished'"]
     }
 
     // Headset battery probe (calls wrapper script)
