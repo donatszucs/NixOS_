@@ -118,7 +118,7 @@ ModuleButton {
         color: "transparent"
 
         implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth) + 20
-        implicitHeight: popupCol.implicitHeight + 20
+        implicitHeight: popupCol.implicitHeight + 10
 
         ColumnLayout {
             id: popupCol
@@ -294,6 +294,49 @@ ModuleButton {
                     }
                 }
             }
+
+            Rectangle { Layout.fillWidth: true; height: 5; color: Theme.divider; radius: Theme.moduleEdgeRadius }
+
+            // ── System actions ─────────────────────────────
+            RowLayout {
+            id: sysRow
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 15
+
+                Text {
+                    text: "NixOS"
+                    color: Theme.textPrimary
+                    font.family: Theme.font
+                    font.pixelSize: 22
+                    font.bold: true
+                }
+
+                ModuleButton {
+                    label: "󰚰"
+                    textFont: 24
+
+                    rightMargin: 4
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: updateProc.running = true
+
+                    implicitWidth: implicitHeight
+
+                    radius: Theme.moduleEdgeRadius
+                }
+                
+                ModuleButton {
+                    label: "󱄅"
+                    textFont: 24
+                    rightMargin: 6
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: rebuildProc.running = true
+
+                    implicitWidth: implicitHeight
+
+                    radius: Theme.moduleEdgeRadius
+                }
+            }
         }
     }
 
@@ -350,6 +393,17 @@ ModuleButton {
         id: btOpen
         // Try blueman-manager first, fall back to gnome control center bluetooth
         command: ["bash", "-c", "blueman-manager || gnome-control-center bluetooth || true"]
+    }
+
+
+    Process {
+        id: rebuildProc
+        command: ["bash", "-c", "kitty -e bash -lc 'cd ~/nixos-config && sudo nixos-rebuild switch --flake .#doni --impure; notify-send 'Rebuild finished'"]
+    }
+
+    Process {
+        id: updateProc
+        command: ["bash", "-c", "kitty -e bash -lc 'cd ~/nixos-config && sudo nix flake update; notify-send 'Flake update finished'"]
     }
 
     // Headset battery probe (calls wrapper script)

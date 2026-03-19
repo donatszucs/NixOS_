@@ -17,7 +17,7 @@ ModuleButton {
 
     bottomLeftRadius: Theme.moduleEdgeRadius + 2
     bottomRightRadius: Theme.moduleEdgeRadius + 2
-    property int overlay: 3
+    property int overlay: 4
 
     implicitHeight: Theme.moduleHeight * 0.9
 
@@ -83,7 +83,8 @@ ModuleButton {
                     }
 
                     Rectangle {
-                        width: root.overlay + 1
+                        visible: wsButton.modelData.toplevels.values.length > 0
+                        width: root.overlay
                         height: Theme.moduleHeight - 15
                         color: Theme.palette("dark").base
                         opacity: 0.5
