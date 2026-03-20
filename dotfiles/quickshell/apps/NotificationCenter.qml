@@ -409,6 +409,7 @@ Item {
                 }
 
                 Text {
+                    id: timeText
                     text: Qt.formatDateTime(new Date(), "HH:mm")
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize - 3
@@ -631,6 +632,7 @@ Item {
         function revive() {
             if (toastRow.notif && toastRow.notif.image !== "")
                 toastRow.cachedImage = toastRow.notif.image
+            timeText.text = Qt.formatDateTime(new Date(), "HH:mm")
             toastRow.showing = true
             expireTimer.restart()
             
