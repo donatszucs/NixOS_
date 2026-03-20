@@ -79,8 +79,12 @@ Item {
             opacity: Theme.moduleOpacity
             topLeftRadius: Theme.moduleEdgeRadius + 5
             
-            implicitWidth: (notificationColumn.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (notificationColumn.implicitWidth + 20)
-            implicitHeight: notificationColumn.implicitHeight === 0 ? 0 : Math.min(notificationColumn.implicitHeight + 20, Layout.maximumHeight)
+            implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (Math.max(innerLayout.implicitWidth, headerButton.implicitWidth) + 20)
+            
+            property real targetHeight: (headerButton.visible ? headerButton.implicitHeight + 20 : 0) + 
+                                        (innerLayout.implicitHeight > 0 ? innerLayout.implicitHeight + 20 : 0)
+            
+            implicitHeight: Math.min(targetHeight, Layout.maximumHeight)
 
             Behavior on implicitHeight {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -89,191 +93,153 @@ Item {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
 
-            ColumnLayout {
-                id: notificationColumn
-                anchors{
-                    top: parent.top
-                    bottom: parent.bottom
-                    left: parent.left
-                    right: parent.right
-                    topMargin: 10
-                }
-                spacing: 10
-                Rectangle {
-                    id: headerButton
+            // ── HEADER ──────────────────────────────────────────────────
+            Rectangle {
+                id: headerButton
+                
+                anchors.top: parent.top
+                anchors.topMargin: 10
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                visible: hoverHandler.hovered
+                implicitWidth: root.notifWidth + 20
+                implicitHeight: headerColumn.implicitHeight + 15
+                radius: Theme.moduleEdgeRadius
+                color: Theme.divider
+
+                ColumnLayout {
+                    id: headerColumn
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.topMargin: 10
+                    anchors.bottomMargin: 10
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
                     
-                    Layout.alignment: Qt.AlignHCenter
-
-                    visible: hoverHandler.hovered
-                    implicitWidth: root.notifWidth + 20
-                    implicitHeight: headerColumn.implicitHeight + 15
-                    radius: Theme.moduleEdgeRadius
-                    color: Theme.divider
-
-                    ColumnLayout {
-                        id: headerColumn
-
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.topMargin: 10
-                        anchors.bottomMargin: 10
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
+                    ModuleButton {
                         
-                        ModuleButton {
-                            
-                            textFont: 20
-                            variant: "dark"
-                            color: "transparent"
-                            label: "󰎟 Notification Center"
+                        id: headerLabel
 
-                            radius: Theme.moduleEdgeRadius
-                            
-                            // Use standard height/width instead of Layout.preferred
-                            implicitHeight: 30
-                            implicitWidth: root.notifWidth
+                        textFont: 20
+                        variant: "dark"
+                        color: "transparent"
+                        label: "󰎟 Notification Center"
+                        radius: Theme.moduleEdgeRadius
+                        
+                        Layout.preferredHeight: hoverHandler.hovered ? 30 : 0
+                        Layout.preferredWidth: root.notifWidth
 
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: volumeSliderContainer.showing = !volumeSliderContainer.showing
-                        }
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: volumeSliderContainer.showing = !volumeSliderContainer.showing
 
-                        Item {
-                            id: volumeSliderContainer
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredWidth: root.notifWidth * 0.9
-                            Layout.preferredHeight: showing ? 40 : 0
-                            
-                            property bool showing: false
-                            clip: true
-                            opacity: showing ? Theme.moduleOpacity : 0
-
-                            Behavior on Layout.preferredHeight {
-                                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-                            }
-                            Behavior on opacity {
-                                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-                            }
-
-                            RowLayout {
-                                anchors.fill: parent
-                                spacing: 10
-
-                                ModuleButton {
-                                    label: SharedState.muted ? "󰖁" : "󰕾"
-                                    color: "transparent"
-
-                                    implicitWidth: 30
-                                    textFont: 20
-
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: SharedState.muted = !SharedState.muted
-                                }
-
-                                StyledSlider {
-                                    from: 0.0
-                                    to: 1.0
-                                    value: SharedState.notifVolume
-                                    onValueChanged: SharedState.notifVolume = value
-
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Flickable {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    
-                    implicitHeight: innerLayout.implicitHeight
-                    implicitWidth: innerLayout.implicitWidth
-
-                    contentWidth: width
-                    
-                    // 1. UPDATE THIS: Ensure the scrollable area is at least 
-                    // as tall as the visible height of the Flickable during animations.
-                    contentHeight: Math.max(innerLayout.implicitHeight + 20, height)
-                    
-                    
-                    clip: true
-                    interactive: true
-
-                    // --- NEW STUFF HERE ---
-                    // Snap to the bottom when new notifications arrive
-                    onContentHeightChanged: {
-                        if (contentHeight > height && !dragging) {
-                            contentY = contentHeight - height
+                        Behavior on Layout.preferredHeight {
+                            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                         }
                     }
 
-                    // Keep it at the bottom if the container itself resizes
-                    onHeightChanged: {
-                        if (contentHeight > height && !dragging) {
-                            contentY = contentHeight - height
-                        }
-                    }
-                    // ----------------------
-
-                    Column {
-                        id: innerLayout
-                        anchors {
-                            fill: parent
-                            topMargin: 10
-                        }
-
-                        width: parent.width - 20
-                        spacing: 10
+                    Item {
+                        id: volumeSliderContainer
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.preferredWidth: root.notifWidth * 0.9
+                        Layout.preferredHeight: showing ? 40 : 0
+                        
+                        property bool showing: false
                         clip: true
+                        opacity: Theme.moduleOpacity
 
-                        move: Transition {
-                            NumberAnimation { 
-                                properties: "y" 
-                                duration: Theme.verticalDuration 
-                                easing.type: Easing.OutCubic 
-                            }
+                        Behavior on Layout.preferredHeight {
+                            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                         }
 
-                        // NEW: Animates new elements appearing
-                        add: Transition {
-                            ParallelAnimation {
-                                NumberAnimation { 
-                                    property: "opacity"
-                                    from: 0.0 
-                                    to: 1.0
-                                    duration: Theme.verticalDuration 
-                                    easing.type: Easing.OutCubic
-                                    alwaysRunToEnd: true
-                                }
-                                NumberAnimation { 
-                                    property: "scale"
-                                    from: 0.2 
-                                    to: 1.0
-                                    duration: Theme.verticalDuration 
-                                    easing.type: Easing.OutBack 
-                                    alwaysRunToEnd: true
-                                }
-                            }
-                        }
-                        
-                        Repeater {
-                            id: notificationRepeater
-                            model: server.trackedNotifications
-                            delegate: NotificationToast {
-                                id: toast
-                                required property var modelData
-                                required property int index
-                                
-                                notif: modelData
-                                notifIndex: index
+                        RowLayout {
+                            anchors.fill: parent
+                            spacing: 10
 
-                                // Replaced Layout.alignment with standard anchors
-                                anchors.horizontalCenter: parent.horizontalCenter
+                            ModuleButton {
+                                label: SharedState.muted ? "󰖁" : "󰕾"
+                                color: "transparent"
+                                implicitWidth: 30
+                                textFont: 20
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: SharedState.muted = !SharedState.muted
+                            }
+
+                            StyledSlider {
+                                from: 0.0
+                                to: 1.0
+                                value: SharedState.notifVolume
+                                onValueChanged: SharedState.notifVolume = value
                             }
                         }
                     }
+                }
+            }
 
-                    Behavior on contentHeight {
+            // ── SCROLLING AREA ──────────────────────────────────────────
+            Flickable {
+                id: notifFlickable
+                
+                // Dynamically anchor to the header if visible, otherwise anchor to the top of the container
+                anchors.top: headerButton.visible ? headerButton.bottom : parent.top
+                anchors.topMargin: headerButton.visible ? 10 : 10
+                
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                
+                contentWidth: width
+                contentHeight: Math.max(innerLayout.smoothHeight + 20, height)
+                
+                clip: true
+                interactive: true
+
+                onContentHeightChanged: {
+                    if (contentHeight > height && !dragging) {
+                        contentY = contentHeight - height
+                    }
+                }
+                onHeightChanged: {
+                    if (contentHeight > height && !dragging) {
+                        contentY = contentHeight - height
+                    }
+                }
+
+                Column {
+                    id: innerLayout
+                    
+                    width: parent.width - 20
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 10
+
+                    property real smoothHeight: implicitHeight
+                    Behavior on smoothHeight {
                         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                    }
+
+                    // lock notifications to bottom
+                    y: Math.max(10, notifFlickable.height - smoothHeight - 10)
+
+                    move: Transition {
+                        NumberAnimation { 
+                            properties: "y" 
+                            duration: Theme.verticalDuration 
+                            easing.type: Easing.OutCubic 
+                        }
+                    }
+                    
+                    Repeater {
+                        id: notificationRepeater
+                        model: server.trackedNotifications
+                        delegate: NotificationToast {
+                            id: toast
+                            required property var modelData
+                            required property int index
+                            
+                            notif: modelData
+                            notifIndex: index
+
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
                     }
                 }
             }
@@ -288,15 +254,19 @@ Item {
         property var notif: null
         property int notifIndex: 0
 
-        // Enter state used to animate from zero size to full size
-        property bool entered: false
-        property bool expiring: false
-        property bool forceClose: false
+        property bool showing: false
+        property bool dismissing: false
 
         // Cached image: set on first load, only updated if a new notification brings its own image
         property string cachedImage: ""
 
-        visible: (hoverHandler.hovered || entered && !expiring) && !forceClose
+        visible: (hoverHandler.hovered || showing)
+
+        onVisibleChanged: {
+            if (visible) {
+                enterAnimation.start()
+            }
+        }
 
         readonly property bool hasInlineReply:
             toastRow.notif && toastRow.notif.hasInlineReply
@@ -329,27 +299,29 @@ Item {
         border.color: "#f38ba8"
         border.width: isCritical ? 2 : 0
 
-        // ── Enter animation: slide in from the right ─────────────────
         Component.onCompleted: {
-            toastRow.entered = true
             if (toastRow.notif && toastRow.notif.image !== "")
                 toastRow.cachedImage = toastRow.notif.image
+
+            toastRow.showing = true 
+            enterAnimation.start()
         }
 
         Timer {
             id: expireTimer
             interval: toastRow.effectiveTimeout
 
-            running: toastRow.effectiveTimeout > 0
+            running: toastRow.effectiveTimeout > 0 && !hoverHandler.hovered
             repeat: false
 
-            onTriggered: toastRow.entered = false
+            onTriggered: disappearAnimation.start()
+
 
         }
 
         onClicked: {
-            toastRow.forceClose = true
-            toastRow.requestDismiss()
+            toastRow.dismissing = true
+            disappearAnimation.start() 
         }
 
         function submitInlineReply() {
@@ -575,21 +547,60 @@ Item {
             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
         }
 
-        function requestDismiss() {
-            if (!toastRow.notif || toastRow.expiring) return
-            toastRow.entered = false
-            toastRow.expiring = true
-            root.inlineReplyInputFocused = false
-            expireCallTimer.start()
+        // ── Animations ────────────────────────────────────────────────
+        ParallelAnimation {
+            id: enterAnimation
+            
+            NumberAnimation { 
+                target: toastRow
+                property: "opacity"
+                from: 0.0 
+                to: 1.0
+                duration: Theme.verticalDuration 
+                easing.type: Easing.OutCubic
+            }
+            NumberAnimation { 
+                target: toastRow 
+                property: "scale"
+                from: 0.2 
+                to: 1.0
+                duration: Theme.verticalDuration 
+                easing.type: Easing.OutBack 
+            }
+        }
+
+        ParallelAnimation {
+            id: disappearAnimation
+            
+            NumberAnimation { 
+                target: toastRow
+                property: "opacity"
+                from: 1.0 
+                to: 0.0
+                duration: Theme.verticalDuration
+                easing.type: Easing.OutCubic
+            }
+            NumberAnimation { 
+                target: toastRow
+                property: "scale"
+                from: 1.0 
+                to: 0.0
+                duration: Theme.verticalDuration
+                easing.type: Easing.OutBack 
+            }
+
+            onFinished: {
+                toastRow.showing = false
+                if (toastRow.dismissing) {
+                    toastRow.notif.dismiss()
+                }
+            }
         }
 
         function revive() {
             if (toastRow.notif && toastRow.notif.image !== "")
                 toastRow.cachedImage = toastRow.notif.image
-            toastRow.forceClose = false
-            toastRow.expiring = false
-            toastRow.entered = true
-            expireCallTimer.stop()
+            toastRow.showing = true
             expireTimer.restart()
             
             SharedState.playNotificationSound()
@@ -601,14 +612,6 @@ Item {
             function onSummaryChanged() { toastRow.revive() }
         }
 
-        Timer {
-            id: expireCallTimer
-            interval: Theme.verticalDuration + 20
-            repeat: false
-            onTriggered: {
-                if (toastRow.notif) toastRow.notif.dismiss()
-            }
-        }
     }
     HoverHandler {
         id: hoverHandler
