@@ -72,7 +72,7 @@ Item {
             Layout.row: 1
             Layout.column: 1
             Layout.alignment: Qt.AlignRight | Qt.AlignBottom
-            Layout.maximumHeight: 900 // Limit max height
+            Layout.maximumHeight: 900 
 
             color: Theme.palette("dark").base
             clip: true
@@ -80,9 +80,8 @@ Item {
             topLeftRadius: Theme.moduleEdgeRadius + 5
             
             implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (Math.max(innerLayout.implicitWidth, headerButton.implicitWidth) + 20)
-            
-            property real targetHeight: (headerButton.visible ? headerButton.implicitHeight + 20 : 0) + 
-                                        (innerLayout.implicitHeight > 0 ? innerLayout.implicitHeight + 20 : 0)
+
+            property real targetHeight: anchorHelper.targetY + (innerLayout.implicitHeight > 0 ? innerLayout.implicitHeight + 20 : 0)
             
             implicitHeight: Math.min(targetHeight, Layout.maximumHeight)
 
@@ -93,61 +92,91 @@ Item {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
 
+            // ── ANCHOR HELPER ─────────────────────
+            Item {
+                id: anchorHelper
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 0
+                
+                property real targetY: hoverHandler.hovered ? (20 + headerButton.implicitHeight) : 0
+                y: targetY
+
+                Behavior on y {
+                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                }
+            }
+
             // ── HEADER ──────────────────────────────────────────────────
             Rectangle {
                 id: headerButton
                 
-                anchors.top: parent.top
-                anchors.topMargin: 10
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                visible: hoverHandler.hovered
-                implicitWidth: root.notifWidth + 20
-                implicitHeight: headerColumn.implicitHeight + 15
+                // 2. ANTI-SQUISH FIX: Removed the top anchor!
+                // By only anchoring the bottom, the header is allowed to smoothly slide 
+                // up and out of the container as the helper moves to 0.
+                anchors {
+                    bottom: anchorHelper.top
+                    leftMargin: 10
+                    rightMargin: 10
+                    bottomMargin: 10
+                    left: parent.left
+                    right: parent.right
+                }
+                
+                // 3. Lock the height so it doesn't deform while sliding
+                height: implicitHeight 
+                
+                // Hide it only when the animation is fully completed
+                visible: anchorHelper.y > 0 
+                
+                implicitHeight: headerColumn.implicitHeight + 20
+                implicitWidth: headerColumn.implicitWidth
+                
                 radius: Theme.moduleEdgeRadius
                 color: Theme.divider
+                clip: true
 
                 ColumnLayout {
                     id: headerColumn
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.topMargin: 10
-                    anchors.bottomMargin: 10
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
+                    anchors{
+                        top: parent.top
+                        left: parent.left
+                        right: parent.right
+                        topMargin: 10
+                        leftMargin: 10
+                        rightMargin: 10
+                    }
                     
                     ModuleButton {
-                        
                         id: headerLabel
-
+                        
                         textFont: 20
                         variant: "dark"
                         color: "transparent"
                         label: "󰎟 Notification Center"
                         radius: Theme.moduleEdgeRadius
                         
-                        Layout.preferredHeight: hoverHandler.hovered ? 30 : 0
-                        Layout.preferredWidth: root.notifWidth
+                        Layout.preferredHeight: 30
+                        Layout.fillWidth: true
 
                         cursorShape: Qt.PointingHandCursor
                         onClicked: volumeSliderContainer.showing = !volumeSliderContainer.showing
-
-                        Behavior on Layout.preferredHeight {
-                            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-                        }
                     }
 
                     Item {
                         id: volumeSliderContainer
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.preferredWidth: root.notifWidth * 0.9
-                        Layout.preferredHeight: showing ? 40 : 0
+                        Layout.preferredWidth: parent.width * 0.9
                         
                         property bool showing: false
+                        Layout.preferredHeight: showing ? 40 : 0
+                        opacity: showing ? Theme.moduleOpacity : 0
                         clip: true
-                        opacity: Theme.moduleOpacity
 
                         Behavior on Layout.preferredHeight {
+                            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                        }
+                        Behavior on opacity {
                             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                         }
 
@@ -165,6 +194,7 @@ Item {
                             }
 
                             StyledSlider {
+                                Layout.fillWidth: true
                                 from: 0.0
                                 to: 1.0
                                 value: SharedState.notifVolume
@@ -179,13 +209,15 @@ Item {
             Flickable {
                 id: notifFlickable
                 
-                // Dynamically anchor to the header if visible, otherwise anchor to the top of the container
-                anchors.top: headerButton.visible ? headerButton.bottom : parent.top
-                anchors.topMargin: headerButton.visible ? 10 : 10
+                // 5. Pin to the bottom of the moving helper
+                anchors{
+                    top: anchorHelper.bottom
+                    topMargin: 10
                 
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
+                    bottom: parent.bottom
+                    left: parent.left
+                    right: parent.right
+                }
                 
                 contentWidth: width
                 contentHeight: Math.max(innerLayout.smoothHeight + 20, height)
