@@ -438,20 +438,19 @@ Item {
                 }
 
                 ModuleButton {
-                    visible: bodyText.visible && bodyText.text.length > 100
-                    label: "Show More"
+                    visible: bodyText.visible && (bodyText.truncated || bodyText.maximumLineCount > 6)
+                    
+                    label: bodyText.maximumLineCount === 6 ? "Show More" : "Show Less"
+                    
                     radius: Theme.moduleEdgeRadius
 
                     onClicked: {
                         if (bodyText.maximumLineCount === 6) {
                             bodyText.maximumLineCount = 1000
-                            label = "Show Less"
                         } else {
                             bodyText.maximumLineCount = 6
-                            label = "Show More"
                         }
                     }
-
                 }
             }
 
