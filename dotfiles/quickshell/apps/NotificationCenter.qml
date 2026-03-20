@@ -59,7 +59,7 @@ Item {
             
             cornerPosition: "bottomRight"
             // Swapped notifColumn.implicitHeight to innerLayout.implicitHeight since notifColumn is gone
-            size: Math.max(Theme.moduleEdgeRadius, Math.floor(innerLayout.implicitHeight / 8))
+            size: Math.max(Theme.moduleEdgeRadius, Math.floor(containerRect.implicitHeight / 8))
             color: Theme.palette("dark").base
             expandingH: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
             expandingV: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
@@ -71,15 +71,16 @@ Item {
             id: containerRect
             Layout.row: 1
             Layout.column: 1
-            Layout.alignment: Qt.AlignBottom | Qt.AlignRight
-            
+            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
+            Layout.maximumHeight: 900 // Limit max height
+
             color: Theme.palette("dark").base
             clip: true
             opacity: Theme.moduleOpacity
             topLeftRadius: Theme.moduleEdgeRadius + 5
             
-            implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (innerLayout.implicitWidth + 20)
-            implicitHeight: innerLayout.implicitHeight === 0 ? 0 : (innerLayout.implicitHeight + 20)
+            implicitWidth: (notificationColumn.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (notificationColumn.implicitWidth + 20)
+            implicitHeight: notificationColumn.implicitHeight === 0 ? 0 : Math.min(notificationColumn.implicitHeight + 20, Layout.maximumHeight)
 
             Behavior on implicitHeight {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -88,41 +89,20 @@ Item {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
 
-            // Your exact inner layout, untouched
-            Column {
-                id: innerLayout
-                anchors {
+            ColumnLayout {
+                id: notificationColumn
+                anchors{
                     top: parent.top
-                    topMargin: 10
+                    bottom: parent.bottom
                     left: parent.left
                     right: parent.right
-                    bottom: parent.bottom
-                    bottomMargin: 10
+                    topMargin: 10
                 }
-
                 spacing: 10
-                clip: true
-
-                move: Transition {
-                    NumberAnimation { 
-                        properties: "y" 
-                        duration: Theme.verticalDuration 
-                        easing.type: Easing.OutCubic 
-                    }
-                }
-
-                // NEW: Animates new elements appearing
-                add: Transition {
-                    ParallelAnimation {
-                        NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-                        NumberAnimation { property: "scale"; from: 0.2; to: 1.0; duration: Theme.verticalDuration; easing.type: Easing.OutBack }
-                    }
-                }
-
                 Rectangle {
                     id: headerButton
                     
-                    anchors.horizontalCenter: parent.horizontalCenter 
+                    Layout.alignment: Qt.AlignHCenter
 
                     visible: hoverHandler.hovered
                     implicitWidth: root.notifWidth + 20
@@ -200,22 +180,100 @@ Item {
                         }
                     }
                 }
-                
-                Repeater {
-                    id: notificationRepeater
-                    model: server.trackedNotifications
-                    delegate: NotificationToast {
-                        id: toast
-                        required property var modelData
-                        required property int index
-                        
-                        notif: modelData
-                        notifIndex: index
 
-                        // Replaced Layout.alignment with standard anchors
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
+                Flickable {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    
+                    implicitHeight: innerLayout.implicitHeight
+                    implicitWidth: innerLayout.implicitWidth
+
+                    contentWidth: width
+                    
+                    // 1. UPDATE THIS: Ensure the scrollable area is at least 
+                    // as tall as the visible height of the Flickable during animations.
+                    contentHeight: Math.max(innerLayout.implicitHeight + 20, height)
+                    
+                    
+                    clip: true
+                    interactive: true
+
+                    // --- NEW STUFF HERE ---
+                    // Snap to the bottom when new notifications arrive
+                    onContentHeightChanged: {
+                        if (contentHeight > height && !dragging) {
+                            contentY = contentHeight - height
+                        }
+                    }
+
+                    // Keep it at the bottom if the container itself resizes
+                    onHeightChanged: {
+                        if (contentHeight > height && !dragging) {
+                            contentY = contentHeight - height
+                        }
+                    }
+                    // ----------------------
+
+                    Column {
+                        id: innerLayout
+                        anchors {
+                            fill: parent
+                            topMargin: 10
+                        }
+
+                        width: parent.width - 20
+                        spacing: 10
+                        clip: true
+
+                        move: Transition {
+                            NumberAnimation { 
+                                properties: "y" 
+                                duration: Theme.verticalDuration 
+                                easing.type: Easing.OutCubic 
+                            }
+                        }
+
+                        // NEW: Animates new elements appearing
+                        add: Transition {
+                            ParallelAnimation {
+                                NumberAnimation { 
+                                    property: "opacity"
+                                    from: 0.0 
+                                    to: 1.0
+                                    duration: Theme.verticalDuration 
+                                    easing.type: Easing.OutCubic
+                                    alwaysRunToEnd: true
+                                }
+                                NumberAnimation { 
+                                    property: "scale"
+                                    from: 0.2 
+                                    to: 1.0
+                                    duration: Theme.verticalDuration 
+                                    easing.type: Easing.OutBack 
+                                    alwaysRunToEnd: true
+                                }
+                            }
+                        }
+                        
+                        Repeater {
+                            id: notificationRepeater
+                            model: server.trackedNotifications
+                            delegate: NotificationToast {
+                                id: toast
+                                required property var modelData
+                                required property int index
+                                
+                                notif: modelData
+                                notifIndex: index
+
+                                // Replaced Layout.alignment with standard anchors
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
+                        }
+                    }
+
+                    Behavior on contentHeight {
+                        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                     }
                 }
             }
@@ -265,7 +323,9 @@ Item {
 
         // ── Colors ────────────────────────────────────────────────────
         variant: isCritical ? "danger" : "light"
+
         opacity: Theme.moduleOpacity
+
         border.color: "#f38ba8"
         border.width: isCritical ? 2 : 0
 
