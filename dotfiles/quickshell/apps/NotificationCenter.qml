@@ -58,7 +58,6 @@ Item {
             Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             
             cornerPosition: "bottomRight"
-            // Swapped notifColumn.implicitHeight to innerLayout.implicitHeight since notifColumn is gone
             size: Math.max(Theme.moduleEdgeRadius, Math.floor(containerRect.implicitHeight / 8))
             color: Theme.palette("dark").base
             expandingH: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
@@ -81,55 +80,45 @@ Item {
             
             implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (Math.max(innerLayout.implicitWidth, headerButton.implicitWidth) + 20)
 
-            property real targetHeight: anchorHelper.targetY + (innerLayout.implicitHeight > 0 ? innerLayout.implicitHeight + 20 : 0)
+            property real hoverProgress: hoverHandler.hovered ? 1.0 : 0.0
+            Behavior on hoverProgress {
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
+
+            property real headerOffset: hoverProgress * (20 + headerButton.implicitHeight)
+
+            property real activePadding: innerLayout.implicitHeight > 0 ? 20 : 0
+
+            Behavior on activePadding {
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
+
+            property real targetHeight: headerOffset + innerLayout.smoothHeight + activePadding
             
             implicitHeight: Math.min(targetHeight, Layout.maximumHeight)
 
-            Behavior on implicitHeight {
-                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-            }
             Behavior on implicitWidth {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-            }
-
-            // ── ANCHOR HELPER ─────────────────────
-            Item {
-                id: anchorHelper
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: 0
-                
-                property real targetY: hoverHandler.hovered ? (20 + headerButton.implicitHeight) : 0
-                y: targetY
-
-                Behavior on y {
-                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-                }
             }
 
             // ── HEADER ──────────────────────────────────────────────────
             Rectangle {
                 id: headerButton
                 
-                // 2. ANTI-SQUISH FIX: Removed the top anchor!
-                // By only anchoring the bottom, the header is allowed to smoothly slide 
-                // up and out of the container as the helper moves to 0.
+                y: containerRect.headerOffset - 10 - height
+
                 anchors {
-                    bottom: anchorHelper.top
-                    leftMargin: 10
-                    rightMargin: 10
-                    bottomMargin: 10
                     left: parent.left
                     right: parent.right
+                    leftMargin: 10
+                    rightMargin: 10
                 }
                 
-                // 3. Lock the height so it doesn't deform while sliding
                 height: implicitHeight 
                 
-                // Hide it only when the animation is fully completed
-                visible: anchorHelper.y > 0 
+                visible: containerRect.headerOffset > 0 
                 
-                implicitHeight: headerColumn.implicitHeight + 20
+                implicitHeight: headerColumn.implicitHeight + 15
                 implicitWidth: headerColumn.implicitWidth
                 
                 radius: Theme.moduleEdgeRadius
@@ -209,10 +198,9 @@ Item {
             Flickable {
                 id: notifFlickable
                 
-                // 5. Pin to the bottom of the moving helper
                 anchors{
-                    top: anchorHelper.bottom
-                    topMargin: 10
+                    top: parent.top
+                    topMargin: containerRect.headerOffset + 10
                 
                     bottom: parent.bottom
                     left: parent.left
@@ -220,7 +208,7 @@ Item {
                 }
                 
                 contentWidth: width
-                contentHeight: Math.max(innerLayout.smoothHeight + 20, height)
+                contentHeight: Math.max(innerLayout.smoothHeight + containerRect.activePadding, height)
                 
                 clip: true
                 interactive: true
@@ -470,6 +458,7 @@ Item {
                     Layout.fillWidth: true
                 }
 
+                // Show More / Show Less button for long notifications
                 ModuleButton {
                     visible: bodyText.visible && (bodyText.truncated || bodyText.maximumLineCount > 6)
                     
@@ -477,6 +466,7 @@ Item {
                     
                     radius: Theme.moduleEdgeRadius
 
+                    cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         if (bodyText.maximumLineCount === 6) {
                             bodyText.maximumLineCount = 1000
@@ -493,7 +483,7 @@ Item {
                 id: actionRow
                 Layout.row: 1
                 Layout.column: 0
-                Layout.columnSpan: 2 // Stretches all the way across the grid
+                Layout.columnSpan: 2
                 
                 Layout.alignment: Qt.AlignLeft
                 spacing: 8
@@ -522,7 +512,7 @@ Item {
                 id: inlineReplyRow
                 Layout.row: 2
                 Layout.column: 0
-                Layout.columnSpan: 2 // Stretches all the way across the grid
+                Layout.columnSpan: 2
                 
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignCenter
