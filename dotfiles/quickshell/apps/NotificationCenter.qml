@@ -49,6 +49,7 @@ Item {
             cornerPosition: "bottomRight"
             size: innerLayout.implicitWidth === 0 ? Theme.moduleEdgeRadius : (innerLayout.implicitWidth / 8)
             color: Theme.palette("dark").base
+            animated: false
         }
 
         // [Row 1, Col 0] Side/Bottom Radius
@@ -58,11 +59,11 @@ Item {
             Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             
             cornerPosition: "bottomRight"
-            size: Math.max(Theme.moduleEdgeRadius, Math.floor(containerRect.implicitHeight / 8))
+            size: Math.floor(containerRect.implicitHeight / 8)
             color: Theme.palette("dark").base
             expandingH: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
             expandingV: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
-            animationDuration: Theme.verticalDuration
+            animated: false
         }
 
         // [Row 1, Col 1] Main Notification Container
@@ -81,42 +82,32 @@ Item {
             implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (Math.max(innerLayout.implicitWidth, headerButton.implicitWidth) + 20)
 
             property real hoverProgress: hoverHandler.hovered ? 1.0 : 0.0
-            Behavior on hoverProgress {
-                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-            }
+            Behavior on hoverProgress { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
             property real headerOffset: hoverProgress * (20 + headerButton.implicitHeight)
 
             property real activePadding: innerLayout.implicitHeight > 0 ? 20 : 0
-
-            Behavior on activePadding {
-                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-            }
+            Behavior on activePadding { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
             property real targetHeight: headerOffset + innerLayout.smoothHeight + activePadding
-            
             implicitHeight: Math.min(targetHeight, Layout.maximumHeight)
 
-            Behavior on implicitWidth {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-            }
+            Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
             // ── HEADER ──────────────────────────────────────────────────
             Rectangle {
                 id: headerButton
                 
-                y: containerRect.headerOffset - 10 - height
-
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    leftMargin: 10
-                    rightMargin: 10
-                }
+                // Simplified positioning mapping seamlessly above the notification scroll area
+                anchors.bottom: notifFlickable.top
+                anchors.bottomMargin: 20
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
                 
-                height: implicitHeight 
-                
-                visible: containerRect.headerOffset > 0 
+                opacity: containerRect.hoverProgress
+                visible: opacity > 0
                 
                 implicitHeight: headerColumn.implicitHeight + 15
                 implicitWidth: headerColumn.implicitWidth
@@ -198,14 +189,11 @@ Item {
             Flickable {
                 id: notifFlickable
                 
-                anchors{
-                    top: parent.top
-                    topMargin: containerRect.headerOffset + 10
-                
-                    bottom: parent.bottom
-                    left: parent.left
-                    right: parent.right
-                }
+                anchors.top: parent.top
+                anchors.topMargin: containerRect.headerOffset + 10
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
                 
                 contentWidth: width
                 contentHeight: Math.max(innerLayout.smoothHeight + containerRect.activePadding, height)
@@ -230,21 +218,17 @@ Item {
                     width: parent.width - 20
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 10
-
+                    
                     property real smoothHeight: implicitHeight
                     Behavior on smoothHeight {
                         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                     }
 
-                    // lock notifications to bottom
+                    // Bottom alignment glide to prevent layout jumps
                     y: Math.max(10, notifFlickable.height - smoothHeight - 10)
 
                     move: Transition {
-                        NumberAnimation { 
-                            properties: "y" 
-                            duration: Theme.verticalDuration 
-                            easing.type: Easing.OutCubic 
-                        }
+                        NumberAnimation { properties: "y"; duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                     }
                     
                     Repeater {
