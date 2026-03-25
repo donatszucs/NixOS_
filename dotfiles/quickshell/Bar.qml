@@ -220,13 +220,9 @@ PanelWindow {
             id: virtualKeyboardModule
 
         }
-        ModSwitcherModule {
-            Layout.alignment: Qt.AlignTop
-            id: modSwitcherModule
-        }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            leftColor: modSwitcherModule.color
+            leftColor: virtualKeyboardModule.color
             leftExpanded: audioModule.expanded
         }
         AudioModule {

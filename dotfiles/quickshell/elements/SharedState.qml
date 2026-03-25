@@ -7,77 +7,7 @@ import Quickshell.Services.Notifications as Notif
 
 Item {
     id: root
-
-    // ==========================================
-    // Mod Switcher State
-    // ==========================================
-    property string modVariant: "dark"
-    property string modLabel: "󰍽"
-
-    readonly property string modDevice: "Keychron  Keychron Link "
-    readonly property string modPreset: "SuperMouse"
-    readonly property string modStateFile: "/tmp/input_remapper_state"
-
-    function refreshModSwitcher() {
-        modStateCheckProc.running = true
-    }
-
-    Process {
-        id: modStateCheckProc
-        command: ["bash", "-c", `[ -f "${root.modStateFile}" ] && echo "on" || echo "off"`]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (text.trim() === "on") {
-                    root.modVariant = "light"
-                    root.modLabel = "󱗼"
-                } else {
-                    root.modVariant = "dark"
-                    root.modLabel = "󰍽"
-                }
-            }
-        }
-    }
-
-    function toggleModSwitcher() {
-        modToggleCheckProc.running = true
-    }
-
-    Process {
-        id: modToggleCheckProc
-        command: ["bash", "-c", `[ -f "${root.modStateFile}" ] && echo "on" || echo "off"`]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (text.trim() === "on") {
-                    // Optimistically set UI to off
-                    root.modVariant = "dark"
-                    root.modLabel = "󰍽"
-                    modStopProc.running = true
-                } else {
-                    // Optimistically set UI to on
-                    root.modVariant = "light"
-                    root.modLabel = "󱗼"
-                    modStartProc.running = true
-                }
-            }
-        }
-    }
-
-    Process {
-        id: modStopProc
-        command: ["bash", "-c", `input-remapper-control --command stop --device "${root.modDevice}" --preset "${root.modPreset}" && rm -f "${root.modStateFile}"`]
-        stdout: StdioCollector {
-            onStreamFinished: root.refreshModSwitcher()
-        }
-    }
-
-    Process {
-        id: modStartProc
-        command: ["bash", "-c", `input-remapper-control --command start --device "${root.modDevice}" --preset "${root.modPreset}" && touch "${root.modStateFile}"`]
-        stdout: StdioCollector {
-            onStreamFinished: root.refreshModSwitcher()
-        }
-    }
-
+    
     // ==========================================
     // Light Switch State
     // ==========================================

@@ -12,9 +12,6 @@
   # KDE Connect for phone integration
   programs.kdeconnect.enable = true;
   
-  # Enable input remapper service
-  services.input-remapper.enable = true;
-  
   programs.gamemode = {
     enable = true;
     settings = {
@@ -66,6 +63,7 @@
   rbw               # CLI password manager
   pinentry-qt     # Qt5 pinentry for rbw
   usbutils          # For lsusb and other USB tools
+  wlsunset          # Automatic color temperature adjustment based on time of day
   
   # -- Applications --
   vscode            

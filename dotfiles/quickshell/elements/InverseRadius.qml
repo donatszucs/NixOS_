@@ -5,11 +5,13 @@ Canvas {
     property bool expandingV: true
     property bool expandingH: true
     property int size: Theme.moduleEdgeRadius
+    property int sizeH: size
+    property int sizeV: size
     property int animationDuration: Theme.verticalDuration
     // Set false to disable the built-in Behavior so width/height can be bound externally
     property bool animated: true
-    implicitWidth: expandingH ? size : 0
-    implicitHeight: expandingV ? size : 0
+    implicitWidth: expandingH ? sizeH : 0
+    implicitHeight: expandingV ? sizeV : 0
 
     property color color: Theme.palette("dark").base
     // Where is the solid corner located within this block?
@@ -33,31 +35,37 @@ Canvas {
         ctx.fillStyle = color;
         ctx.beginPath();
         
+        ctx.save();
+        var scaleX = width > 0 ? width : 1;
+        var scaleY = height > 0 ? height : 1;
+        ctx.scale(scaleX, scaleY);
+        
         if (cornerPosition === "topLeft") {
             ctx.moveTo(0, 0);
-            ctx.lineTo(width, 0);
-            ctx.arc(width, height, width, 1.5 * Math.PI, Math.PI, true);
-            ctx.lineTo(0, height);
+            ctx.lineTo(1, 0);
+            ctx.arc(1, 1, 1, 1.5 * Math.PI, Math.PI, true);
+            ctx.lineTo(0, 1);
             ctx.closePath();
         } else if (cornerPosition === "topRight") {
-            ctx.moveTo(width, 0);
+            ctx.moveTo(1, 0);
             ctx.lineTo(0, 0);
-            ctx.arc(0, height, width, 1.5 * Math.PI, 2.0 * Math.PI, false);
-            ctx.lineTo(width, height);
+            ctx.arc(0, 1, 1, 1.5 * Math.PI, 2.0 * Math.PI, false);
+            ctx.lineTo(1, 1);
             ctx.closePath();
         } else if (cornerPosition === "bottomLeft") {
-            ctx.moveTo(0, height);
-            ctx.lineTo(width, height);
-            ctx.arc(width, 0, width, 0.5 * Math.PI, Math.PI, false);
+            ctx.moveTo(0, 1);
+            ctx.lineTo(1, 1);
+            ctx.arc(1, 0, 1, 0.5 * Math.PI, Math.PI, false);
             ctx.lineTo(0, 0);
             ctx.closePath();
         } else if (cornerPosition === "bottomRight") {
-            ctx.moveTo(width, height);
-            ctx.lineTo(0, height);
-            ctx.arc(0, 0, width, 0.5 * Math.PI, 0, true);
-            ctx.lineTo(width, 0);
+            ctx.moveTo(1, 1);
+            ctx.lineTo(0, 1);
+            ctx.arc(0, 0, 1, 0.5 * Math.PI, 0, true);
+            ctx.lineTo(1, 0);
             ctx.closePath();
         }
+        ctx.restore();
         ctx.fill();
     }
 

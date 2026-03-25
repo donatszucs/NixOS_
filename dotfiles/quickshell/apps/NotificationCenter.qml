@@ -47,7 +47,8 @@ Item {
             Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             
             cornerPosition: "bottomRight"
-            size: innerLayout.implicitWidth === 0 ? Theme.moduleEdgeRadius : (innerLayout.implicitWidth / 8)
+            sizeH: Math.max(containerRect.implicitWidth / 4, Theme.moduleEdgeRadius)
+            sizeV: Math.max(containerRect.implicitWidth / 8, Theme.moduleEdgeRadius)
             color: Theme.palette("dark").base
             animated: false
         }
@@ -59,7 +60,8 @@ Item {
             Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             
             cornerPosition: "bottomRight"
-            size: Math.floor(containerRect.implicitHeight / 8)
+            sizeH: Math.floor(containerRect.implicitHeight / 8)
+            sizeV: Math.floor(containerRect.implicitHeight / 4)
             color: Theme.palette("dark").base
             expandingH: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
             expandingV: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
@@ -264,11 +266,12 @@ Item {
         // Cached image: set on first load, only updated if a new notification brings its own image
         property string cachedImage: ""
 
-        visible: (hoverHandler.hovered || showing)
+        property bool shouldBeVisible: !dismissing && (hoverHandler.hovered || showing)
+        visible: opacity > 0 || height > 0
 
-        onVisibleChanged: {
-            if (visible) {
-                enterAnimation.start()
+        onOpacityChanged: {
+            if (opacity === 0 && dismissing && toastRow.notif) {
+                toastRow.notif.dismiss()
             }
         }
 
@@ -288,8 +291,12 @@ Item {
             : (toastRow.notif && toastRow.notif.expireTimeout > 0 ? toastRow.notif.expireTimeout : 5000)
 
         // ── Sizing & shape ────────────────────────────────────────────
-        height: contentGrid.implicitHeight + Theme.modulePaddingH * 2
-        width: contentGrid.implicitWidth + Theme.modulePaddingH * 2
+        property real moduleHeight: contentGrid.implicitHeight + Theme.modulePaddingH * 2
+        property real moduleWidth: contentGrid.implicitWidth + Theme.modulePaddingH * 2
+
+
+        height: shouldBeVisible ? moduleHeight : 0.0
+        width: shouldBeVisible ? moduleWidth : 0.0
 
         clip: true
 
@@ -298,7 +305,7 @@ Item {
         // ── Colors ────────────────────────────────────────────────────
         variant: isCritical ? "danger" : "light"
 
-        opacity: Theme.moduleOpacity
+        opacity: shouldBeVisible ? Theme.moduleOpacity : 0.0
 
         border.color: "#f38ba8"
         border.width: isCritical ? 2 : 0
@@ -308,7 +315,6 @@ Item {
                 toastRow.cachedImage = toastRow.notif.image
 
             toastRow.showing = true 
-            enterAnimation.start()
         }
 
         Timer {
@@ -318,14 +324,13 @@ Item {
             running: toastRow.effectiveTimeout > 0 && !hoverHandler.hovered
             repeat: false
 
-            onTriggered: disappearAnimation.start()
+            onTriggered: toastRow.showing = false
 
 
         }
 
         onClicked: {
             toastRow.dismissing = true
-            disappearAnimation.start() 
         }
 
         function submitInlineReply() {
@@ -552,55 +557,13 @@ Item {
         Behavior on height {
             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
         }
-
-        // ── Animations ────────────────────────────────────────────────
-        ParallelAnimation {
-            id: enterAnimation
-            
-            NumberAnimation { 
-                target: toastRow
-                property: "opacity"
-                from: 0.0 
-                to: 1.0
-                duration: Theme.verticalDuration 
-                easing.type: Easing.OutCubic
-            }
-            NumberAnimation { 
-                target: toastRow 
-                property: "scale"
-                from: 0.2 
-                to: 1.0
-                duration: Theme.verticalDuration 
-                easing.type: Easing.OutBack 
-            }
+        
+        Behavior on width {
+            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
         }
 
-        ParallelAnimation {
-            id: disappearAnimation
-            
-            NumberAnimation { 
-                target: toastRow
-                property: "opacity"
-                from: 1.0 
-                to: 0.0
-                duration: Theme.verticalDuration
-                easing.type: Easing.OutCubic
-            }
-            NumberAnimation { 
-                target: toastRow
-                property: "scale"
-                from: 1.0 
-                to: 0.0
-                duration: Theme.verticalDuration
-                easing.type: Easing.OutBack 
-            }
-
-            onFinished: {
-                toastRow.showing = false
-                if (toastRow.dismissing) {
-                    toastRow.notif.dismiss()
-                }
-            }
+        Behavior on opacity {
+            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
         }
 
         function revive() {
