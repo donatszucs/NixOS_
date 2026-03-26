@@ -31,7 +31,7 @@
   };
 
   # 3. Force load the kernel module (Driver)
-  boot.kernelModules = [ "btusb" ];
+  boot.kernelModules = [ "btusb" "ntsync" ];
 
   # Enable the graphics driver
   hardware.graphics.enable = true;

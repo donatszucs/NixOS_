@@ -64,6 +64,7 @@
       name = "Dracula";
       package = pkgs.dracula-icon-theme;
     };
+    gtk4.theme = null;
   };
 
   # Also set the FreeDesktop/GNOME color-scheme portal preference

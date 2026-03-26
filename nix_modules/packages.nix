@@ -74,6 +74,7 @@
   discord
   qalculate-gtk
   texlive.combined.scheme-full
+  teams-for-linux
 
   (prismlauncher.override {
     jdks = [ 
