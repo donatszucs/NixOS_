@@ -47,7 +47,9 @@ Item {
             Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             
             cornerPosition: "bottomRight"
-            sizeH: Math.max(containerRect.implicitWidth / 4, Theme.moduleEdgeRadius)
+            smoothCurve: true
+            smoothTolerance: 0.4477 * Theme.moduleEdgeRadius / sizeH
+            sizeH: Math.max(containerRect.implicitWidth, Theme.moduleEdgeRadius)
             sizeV: Math.max(containerRect.implicitWidth / 8, Theme.moduleEdgeRadius)
             color: Theme.palette("dark").base
             animated: false
@@ -60,8 +62,10 @@ Item {
             Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             
             cornerPosition: "bottomRight"
-            sizeH: Math.floor(containerRect.implicitHeight / 8)
-            sizeV: Math.floor(containerRect.implicitHeight / 4)
+            smoothCurve: true
+            smoothTolerance: 0.4477 * Theme.moduleEdgeRadius / sizeV
+            sizeH: Math.max(containerRect.implicitHeight / 8, Theme.moduleEdgeRadius)
+            sizeV: containerRect.implicitHeight
             color: Theme.palette("dark").base
             expandingH: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
             expandingV: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)

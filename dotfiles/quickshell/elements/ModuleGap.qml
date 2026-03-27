@@ -15,6 +15,16 @@ Item {
     property bool leftExpandedBottom: true
     property bool rightExpandedBottom: true
 
+    // Vertival and Horizontal sizes of the radius corvers.
+    property int sizeHleft: Theme.moduleEdgeRadius
+    property int sizeVleft: Theme.moduleEdgeRadius
+    property int sizeHright: Theme.moduleEdgeRadius
+    property int sizeVright: Theme.moduleEdgeRadius
+
+
+    // base properties
+    property bool smoothCurve: false
+    property real smoothTolerance: 0.1
     // The physical gap size between modules
     implicitWidth: 0
     implicitHeight: Theme.moduleHeight
@@ -24,6 +34,11 @@ Item {
         cornerPosition: "topRight"
         color: root.leftColor
         expandingV: root.leftExpanded
+        sizeH: root.sizeHleft
+        sizeV: root.sizeVleft
+
+        smoothCurve: root.smoothCurve
+        smoothTolerance: root.smoothTolerance
         
         anchors {
             // Anchor to the very right edge of this gap
@@ -37,38 +52,17 @@ Item {
         cornerPosition: "topLeft"
         color: root.rightColor
         expandingV: root.rightExpanded
+        sizeH: root.sizeHright
+        sizeV: root.sizeVright
+
+        smoothCurve: root.smoothCurve
+        smoothTolerance: root.smoothTolerance
         
         anchors {
             // Anchor to the very left edge of this gap
 
             left: parent.left
             top: parent.bottom // Or whatever vertical anchor you were using
-        }
-    }
-    // 3. The Right-facing corner (attaches to the Left module)
-    InverseRadius {
-        cornerPosition: "bottomRight"
-        color: root.leftColorBottom
-        expandingV: root.leftExpandedBottom
-        
-        anchors {
-            // Anchor to the very right edge of this gap
-            right: parent.right  
-            bottom: parent.bottom 
-        }
-    }
-
-    // 4. The Left-facing corner (attaches to the Right module)
-    InverseRadius {
-        cornerPosition: "bottomLeft"
-        color: root.rightColorBottom
-        expandingV: root.rightExpandedBottom
-        
-        anchors {
-            // Anchor to the very left edge of this gap
-
-            left: parent.left
-            bottom: parent.bottom // Or whatever vertical anchor you were using
         }
     }
 }

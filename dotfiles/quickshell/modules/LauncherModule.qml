@@ -263,9 +263,6 @@ ModuleButton {
                 Layout.rightMargin: launcherModule.padding
                 implicitHeight: Math.min(launcherModule.filteredApps.length, launcherModule.maxVisible) * Theme.moduleHeight
                 color: "transparent"
-                Behavior on implicitHeight {
-                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-                }
 
                 ListView {
                     id: appList
