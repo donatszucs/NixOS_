@@ -95,8 +95,7 @@ Item {
             property real activePadding: innerLayout.implicitHeight > 0 ? 20 : 0
             Behavior on activePadding { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
-            property real targetHeight: headerOffset + innerLayout.smoothHeight + activePadding
-            implicitHeight: Math.min(targetHeight, Layout.maximumHeight)
+            implicitHeight: Math.min(headerOffset + innerLayout.smoothHeight + activePadding, Layout.maximumHeight)
 
             Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
@@ -208,7 +207,7 @@ Item {
                 interactive: true
 
                 onContentHeightChanged: {
-                    if (contentHeight > height && !dragging) {
+                    if (contentHeight > height && !dragging  && !hoverHandler.hovered) {
                         contentY = contentHeight - height
                     }
                 }
