@@ -11,6 +11,9 @@ import "../elements"
 Item {
     id: root
 
+
+    layer.enabled: true
+    
     // ── Geometry ────────────────────────────────────────────────────────
     readonly property int notifWidth:   300
 

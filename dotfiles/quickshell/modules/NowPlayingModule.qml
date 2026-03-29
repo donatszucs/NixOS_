@@ -71,7 +71,7 @@ ModuleButton {
                 cursorShape: Qt.PointingHandCursor
 
                 // 2. Set your fixed width here
-                implicitWidth: expanded ? 200 : Math.min(200, scrollingText.paintedWidth + 30)
+                implicitWidth: expanded ? 200 : Math.min(200, scrollingText.implicitWidth + 30)
                 onClicked: focusNow()
 
                 bottomRightRadius: Theme.moduleEdgeRadius
@@ -93,11 +93,14 @@ ModuleButton {
                         font.pixelSize: Theme.fontSize
                         
                         anchors.verticalCenter: parent.verticalCenter
+                        
+                        width: nowPlayingModule.expanded ? implicitWidth : textContainer.width
+                        elide: nowPlayingModule.expanded ? Text.ElideNone : Text.ElideRight
 
                         SequentialAnimation on x {
                             id: scrollAnim
                             loops: Animation.Infinite
-                            running: scrollingText.paintedWidth > textContainer.width
+                            running: nowPlayingModule.expanded && scrollingText.implicitWidth > textContainer.width
 
                             onRunningChanged: {
                                 if (!running) {
@@ -107,13 +110,13 @@ ModuleButton {
 
                             PropertyAction { target: scrollingText; property: "x"; value: 0 }
 
-                            PauseAnimation { duration: 1500 }
+                            PauseAnimation { duration: Theme.horizontalDuration }
 
                             NumberAnimation {
                                 from: 0
-                                to: Math.min(0, textContainer.width - scrollingText.paintedWidth)
-                                // Adjust the multiplier (30) to make it scroll faster or slower
-                                duration: Math.max(0, scrollingText.paintedWidth - textContainer.width) * 30 
+                                to: Math.min(0, textContainer.width - scrollingText.implicitWidth)
+                                
+                                duration: Math.max(0, scrollingText.implicitWidth - textContainer.width) * 30 
                             }
 
                             PauseAnimation { duration: 1500 }
@@ -175,34 +178,26 @@ ModuleButton {
             implicitWidth: albumArtClip.width
             implicitHeight: albumArtClip.height
 
-            // Changed to an Item since MultiEffect handles the drawing now
             Item { 
                 id: albumArtClip
                 anchors.centerIn: parent
-                
-                // 1. The fixed width you want — decoupled from the animating implicitWidth
-                //    so height expansion starts immediately alongside width expansion
+
                 width: Math.ceil(topRow.implicitWidth)
-                
-                // 2. Calculate the height dynamically using the image's source dimensions
+
                 // Formula: Height = Width * (Original Height / Original Width)
                 height: albumArt.implicitWidth > 0 
                         ? (width * (albumArt.implicitHeight / albumArt.implicitWidth)) 
-                        : width // Fallback: makes it a perfect square before the image finishes loading
+                        : width
 
                 Image {
                     id: albumArt
                     anchors.fill: parent
-                    // Since the container now perfectly matches the image's ratio, 
-                    // PreserveAspectFit or Stretch will both work perfectly without cutting anything off.
                     fillMode: Image.PreserveAspectFit
                     source: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
-                    // Prevent constant re-decoding by using a fixed max size or just implicit sizing
                     sourceSize.width: 200
                     visible: false 
                 }
 
-                // 3. The Qt 6 way to apply masks and effects
                 MultiEffect {
                     source: albumArt
                     anchors.fill: albumArt
@@ -211,7 +206,6 @@ ModuleButton {
                     maskSource: maskItem
                 }
 
-                // 4. The shape of our mask
                 Item {
                     id: maskItem
                     anchors.fill: parent
@@ -237,13 +231,11 @@ ModuleButton {
         }
     }
 
-    // Use Quickshell.Services.Mpris
     readonly property var mpris: Mpris
     property var currentPlayer: null
     property string currentTrackId: ""
 
     function pickPlayer() {
-        // prefer a playing player, otherwise first available
         var pick = null
         if (!Mpris || !Mpris.players) {
             currentPlayer = null
@@ -252,7 +244,6 @@ ModuleButton {
             nowPlayingModule.playPauseIcon = "󰐊"
             return
         }
-        // dictionary-like with `values` array (observed structure)
         else {
             for (var vi = 0; vi < Mpris.players.values.length; vi++) {
                 var pv = Mpris.players.values[vi]
@@ -281,11 +272,10 @@ ModuleButton {
             nowPlayingModule.titleText = "󰎆  " + (currentPlayer.trackTitle || "Nothing playing")
             nowPlayingModule.authorText = currentPlayer.trackArtist || "Unknown artist"
             // Reset scrolling animation when the track actually changes
-            scrollAnim.restart()
+            if (nowPlayingModule.expanded)
+                scrollAnim.restart()
         }
     }
-
-    // We poll Mpris.players periodically; dynamic Connections caused issues in some builds
 
     function doTogglePlay() { if (currentPlayer && currentPlayer.togglePlaying) currentPlayer.togglePlaying() }
     function doNext() { if (currentPlayer && currentPlayer.next) currentPlayer.next() }
