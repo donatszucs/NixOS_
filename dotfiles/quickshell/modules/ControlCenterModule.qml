@@ -11,7 +11,6 @@ import "../elements"
 
 ModuleButton {
     id: controlCenter
-    opacity: Theme.moduleOpacity
     property bool expanded: false
     noHoverColorChange: expanded ? true : false
 

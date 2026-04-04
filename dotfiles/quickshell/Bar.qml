@@ -120,7 +120,6 @@ PanelWindow {
 
             Rectangle {
                 anchors.fill: parent
-                opacity: Theme.moduleOpacity
                 color: Theme.palette("dark").base
             }
 

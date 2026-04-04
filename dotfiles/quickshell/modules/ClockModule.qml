@@ -7,7 +7,6 @@ import "../elements"
 
 ModuleButton {
     id: root
-    opacity: Theme.moduleOpacity
 
     property bool expanded: hovered
 

@@ -36,7 +36,6 @@ Rectangle {
             implicitWidth: wallpaperPanel.cornerSize
             implicitHeight: wallpaperPanel.cornerSize
             color: Theme.dark.base
-            opacity: Theme.moduleOpacity
             Layout.alignment: Qt.AlignRight
             expandingH: wallpaperPanel.expanded
         }
@@ -48,7 +47,6 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             color: Theme.dark.base
-            opacity: Theme.moduleOpacity
             
             topLeftRadius: Theme.moduleEdgeRadius
             bottomLeftRadius: Theme.moduleEdgeRadius
@@ -136,7 +134,6 @@ Rectangle {
             implicitWidth: wallpaperPanel.cornerSize
             implicitHeight: wallpaperPanel.cornerSize
             color: Theme.dark.base
-            opacity: Theme.moduleOpacity
             Layout.alignment: Qt.AlignRight
             expandingH: wallpaperPanel.expanded
         }

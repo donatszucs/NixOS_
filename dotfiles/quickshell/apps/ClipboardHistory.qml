@@ -139,7 +139,6 @@ Rectangle {
             implicitWidth: clipboardPanel.cornerSize
             implicitHeight: clipboardPanel.cornerSize
             color: Theme.dark.base
-            opacity: Theme.moduleOpacity
             Layout.alignment: Qt.AlignLeft
             expandingH: clipboardPanel.expanded
         }
@@ -151,7 +150,6 @@ Rectangle {
             Layout.fillHeight: true
 
             color: Theme.dark.base
-            opacity: Theme.moduleOpacity
 
             topRightRadius: Theme.moduleEdgeRadius
             bottomRightRadius: Theme.moduleEdgeRadius
@@ -224,7 +222,6 @@ Rectangle {
             implicitWidth: clipboardPanel.cornerSize
             implicitHeight: clipboardPanel.cornerSize
             color: Theme.dark.base
-            opacity: Theme.moduleOpacity
             Layout.alignment: Qt.AlignLeft
             expandingH: clipboardPanel.expanded
         }

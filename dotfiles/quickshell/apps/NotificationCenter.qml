@@ -83,10 +83,15 @@ Item {
             Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             Layout.maximumHeight: 900 
 
-            color: Theme.palette("dark").base
+            color: "transparent"
             clip: true
-            opacity: Theme.moduleOpacity
             topLeftRadius: Theme.moduleEdgeRadius + 5
+
+            Rectangle {
+                anchors.fill: parent
+                color: Theme.palette("dark").base
+                topLeftRadius: parent.topLeftRadius
+            }
             
             implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (Math.max(innerLayout.implicitWidth, headerButton.implicitWidth) + 20)
 
@@ -158,7 +163,7 @@ Item {
                         
                         property bool showing: false
                         Layout.preferredHeight: showing ? 40 : 0
-                        opacity: showing ? Theme.moduleOpacity : 0
+                        opacity: showing ? 1 : 0
                         clip: true
 
                         Behavior on Layout.preferredHeight {
@@ -311,7 +316,7 @@ Item {
         // ── Colors ────────────────────────────────────────────────────
         variant: isCritical ? "danger" : "light"
 
-        opacity: shouldBeVisible ? Theme.moduleOpacity : 0.0
+        opacity: shouldBeVisible ? 1 : 0.0
 
         border.color: "#f38ba8"
         border.width: isCritical ? 2 : 0

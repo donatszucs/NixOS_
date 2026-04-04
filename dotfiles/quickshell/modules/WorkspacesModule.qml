@@ -13,7 +13,6 @@ ModuleButton {
     property string screenName: ""
 
     color: Theme.palette("dark").base
-    opacity: Theme.moduleOpacity
 
     bottomLeftRadius: Theme.moduleEdgeRadius + 2
     bottomRightRadius: Theme.moduleEdgeRadius + 2

@@ -9,7 +9,6 @@ import "../elements"
 ModuleButton {
     id: root
     noHoverColorChange: true
-    opacity: Theme.moduleOpacity
     property int openMenus: 0
     property bool expanded: hovered
 

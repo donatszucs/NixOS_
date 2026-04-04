@@ -29,7 +29,6 @@ Canvas {
     // Ensure smooth curved edges
     antialiasing: true
     smooth: true
-    opacity: Theme.moduleOpacity
 
     onColorChanged: requestPaint()
     onCornerPositionChanged: requestPaint()

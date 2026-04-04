@@ -16,7 +16,6 @@ ModuleButton {
     property bool expanded: false
     property string screenName: ""
 
-    opacity: Theme.moduleOpacity
 
     property int  panelWidth:  400
     property int  maxVisible:  8

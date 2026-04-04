@@ -152,7 +152,6 @@ Rectangle {
             cornerPosition: "bottomRight"
             implicitHeight: rbwPanel.cornerSize
             implicitWidth: rbwPanel.cornerSize
-            opacity: Theme.moduleOpacity
             Layout.alignment: Qt.AlignBottom
             expandingV: rbwPanel.expanded
         }
@@ -163,7 +162,6 @@ Rectangle {
             implicitHeight: rbwPanel.implicitHeight
             Layout.fillWidth: true
             color: Theme.dark.base
-            opacity: Theme.moduleOpacity
             topLeftRadius: Theme.moduleEdgeRadius
             topRightRadius: Theme.moduleEdgeRadius
             clip: true
@@ -306,7 +304,6 @@ Rectangle {
             implicitHeight: rbwPanel.cornerSize
             implicitWidth: rbwPanel.cornerSize
             color: Theme.dark.base
-            opacity: Theme.moduleOpacity
             Layout.alignment: Qt.AlignBottom
             expandingV: rbwPanel.expanded
         }

@@ -10,7 +10,6 @@ ModuleButton {
     id: audioModule
     color: implicitHeight === Theme.moduleHeight ? "transparent" : Theme.palette("dark").base
     dontAnimateColor: true
-    opacity: Theme.moduleOpacity
     property bool expanded: false
     property int maxSinkBarLength: 0
 

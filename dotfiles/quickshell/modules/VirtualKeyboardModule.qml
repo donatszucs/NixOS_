@@ -8,7 +8,6 @@ import "../elements"
 ModuleButton {
     id: virtualKbrd
     label: ""
-    opacity: Theme.moduleOpacity
     cursorShape: Qt.PointingHandCursor
     property bool active: false
 
