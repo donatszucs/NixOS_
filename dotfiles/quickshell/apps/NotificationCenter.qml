@@ -83,15 +83,9 @@ Item {
             Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             Layout.maximumHeight: 900 
 
-            color: "transparent"
+            color: Theme.palette("dark").base
             clip: true
             topLeftRadius: Theme.moduleEdgeRadius + 5
-
-            Rectangle {
-                anchors.fill: parent
-                color: Theme.palette("dark").base
-                topLeftRadius: parent.topLeftRadius
-            }
             
             implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (Math.max(innerLayout.implicitWidth, headerButton.implicitWidth) + 20)
 

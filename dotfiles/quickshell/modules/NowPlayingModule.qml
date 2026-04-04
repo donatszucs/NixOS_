@@ -20,8 +20,7 @@ ModuleButton {
     HoverHandler {
         id: parentHover
         onHoveredChanged: {
-            scrollAnim.stop()
-            scrollAnim.restart()
+            scrollAnim.start()
         }
 
     }
@@ -272,7 +271,7 @@ ModuleButton {
             nowPlayingModule.authorText = currentPlayer.trackArtist || "Unknown artist"
             // Reset scrolling animation when the track actually changes
             if (nowPlayingModule.expanded)
-                scrollAnim.restart()
+                scrollAnim.start()
         }
     }
 
