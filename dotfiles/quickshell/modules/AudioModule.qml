@@ -89,7 +89,7 @@ ModuleButton {
                 label: "100% "
                 textAlign: "right"
                 
-                rightMargin: Theme.modulePaddingH + 4
+                rightMargin: Theme.modulePaddingH
 
                 bottomRightRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
 
@@ -230,7 +230,7 @@ ModuleButton {
                     } else if (v > 0 && v < 50) {
                         volumeButton.label = v + "% "
                     } else {
-                        volumeButton.label = v + "%  "
+                        volumeButton.label = v + "% "
                     }
                 }
             }

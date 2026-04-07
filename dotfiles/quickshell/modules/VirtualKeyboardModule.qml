@@ -11,7 +11,6 @@ ModuleButton {
     cursorShape: Qt.PointingHandCursor
     property bool active: false
 
-    rightMargin: 5
 
     Process {
         id: startProc

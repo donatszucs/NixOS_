@@ -42,7 +42,6 @@ ModuleButton {
             cursorShape: Qt.PointingHandCursor
             label: "󱊖"
             colorOverride: true
-            leftMargin: -3
 
             onClicked: missioncenterProcess.running = true
 

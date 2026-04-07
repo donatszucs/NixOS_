@@ -57,10 +57,9 @@ ModuleButton {
             Layout.topMargin: powerModule.expanded ? 0 : padding
             Layout.leftMargin: 6
             label: powerModule.expanded ? "Power Menu" : ""
-            rightMargin: powerModule.expanded ? 0: 4
             
             implicitHeight: powerModule.expanded ? Theme.moduleHeight: Math.ceil(Theme.moduleHeight * 0.75)
-            implicitWidth: powerModule.expanded ? textFont * 10 : Math.ceil(Theme.moduleHeight * 1.25)
+            implicitWidth: powerModule.expanded ? textFont * 12 : Math.ceil(Theme.moduleHeight * 1.25)
 
             cursorShape: Qt.PointingHandCursor
             onClicked: powerModule.expanded = !powerModule.expanded
@@ -81,10 +80,10 @@ ModuleButton {
         Repeater {
 
             model: [
-                { index: 0, text: "  Shutdown", cmd: "systemctl poweroff", },
-                { index: 1, text: "  Reboot", cmd: "systemctl reboot", },
-                { index: 2, text: "  Suspend", cmd: "systemctl suspend", },
-                { index: 3, text: "  Lock", cmd: "hyprlock", }
+                { index: 0, icon: "", text: "Shutdown", cmd: "systemctl poweroff", },
+                { index: 1, icon: "", text: "Reboot", cmd: "systemctl reboot", },
+                { index: 2, icon: "󰌪", text: "Suspend", cmd: "systemctl suspend", },
+                { index: 3, icon: "", text: "Lock", cmd: "hyprlock", }
             ]
             delegate: ModuleButton {
                 id: actionButton
@@ -100,9 +99,37 @@ ModuleButton {
 
                 radius: Theme.moduleEdgeRadius
 
-                label: modelData.text
-                textAlign: "left"
-                leftMargin: 20
+                RowLayout {
+                    anchors.left: parent.left
+                    anchors.leftMargin: Theme.modulePaddingH
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 15
+
+                    Text {
+                        text: actionButton.modelData.icon
+                        color: actionButton.textColor
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize * 1.5
+                        font.bold: true
+                    }
+
+                    Rectangle {
+
+                        width: 4
+                        height: Theme.moduleHeight - 10
+                        color: Theme.palette("dark").base
+                        opacity: 0.5
+                        radius: 2
+                    }
+
+                    Text {
+                        text: actionButton.modelData.text
+                        color: actionButton.textColor
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: true
+                    }
+                }
 
                 Process {
                     id: actionProc

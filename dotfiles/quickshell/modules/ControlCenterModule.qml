@@ -177,7 +177,6 @@ ModuleButton {
                         colorOverride: true
                         textColor: controlCenter.netColor
                         textFont: 24
-                        rightMargin: 6
                         implicitWidth: textFont * 2
                         radius: Theme.moduleEdgeRadius
                         onClicked: netOpen.running = true
@@ -330,7 +329,6 @@ ModuleButton {
                         cursorShape: Qt.PointingHandCursor
                         colorOverride: true
                         textFont: 24
-                        rightMargin: 8
                         implicitWidth: textFont * 2
                         radius: Theme.moduleEdgeRadius
                         onClicked: headsetProc.running = true
@@ -371,7 +369,6 @@ ModuleButton {
                     label: "󰚰"
                     textFont: 24
 
-                    rightMargin: 4
                     cursorShape: Qt.PointingHandCursor
                     onClicked: updateProc.running = true
 
@@ -383,7 +380,6 @@ ModuleButton {
                 ModuleButton {
                     label: "󱄅"
                     textFont: 24
-                    rightMargin: 6
                     cursorShape: Qt.PointingHandCursor
                     onClicked: rebuildProc.running = true
 
