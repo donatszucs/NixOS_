@@ -5,9 +5,9 @@ import "../elements"
 ModuleButton {
     label: ""
     variant: "dark"
-    implicitWidth: Math.ceil(Theme.moduleHeight * 0.8)
+    implicitWidth: Math.ceil(Theme.moduleHeight * 0.7)
     implicitHeight: Math.ceil(Theme.moduleHeight * 0.7)
-    rightMargin: 2
+    radius: implicitHeight / 2
 
     onClicked: Hyprland.dispatch("workspace empty")
     cursorShape: Qt.PointingHandCursor
