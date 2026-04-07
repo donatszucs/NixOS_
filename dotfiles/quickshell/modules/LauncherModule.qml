@@ -1,6 +1,7 @@
 // App Launcher — expands downward with search + installed app list
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Io
@@ -263,8 +264,30 @@ ModuleButton {
                 Layout.fillWidth: true
                 Layout.leftMargin: launcherModule.padding
                 Layout.rightMargin: launcherModule.padding
-                implicitHeight: Math.min(launcherModule.filteredApps.length, launcherModule.maxVisible) * (Theme.listHeight + 5) // item height + spacing
+                property int visibleItems: Math.min(launcherModule.filteredApps.length, launcherModule.maxVisible)
+                implicitHeight: visibleItems * Theme.listHeight + (visibleItems - 1) * 5// item height + spacing
                 color: "transparent"
+                radius: Theme.moduleEdgeRadius
+                clip: true
+                layer.enabled: true
+                layer.smooth: true
+                layer.effect: MultiEffect {
+                    maskEnabled: true
+                    maskSource: appListMask
+                }
+
+                Item {
+                    id: appListMask
+                    anchors.fill: parent
+                    visible: false
+                    layer.enabled: true
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: appListRect.radius
+                        color: "black"
+                    }
+                }
 
                 ListView {
                     id: appList

@@ -147,7 +147,8 @@ Rectangle {
             "CONF_DIR=\"$HOME/.config/hypr\"; " +
             "LINK_NAME=\"$CONF_DIR/temps/wallpaper_$MONITOR\"; " +
             "ln -sf \"" + targetFile + "\" \"$LINK_NAME\"; " +
-            "pkill hyprpaper; hyprpaper & disown"
+            "pkill -x hyprpaper || true; " + 
+            "setsid -f hyprpaper >/dev/null 2>&1"
         ]
         onRunningChanged: {
             if (!running) {

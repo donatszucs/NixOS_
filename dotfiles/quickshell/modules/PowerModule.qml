@@ -55,7 +55,7 @@ ModuleButton {
             Layout.alignment: Qt.AlignCenter
             Layout.rightMargin: 10
             Layout.topMargin: powerModule.expanded ? 0 : padding
-            Layout.leftMargin: 10
+            Layout.leftMargin: 5
             label: powerModule.expanded ? "Power Menu" : ""
             
             implicitHeight: powerModule.expanded ? Theme.moduleHeight: Math.ceil(Theme.moduleHeight * 0.75)
@@ -146,7 +146,7 @@ ModuleButton {
             Layout.alignment: Qt.AlignCenter
             Layout.preferredWidth: mainButton.implicitWidth
             Layout.rightMargin: 10
-            Layout.leftMargin: 10
+            Layout.leftMargin: 5
             Layout.fillWidth: true
             implicitHeight: Theme.listHeight
             color: Theme.divider
