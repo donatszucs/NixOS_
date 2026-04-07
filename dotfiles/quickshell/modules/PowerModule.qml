@@ -53,13 +53,13 @@ ModuleButton {
             property int padding: (Theme.moduleHeight - Math.ceil(Theme.moduleHeight * 0.75)) / 2
 
             Layout.alignment: Qt.AlignCenter
-            Layout.rightMargin: 6
+            Layout.rightMargin: 10
             Layout.topMargin: powerModule.expanded ? 0 : padding
-            Layout.leftMargin: 6
+            Layout.leftMargin: 10
             label: powerModule.expanded ? "Power Menu" : ""
             
             implicitHeight: powerModule.expanded ? Theme.moduleHeight: Math.ceil(Theme.moduleHeight * 0.75)
-            implicitWidth: powerModule.expanded ? textFont * 12 : Math.ceil(Theme.moduleHeight * 1.25)
+            implicitWidth: powerModule.expanded ? 180 : Math.ceil(Theme.moduleHeight * 1.25)
 
             cursorShape: Qt.PointingHandCursor
             onClicked: powerModule.expanded = !powerModule.expanded
@@ -140,6 +140,71 @@ ModuleButton {
 
             }
         }
+
+        // ── System actions ─────────────────────────────
+        Rectangle {
+            Layout.alignment: Qt.AlignCenter
+            Layout.preferredWidth: mainButton.implicitWidth
+            Layout.rightMargin: 10
+            Layout.leftMargin: 10
+            Layout.fillWidth: true
+            implicitHeight: Theme.listHeight
+            color: Theme.divider
+            radius: Theme.moduleEdgeRadius
+
+            RowLayout {
+                id: sysRow
+                anchors.centerIn: parent
+                spacing: 10
+
+                Text {
+                    text: "NixOS"
+                    color: Theme.textPrimary
+                    font.family: Theme.font
+                    font.pixelSize: 22
+                    font.bold: true
+                }
+
+                ModuleButton {
+                    variant: "light"
+                    label: "󰚰"
+                    textFont: 24
+
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: updateProc.running = true
+
+                    implicitWidth: implicitHeight
+
+                    radius: Theme.moduleEdgeRadius
+                }
+                
+                ModuleButton {
+                    variant: "light"
+                    label: "󱄅"
+                    textFont: 24
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: rebuildProc.running = true
+
+                    implicitWidth: implicitHeight
+
+                    radius: Theme.moduleEdgeRadius
+                }
+
+                Behavior on implicitWidth {
+                    NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+                }
+            }
+        }
+    }
+
+    Process {
+        id: rebuildProc
+        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config && sudo nixos-rebuild switch --flake .#doni --impure; notify-send 'Rebuild finished'"]
+    }
+
+    Process {
+        id: updateProc
+        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config && sudo nix flake update; notify-send 'Flake update finished'"]
     }
 
     Behavior on color {

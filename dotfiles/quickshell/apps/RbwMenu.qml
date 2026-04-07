@@ -242,7 +242,7 @@ Rectangle {
                         id: parentButton
                         width: resultsList.width
                         height: modelData.user ? 54 : 44
-                        variant: index === rbwPanel.selectedIndex ? "light" : "dark"
+                        variant: index === rbwPanel.selectedIndex ? "light" : "neutral"
                         radius: Theme.moduleEdgeRadius
 
                         Column {

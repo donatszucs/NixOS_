@@ -25,8 +25,8 @@ ModuleButton {
         id: sinksListModel
     }
 
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
     clip: true
 
     property alias sinksModel: sinksListModel
@@ -57,7 +57,7 @@ ModuleButton {
                     sinksListModel.append({ "name": desc, "active": active, "id" : n.id })
                 }
             }
-            maxSinkBarLength = maxSinkLen * 9
+            maxSinkBarLength = maxSinkLen * 9 + 7
         }
     }
 
@@ -138,7 +138,7 @@ ModuleButton {
                 required property var modelData
                 required property int index
 
-                variant: modelData.active ? "light" : "dark"
+                variant: modelData.active ? "light" : "neutral"
                 cursorShape: Qt.PointingHandCursor
                 implicitWidth: maxSinkBarLength
                 implicitHeight: Theme.listHeight

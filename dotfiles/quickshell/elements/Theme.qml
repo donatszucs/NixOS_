@@ -30,6 +30,18 @@ QtObject {
         readonly property color border:     "#8e6ca0"
     }
 
+    readonly property QtObject neutral: QtObject {
+        readonly property color _solidBase:        '#3b3341'
+        readonly property color _solidHover:       '#57505e'
+        readonly property color _solidPressed:     '#4a484c'
+        
+        readonly property color base:        Qt.rgba(_solidBase.r, _solidBase.g, _solidBase.b, Theme.moduleOpacity)
+        readonly property color hover:       Qt.rgba(_solidHover.r, _solidHover.g, _solidHover.b, Theme.moduleOpacity)
+        readonly property color pressed:     Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, Theme.moduleOpacity)
+        readonly property color text:       "#d5bfe2"
+        readonly property color border:     "#8e6ca0"
+    }
+
     readonly property QtObject light: QtObject {
         readonly property color _solidBase:       '#d5bfe2'
         readonly property color _solidHover:      '#eee2f5'
@@ -56,9 +68,10 @@ QtObject {
 
     // Helper: resolve a variant name string → palette object
     // Usage: Theme.palette("dark").top
-    function palette(name) {
+        function palette(name) {
         if (name === "light")       return Theme.light
         if (name === "danger")      return Theme.danger
+        if (name === "neutral")     return Theme.neutral
         return Theme.dark
     }
 

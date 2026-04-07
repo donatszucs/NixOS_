@@ -122,6 +122,7 @@ ModuleButton {
                 Layout.rightMargin: launcherModule.padding
             
                 ModuleButton {
+                    variant: "neutral"
                     Layout.fillWidth: true
                     implicitHeight: Theme.moduleHeight
                     label: "󰸉  Wallpaper"
@@ -136,6 +137,7 @@ ModuleButton {
                 }
             
                 ModuleButton {
+                    variant: "neutral"
                     Layout.fillWidth: true
                     implicitHeight: Theme.moduleHeight
                     label: "󰌆 Bitwarden"
@@ -154,6 +156,7 @@ ModuleButton {
                 }
 
                 ModuleButton {
+                    variant: "neutral"
                     Layout.fillWidth: true
                     implicitHeight: Theme.moduleHeight
                     label: " Clipboard"
@@ -274,7 +277,8 @@ ModuleButton {
                         required property var modelData
                         required property int index
 
-                        variant: isCurrent ? "light" : "dark"
+                        id: appButton
+                        variant: isCurrent ? "light" : "neutral"
                         noHoverColorChange: true
                         cursorShape: Qt.PointingHandCursor
                         width: appList.width
@@ -294,12 +298,20 @@ ModuleButton {
 
                         RowLayout {
                             anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
-                            spacing: 8
+                            spacing: 10
 
                             IconImage {
                                 implicitSize: Theme.moduleHeight - 10
                                 source: modelData.icon !== "" ? "image://icon/" + modelData.icon : ""
                                 visible: modelData.icon !== ""
+                            }
+
+                            Rectangle {
+                                width: 4
+                                height: Theme.moduleHeight - 10
+                                color: appButton.textColor
+                                opacity: 0.5
+                                radius: 2
                             }
 
                             Text {

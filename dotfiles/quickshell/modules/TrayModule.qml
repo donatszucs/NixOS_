@@ -10,7 +10,7 @@ ModuleButton {
     id: root
     noHoverColorChange: true
     property int openMenus: 0
-    property bool expanded: hovered
+    property bool expanded: hovered || openMenus > 0
 
     // This MUST be assigned when you create the component in your main file
     property var parentWindow: null 
@@ -48,98 +48,108 @@ ModuleButton {
         }
 
         // Tray items — revealed by clip as width expands leftward
-        RowLayout {
-            spacing: 6
-            layoutDirection: Qt.RightToLeft
+        Rectangle {
+            Layout.alignment: Qt.AlignCenter
+            Layout.preferredWidth: trayRow.implicitWidth + 10
+            implicitHeight: 25
+            color: Theme.divider
+            radius: Theme.moduleEdgeRadius / 2
 
-            Repeater {
-                model: SystemTray.items
+            RowLayout {
+                id: trayRow
+                anchors.fill: parent
+                anchors.leftMargin: 5
+                anchors.rightMargin: 5
+                spacing: 5
+                layoutDirection: Qt.RightToLeft
 
-                delegate: ModuleButton {
-                    id: trayItemDelegate
-                    colorOverride: true
-                    noHoverColorChange: true
-                    required property var modelData
-                    property bool menuOpen: false
+                Repeater {
+                    model: SystemTray.items
 
-                    onMenuOpenChanged: {
-                        if (menuOpen) root.openMenus++
-                        else root.openMenus--
-                    }
-                    Component.onDestruction: {
-                        if (menuOpen) root.openMenus--
-                    }
+                    delegate: ModuleButton {
+                        id: trayItemDelegate
+                        colorOverride: true
+                        noHoverColorChange: true
+                        required property var modelData
+                        property bool menuOpen: false
 
-                    implicitWidth: 24
-                    implicitHeight: 24
-                    radius: 6
-
-                    Image {
-                        anchors.centerIn: parent
-                        // Quickshell doesn't support the "iconName?path=..." format
-                        // that some apps (e.g. Spotify) use. Detect it and build
-                        // a direct file:// URL; fall back to the native value otherwise
-                        // so Quickshell's image provider still resolves XDG icon names.
-                        source: {
-                            var s = String(modelData.icon)
-                            var idx = s.indexOf("?path=")
-                            if (idx !== -1) {
-                                var nameOnly = s.substring(0, idx).split("/").pop()
-                                var dir = s.substring(idx + 6)
-                                return "file://" + dir + "/" + nameOnly + ".png"
-                            }
-                            return modelData.icon
+                        onMenuOpenChanged: {
+                            if (menuOpen) root.openMenus++
+                            else root.openMenus--
                         }
-                        width: 20
-                        height: 20
-                        sourceSize.width: 20
-                        sourceSize.height: 20
-                        fillMode: Image.PreserveAspectFit
-                        smooth: true
-                    }
+                        Component.onDestruction: {
+                            if (menuOpen) root.openMenus--
+                        }
 
-                    // 1. Define the Menu Anchor
-                    QsMenuAnchor {
-                        id: menuAnchor
-                        menu: modelData.menu
-                        
-                        // Use the explicitly passed window
-                        anchor.window: root.parentWindow 
-                        
-                        // Width and height can be bound directly
-                        anchor.rect.width: trayItemDelegate.width
-                        anchor.rect.height: trayItemDelegate.height
+                        implicitWidth: 24
+                        implicitHeight: 24
+                        radius: 6
 
-                        onOpened: trayItemDelegate.menuOpen = true
-                        onClosed: trayItemDelegate.menuOpen = false
-                    }
-
-                    // 2. Trigger the anchor to open
-                    MouseArea {
-                        anchors.fill: parent
-                        acceptedButtons: Qt.LeftButton | Qt.RightButton
-                        
-                        onClicked: (mouse) => {
-                            if (mouse.button === Qt.RightButton) {
-                                if (modelData.hasMenu && root.parentWindow !== null) {
-                                    // Map the icon's local coordinates to the main scene (window)
-                                    let mapped = trayItemDelegate.mapToItem(null, 0, 30)
-                                    menuAnchor.anchor.rect.x = mapped.x
-                                    menuAnchor.anchor.rect.y = mapped.y
-                                    
-                                    menuAnchor.open()
-                                } else if (root.parentWindow === null) {
-                                    console.warn("Tray Error: parentWindow is null! Did you pass it in main.qml?")
+                        Image {
+                            anchors.centerIn: parent
+                            // Quickshell doesn't support the "iconName?path=..." format
+                            // that some apps (e.g. Spotify) use. Detect it and build
+                            // a direct file:// URL; fall back to the native value otherwise
+                            // so Quickshell's image provider still resolves XDG icon names.
+                            source: {
+                                var s = String(modelData.icon)
+                                var idx = s.indexOf("?path=")
+                                if (idx !== -1) {
+                                    var nameOnly = s.substring(0, idx).split("/").pop()
+                                    var dir = s.substring(idx + 6)
+                                    return "file://" + dir + "/" + nameOnly + ".png"
                                 }
-                            } else {
-                                modelData.activate()
+                                return modelData.icon
+                            }
+                            width: 20
+                            height: 20
+                            sourceSize.width: 20
+                            sourceSize.height: 20
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
+                        }
+
+                        // 1. Define the Menu Anchor
+                        QsMenuAnchor {
+                            id: menuAnchor
+                            menu: modelData.menu
+                            
+                            // Use the explicitly passed window
+                            anchor.window: root.parentWindow 
+                            
+                            // Width and height can be bound directly
+                            anchor.rect.width: trayItemDelegate.width
+                            anchor.rect.height: trayItemDelegate.height
+
+                            onOpened: trayItemDelegate.menuOpen = true
+                            onClosed: trayItemDelegate.menuOpen = false
+                        }
+
+                        // 2. Trigger the anchor to open
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+                            
+                            onClicked: (mouse) => {
+                                if (mouse.button === Qt.RightButton) {
+                                    if (modelData.hasMenu && root.parentWindow !== null) {
+                                        // Map the icon's local coordinates to the main scene (window)
+                                        let mapped = trayItemDelegate.mapToItem(null, 0, 30)
+                                        menuAnchor.anchor.rect.x = mapped.x
+                                        menuAnchor.anchor.rect.y = mapped.y
+                                        
+                                        menuAnchor.open()
+                                    } else if (root.parentWindow === null) {
+                                        console.warn("Tray Error: parentWindow is null! Did you pass it in main.qml?")
+                                    }
+                                } else {
+                                    modelData.activate()
+                                }
                             }
                         }
                     }
                 }
             }
         }
-
-        Rectangle { width: 5; height: Theme.moduleHeight * 0.7; color: Theme.divider; radius: Theme.moduleEdgeRadius }
     }
 }

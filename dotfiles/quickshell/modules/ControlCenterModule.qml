@@ -40,8 +40,10 @@ ModuleButton {
     // Headset battery
     property bool headsetBatteryAvailable: false
     property int  headsetBatteryPercent: -1
+    property string headsetBatteryLabel: "HyprX Cloud II"
     property string headsetBatteryState: "not available"
-    property string headsetBatteryLabel: headsetBatteryPercent >= 0 ? ( "HyprX Cloud II: " + headsetBatteryPercent + "%") : "HyprX Cloud II"
+    property string headsetBatteryPercentLabel: headsetBatteryPercent + "%"
+    property int statusColumnWidth: 60
 
     // 2. The function that checks if ANY device in our invisible list is connected
     function updateBtStatus() {
@@ -160,7 +162,6 @@ ModuleButton {
 
                     anchors {
                         left:    parent.left
-                        right:   parent.right
                         top:     parent.top
                         leftMargin: 10
                         rightMargin: 10
@@ -168,7 +169,7 @@ ModuleButton {
                         bottomMargin: 10
                     }
 
-                    spacing: 0
+                    spacing: 15
 
                     ModuleButton {
                         id: netStatusIcon
@@ -178,23 +179,38 @@ ModuleButton {
                         textColor: controlCenter.netColor
                         textFont: 24
                         implicitWidth: textFont * 2
+                        Layout.preferredWidth: controlCenter.statusColumnWidth
                         radius: Theme.moduleEdgeRadius
                         onClicked: netOpen.running = true
                     }
 
+                    Rectangle {
+                        width: 4
+                        Layout.preferredHeight: parent.height * 0.8
+                        Layout.alignment: Qt.AlignVCenter
+                        color: "white"
+                        opacity: 0.5
+                        radius: 2
+                    }
+
                     ColumnLayout {
                         id: netInfoCol
-                        spacing: 0
-                        ModuleButton {
-                            label: controlCenter.netName
-                            color: "transparent"
-                            textColor: controlCenter.netColor
+                        Layout.margins: 10
+                        spacing: 10
+                        Text {
+                            text: controlCenter.netName
+                            color: Theme.textPrimary
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize
+                            font.bold: true
 
                         }
-                        ModuleButton {
-                            label: controlCenter.netState
-                            color: "transparent"
-                            textColor: controlCenter.netColor
+                        Text {
+                            text: controlCenter.netState
+                            color: Theme.textPrimary
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize
+                            font.bold: true
                         }
                     }
                 }
@@ -215,7 +231,6 @@ ModuleButton {
                     
                     anchors {
                         left:    parent.left
-                        right:   parent.right
                         top:     parent.top
                         leftMargin: 10
                         rightMargin: 10
@@ -223,12 +238,17 @@ ModuleButton {
                         bottomMargin: 10
                     }
 
-                    spacing: 8
+                    spacing: 15
 
                     ColumnLayout {
+                        id: btStatusCol
+                        Layout.preferredWidth: controlCenter.statusColumnWidth
+                        Layout.topMargin: 10
+                        Layout.bottomMargin: 10
 
                         ModuleButton {
                             label: controlCenter.btIcon
+                            Layout.alignment: Qt.AlignHCenter
                             cursorShape: Qt.PointingHandCursor
                             textColor: controlCenter.btColor
                             colorOverride: true
@@ -275,24 +295,56 @@ ModuleButton {
                             }
                         }
                     }
+
+                    Rectangle {
+                        width: 4
+                        Layout.preferredHeight: parent.height * 0.8
+                        Layout.alignment: Qt.AlignVCenter
+                        color: "white"
+                        opacity: 0.5
+                        radius: 2
+                    }
+
                     ColumnLayout {
+                        id: btInfoCol
                         Layout.fillWidth: true
+                        Layout.margins: 10
+                        spacing: 10
 
                         Repeater {
                             model: controlCenter.btDevices ? controlCenter.btDevices : []
-                            delegate: ModuleButton {
+                            delegate: RowLayout {
                                 required property var modelData
-                                label: modelData.batteryAvailable ? modelData.name + ": " + modelData.battery * 100 + "%" : modelData.name
-                                color: "transparent"
-                                textColor: Theme.textPrimary
                                 visible: modelData && modelData.connected === true
+                                spacing: 10
+
+                                Text {
+                                    text: modelData.name
+                                    color: Theme.textPrimary
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize
+                                    font.bold: true
+                                }
+                                ModuleButton {
+                                    variant: "light"
+                                    visible: modelData.batteryAvailable
+                                    label: modelData.battery * 100 + "%"
+                                    radius: Theme.moduleEdgeRadius / 2
+                                    implicitHeight: Theme.fontSize + 10
+                                    implicitWidth: label.length * (Theme.fontSize * 0.6) + 10
+                                    color: modelData.battery > 0.2 ? Theme.statusGreen : Theme.statusRed
+                                }
+
                             }
                         }
 
-                        ModuleButton {
+                        Text {
                             visible: !controlCenter.btDevicesConnected
-                            label: controlCenter.btPowered ? "No devices" : "disabled"
-                            color: "transparent"
+                            text: controlCenter.btPowered ? "No devices" : "disabled"
+                            color: Theme.textPrimary
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize
+                            font.bold: true
                         }
                     }
                 }
@@ -313,7 +365,6 @@ ModuleButton {
 
                     anchors {
                         left:    parent.left
-                        right:   parent.right
                         top:     parent.top
                         leftMargin: 10
                         rightMargin: 10
@@ -321,7 +372,7 @@ ModuleButton {
                         bottomMargin: 10
                     }
                      
-                    spacing: 0
+                    spacing: 15
 
                     ModuleButton {
                         label: ""
@@ -330,64 +381,56 @@ ModuleButton {
                         colorOverride: true
                         textFont: 24
                         implicitWidth: textFont * 2
+                        Layout.preferredWidth: controlCenter.statusColumnWidth
                         radius: Theme.moduleEdgeRadius
                         onClicked: headsetProc.running = true
                     }
+
+                    Rectangle {
+                        width: 4
+                        Layout.preferredHeight: parent.height * 0.8
+                        Layout.alignment: Qt.AlignVCenter
+                        color: "white"
+                        opacity: 0.5
+                        radius: 2
+                    }
                     
                     ColumnLayout {
-                        spacing: 0
-                        ModuleButton {
-                            color: "transparent"
-                            textColor: Theme.textPrimary
-                            label: controlCenter.headsetBatteryLabel
+                        id: headsetInfoCol
+                        spacing: 10
+                        Layout.margins: 10
+                        RowLayout {
+                            spacing: 10
+
+                            Text {
+                                text: controlCenter.headsetBatteryLabel
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize
+                                font.bold: true
+                            }
+                            ModuleButton {
+                                variant: "light"
+                                visible: controlCenter.headsetBatteryAvailable
+                                label: controlCenter.headsetBatteryPercentLabel
+                                implicitHeight: Theme.fontSize + 10
+                                implicitWidth: label.length * (Theme.fontSize * 0.6) + 10
+                                radius: Theme.moduleEdgeRadius / 2
+                                color: controlCenter.headsetBatteryPercent > 0.2 ? Theme.statusGreen : Theme.statusRed
+                            }
+
                         }
-                        ModuleButton {
-                            color: "transparent"
-                            textColor: Theme.textPrimary
-                            label: controlCenter.headsetBatteryState
+                        Text {
+                            color: Theme.textPrimary
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize
+                            font.bold: true
+                            text: controlCenter.headsetBatteryState
                         }
                     }
                 }
             }
 
-            // ── System actions ─────────────────────────────
-            RowLayout {
-            id: sysRow
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter
-            spacing: 15
-
-                Text {
-                    text: "NixOS"
-                    color: Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: 22
-                    font.bold: true
-                }
-
-                ModuleButton {
-                    label: "󰚰"
-                    textFont: 24
-
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: updateProc.running = true
-
-                    implicitWidth: implicitHeight
-
-                    radius: Theme.moduleEdgeRadius
-                }
-                
-                ModuleButton {
-                    label: "󱄅"
-                    textFont: 24
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: rebuildProc.running = true
-
-                    implicitWidth: implicitHeight
-
-                    radius: Theme.moduleEdgeRadius
-                }
-            }
         }
     }
 
@@ -444,17 +487,6 @@ ModuleButton {
         id: btOpen
         // Try blueman-manager first, fall back to gnome control center bluetooth
         command: ["bash", "-c", "blueman-manager || gnome-control-center bluetooth || true"]
-    }
-
-
-    Process {
-        id: rebuildProc
-        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config && sudo nixos-rebuild switch --flake .#doni --impure; notify-send 'Rebuild finished'"]
-    }
-
-    Process {
-        id: updateProc
-        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config && sudo nix flake update; notify-send 'Flake update finished'"]
     }
 
     // Headset battery probe (calls wrapper script)

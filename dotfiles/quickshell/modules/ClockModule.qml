@@ -23,7 +23,7 @@ ModuleButton {
 
     Component.onCompleted: updateTime()
 
-    implicitWidth: timeRow.implicitWidth + 12
+    implicitWidth: timeRow.implicitWidth + 20
 
     RowLayout {
         id: timeRow
@@ -52,7 +52,7 @@ ModuleButton {
         }
 
         Rectangle {
-            implicitWidth: root.expanded ? 6 : 0
+            implicitWidth: root.expanded ? 10 : 0
             height: timeRow.implicitHeight
             color: "transparent"
 

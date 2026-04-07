@@ -182,7 +182,7 @@ Rectangle {
                     model: clipboardModel
                     delegate: ModuleButton {
                         implicitWidth: list.width
-                        variant: clipboardPanel.selectedIndex === index ? "light" : "dark"
+                        variant: clipboardPanel.selectedIndex === index ? "light" : "neutral"
                         implicitHeight: Theme.listHeight
                         radius: Theme.moduleEdgeRadius
                         
