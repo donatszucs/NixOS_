@@ -239,11 +239,10 @@ Rectangle {
                     model: rbwPanel.filteredItems
 
                     delegate: ModuleButton {
+                        id: parentButton
                         width: resultsList.width
                         height: modelData.user ? 54 : 44
-                        variant: "light"
-                        colorOverride: index === rbwPanel.selectedIndex
-                        overrideColor: "white"
+                        variant: index === rbwPanel.selectedIndex ? "light" : "dark"
                         radius: Theme.moduleEdgeRadius
 
                         Column {
@@ -259,7 +258,7 @@ Rectangle {
                             Text {
                                 width: parent.width
                                 text: modelData.name
-                                color: parent.textColor
+                                color: parentButton.pal.text
                                 font.family: Theme.font
                                 font.pixelSize: Theme.fontSize
                                 elide: Text.ElideRight
@@ -268,7 +267,7 @@ Rectangle {
                             Text {
                                 width: parent.width
                                 text: modelData.user
-                                color: parent.textColor
+                                color: parentButton.pal.text
                                 opacity: 0.5
                                 font.family: Theme.font
                                 font.pixelSize: Theme.fontSize - 2

@@ -12,12 +12,35 @@ ModuleButton {
     property int displayNumber: screenName === "DP-1" ? 1 : 2
     property int brightness: 50
     property string cacheFile: "/tmp/ddc_brightness_disp" + displayNumber
+    property bool active: false
 
     label: brightness + "%  "
 
     // Read brightness from cache on startup
     Component.onCompleted: {
         readCache()
+    }
+
+    Process {
+        id: startProc
+        command: ["bash", "-c", "wlsunset -l 47.5 -L 19.0 -t 3500 -T 5000"]
+    }
+
+    Process {
+        id: killProc
+        command: ["bash", "-c", "pkill wlsunset"]
+    }
+
+    onClicked: {
+        root.active = !root.active; // Toggle the state
+        
+        if (root.active) {
+            root.variant = "light"
+            startProc.running = true;
+        } else {
+            root.variant = "dark"
+            killProc.running = true;
+        }
     }
 
     function readCache() {
@@ -77,6 +100,7 @@ ModuleButton {
         anchors.fill: parent
         propagateComposedEvents: true
         acceptedButtons: Qt.NoButton
+        cursorShape: Qt.PointingHandCursor
         
         onWheel: wheel => {
             if (wheel.angleDelta.y > 0) {

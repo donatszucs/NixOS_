@@ -73,6 +73,7 @@ QtObject {
 
     // ── Module sizing ────────────────────────────────────────────────
     readonly property real moduleHeight: 33
+    readonly property real listHeight: 50
     readonly property real moduleOpacity: 0.7
     readonly property int moduleRadius:   0
     readonly property int moduleEdgeRadius:   18

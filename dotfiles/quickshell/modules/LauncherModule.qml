@@ -260,7 +260,7 @@ ModuleButton {
                 Layout.fillWidth: true
                 Layout.leftMargin: launcherModule.padding
                 Layout.rightMargin: launcherModule.padding
-                implicitHeight: Math.min(launcherModule.filteredApps.length, launcherModule.maxVisible) * Theme.moduleHeight
+                implicitHeight: Math.min(launcherModule.filteredApps.length, launcherModule.maxVisible) * (Theme.listHeight + 5) // item height + spacing
                 color: "transparent"
 
                 ListView {
@@ -274,10 +274,11 @@ ModuleButton {
                         required property var modelData
                         required property int index
 
-                        variant: "light"
+                        variant: isCurrent ? "light" : "dark"
                         noHoverColorChange: true
                         cursorShape: Qt.PointingHandCursor
                         width: appList.width
+                        height: Theme.listHeight
                         radius: Theme.moduleEdgeRadius
                         onClicked: {
                             modelData.execute()
@@ -286,8 +287,6 @@ ModuleButton {
 
                         // Visual highlight when keyboard-selected or mouse-hovered
                         property bool isCurrent: index === appList.currentIndex
-                        colorOverride: isCurrent
-                        overrideColor: "white"
 
                         HoverHandler {
                             onHoveredChanged: if (hovered) appList.currentIndex = index

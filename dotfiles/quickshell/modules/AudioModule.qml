@@ -12,6 +12,7 @@ ModuleButton {
     dontAnimateColor: true
     property bool expanded: false
     property int maxSinkBarLength: 0
+    property int sinkNameMaxChars: 30
 
     HoverHandler {
         id: parentHover
@@ -51,11 +52,12 @@ ModuleButton {
                             active = true
                         }
                     }
-                    if (desc.length > maxSinkLen) maxSinkLen = desc.length
+                    var cappedLen = Math.min(desc.length, sinkNameMaxChars)
+                    if (cappedLen > maxSinkLen) maxSinkLen = cappedLen
                     sinksListModel.append({ "name": desc, "active": active, "id" : n.id })
-                    maxSinkBarLength = maxSinkLen * 9
                 }
             }
+            maxSinkBarLength = maxSinkLen * 9
         }
     }
 
@@ -132,16 +134,73 @@ ModuleButton {
             Layout.margins: 10
             implicitHeight: contentHeight
             delegate: ModuleButton {
+                id: parentButton
                 required property var modelData
                 required property int index
 
-                variant: "light"
+                variant: modelData.active ? "light" : "dark"
                 cursorShape: Qt.PointingHandCursor
                 implicitWidth: maxSinkBarLength
-                implicitHeight: Theme.moduleHeight
+                implicitHeight: Theme.listHeight
                 radius: Theme.moduleEdgeRadius
-                colorOverride: modelData.active
-                overrideColor: "white"
+                label: ""
+
+                readonly property string truncatedName: {
+                    if (modelData.name.length <= sinkNameMaxChars) return modelData.name
+                    if (sinkNameMaxChars <= 3) return modelData.name.slice(0, sinkNameMaxChars)
+                    return modelData.name.slice(0, sinkNameMaxChars - 3) + "..."
+                }
+
+                Item {
+                    id: sinkNameViewport
+                    anchors {
+                        fill: parent
+                        leftMargin: Theme.modulePaddingH
+                        rightMargin: Theme.modulePaddingH
+                    }
+                    clip: true
+
+                    Text {
+                        id: sinkNameText
+                        text: parentButton.hovered ? modelData.name : parentButton.truncatedName
+                        color: parentButton.textColor
+                        font.family: Theme.font
+                        font.pixelSize: parentButton.textFont
+                        font.bold: true
+                        anchors.verticalCenter: parent.verticalCenter
+                        x: 0
+                    }
+
+                    SequentialAnimation {
+                        id: sinkNameMarquee
+                        running: parentButton.hovered && sinkNameText.width > sinkNameViewport.width
+                        loops: Animation.Infinite
+
+                        onRunningChanged: {
+                                if (!running) {
+                                    sinkNameText.x = 0;
+                                }
+                            }
+
+                        PauseAnimation { duration: 250 }
+                        NumberAnimation {
+                            target: sinkNameText
+                            property: "x"
+                            from: 0
+                            to: -(sinkNameText.width - sinkNameViewport.width)
+                            duration: Math.max(1200, (sinkNameText.width - sinkNameViewport.width) * 30)
+                            easing.type: Easing.Linear
+                        }
+                        PauseAnimation { duration: 500 }
+                        NumberAnimation {
+                            target: sinkNameText
+                            property: "x"
+                            to: 0
+                            duration: 250
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
                 Process {
                     id: actionProc
                     command: ["bash", "-c", "wpctl set-default " + modelData.id]
@@ -149,7 +208,6 @@ ModuleButton {
 
                 onClicked: actionProc.running = true
 
-                label: modelData.name
             }
         }
 

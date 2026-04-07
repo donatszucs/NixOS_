@@ -182,13 +182,11 @@ Rectangle {
                     model: clipboardModel
                     delegate: ModuleButton {
                         implicitWidth: list.width
-                        variant: "light"
-                        implicitHeight: 50
-                        colorOverride: clipboardPanel.selectedIndex === index
-                        overrideColor: "white"
+                        variant: clipboardPanel.selectedIndex === index ? "light" : "dark"
+                        implicitHeight: Theme.listHeight
                         radius: Theme.moduleEdgeRadius
                         
-                        label: clipContent.length > 38? clipContent.substring(0, 38) + "..." : clipContent
+                        label: clipContent.length > 38? clipContent.substring(0, 35) + "..." : clipContent
                         textAlign: "left"
                         leftMargin: 20
 

@@ -108,18 +108,24 @@ ModuleButton {
 
                             PropertyAction { target: scrollingText; property: "x"; value: 0 }
 
-                            PauseAnimation { duration: Theme.horizontalDuration }
-
+                            PauseAnimation { duration: 500 }
+                            
                             NumberAnimation {
+                                target: scrollingText
+                                property: "x"
                                 from: 0
                                 to: Math.min(0, textContainer.width - scrollingText.implicitWidth)
-                                
                                 duration: Math.max(0, scrollingText.implicitWidth - textContainer.width) * 30 
+                                easing.type: Easing.Linear
                             }
-
-                            PauseAnimation { duration: 1500 }
-
-                            PropertyAction { target: scrollingText; property: "x"; value: 0 }
+                            PauseAnimation { duration: 500 }
+                            NumberAnimation {
+                                target: scrollingText
+                                property: "x"
+                                to: 0
+                                duration: 250
+                                easing.type: Easing.OutCubic
+                            }
                         }
                     }
                 }

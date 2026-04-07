@@ -21,10 +21,10 @@ ModuleButton {
         }
     }
 
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
 
-    implicitHeight: expanded ? actionColumn.implicitHeight + 6: Theme.moduleHeight
-    implicitWidth: expanded ? actionColumn.implicitWidth : actionColumn.implicitWidth
+    implicitHeight: expanded ? actionColumn.implicitHeight + 10: Theme.moduleHeight
+    implicitWidth: expanded ? actionColumn.implicitWidth + 5 : actionColumn.implicitWidth
 
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -33,7 +33,7 @@ ModuleButton {
     // Action buttons — revealed by clip as width expands leftward
     ColumnLayout {
         id: actionColumn
-        spacing: 5
+        spacing: 10
         anchors {
             top: parent.top
             right: parent.right
@@ -56,7 +56,7 @@ ModuleButton {
             Layout.rightMargin: 6
             Layout.topMargin: powerModule.expanded ? 0 : padding
             Layout.leftMargin: 6
-            label: powerModule.expanded ? " Power Menu" : ""
+            label: powerModule.expanded ? "Power Menu" : ""
             rightMargin: powerModule.expanded ? 0: 4
             
             implicitHeight: powerModule.expanded ? Theme.moduleHeight: Math.ceil(Theme.moduleHeight * 0.75)
@@ -94,7 +94,7 @@ ModuleButton {
                 variant: "danger"
 
                 implicitWidth: mainButton.implicitWidth
-                implicitHeight: Theme.moduleHeight
+                implicitHeight: Theme.listHeight
 
                 Layout.alignment: Qt.AlignHCenter
 

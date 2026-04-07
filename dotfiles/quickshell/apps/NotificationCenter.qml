@@ -143,7 +143,7 @@ Item {
                         label: "󰎟 Notification Center"
                         radius: Theme.moduleEdgeRadius
                         
-                        Layout.preferredHeight: 30
+                        Layout.preferredHeight: Theme.listHeight
                         Layout.fillWidth: true
 
                         cursorShape: Qt.PointingHandCursor
