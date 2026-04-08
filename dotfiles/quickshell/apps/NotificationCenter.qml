@@ -90,12 +90,12 @@ Item {
             implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (Math.max(innerLayout.implicitWidth, headerButton.implicitWidth) + 20)
 
             property real hoverProgress: hoverHandler.hovered ? 1.0 : 0.0
-            Behavior on hoverProgress { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+            Behavior on hoverProgress { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
 
             property real headerOffset: hoverProgress * (20 + headerButton.implicitHeight)
 
             property real activePadding: innerLayout.implicitHeight > 0 ? 20 : 0
-            Behavior on activePadding { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+            Behavior on activePadding { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
 
             implicitHeight: Math.min(headerOffset + innerLayout.smoothHeight + activePadding, Layout.maximumHeight)
 
@@ -161,10 +161,10 @@ Item {
                         clip: true
 
                         Behavior on Layout.preferredHeight {
-                            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
                         }
                         Behavior on opacity {
-                            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
                         }
 
                         RowLayout {
@@ -235,7 +235,7 @@ Item {
                     y: Math.max(10, notifFlickable.height - smoothHeight - 10)
 
                     move: Transition {
-                        NumberAnimation { properties: "y"; duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                        NumberAnimation { properties: "y"; duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
                     }
                     
                     Repeater {
