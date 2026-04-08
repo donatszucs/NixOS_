@@ -325,7 +325,7 @@ ModuleButton {
 
                             IconImage {
                                 implicitSize: Theme.moduleHeight - 10
-                                source: modelData.icon !== "" ? "image://icon/" + modelData.icon : ""
+                                source: modelData.icon !== "" ? Quickshell.iconPath(modelData.icon) : ""
                                 visible: modelData.icon !== ""
                             }
 

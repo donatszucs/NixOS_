@@ -95,7 +95,11 @@ ModuleButton {
                 implicitWidth: mainButton.implicitWidth
                 implicitHeight: Theme.listHeight
 
-                Layout.alignment: Qt.AlignHCenter
+                Layout.alignment: Qt.AlignCenter
+                Layout.preferredWidth: mainButton.implicitWidth
+                Layout.rightMargin: 10
+                Layout.leftMargin: 5
+                Layout.fillWidth: true
 
                 radius: Theme.moduleEdgeRadius
 

@@ -50,6 +50,9 @@ Rectangle {
 
     // ── variant and palette --------------------------------
     property var pal: Theme.palette(variant)
+    property color baseColor: pal.base
+    property color hoverColor: pal.hover
+    property color pressedColor: pal.pressed
 
     HoverHandler {
         id: rootHover
@@ -64,7 +67,7 @@ Rectangle {
     implicitWidth: Math.ceil(labelText.implicitWidth + 30)
     radius: Theme.moduleRadius
 
-    color: (root.pressed && !root.noPressColorChange) ? root.pal.pressed : ((root.hovered && !root.noHoverColorChange) ? root.pal.hover : colorOverride ? root.overrideColor : root.pal.base)
+    color: (root.pressed && !root.noPressColorChange) ? root.pressedColor : ((root.hovered && !root.noHoverColorChange) ? root.hoverColor : colorOverride ? root.overrideColor : root.baseColor)
 
     clip: true
 

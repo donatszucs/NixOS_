@@ -117,20 +117,20 @@ ModuleButton {
                                         "/home/doni/nixos-config/scripts/SteamIcon/SteamIconSearch.sh", 
                                         "/home/doni/.steam/root/appcache/librarycache/" + steamId
                                     ]);
-                                    return steamImagePath !== "" ? steamImagePath : "image://icon/steam";
+                                    return steamImagePath !== "" ? steamImagePath : Quickshell.iconPath(steam);
                                 }
                                 
                                 var entries = DesktopEntries.applications.values
                                 for (var i = 0; i < entries.length; i++) {
                                     if (entries[i].id.toLowerCase() === appId.toLowerCase())
-                                        return "image://icon/" + (entries[i].icon !== "" ? entries[i].icon : appId)
+                                        return Quickshell.iconPath(entries[i].icon !== "" ? entries[i].icon : appId)
                                 }
                                 // fallback: match by display name
                                 for (var j = 0; j < entries.length; j++) {
                                     if (entries[j].name.toLowerCase() === appId.toLowerCase())
-                                        return "image://icon/" + (entries[j].icon !== "" ? entries[j].icon : appId)
+                                        return Quickshell.iconPath(entries[j].icon !== "" ? entries[j].icon : appId)
                                 }
-                                return "image://icon/" + appId
+                                return Quickshell.iconPath(appId)
                             }
 
                             height: Theme.moduleHeight - 15
