@@ -50,7 +50,7 @@ QtObject {
         readonly property color base:       Qt.rgba(_solidBase.r, _solidBase.g, _solidBase.b, Theme.moduleOpacity)
         readonly property color hover:      Qt.rgba(_solidHover.r, _solidHover.g, _solidHover.b, Theme.moduleOpacity)
         readonly property color pressed:    Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, Theme.moduleOpacity)
-        readonly property color text:       "#171617"
+        readonly property color text:       '#2e2a2e'
         readonly property color border:     "#c8b3d4"
     }
 

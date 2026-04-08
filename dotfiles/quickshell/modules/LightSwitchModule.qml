@@ -21,79 +21,52 @@ ModuleButton {
         }
     }
 
-    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius : Theme.moduleRadius
+    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
 
     implicitHeight: expanded
         ? Theme.moduleHeight + colorWheelArea.height + 12
         : Theme.moduleHeight
     implicitWidth: expanded
-        ? Math.max(topRow.implicitWidth, colorWheelArea.implicitWidth + 20)
-        : topRow.implicitWidth
+        ? Math.max(labelText.implicitWidth, colorWheelArea.implicitWidth + 20)
+        : labelText.implicitWidth + (Theme.modulePaddingH * 2)
 
     Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration } }
     Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration } }
 
-    // ── Collapsed top row ───────────────────────────────────────────
-    RowLayout {
-        id: topRow
+    // Main label — clicking toggles light on/off
+    Text {
+        id: labelText
         anchors {
             left:  parent.left
+            leftMargin: Theme.modulePaddingH
+            rightMargin: Theme.modulePaddingH
             right: parent.right
             top:   parent.top
         }
         height: Theme.moduleHeight
-        spacing: 0
 
-        // Main label — clicking toggles light on/off
-        Text {
-            id: labelText
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.leftMargin: Theme.modulePaddingH
-            Layout.rightMargin: SharedState.lightActive ? 0 : Theme.modulePaddingH
-            text: SharedState.lightActive
-                ? SharedState.lightBrightness + "% 󱩒"
-                : "Off 󱩎"
-            color: Theme.palette(SharedState.lightVariant).text
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize
-            font.bold: true
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
+        text: SharedState.lightActive
+            ? SharedState.lightBrightness + "% 󱩒"
+            : "Off 󱩎"
+        color: Theme.palette(SharedState.lightVariant).text
+        font.family: Theme.font
+        font.pixelSize: Theme.fontSize
+        font.bold: true
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
 
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: SharedState.toggleLight()
-            }
-        }
-
-        // Colour swatch — clicking expands/collapses the colour wheel
-        Rectangle {
-            id: colorSwatch
-            visible: SharedState.lightActive
-            width: Math.ceil(Theme.moduleHeight * 0.6)
-            height: width
-            radius: height / 2
-            Layout.alignment: Qt.AlignVCenter
-            Layout.leftMargin: Theme.modulePaddingH / 2
-            Layout.rightMargin: Theme.modulePaddingH / 2
-            color: SharedState.lightSaturation === 0
-                ? "white"
-                : Qt.hsla(SharedState.lightHue / 360, 1.0, 0.5, 1.0)
-            border.color: Theme.palette(SharedState.lightVariant).border
-            border.width: 1
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                propagateComposedEvents: false
-                onClicked: mouse => {
-                    mouse.accepted = true
-                    root.expanded = !root.expanded
-                }
-            }
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: (mouse) => {
+                                    if (mouse.button === Qt.RightButton) {
+                                        root.expanded = !root.expanded
+                                    } else {
+                                        SharedState.toggleLight()
+                                    }
+                                }
         }
     }
 
@@ -105,7 +78,7 @@ ModuleButton {
         anchors {
             left:     parent.left
             right:    parent.right
-            top:      topRow.bottom
+            top:      labelText.bottom
             topMargin: 0
         }
 

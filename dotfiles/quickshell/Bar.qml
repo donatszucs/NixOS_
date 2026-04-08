@@ -202,7 +202,6 @@ PanelWindow {
         LightSwitchModule {
             Layout.alignment: Qt.AlignTop
             id: lightSwitchModule
-            bottomLeftRadius: Theme.moduleEdgeRadius
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
