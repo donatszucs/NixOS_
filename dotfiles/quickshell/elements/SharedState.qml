@@ -123,7 +123,7 @@ Item {
     }
 
     property bool muted: false
-    property double notifVolume: 0.3
+    property double notifVolume: 0.1
 
     function playNotificationSound() {
         if (!root.muted){
