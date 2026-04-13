@@ -41,6 +41,7 @@ ModuleButton {
             id: notificationButton
             cursorShape: Qt.PointingHandCursor
             label: "󱊖"
+            textFont: Theme.fontSize + 2
 
             onClicked: missioncenterProcess.running = true
 

@@ -96,7 +96,8 @@ ModuleButton {
                 noPressColorChange: !expanded
                 Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
-                label: "  Menu "
+                label: " Menu"
+                textFont: Theme.fontSize + 2
                 cursorShape: Qt.PointingHandCursor
                 bottomLeftRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0
                 bottomRightRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0

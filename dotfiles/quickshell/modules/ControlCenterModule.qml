@@ -99,6 +99,7 @@ ModuleButton {
             text: controlCenter.netIcon
             color: controlCenter.netColor
             font.family: Theme.font
+            font.pixelSize: Theme.fontSize + 1
             
             // Add padding here if your ModuleButton had specific padding
             leftPadding: Theme.modulePaddingH; rightPadding: 10
@@ -107,6 +108,7 @@ ModuleButton {
             text: controlCenter.btIcon
             color: controlCenter.btColor
             font.family: Theme.font
+            font.pixelSize: Theme.fontSize + 1
             leftPadding: 10; rightPadding: Theme.modulePaddingH
         }
     }
@@ -188,7 +190,7 @@ ModuleButton {
                         width: 4
                         Layout.preferredHeight: parent.height * 0.8
                         Layout.alignment: Qt.AlignVCenter
-                        color: "white"
+                        color: Theme.textPrimary
                         opacity: 0.5
                         radius: 2
                     }
@@ -300,7 +302,7 @@ ModuleButton {
                         width: 4
                         Layout.preferredHeight: parent.height * 0.8
                         Layout.alignment: Qt.AlignVCenter
-                        color: "white"
+                        color: Theme.textPrimary
                         opacity: 0.5
                         radius: 2
                     }
@@ -390,7 +392,7 @@ ModuleButton {
                         width: 4
                         Layout.preferredHeight: parent.height * 0.8
                         Layout.alignment: Qt.AlignVCenter
-                        color: "white"
+                        color: Theme.textPrimary
                         opacity: 0.5
                         radius: 2
                     }

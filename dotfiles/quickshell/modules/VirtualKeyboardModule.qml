@@ -8,6 +8,7 @@ import "../elements"
 ModuleButton {
     id: virtualKbrd
     label: ""
+    textFont: Theme.fontSize + 3
     cursorShape: Qt.PointingHandCursor
     property bool active: false
 
