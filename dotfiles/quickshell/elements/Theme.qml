@@ -56,7 +56,7 @@ QtObject {
 
     readonly property QtObject danger: QtObject {
         readonly property color _solidBase:       '#e17580'
-        readonly property color _solidHover:      '#a36067'
+        readonly property color _solidHover:      '#efadb3'
         readonly property color _solidPressed:    "#8f3939"
         
         readonly property color base:       Qt.rgba(_solidBase.r, _solidBase.g, _solidBase.b, Theme.moduleOpacity)
