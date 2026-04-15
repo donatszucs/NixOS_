@@ -30,17 +30,17 @@ ModuleButton {
 
 
     implicitHeight: expanded ? column.implicitHeight + 10 : Theme.moduleHeight
-    implicitWidth: expanded ? Math.ceil(topRow.implicitWidth + 30) : Math.ceil(topRow.implicitWidth)
+    implicitWidth: expanded ? topRow.implicitWidth + 30 : topRow.implicitWidth
     clip: true
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutCubic }
     }
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius : 0
-    bottomRightRadius: Theme.moduleEdgeRadius
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 5 : 0
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
 
     ColumnLayout {
         id: column
