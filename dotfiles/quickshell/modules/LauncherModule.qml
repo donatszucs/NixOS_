@@ -265,8 +265,12 @@ ModuleButton {
                 Layout.fillWidth: true
                 Layout.leftMargin: launcherModule.padding
                 Layout.rightMargin: launcherModule.padding
-                property int visibleItems: Math.min(launcherModule.filteredApps.length, launcherModule.maxVisible)
-                implicitHeight: visibleItems * Theme.listHeight + (visibleItems - 1) * 5// item height + spacing
+                property int visibleItems: launcherModule.filteredApps.length > 0
+                    ? Math.min(launcherModule.filteredApps.length, launcherModule.maxVisible)
+                    : 0
+                implicitHeight: visibleItems > 0
+                    ? (visibleItems * Theme.listHeight + (visibleItems - 1) * 5) // item height + spacing
+                    : 0
                 color: "transparent"
                 radius: Theme.moduleEdgeRadius
                 clip: true
