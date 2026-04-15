@@ -3,7 +3,7 @@ import QtQuick
 
 QtObject {
     // ── Divider-anchored palette seed ───────────────────────────────
-    readonly property color palettePaper:        '#d8b8ef'
+    readonly property color palettePaper:        '#e4cdf4'
     readonly property color paletteInk:          '#252525'
     readonly property color paletteBorderSoft:   "#b7a8c6"
     readonly property color paletteBorderStrong: "#8e6ca0"
@@ -49,7 +49,7 @@ QtObject {
     }
 
     readonly property QtObject light: QtObject {
-        readonly property color _solidBase:       palettePaper
+        readonly property color _solidBase:       '#e4c2fd'
         readonly property color _solidHover:      '#f1dffd'
         readonly property color _solidPressed:    '#929192'
         

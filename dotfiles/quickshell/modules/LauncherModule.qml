@@ -97,7 +97,7 @@ ModuleButton {
                 Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
                 label: " Menu"
-                textFont: Theme.fontSize + 2
+                textFont: Theme.fontSize
                 cursorShape: Qt.PointingHandCursor
                 bottomLeftRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0
                 bottomRightRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0
