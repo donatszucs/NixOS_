@@ -378,7 +378,7 @@ ModuleButton {
 
                     ModuleButton {
                         label: ""
-                        textColor: controlCenter.headsetBatteryAvailable ? (controlCenter.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed) : Theme.textPrimary
+                        textColor: controlCenter.headsetBatteryAvailable ? (controlCenter.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed) : Theme.statusDisabled
                         cursorShape: Qt.PointingHandCursor
                         colorOverride: true
                         textFont: 24

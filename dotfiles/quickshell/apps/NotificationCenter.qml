@@ -195,6 +195,7 @@ Item {
             // ── SCROLLING AREA ──────────────────────────────────────────
             Flickable {
                 id: notifFlickable
+                property real previousContentHeight: 0
                 
                 anchors.top: parent.top
                 anchors.topMargin: containerRect.headerOffset + 10
@@ -209,9 +210,14 @@ Item {
                 interactive: true
 
                 onContentHeightChanged: {
-                    if (contentHeight > height && !dragging  && !hoverHandler.hovered) {
+                    var grew = contentHeight > previousContentHeight
+                    var wasAtBottom = previousContentHeight <= height || contentY >= (previousContentHeight - height - 2)
+
+                    if (contentHeight > height && !dragging && grew && wasAtBottom) {
                         contentY = contentHeight - height
                     }
+
+                    previousContentHeight = contentHeight
                 }
                 onHeightChanged: {
                     if (contentHeight > height && !dragging) {

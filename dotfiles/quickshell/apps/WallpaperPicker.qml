@@ -76,7 +76,7 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     cellWidth: 240
-                    cellHeight: 210
+                    cellHeight: 180
                     clip: true
                     
                     model: FolderListModel {
@@ -86,9 +86,10 @@ Rectangle {
                     
                     delegate: ModuleButton {
                         implicitWidth: 220
-                        implicitHeight: 190
-                        variant: "light"
-                        radius: Theme.moduleEdgeRadius
+                        implicitHeight: 160
+                        variant: "neutral"
+                        radius: Theme.moduleEdgeRadius / 2
+                        cursorShape: Qt.PointingHandCursor
                         
                         Image {
                             id: preview

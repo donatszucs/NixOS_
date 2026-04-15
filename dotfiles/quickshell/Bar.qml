@@ -252,7 +252,7 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            leftColor: trayModule.color
+            leftColor: powerModule.color
             leftExpanded: powerModule.expanded
         }
         PowerModule {

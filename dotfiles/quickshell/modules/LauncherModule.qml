@@ -183,8 +183,8 @@ ModuleButton {
                 Layout.fillWidth: true
                 Layout.leftMargin: launcherModule.padding
                 Layout.rightMargin: launcherModule.padding
-                implicitHeight: Theme.moduleHeight
-                color: Theme.dark.pressed
+                implicitHeight: Theme.listHeight
+                color: Theme.divider
                 radius: Theme.moduleEdgeRadius
                 cursorShape: Qt.PointingHandCursor
 
@@ -193,7 +193,7 @@ ModuleButton {
                     anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
                     color: Theme.textPrimary
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.fontSize * 1.1
                     verticalAlignment: TextInput.AlignVCenter
                     focus: true
                     onActiveFocusChanged: {
