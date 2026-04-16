@@ -10,7 +10,7 @@ ModuleButton {
     noPressColorChange: true
     // We manage our own content; keep the inherited label empty
     label: ""
-    variant: !expanded ? SharedState.lightVariant : "dark"
+    
 
     // ── Expand / collapse colour picker ────────────────────────────
     property bool expanded: false

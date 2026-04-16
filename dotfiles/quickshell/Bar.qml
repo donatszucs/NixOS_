@@ -202,6 +202,7 @@ PanelWindow {
         LightSwitchModule {
             Layout.alignment: Qt.AlignTop
             id: lightSwitchModule
+            variant: !expanded ? SharedState.lightVariant : monitorBrightnessModule.variant
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
