@@ -13,6 +13,8 @@
       url = "github:youwen5/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    playit-nixos-module.url = "github:pedorich-n/playit-nixos-module";
   };
 
   outputs = inputs: {
@@ -21,6 +23,7 @@
         inherit inputs;
       };
       modules = [
+        inputs.playit-nixos-module.nixosModules.default
         ./configuration.nix
       ];
     };

@@ -69,6 +69,7 @@
   vscode            
   google-chrome
   inputs.zen-browser.packages."${builtins.currentSystem}".default
+  inputs.playit-nixos-module.packages."${builtins.currentSystem}".playit-cli
   spotify
   pkgs.vesktop
   discord
@@ -81,6 +82,7 @@
       jdk8 
       jdk17 
       jdk21 
+      jdk25
     ];
   })
 
@@ -114,4 +116,9 @@
   # -- Headset Control --
   hidapi            # HID access library (needed for HyperX Cloud II Wireless script)
   ];
+
+  programs.bash.shellAliases = {
+    mc-sv = "/home/doni/nixos-config/scripts/Minecraft/mc-server.sh";
+  };
+
 }

@@ -14,6 +14,11 @@
   # Networking
   networking.hostName = "nixos"; # Define your hostname.
   networking.networkmanager.enable = true;
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 25565 25575 ]; # 25565 for players, 25575 for RCON
+    allowedUDPPorts = [ 25565 ];       # Minecraft uses both
+  };
 
   # Time zone
   time.timeZone = "Europe/Budapest";

@@ -16,6 +16,7 @@
       /home/doni/nixos-config/nix_modules/hardware.nix
       /home/doni/nixos-config/nix_modules/desktop.nix
       /home/doni/nixos-config/nix_modules/packages.nix
+      /home/doni/nixos-config/nix_modules/minecraft.nix
     ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
