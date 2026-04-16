@@ -10,13 +10,12 @@
 
       inputs.home-manager.nixosModules.default
 
-      /home/doni/nixos-config/hardware-configuration.nix
-
-      /home/doni/nixos-config/nix_modules/core.nix
-      /home/doni/nixos-config/nix_modules/hardware.nix
-      /home/doni/nixos-config/nix_modules/desktop.nix
-      /home/doni/nixos-config/nix_modules/packages.nix
-      /home/doni/nixos-config/nix_modules/minecraft.nix
+      ./hardware-configuration.nix
+      ./nix_modules/core.nix
+      ./nix_modules/hardware.nix
+      ./nix_modules/desktop.nix
+      ./nix_modules/packages.nix
+      ./nix_modules/minecraft.nix
     ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.

@@ -1,6 +1,11 @@
 { config, pkgs, ... }:
 
 {
+  # Prevent the Minecraft server from starting automatically on boot
+  systemd.services.minecraft-server.wantedBy = pkgs.lib.mkForce [ ];
+
+  # to start run mc-sv start
+
   # ==========================================
   # 1. MINECRAFT SERVER CONFIGURATION
   # ==========================================
