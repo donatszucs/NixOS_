@@ -133,9 +133,9 @@ Item {
     function toggleNightLight() {
         root.nightLightActive = !root.nightLightActive
         if (root.nightLightActive) {
-            startNightLightProc.running = false
+            startNightLightProc.running = true
         } else {
-            killNightLightProc.running = false
+            killNightLightProc.running = true
         }
     }
 
