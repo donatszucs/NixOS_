@@ -30,15 +30,18 @@
       nerd-fonts.hack
       nerd-fonts.jetbrains-mono
       nerd-fonts.caskaydia-mono
+      nerd-fonts.roboto-mono
+      nerd-fonts.sauce-code-pro
+      nerd-fonts.dejavu-sans-mono
       noto-fonts
     ];
 
     fontconfig = {
     enable = true;
     defaultFonts = {
-      monospace = [ "CaskaydiaMono NFP" ];
-      sansSerif = [ "CaskaydiaMono NFP" ];
-      serif = [ "CaskaydiaMono NFP" ];
+      monospace = [ "RobotoMono Nerd Font Mono" ];
+      sansSerif = [ "RobotoMono Nerd Font Propo" ];
+      serif = [ "RobotoMono Nerd Font Propo" ];
     };
     localConf = ''
       <?xml version="1.0"?>
@@ -46,7 +49,7 @@
       <fontconfig>
         <match target="pattern">
           <test name="family" compare="eq">
-            <string>CaskaydiaMono NFP</string>
+            <string>RobotoMono Nerd Font Propo</string>
           </test>
           <edit name="weight" mode="assign">
             <const>demibold</const>

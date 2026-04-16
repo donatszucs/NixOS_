@@ -86,7 +86,7 @@ QtObject {
     readonly property color barBgBottom: "transparent"
 
     // ── Typography ───────────────────────────────────────────────────
-    readonly property string font: "CaskaydiaMono NFP SemiBold"
+    readonly property string font: "RobotoMono Nerd Font Propo"
     readonly property int    fontSize:  14
     readonly property int    barHeight: 33
 
