@@ -12,7 +12,8 @@ ModuleButton {
     property int displayNumber: screenName === "DP-1" ? 1 : 2
     property int brightness: 50
     property string cacheFile: "/tmp/ddc_brightness_disp" + displayNumber
-    property bool active: false
+    
+    variant: SharedState.nightLightActive ? "light" : "dark"
 
     label: brightness + "% "
 
@@ -21,26 +22,8 @@ ModuleButton {
         readCache()
     }
 
-    Process {
-        id: startProc
-        command: ["bash", "-c", "wlsunset -l 47.5 -L 19.0 -t 3500 -T 5000"]
-    }
-
-    Process {
-        id: killProc
-        command: ["bash", "-c", "pkill wlsunset"]
-    }
-
     onClicked: {
-        root.active = !root.active; // Toggle the state
-        
-        if (root.active) {
-            root.variant = "light"
-            startProc.running = true;
-        } else {
-            root.variant = "dark"
-            killProc.running = true;
-        }
+        SharedState.toggleNightLight()
     }
 
     function readCache() {

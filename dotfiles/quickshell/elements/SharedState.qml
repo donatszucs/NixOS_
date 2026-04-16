@@ -125,6 +125,30 @@ Item {
     property bool muted: false
     property double notifVolume: 0.1
 
+    // ==========================================
+    // Night Light (wlsunset) State
+    // ==========================================
+    property bool nightLightActive: false
+
+    function toggleNightLight() {
+        root.nightLightActive = !root.nightLightActive
+        if (root.nightLightActive) {
+            startNightLightProc.running = false
+        } else {
+            killNightLightProc.running = false
+        }
+    }
+
+    Process {
+        id: startNightLightProc
+        command: ["bash", "-c", "wlsunset -l 47.5 -L 19.0 -t 3500 -T 5000"]
+    }
+
+    Process {
+        id: killNightLightProc
+        command: ["bash", "-c", "pkill wlsunset"]
+    }
+
     function playNotificationSound() {
         if (!root.muted){
             Quickshell.execDetached(["pw-play", "--volume", root.notifVolume, "/home/doni/nixos-config/misc/ping.ogg"])

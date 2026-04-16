@@ -6,10 +6,11 @@ import "../elements"
 
 ModuleButton {
     id: root
-    noHoverColorChange: expanded ? true : false
+    noHoverColorChange: expanded
+    noPressColorChange: true
     // We manage our own content; keep the inherited label empty
     label: ""
-    variant: SharedState.lightVariant
+    variant: !expanded ? SharedState.lightVariant : "dark"
 
     // ── Expand / collapse colour picker ────────────────────────────
     property bool expanded: false
@@ -29,32 +30,34 @@ ModuleButton {
         : Theme.moduleHeight
     implicitWidth: expanded
         ? Math.max(labelText.implicitWidth, colorWheelArea.implicitWidth + 20)
-        : labelText.implicitWidth + (Theme.modulePaddingH * 2)
-
+        : labelText.implicitWidth
     Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration } }
     Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration } }
 
     // Main label — clicking toggles light on/off
-    Text {
+    ModuleButton {
         id: labelText
+        colorOverride: !root.expanded
+        noHoverColorChange: !root.expanded
+        noPressColorChange: !root.expanded
+
         anchors {
             left:  parent.left
-            leftMargin: Theme.modulePaddingH
-            rightMargin: Theme.modulePaddingH
+            leftMargin: expanded ? Theme.modulePaddingH : 0
             right: parent.right
             top:   parent.top
         }
         height: Theme.moduleHeight
 
-        text: SharedState.lightActive
+        label: SharedState.lightActive
             ? SharedState.lightBrightness + "% 󱩒"
             : "Off 󱩎"
-        color: Theme.palette(SharedState.lightVariant).text
-        font.family: Theme.font
-        font.pixelSize: Theme.fontSize
-        font.bold: true
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+        variant: SharedState.lightVariant
+        
+        bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
+        bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
+
+        Behavior on anchors.leftMargin { NumberAnimation { duration: Theme.horizontalDuration } }
 
         MouseArea {
             anchors.fill: parent

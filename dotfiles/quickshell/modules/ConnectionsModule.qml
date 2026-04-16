@@ -1,4 +1,4 @@
-// Control Center — hovers open downward showing network + bluetooth info
+// Connections — hovers open downward showing network + bluetooth info
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
@@ -10,7 +10,7 @@ import Quickshell.Bluetooth
 import "../elements"
 
 ModuleButton {
-    id: controlCenter
+    id: connectionsModule
     property bool expanded: false
     noHoverColorChange: expanded ? true : false
 
@@ -33,7 +33,7 @@ ModuleButton {
     readonly property var   btAdapter:   Bluetooth.defaultAdapter
     readonly property bool  btPowered:   btAdapter ? btAdapter.enabled : false
     readonly property var   btDevices:   btAdapter ? btAdapter.devices : null
-    property color btColor:     controlCenter.btPowered ? Theme.statusBlue : Theme.statusDisabled
+    property color btColor:     connectionsModule.btPowered ? Theme.statusBlue : Theme.statusDisabled
     // 1. The master boolean that controls your icon
     property bool btDevicesConnected: false
 
@@ -63,7 +63,7 @@ ModuleButton {
     // 3. The exact same logic as your Repeater, but invisible
     Instantiator {
         id: deviceTracker
-        model: controlCenter.btDevices ? controlCenter.btDevices : []
+        model: connectionsModule.btDevices ? connectionsModule.btDevices : []
         
         // QtObject is the cheapest non-visual element in QML. 
         // It takes zero screen space.
@@ -83,21 +83,21 @@ ModuleButton {
     }
 
     // 4. Your icon logic
-    property string btIcon: controlCenter.btPowered ? (btDevicesConnected ? "󰂱" : "󰂯") : "󰂲"
+    property string btIcon: connectionsModule.btPowered ? (btDevicesConnected ? "󰂱" : "󰂯") : "󰂲"
     // ── Sizing ─────────────────────────────────────────────────
     implicitHeight: expanded ? dropdownMenu.implicitHeight : Theme.moduleHeight
     implicitWidth:  expanded ? Math.ceil(dropdownMenu.implicitWidth) : Math.ceil(labelRow.implicitWidth)
 
     // ── Collapsed label ────────────────────────────────────────
     RowLayout {
-        visible: !controlCenter.expanded
+        visible: !connectionsModule.expanded
         id: labelRow
         anchors.centerIn: parent
         spacing: 0
 
         Text {
-            text: controlCenter.netIcon
-            color: controlCenter.netColor
+            text: connectionsModule.netIcon
+            color: connectionsModule.netColor
             font.family: Theme.font
             font.pixelSize: Theme.fontSize + 1
             
@@ -105,8 +105,8 @@ ModuleButton {
             leftPadding: Theme.modulePaddingH; rightPadding: 10
     }
         Text {
-            text: controlCenter.btIcon
-            color: controlCenter.btColor
+            text: connectionsModule.btIcon
+            color: connectionsModule.btColor
             font.family: Theme.font
             font.pixelSize: Theme.fontSize + 1
             leftPadding: 10; rightPadding: Theme.modulePaddingH
@@ -116,7 +116,7 @@ ModuleButton {
     // ── Popup dropdown ─────────────────────────────────────────
     ModuleButton {
         id: dropdownMenu
-        visible: controlCenter.expanded
+        visible: connectionsModule.expanded
         noHoverColorChange: true
         color: "transparent"
 
@@ -137,22 +137,22 @@ ModuleButton {
             spacing: 10
 
             ModuleButton {
-                visible: controlCenter.expanded
+                visible: connectionsModule.expanded
                 implicitWidth: parent.width
                 implicitHeight: Theme.moduleHeight
-                label: "Control Center"
+                label: "Connections"
                 
                 bottomLeftRadius: Theme.moduleEdgeRadius
                 bottomRightRadius: Theme.moduleEdgeRadius
 
                 cursorShape: Qt.PointingHandCursor
-                onClicked: controlCenter.expanded = false
+                onClicked: connectionsModule.expanded = false
             }
 
             // ── Network ──────────────────────────────────
             ModuleButton {
                 id: netModule
-                visible: controlCenter.expanded
+                visible: connectionsModule.expanded
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
@@ -175,13 +175,13 @@ ModuleButton {
 
                     ModuleButton {
                         id: netStatusIcon
-                        label: controlCenter.netIcon
+                        label: connectionsModule.netIcon
                         cursorShape: Qt.PointingHandCursor
                         colorOverride: true
-                        textColor: controlCenter.netColor
+                        textColor: connectionsModule.netColor
                         textFont: 24
                         implicitWidth: textFont * 2
-                        Layout.preferredWidth: controlCenter.statusColumnWidth
+                        Layout.preferredWidth: connectionsModule.statusColumnWidth
                         radius: Theme.moduleEdgeRadius
                         onClicked: netOpen.running = true
                     }
@@ -200,7 +200,7 @@ ModuleButton {
                         Layout.margins: 10
                         spacing: 10
                         Text {
-                            text: controlCenter.netName
+                            text: connectionsModule.netName
                             color: Theme.textPrimary
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize
@@ -208,7 +208,7 @@ ModuleButton {
 
                         }
                         Text {
-                            text: controlCenter.netState
+                            text: connectionsModule.netState
                             color: Theme.textPrimary
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize
@@ -221,7 +221,7 @@ ModuleButton {
             // ── Bluetooth ──────────────────────────────────
             ModuleButton {
                 id: btModule
-                visible: controlCenter.expanded
+                visible: connectionsModule.expanded
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
@@ -244,15 +244,15 @@ ModuleButton {
 
                     ColumnLayout {
                         id: btStatusCol
-                        Layout.preferredWidth: controlCenter.statusColumnWidth
+                        Layout.preferredWidth: connectionsModule.statusColumnWidth
                         Layout.topMargin: 10
                         Layout.bottomMargin: 10
 
                         ModuleButton {
-                            label: controlCenter.btIcon
+                            label: connectionsModule.btIcon
                             Layout.alignment: Qt.AlignHCenter
                             cursorShape: Qt.PointingHandCursor
-                            textColor: controlCenter.btColor
+                            textColor: connectionsModule.btColor
                             colorOverride: true
                             radius: Theme.moduleEdgeRadius
                             textFont: 24
@@ -267,12 +267,12 @@ ModuleButton {
                             width: 40
                             height: 22
                             radius: height / 2
-                            color: controlCenter.btColor
-                            border.color: controlCenter.btColor
+                            color: connectionsModule.btColor
+                            border.color: connectionsModule.btColor
                             border.width: 1
                             Layout.alignment: Qt.AlignHCenter
 
-                            property bool on: controlCenter.btPowered
+                            property bool on: connectionsModule.btPowered
 
                             Rectangle {
                                 id: handle
@@ -290,7 +290,7 @@ ModuleButton {
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: {
-                                    if (controlCenter.btAdapter) controlCenter.btAdapter.enabled = !controlCenter.btAdapter.enabled
+                                    if (connectionsModule.btAdapter) connectionsModule.btAdapter.enabled = !connectionsModule.btAdapter.enabled
                                 }
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
@@ -314,7 +314,7 @@ ModuleButton {
                         spacing: 10
 
                         Repeater {
-                            model: controlCenter.btDevices ? controlCenter.btDevices : []
+                            model: connectionsModule.btDevices ? connectionsModule.btDevices : []
                             delegate: RowLayout {
                                 required property var modelData
                                 visible: modelData && modelData.connected === true
@@ -341,8 +341,8 @@ ModuleButton {
                         }
 
                         Text {
-                            visible: !controlCenter.btDevicesConnected
-                            text: controlCenter.btPowered ? "No devices" : "disabled"
+                            visible: !connectionsModule.btDevicesConnected
+                            text: connectionsModule.btPowered ? "No devices" : "disabled"
                             color: Theme.textPrimary
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize
@@ -355,7 +355,7 @@ ModuleButton {
             // ── Headset ──────────────────────────────────
             ModuleButton {
                 id: headsetModule
-                visible: controlCenter.expanded
+                visible: connectionsModule.expanded
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
@@ -378,12 +378,12 @@ ModuleButton {
 
                     ModuleButton {
                         label: ""
-                        textColor: controlCenter.headsetBatteryAvailable ? (controlCenter.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed) : Theme.statusDisabled
+                        textColor: connectionsModule.headsetBatteryAvailable ? (connectionsModule.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed) : Theme.statusDisabled
                         cursorShape: Qt.PointingHandCursor
                         colorOverride: true
                         textFont: 24
                         implicitWidth: textFont * 2
-                        Layout.preferredWidth: controlCenter.statusColumnWidth
+                        Layout.preferredWidth: connectionsModule.statusColumnWidth
                         radius: Theme.moduleEdgeRadius
                         onClicked: headsetProc.running = true
                     }
@@ -405,7 +405,7 @@ ModuleButton {
                             spacing: 10
 
                             Text {
-                                text: controlCenter.headsetBatteryLabel
+                                text: connectionsModule.headsetBatteryLabel
                                 color: Theme.textPrimary
                                 font.family: Theme.font
                                 font.pixelSize: Theme.fontSize
@@ -413,12 +413,12 @@ ModuleButton {
                             }
                             ModuleButton {
                                 variant: "light"
-                                visible: controlCenter.headsetBatteryAvailable
-                                label: controlCenter.headsetBatteryPercentLabel
+                                visible: connectionsModule.headsetBatteryAvailable
+                                label: connectionsModule.headsetBatteryPercentLabel
                                 implicitHeight: Theme.fontSize + 10
                                 implicitWidth: label.length * (Theme.fontSize * 0.6) + 10
                                 radius: Theme.moduleEdgeRadius / 2
-                                color: controlCenter.headsetBatteryPercent > 0.2 ? Theme.statusGreen : Theme.statusRed
+                                color: connectionsModule.headsetBatteryPercent > 0.2 ? Theme.statusGreen : Theme.statusRed
                             }
 
                         }
@@ -427,7 +427,7 @@ ModuleButton {
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize
                             font.bold: true
-                            text: controlCenter.headsetBatteryState
+                            text: connectionsModule.headsetBatteryState
                         }
                     }
                 }
@@ -454,20 +454,20 @@ ModuleButton {
             onStreamFinished: {
                 var line = text.trim()
                 if (line === "") {
-                    controlCenter.netName  = "Disconnected"
-                    controlCenter.netState = "disconnected"
-                    controlCenter.netIcon  = "󰈂"
-                    controlCenter.netColor = Theme.statusRed
+                    connectionsModule.netName  = "Disconnected"
+                    connectionsModule.netState = "disconnected"
+                    connectionsModule.netIcon  = "󰈂"
+                    connectionsModule.netColor = Theme.statusRed
                     return
                 }
                 var parts = line.split(":")
-                controlCenter.netName  = parts[0] || "Unknown"
-                controlCenter.netState = (parts[2] || "").toLowerCase().includes("activated") ? "connected" : parts[2] || "unknown"
-                controlCenter.netColor = controlCenter.netState === "connected" ? Theme.statusGreen : Theme.statusRed
+                connectionsModule.netName  = parts[0] || "Unknown"
+                connectionsModule.netState = (parts[2] || "").toLowerCase().includes("activated") ? "connected" : parts[2] || "unknown"
+                connectionsModule.netColor = connectionsModule.netState === "connected" ? Theme.statusGreen : Theme.statusRed
                 var t = (parts[1] || "").toLowerCase()
-                if      (t.includes("wifi") || t.includes("802-11"))      controlCenter.netIcon = "󰤨"
-                else if (t.includes("ethernet") || t.includes("802-3"))   controlCenter.netIcon = "󰈀"
-                else                                                       controlCenter.netIcon = "󰈂"
+                if      (t.includes("wifi") || t.includes("802-11"))      connectionsModule.netIcon = "󰤨"
+                else if (t.includes("ethernet") || t.includes("802-3"))   connectionsModule.netIcon = "󰈀"
+                else                                                       connectionsModule.netIcon = "󰈂"
             }
         }
     }
@@ -500,22 +500,22 @@ ModuleButton {
             onStreamFinished: {
                 var line = text.trim()
                 if (line === "") {
-                    controlCenter.headsetBatteryAvailable = false 
-                    controlCenter.headsetBatteryPercent = -1
-                    controlCenter.headsetBatteryState = "not available"
+                    connectionsModule.headsetBatteryAvailable = false 
+                    connectionsModule.headsetBatteryPercent = -1
+                    connectionsModule.headsetBatteryState = "not available"
                     return
                 }
                 // Expected: "Battery: 45%  (Charging)"
                 var re = /Battery:\s*(\d+)%\s*\(([^)]+)\)/
                 var m = re.exec(line)
                 if (m) {
-                    controlCenter.headsetBatteryAvailable = true
-                    controlCenter.headsetBatteryPercent = parseInt(m[1])
-                    controlCenter.headsetBatteryState = m[2]
+                    connectionsModule.headsetBatteryAvailable = true
+                    connectionsModule.headsetBatteryPercent = parseInt(m[1])
+                    connectionsModule.headsetBatteryState = m[2]
                 } else {
-                    controlCenter.headsetBatteryAvailable = false
-                    controlCenter.headsetBatteryPercent = -1
-                    controlCenter.headsetBatteryState = line
+                    connectionsModule.headsetBatteryAvailable = false
+                    connectionsModule.headsetBatteryPercent = -1
+                    connectionsModule.headsetBatteryState = line
                 }
             }
         }

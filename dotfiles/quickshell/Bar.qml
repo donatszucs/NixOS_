@@ -230,20 +230,20 @@ PanelWindow {
         ModuleGap {
             Layout.alignment: Qt.AlignTop
 
-            leftColor: controlCenterModule.color
-            leftExpanded: controlCenterModule.expanded
+            leftColor: connectionsModule.color
+            leftExpanded: connectionsModule.expanded
 
             rightColor: audioModule.color
             rightExpanded: audioModule.expanded
         }
-        ControlCenterModule {
+        ConnectionsModule {
             Layout.alignment: Qt.AlignTop
-            id: controlCenterModule
+            id: connectionsModule
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            rightColor: controlCenterModule.color
-            rightExpanded: controlCenterModule.expanded
+            rightColor: connectionsModule.color
+            rightExpanded: connectionsModule.expanded
         }
         TrayModule {
             Layout.alignment: Qt.AlignTop

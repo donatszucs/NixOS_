@@ -119,7 +119,7 @@ ModuleButton {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: pavu.running = true
 
-                label: "Audio Center"
+                label: "Audio"
 
             }
         }
