@@ -93,7 +93,6 @@ ModuleButton {
                 id: collapsedRow
                 colorOverride: !expanded
                 noHoverColorChange: !expanded
-                noPressColorChange: !expanded
                 Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
                 label: " Menu"

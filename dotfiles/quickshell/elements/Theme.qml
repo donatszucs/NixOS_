@@ -5,8 +5,8 @@ QtObject {
     // ── Divider-anchored palette seed ───────────────────────────────
     readonly property color palettePaper:        '#e4cdf4'
     readonly property color paletteInk:          '#252525'
-    readonly property color paletteBorderSoft:   "#b7a8c6"
-    readonly property color paletteBorderStrong: "#8e6ca0"
+    readonly property color paletteBorderSoft:   Qt.darker(palettePaper, 1.25)
+    readonly property color paletteBorderStrong: Qt.darker(palettePaper, 1.6)
 
     // ── Base colors ──────────────────────────────────────────────────
     readonly property color textPrimary:  palettePaper
@@ -16,7 +16,7 @@ QtObject {
     readonly property color statusGreen:   "#a0e0a0"
     readonly property color statusRed:     "#e09090"
     readonly property color statusBlue:      "#80b0ff"
-    readonly property color statusDisabled:     Qt.rgba(0.6,0.4,0.7,0.7)
+    readonly property color statusDisabled:     Qt.rgba(palettePaper.r * 0.7, palettePaper.g * 0.7, palettePaper.b * 0.7, 0.7)
 
     readonly property color divider:        Qt.rgba(1,1,1,0.08)
 
@@ -26,8 +26,8 @@ QtObject {
 
     readonly property QtObject dark: QtObject {
         readonly property color _solidBase:        paletteInk
-        readonly property color _solidHover:       '#34303a'
-        readonly property color _solidPressed:     '#342d3d'
+        readonly property color _solidHover:       Qt.lighter(Theme.paletteInk, 1.4)
+        readonly property color _solidPressed:    Qt.darker(Theme.paletteInk, 1.4)
         
         readonly property color base:        Qt.rgba(_solidBase.r, _solidBase.g, _solidBase.b, Theme.moduleOpacity)
         readonly property color hover:       Qt.rgba(_solidHover.r, _solidHover.g, _solidHover.b, Theme.moduleOpacity)
@@ -43,15 +43,15 @@ QtObject {
         
         readonly property color base:        Qt.rgba(_solidBase.r, _solidBase.g, _solidBase.b, 0.08 * Theme.moduleOpacity)
         readonly property color hover:       Qt.rgba(_solidHover.r, _solidHover.g, _solidHover.b, 0.14 * Theme.moduleOpacity)
-        readonly property color pressed:     Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, 0.2 * Theme.moduleOpacity)
+        readonly property color pressed:     Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, 0.04 * Theme.moduleOpacity)
         readonly property color text:        Theme.palettePaper
         readonly property color border:      Theme.paletteBorderStrong
     }
 
     readonly property QtObject light: QtObject {
-        readonly property color _solidBase:       '#e4c2fd'
-        readonly property color _solidHover:      '#f1dffd'
-        readonly property color _solidPressed:    '#929192'
+        readonly property color _solidBase:       Theme.palettePaper
+        readonly property color _solidHover:      Qt.lighter(Theme.palettePaper, 1.4)
+        readonly property color _solidPressed:    Qt.darker(Theme.palettePaper, 1.4)
         
         readonly property color base:       Qt.rgba(_solidBase.r, _solidBase.g, _solidBase.b, Theme.moduleOpacity)
         readonly property color hover:      Qt.rgba(_solidHover.r, _solidHover.g, _solidHover.b, Theme.moduleOpacity)
@@ -60,10 +60,10 @@ QtObject {
         readonly property color border:     Theme.paletteBorderSoft
     }
 
-    readonly property QtObject danger: QtObject {
+    readonly property QtObject red: QtObject {
         readonly property color _solidBase:       '#e17580'
-        readonly property color _solidHover:      '#efadb3'
-        readonly property color _solidPressed:    "#8f3939"
+        readonly property color _solidHover:      Qt.lighter(_solidBase, 1.4)
+        readonly property color _solidPressed:    Qt.darker(_solidBase, 1.4)
         
         readonly property color base:       Qt.rgba(_solidBase.r, _solidBase.g, _solidBase.b, Theme.moduleOpacity)
         readonly property color hover:      Qt.rgba(_solidHover.r, _solidHover.g, _solidHover.b, Theme.moduleOpacity)
@@ -76,7 +76,7 @@ QtObject {
     // Usage: Theme.palette("dark").top
         function palette(name) {
         if (name === "light")       return Theme.light
-        if (name === "danger")      return Theme.danger
+        if (name === "red")      return Theme.red
         if (name === "neutral")     return Theme.neutral
         return Theme.dark
     }

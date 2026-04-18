@@ -66,7 +66,7 @@ ModuleButton {
                 noPressColorChange: !expanded
                 id: titleBtn
                 Layout.alignment: Qt.AlignCenter
-                cursorShape: Qt.PointingHandCursor
+                cursorShape: isPlaying ? Qt.PointingHandCursor : Qt.ArrowCursor
 
                 // 2. Set your fixed width here
                 implicitWidth: expanded ? 200 : Math.min(200, scrollingText.implicitWidth + 30)

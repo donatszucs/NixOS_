@@ -7,7 +7,7 @@ import "../elements"
 ModuleButton {
     id: root
     noHoverColorChange: expanded
-    noPressColorChange: true
+    noPressColorChange: expanded
     // We manage our own content; keep the inherited label empty
     label: ""
     
@@ -39,7 +39,6 @@ ModuleButton {
         id: labelText
         colorOverride: !root.expanded
         noHoverColorChange: !root.expanded
-        noPressColorChange: !root.expanded
 
         anchors {
             left:  parent.left
@@ -63,6 +62,25 @@ ModuleButton {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+            onWheel: wheel => {
+                if (wheel.angleDelta.y > 0) {
+                    SharedState.lightBrightness = Math.min(100, SharedState.lightBrightness + 5)
+                } else {
+                    SharedState.lightBrightness = Math.max(1,   SharedState.lightBrightness - 5)
+                }
+                debounceTimer.restart()
+                wheel.accepted = true
+            }
+
+            onPressedChanged: {
+                if(!root.expanded) {
+                    root.pressed = !root.pressed
+                }
+                else {
+                    labelText.pressed = !labelText.pressed
+                }
+            }
             onClicked: (mouse) => {
                                     if (mouse.button === Qt.RightButton) {
                                         root.expanded = !root.expanded
@@ -183,24 +201,6 @@ ModuleButton {
         interval: 1000
         repeat: false
         onTriggered: SharedState.setLightBrightness(SharedState.lightBrightness)
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        propagateComposedEvents: true
-        acceptedButtons: Qt.LeftButton
-        cursorShape: Qt.PointingHandCursor
-        onPressedChanged: root.pressed = !root.pressed
-
-        onWheel: wheel => {
-            if (wheel.angleDelta.y > 0) {
-                SharedState.lightBrightness = Math.min(100, SharedState.lightBrightness + 5)
-            } else {
-                SharedState.lightBrightness = Math.max(1,   SharedState.lightBrightness - 5)
-            }
-            debounceTimer.restart()
-            wheel.accepted = true
-        }
     }
 
     Component.onCompleted: SharedState.refreshLightStatus()

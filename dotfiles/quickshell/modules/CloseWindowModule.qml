@@ -5,7 +5,7 @@ import "../elements"
 
 ModuleButton {
     label: ""
-    variant: "danger"
+    variant: "red"
     implicitWidth: Math.ceil(Theme.moduleHeight * 0.7)
     implicitHeight: Math.ceil(Theme.moduleHeight * 0.7)
     radius: implicitHeight / 2

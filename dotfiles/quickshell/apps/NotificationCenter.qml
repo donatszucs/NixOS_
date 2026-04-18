@@ -314,7 +314,7 @@ Item {
         radius: Theme.moduleEdgeRadius
 
         // ── Colors ────────────────────────────────────────────────────
-        variant: isCritical ? "danger" : "light"
+        variant: isCritical ? "red" : "light"
 
         opacity: shouldBeVisible ? 1 : 0.0
 

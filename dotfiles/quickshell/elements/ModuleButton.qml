@@ -32,7 +32,7 @@ Rectangle {
         rightMargin: rightMarginButton
     }
     // ── Variant ──────────────────────────────────────────────────────
-    // Set to one of: "dark" (default) | "light" | "danger" | "transparent"
+    // Set to one of: "dark" (default) | "light" | "red" | "transparent"
     property string variant: "dark"
 
     // Whether to suppress the hover colour change

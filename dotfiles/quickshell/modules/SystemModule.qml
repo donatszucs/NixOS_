@@ -88,7 +88,7 @@ ModuleButton {
 
                 required property var modelData
                 cursorShape: Qt.PointingHandCursor
-                variant: "danger"
+                variant: "red"
 
                 implicitWidth: mainButton.implicitWidth
                 implicitHeight: Theme.listHeight

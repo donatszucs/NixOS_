@@ -221,8 +221,7 @@ ModuleButton {
                             text: connectionsModule.netState
                             color: Theme.textPrimary
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
-                            font.bold: true
+                            font.pixelSize: Theme.fontSize * 0.9
                         }
                     }
                 }
