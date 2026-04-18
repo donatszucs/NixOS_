@@ -1,4 +1,4 @@
-// Power group — power icon stays fixed right, action buttons slide out to the left
+// System group — system icon stays fixed right, action buttons slide out to the left
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
@@ -6,7 +6,7 @@ import Quickshell.Io
 import "../elements"
 
 ModuleButton {
-    id: powerModule
+    id: systemModule
     color: Theme.palette("dark").base
     noHoverColorChange: true
     property bool expanded: false
@@ -45,22 +45,22 @@ ModuleButton {
             
             radius: Theme.moduleEdgeRadius
 
-            topLeftRadius: !powerModule.expanded ? Theme.moduleEdgeRadius : 0
-            topRightRadius: !powerModule.expanded ? Theme.moduleEdgeRadius : 0
+            topLeftRadius: !systemModule.expanded ? Theme.moduleEdgeRadius : 0
+            topRightRadius: !systemModule.expanded ? Theme.moduleEdgeRadius : 0
             
             property int padding: (Theme.moduleHeight - Math.ceil(Theme.moduleHeight * 0.75)) / 2
 
             Layout.alignment: Qt.AlignCenter
             Layout.rightMargin: 10
-            Layout.topMargin: powerModule.expanded ? 0 : padding
+            Layout.topMargin: systemModule.expanded ? 0 : padding
             Layout.leftMargin: 5
-            label: powerModule.expanded ? "Power Menu" : ""
+            label: systemModule.expanded ? "System" : ""
             
-            implicitHeight: powerModule.expanded ? Theme.moduleHeight: Math.ceil(Theme.moduleHeight * 0.75)
-            implicitWidth: powerModule.expanded ? 180 : Math.ceil(Theme.moduleHeight * 1.25)
+            implicitHeight: systemModule.expanded ? Theme.moduleHeight: Math.ceil(Theme.moduleHeight * 0.75)
+            implicitWidth: systemModule.expanded ? 180 : Math.ceil(Theme.moduleHeight * 1.25)
 
             cursorShape: Qt.PointingHandCursor
-            onClicked: powerModule.expanded = !powerModule.expanded
+            onClicked: systemModule.expanded = !systemModule.expanded
 
             Behavior on implicitWidth {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }

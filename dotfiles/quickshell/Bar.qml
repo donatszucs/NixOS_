@@ -253,17 +253,17 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            leftColor: powerModule.color
-            leftExpanded: powerModule.expanded
+            leftColor: systemModule.color
+            leftExpanded: systemModule.expanded
         }
-        PowerModule {
+        SystemModule {
             Layout.alignment: Qt.AlignTop
-            id: powerModule
+            id: systemModule
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            leftColor: powerModule.color
-            implicitHeight: powerModule.implicitHeight
+            leftColor: systemModule.color
+            implicitHeight: systemModule.implicitHeight
         }
     }
 
