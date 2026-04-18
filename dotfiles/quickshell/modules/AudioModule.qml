@@ -131,7 +131,9 @@ ModuleButton {
             spacing: 5
             focus: false
             Layout.fillWidth: true
-            Layout.margins: 10
+            Layout.leftMargin: 10
+            Layout.rightMargin: 10
+            Layout.bottomMargin: 10
             implicitHeight: contentHeight
             delegate: ModuleButton {
                 id: parentButton
