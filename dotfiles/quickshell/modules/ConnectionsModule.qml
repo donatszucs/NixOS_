@@ -23,6 +23,8 @@ ModuleButton {
     
     cursorShape: Qt.PointingHandCursor
     onClicked: expanded = !expanded
+
+    property int cardWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, mouseRow.implicitWidth, headsetRow.implicitWidth) + 20
     // ── State ──────────────────────────────────────────────────
     property string netIcon:     "󰈀"
     property string netName:     "..."
@@ -128,7 +130,7 @@ ModuleButton {
         noHoverColorChange: true
         color: "transparent"
 
-        implicitWidth: Math.max(netModule.implicitWidth, btModule.implicitWidth, headsetModule.implicitWidth, mouseModule.implicitWidth) + 20
+        implicitWidth: connectionsModule.cardWidth + 20
         implicitHeight: popupCol.implicitHeight + 10
 
         ColumnLayout {
@@ -164,7 +166,7 @@ ModuleButton {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
-                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth, mouseRow.implicitWidth) + 20
+                implicitWidth: connectionsModule.cardWidth
                 implicitHeight: netRow.implicitHeight + 20
 
                 RowLayout {
@@ -233,7 +235,7 @@ ModuleButton {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
-                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth, mouseRow.implicitWidth) + 20
+                implicitWidth: connectionsModule.cardWidth
                 implicitHeight: btRow.implicitHeight + 20
 
                 RowLayout {
@@ -367,7 +369,7 @@ ModuleButton {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
-                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth, mouseRow.implicitWidth) + 20
+                implicitWidth: connectionsModule.cardWidth
                 implicitHeight: headsetRow.implicitHeight + 20
                 
                 RowLayout {
@@ -386,7 +388,7 @@ ModuleButton {
 
                     ModuleButton {
                         label: ""
-                        textColor: connectionsModule.headsetBatteryAvailable ? (connectionsModule.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed) : Theme.statusDisabled
+                        textColor: connectionsModule.headsetBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
                         cursorShape: Qt.PointingHandCursor
                         colorOverride: true
                         textFont: 24
@@ -426,7 +428,7 @@ ModuleButton {
                                 implicitHeight: Theme.fontSize + 10
                                 implicitWidth: label.length * (Theme.fontSize * 0.6) + 10
                                 radius: Theme.moduleEdgeRadius / 2
-                                color: connectionsModule.headsetBatteryPercent > 0.2 ? Theme.statusGreen : Theme.statusRed
+                                color: connectionsModule.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed
                             }
 
                         }
@@ -447,7 +449,7 @@ ModuleButton {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
-                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, mouseRow.implicitWidth) + 20
+                implicitWidth: connectionsModule.cardWidth
                 implicitHeight: mouseRow.implicitHeight + 20
                 
                 RowLayout {
@@ -466,7 +468,7 @@ ModuleButton {
 
                     ModuleButton {
                         label: "󰍽"
-                        textColor: connectionsModule.mouseBatteryAvailable ? (connectionsModule.mouseBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed) : Theme.statusDisabled
+                        textColor: connectionsModule.mouseBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
                         cursorShape: Qt.PointingHandCursor
                         colorOverride: true
                         textFont: 24
@@ -506,7 +508,7 @@ ModuleButton {
                                 implicitHeight: Theme.fontSize + 10
                                 implicitWidth: label.length * (Theme.fontSize * 0.6) + 10
                                 radius: Theme.moduleEdgeRadius / 2
-                                color: connectionsModule.mouseBatteryPercent > 0.2 ? Theme.statusGreen : Theme.statusRed
+                                color: connectionsModule.mouseBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed
                             }
 
                         }
