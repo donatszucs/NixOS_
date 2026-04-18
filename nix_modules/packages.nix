@@ -34,6 +34,10 @@
     ];
   };
 
+  # Enable Wireshark and configure permissions
+  programs.wireshark.enable = true;
+  programs.wireshark.package = pkgs.wireshark;
+  
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [

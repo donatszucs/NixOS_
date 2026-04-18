@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Keychron M6 Wireless battery checker wrapper
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV="$SCRIPT_DIR/../scriptsEnv/.venv/bin/python"
+
+HIDAPI_SYSTEM="/run/current-system/sw/lib"
+HIDAPI_LIB="$HIDAPI_SYSTEM"
+
+if [[ -z "$HIDAPI_LIB" ]]; then
+    echo "Error: libhidapi not found." >&2
+    exit 1
+fi
+
+export LD_LIBRARY_PATH="$HIDAPI_LIB"
+exec "$VENV" "$SCRIPT_DIR/MouseBattery.py" "$@"

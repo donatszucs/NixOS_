@@ -43,6 +43,14 @@ ModuleButton {
     property string headsetBatteryLabel: "HyprX Cloud II"
     property string headsetBatteryState: "not available"
     property string headsetBatteryPercentLabel: headsetBatteryPercent + "%"
+    
+    // Mouse battery
+    property bool mouseBatteryAvailable: false
+    property int  mouseBatteryPercent: -1
+    property string mouseBatteryLabel: "Keychron M6"
+    property string mouseBatteryState: "not available"
+    property string mouseBatteryPercentLabel: mouseBatteryPercent + "%"
+    
     property int statusColumnWidth: 60
 
     // 2. The function that checks if ANY device in our invisible list is connected
@@ -120,7 +128,7 @@ ModuleButton {
         noHoverColorChange: true
         color: "transparent"
 
-        implicitWidth: Math.max(netModule.implicitWidth, btModule.implicitWidth, headsetModule.implicitWidth) + 20
+        implicitWidth: Math.max(netModule.implicitWidth, btModule.implicitWidth, headsetModule.implicitWidth, mouseModule.implicitWidth) + 20
         implicitHeight: popupCol.implicitHeight + 10
 
         ColumnLayout {
@@ -156,7 +164,7 @@ ModuleButton {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
-                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth) + 20
+                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth, mouseRow.implicitWidth) + 20
                 implicitHeight: netRow.implicitHeight + 20
 
                 RowLayout {
@@ -225,7 +233,7 @@ ModuleButton {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
-                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth) + 20
+                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth, mouseRow.implicitWidth) + 20
                 implicitHeight: btRow.implicitHeight + 20
 
                 RowLayout {
@@ -359,7 +367,7 @@ ModuleButton {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
-                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth) + 20
+                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, headsetRow.implicitWidth, mouseRow.implicitWidth) + 20
                 implicitHeight: headsetRow.implicitHeight + 20
                 
                 RowLayout {
@@ -425,9 +433,89 @@ ModuleButton {
                         Text {
                             color: Theme.textPrimary
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
-                            font.bold: true
+                            font.pixelSize: Theme.fontSize * 0.9
                             text: connectionsModule.headsetBatteryState
+                        }
+                    }
+                }
+            }
+
+            // ── Mouse ──────────────────────────────────
+            ModuleButton {
+                id: mouseModule
+                visible: connectionsModule.expanded
+                color: Theme.divider
+                radius: Theme.moduleEdgeRadius
+
+                implicitWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, mouseRow.implicitWidth) + 20
+                implicitHeight: mouseRow.implicitHeight + 20
+                
+                RowLayout {
+                    id: mouseRow
+
+                    anchors {
+                        left:    parent.left
+                        top:     parent.top
+                        leftMargin: 10
+                        rightMargin: 10
+                        topMargin: 10
+                        bottomMargin: 10
+                    }
+                     
+                    spacing: 15
+
+                    ModuleButton {
+                        label: "󰍽"
+                        textColor: connectionsModule.mouseBatteryAvailable ? (connectionsModule.mouseBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed) : Theme.statusDisabled
+                        cursorShape: Qt.PointingHandCursor
+                        colorOverride: true
+                        textFont: 24
+                        implicitWidth: textFont * 2
+                        Layout.preferredWidth: connectionsModule.statusColumnWidth
+                        radius: Theme.moduleEdgeRadius
+                        onClicked: mouseProc.running = true
+                    }
+
+                    Rectangle {
+                        width: 4
+                        Layout.preferredHeight: parent.height * 0.8
+                        Layout.alignment: Qt.AlignVCenter
+                        color: Theme.textPrimary
+                        opacity: 0.5
+                        radius: 2
+                    }
+                    
+                    ColumnLayout {
+                        id: mouseInfoCol
+                        spacing: 10
+                        Layout.margins: 10
+                        RowLayout {
+                            spacing: 10
+
+                            Text {
+                                text: connectionsModule.mouseBatteryLabel
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize
+                                font.bold: true
+                            }
+                            ModuleButton {
+                                variant: "light"
+                                visible: connectionsModule.mouseBatteryAvailable
+                                label: connectionsModule.mouseBatteryPercentLabel
+                                implicitHeight: Theme.fontSize + 10
+                                implicitWidth: label.length * (Theme.fontSize * 0.6) + 10
+                                radius: Theme.moduleEdgeRadius / 2
+                                color: connectionsModule.mouseBatteryPercent > 0.2 ? Theme.statusGreen : Theme.statusRed
+                            }
+
+                        }
+                        Text {
+                            color: Theme.textPrimary
+                            opacity: 0.8
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize * 0.9
+                            text: connectionsModule.mouseBatteryState
                         }
                     }
                 }
@@ -527,5 +615,58 @@ ModuleButton {
         running: true
         repeat: true
         onTriggered: headsetProc.running = true
+    }
+
+    // Mouse battery probe
+    Process {
+        id: mouseProc
+        command: ["bash", "-c", 'f="/tmp/keychron_battery.txt"; head -n 1 "$f" 2>/dev/null; stat -c %Y "$f" 2>/dev/null || echo ""']
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var lines = text.trim().split("\n")
+                if (lines.length < 2 || lines[0] === "" || lines[0] === "?") {
+                    connectionsModule.mouseBatteryAvailable = false 
+                    connectionsModule.mouseBatteryPercent = -1
+                    connectionsModule.mouseBatteryState = lines.length > 0 && lines[0] !== "?" && lines[0] !== "" ? lines[0] : "not available"
+                    return
+                }
+                
+                var status = lines[0].trim()
+                var modTime = parseInt(lines[1].trim())
+                var timeAgo = ""
+                
+                if (!isNaN(modTime)) {
+                    var diffMins = Math.floor((Date.now() - (modTime * 1000)) / 60000)
+                    if (diffMins < 0) diffMins = 0 // In case of minor clock desync
+                    var days = Math.floor(diffMins / 1440)
+                    var hours = Math.floor((diffMins % 1440) / 60)
+                    var mins = diffMins % 60
+                    
+                    if (days > 0) timeAgo += days + "d "
+                    if (hours > 0) timeAgo += hours + "h "
+                    if (mins > 0 || (days === 0 && hours === 0)) timeAgo += mins + "m "
+                    timeAgo += "ago"
+                }
+                
+                if (status.endsWith("%")) {
+                    connectionsModule.mouseBatteryAvailable = true
+                    connectionsModule.mouseBatteryPercent = parseInt(status)
+                    connectionsModule.mouseBatteryState = timeAgo
+                } else {
+                    connectionsModule.mouseBatteryAvailable = false
+                    connectionsModule.mouseBatteryPercent = -1
+                    connectionsModule.mouseBatteryState = status + (timeAgo ? " (" + timeAgo + ")" : "")
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: mouseTimer
+        interval: 5000
+        running: true
+        repeat: true
+        onTriggered: mouseProc.running = true
     }
 }

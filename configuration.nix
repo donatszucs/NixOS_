@@ -22,7 +22,7 @@
   users.users.doni = {
     isNormalUser = true;
     description = "Doni";
-    extraGroups = [ "networkmanager" "wheel" "i2c" "video" "input" "uinput" ];
+    extraGroups = [ "networkmanager" "wheel" "i2c" "video" "input" "uinput" "wireshark" "plugdev" ];
     packages = with pkgs; [
       git
     ];

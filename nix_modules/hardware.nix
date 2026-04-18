@@ -31,7 +31,7 @@
   };
 
   # 3. Force load the kernel module (Driver)
-  boot.kernelModules = [ "btusb" "ntsync" ];
+  boot.kernelModules = [ "btusb" "ntsync" "usbmon" ];
 
   # Enable the graphics driver
   hardware.graphics.enable = true;
@@ -75,8 +75,11 @@
   # Enable Bluetooth audio support
   services.blueman.enable = true;
 
-  # udev rule for HyperX Cloud II Wireless 0x03f0:0x018b
+  # udev rule for HyperX Cloud II Wireless 0x03f0:0x018b and wireshark usbmon
   services.udev.extraRules = ''
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03f0", ATTRS{idProduct}=="018b", MODE="0666"
+    SUBSYSTEM=="usbmon", GROUP="wireshark", MODE="0640"
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3434", ATTRS{idProduct}=="d030", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3434", ATTRS{idProduct}=="d03f", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
   '';
 }
