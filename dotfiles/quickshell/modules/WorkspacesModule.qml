@@ -98,7 +98,7 @@ ModuleButton {
 
                     Repeater {
                         model: wsButton.modelData.toplevels.values
-                        delegate: Image {
+                        delegate: IconImage {
                             id: windowIcon
                             required property var modelData
                             // Use x11 appId if wayland one is empty or missing (e.g. for Steam games running via XWayland)
@@ -128,13 +128,28 @@ ModuleButton {
                                 
                                 var entries = DesktopEntries.applications.values
                                 for (var i = 0; i < entries.length; i++) {
-                                    if (entries[i].id.toLowerCase() === appId.toLowerCase())
+                                    var entryId = entries[i].id.toLowerCase();
+                                    var appLower = appId.toLowerCase();
+                                    if (entryId === appLower || entryId === appLower + ".desktop" || entryId.indexOf(appLower) >= 0)
                                         return Quickshell.iconPath(entries[i].icon !== "" ? entries[i].icon : appId)
                                 }
                                 // fallback: match by display name
                                 for (var j = 0; j < entries.length; j++) {
-                                    if (entries[j].name.toLowerCase() === appId.toLowerCase())
+                                    if (entries[j].name.toLowerCase() === appLower || entries[j].name.toLowerCase().indexOf(appLower) >= 0)
                                         return Quickshell.iconPath(entries[j].icon !== "" ? entries[j].icon : appId)
+                                }
+                                // extreme fallback: match window title for electron wrappers
+                                if (modelData.title) {
+                                    var titleLower = modelData.title.toLowerCase();
+                                    
+                                    if (titleLower.indexOf("teams") >= 0) return Quickshell.iconPath("teams-for-linux");
+
+                                    for (var k = 0; k < entries.length; k++) {
+                                        var entryName = entries[k].name.toLowerCase();
+                                        if (titleLower.indexOf(entryName) >= 0 || entryName.indexOf(titleLower) >= 0) {
+                                            return Quickshell.iconPath(entries[k].icon !== "" ? entries[k].icon : appId);
+                                        }
+                                    }
                                 }
                                 return Quickshell.iconPath(appId)
                             }
@@ -144,24 +159,20 @@ ModuleButton {
                             // Check if we are loading a system icon or a local Steam file
                             readonly property bool isSystemIcon: String(source).indexOf("image://icon/") === 0
 
-                            // If it's a system icon, force a square. If it's Steam, use the real aspect ratio.
+                            // If it's a system icon, force a square. If it's Steam, try to preserve aspect ratio.
                             width: {
                                 if (isSystemIcon) {
                                     return height; 
                                 }
-                                return implicitHeight > 0 ? (implicitWidth / implicitHeight) * height : height;
+                                // Use implicit width/height or sourceSize to guess aspect ratio
+                                var sWidth = implicitWidth > 0 ? implicitWidth : (sourceSize.width > 0 ? sourceSize.width : height);
+                                var sHeight = implicitHeight > 0 ? implicitHeight : (sourceSize.height > 0 ? sourceSize.height : height);
+                                return (sWidth / sHeight) * height;
                             }
-
-                            sourceSize.height: height
-                            sourceSize.width: isSystemIcon ? height : 0
-
-                            fillMode: Image.PreserveAspectFit
 
                             source: resolvedIcon
                             
                             visible: appId !== ""
-                            asynchronous: true
-                            mipmap: true
                             
                             Process {
                                 id: steamIconProc
@@ -206,6 +217,7 @@ ModuleButton {
         ModuleButton {
             label: ""
             variant: "light"
+            opacity: 0.6
             implicitWidth: root.implicitHeight - 2 * root.overlay
             implicitHeight: root.implicitHeight - 2 * root.overlay
             
