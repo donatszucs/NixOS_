@@ -43,12 +43,12 @@ ModuleButton {
             id: mainButton
             variant: "light"
             
-            radius: Theme.moduleEdgeRadius
+            radius: !systemModule.expanded ? Theme.moduleEdgeRadius / 2 : Theme.moduleEdgeRadius
 
-            topLeftRadius: !systemModule.expanded ? Theme.moduleEdgeRadius : 0
-            topRightRadius: !systemModule.expanded ? Theme.moduleEdgeRadius : 0
+            topLeftRadius: !systemModule.expanded ? Theme.moduleEdgeRadius / 2 : 0
+            topRightRadius: !systemModule.expanded ? Theme.moduleEdgeRadius / 2 : 0
             
-            property int padding: (Theme.moduleHeight - Math.ceil(Theme.moduleHeight * 0.75)) / 2
+            property int padding: (Theme.moduleHeight - Math.ceil(Theme.moduleHeight * 0.7)) / 2
 
             Layout.alignment: Qt.AlignCenter
             Layout.rightMargin: 10
@@ -56,8 +56,8 @@ ModuleButton {
             Layout.leftMargin: 5
             label: systemModule.expanded ? "System" : ""
             
-            implicitHeight: systemModule.expanded ? Theme.moduleHeight: Math.ceil(Theme.moduleHeight * 0.75)
-            implicitWidth: systemModule.expanded ? 180 : Math.ceil(Theme.moduleHeight * 1.25)
+            implicitHeight: systemModule.expanded ? Theme.moduleHeight: Math.ceil(Theme.moduleHeight * 0.7)
+            implicitWidth: systemModule.expanded ? 180 : Math.ceil(Theme.moduleHeight * 1.15)
 
             cursorShape: Qt.PointingHandCursor
             onClicked: systemModule.expanded = !systemModule.expanded

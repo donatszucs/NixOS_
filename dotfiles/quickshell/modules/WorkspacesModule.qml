@@ -322,17 +322,6 @@ ModuleButton {
                 visible: Hyprland.workspaces.values.length > 0
             }
 
-            Text {
-                text: "Send to workspace"
-                color: Theme.textPrimary
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 2
-                font.bold: true
-                Layout.leftMargin: 8
-                opacity: 0.6
-                visible: Hyprland.workspaces.values.length > 0
-            }
-
             ModuleButton {
                 Layout.fillWidth: true
                 implicitHeight: 34
