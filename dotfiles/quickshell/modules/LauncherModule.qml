@@ -195,11 +195,6 @@ ModuleButton {
                     font.pixelSize: Theme.fontSize * 1.1
                     verticalAlignment: TextInput.AlignVCenter
                     focus: true
-                    onActiveFocusChanged: {
-                        if (!activeFocus && launcherModule.expanded) {
-                            launcherModule.expanded = false;
-                        }
-                    }
 
                     Text {
                         anchors {

@@ -29,6 +29,9 @@ PanelWindow {
 
     mask: Region {
         
+        Region {
+            item: bgMouseArea.enabled ? bgMouseArea : null
+        }
         // Left modules interaction region
         Region {
             item: leftRow
@@ -41,6 +44,10 @@ PanelWindow {
 
         Region {
             item: workspacesModule
+        }
+
+        Region {
+            item: workspacesModule.contextPanel
         }
 
         Region {
@@ -70,14 +77,21 @@ PanelWindow {
         Region {
             item: notificationCenter
         }
+
     }
 
     // Background MouseArea to close the launcher when clicking outside of it
     MouseArea {
+        id: bgMouseArea
         anchors.fill: parent
-        enabled: launcherModule.expanded
+        visible: enabled
+        enabled: launcherModule.expanded || workspacesModule.contextPanel.visible || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded
         onClicked: {
             launcherModule.expanded = false
+            workspacesModule.contextPanel.visible = false
+            wallpaperPicker.expanded = false
+            clipboardHistory.expanded = false
+            rbwMenu.closeMenu()
         }
         z: -1
     }

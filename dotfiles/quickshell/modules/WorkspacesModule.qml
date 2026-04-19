@@ -1,6 +1,8 @@
 // Workspaces — uses Hyprland IPC via Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
+
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Widgets
@@ -12,11 +14,15 @@ ModuleButton {
     id: root
     property string screenName: ""
 
+    clip: false
+
     color: Theme.palette("dark").base
 
     bottomLeftRadius: Theme.moduleEdgeRadius + 2
     bottomRightRadius: Theme.moduleEdgeRadius + 2
     property int overlay: 4
+
+    property alias contextPanel: contextPanelItem
 
     implicitHeight: Theme.moduleHeight * 0.9
 
@@ -167,6 +173,23 @@ ModuleButton {
                                     }
                                 }
                             }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: (mouse) => {
+                                    if (mouse.button === Qt.RightButton) {
+                                        var pos = mapToItem(root, 0, root.implicitHeight + 4)
+                                        contextPanelItem.x = pos.x - contextPanelItem.width / 2 + width / 2
+                                        contextPanelItem.targetAddress = String(windowIcon.modelData.address)
+                                        contextPanelItem.visible = true
+                                    } else {
+                                        Hyprland.dispatch("focuswindow address:0x" + String(windowIcon.modelData.address))
+                                        contextPanelItem.visible = false
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -219,6 +242,96 @@ ModuleButton {
                 }
                 Behavior on opacity {
                     NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        id: contextPanelItem
+        property string targetAddress: ""
+        
+        visible: false
+        z: 100
+        y: root.implicitHeight + 6
+        implicitWidth: 160
+        implicitHeight: contentColumn.implicitHeight + 12
+        color: Theme.palette("dark").base
+        radius: Theme.moduleEdgeRadius
+        border.color: Theme.divider
+        border.width: 1
+
+        Behavior on opacity {
+            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+        }
+        opacity: visible ? 1.0 : 0.0
+
+        ColumnLayout {
+            id: contentColumn
+            anchors.fill: parent
+            anchors.margins: 6
+            spacing: 4
+            
+            ModuleButton {
+                Layout.fillWidth: true
+                implicitHeight: 34
+                label: "Close"
+                variant: "red"
+                cursorShape: Qt.PointingHandCursor
+                radius: Theme.moduleEdgeRadius - 4
+                onClicked: {
+                    Hyprland.dispatch("closewindow address:0x" + contextPanelItem.targetAddress)
+                    contextPanelItem.visible = false
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                color: Theme.divider
+                Layout.topMargin: 2
+                Layout.bottomMargin: 2
+                visible: Hyprland.workspaces.values.length > 0
+            }
+
+            Text {
+                text: "Send to workspace"
+                color: Theme.textPrimary
+                font.family: Theme.font
+                font.pixelSize: Theme.fontSize - 2
+                font.bold: true
+                Layout.leftMargin: 8
+                opacity: 0.6
+                visible: Hyprland.workspaces.values.length > 0
+            }
+
+            ModuleButton {
+                Layout.fillWidth: true
+                implicitHeight: 34
+                variant: "neutral"
+                cursorShape: Qt.PointingHandCursor
+                radius: Theme.moduleEdgeRadius - 4
+                label: "+ New workspace"
+                onClicked: {
+                    Hyprland.dispatch("movetoworkspacesilent empty,address:0x" + contextPanelItem.targetAddress)
+                    contextPanelItem.visible = false
+                }
+            }
+
+            Repeater {
+                model: Hyprland.workspaces.values
+                delegate: ModuleButton {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    implicitHeight: 34
+                    variant: "neutral"
+                    cursorShape: Qt.PointingHandCursor
+                    radius: Theme.moduleEdgeRadius - 4
+                    label: modelData.name
+                    onClicked: {
+                        Hyprland.dispatch("movetoworkspacesilent " + modelData.id + ",address:0x" + contextPanelItem.targetAddress)
+                        contextPanelItem.visible = false
+                    }
                 }
             }
         }
