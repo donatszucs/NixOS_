@@ -37,21 +37,12 @@ PanelWindow {
             item: leftRow
         }
 
-        // Center modules interaction region
-        Region {
-            item: closeWindowModule
-        }
-
         Region {
             item: workspacesModule
         }
 
         Region {
             item: workspacesModule.contextPanel
-        }
-
-        Region {
-            item: addWorkspaceModule
         }
 
         // Right modules interaction region
@@ -155,16 +146,6 @@ PanelWindow {
     }
 
     // ── CENTER ───────────────────────────────────────────────────────────
-    CloseWindowModule {
-        id: closeWindowModule
-        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2 
-        radius: Theme.moduleEdgeRadius
-        anchors {
-                rightMargin: Theme.moduleEdgeMarginV + 4
-                right: workspacesModule.left
-            top: parent.top
-        }
-    }
 
     InverseRadius {
         cornerPosition: "topRight"
@@ -185,16 +166,6 @@ PanelWindow {
         color: workspacesModule.color
         anchors {
             left: workspacesModule.right
-            top: parent.top
-        }
-    }
-    AddWorkspaceModule {
-        topMarginButton: Theme.moduleMarginH + Theme.moduleHeight/2 - implicitHeight/2
-        radius: Theme.moduleEdgeRadius
-        id: addWorkspaceModule
-        anchors {
-                left: workspacesModule.right
-                leftMargin: Theme.moduleEdgeMarginV + 4
             top: parent.top
         }
     }

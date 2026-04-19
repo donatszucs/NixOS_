@@ -62,8 +62,8 @@ ModuleButton {
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
                 topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
                 bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
-                topRightRadius: index === root.monitorWorkspaces.workspaces.length - 1 ? Theme.moduleEdgeRadius : 5
-                bottomRightRadius: index === root.monitorWorkspaces.workspaces.length - 1 ? Theme.moduleEdgeRadius : 5
+                topRightRadius: 5
+                bottomRightRadius: 5
 
                 readonly property bool active:
                     Hyprland.focusedMonitor !== null &&
@@ -201,6 +201,22 @@ ModuleButton {
                     NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                 }
             }
+        }
+
+        ModuleButton {
+            label: ""
+            variant: "light"
+            implicitWidth: root.implicitHeight - 2 * root.overlay
+            implicitHeight: root.implicitHeight - 2 * root.overlay
+            
+            topLeftRadius: 5
+            bottomLeftRadius: 5
+
+            topRightRadius: Theme.moduleEdgeRadius
+            bottomRightRadius: Theme.moduleEdgeRadius
+
+            onClicked: Hyprland.dispatch("workspace empty")
+            cursorShape: Qt.PointingHandCursor
         }
         // Spacer between "my" workspaces and the others (if any)
         Rectangle {
