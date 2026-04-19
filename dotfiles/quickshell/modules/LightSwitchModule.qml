@@ -35,7 +35,7 @@ ModuleButton {
     Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration } }
 
     // Main label — clicking toggles light on/off
-    ModuleButton {
+    PillBarButton {
         id: labelText
         colorOverride: !root.expanded
         noHoverColorChange: !root.expanded
@@ -48,7 +48,8 @@ ModuleButton {
         }
         height: Theme.moduleHeight
 
-        label: SharedState.lightActive
+        percent: SharedState.lightActive ? SharedState.lightBrightness : 0
+        pillText: SharedState.lightActive
             ? SharedState.lightBrightness + "% 󱩒"
             : "Off 󱩎"
         variant: SharedState.lightVariant

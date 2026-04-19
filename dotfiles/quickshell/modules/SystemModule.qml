@@ -43,12 +43,12 @@ ModuleButton {
             id: mainButton
             variant: "light"
             
-            radius: !systemModule.expanded ? Theme.moduleEdgeRadius / 2 : Theme.moduleEdgeRadius
+            radius: !systemModule.expanded ? implicitHeight / 2 : Theme.moduleEdgeRadius
 
-            topLeftRadius: !systemModule.expanded ? Theme.moduleEdgeRadius / 2 : 0
-            topRightRadius: !systemModule.expanded ? Theme.moduleEdgeRadius / 2 : 0
+            topLeftRadius: !systemModule.expanded ? implicitHeight / 2 : 0
+            topRightRadius: !systemModule.expanded ? implicitHeight / 2 : 0
             
-            property int padding: (Theme.moduleHeight - Math.ceil(Theme.moduleHeight * 0.7)) / 2
+            property int padding: (Theme.moduleHeight - (Theme.moduleHeight - 8)) / 2
 
             Layout.alignment: Qt.AlignCenter
             Layout.rightMargin: 10
@@ -56,7 +56,7 @@ ModuleButton {
             Layout.leftMargin: 5
             label: systemModule.expanded ? "System" : ""
             
-            implicitHeight: systemModule.expanded ? Theme.moduleHeight: Math.ceil(Theme.moduleHeight * 0.7)
+            implicitHeight: systemModule.expanded ? Theme.moduleHeight: Theme.moduleHeight - 8
             implicitWidth: systemModule.expanded ? 180 : Math.ceil(Theme.moduleHeight * 1.15)
 
             cursorShape: Qt.PointingHandCursor
@@ -73,6 +73,11 @@ ModuleButton {
             Behavior on Layout.topMargin {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
+
+            Behavior on radius {
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
+
         }
 
         Repeater {
@@ -207,9 +212,5 @@ ModuleButton {
     Process {
         id: updateProc
         command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config && sudo nix flake update; notify-send 'Flake update finished'"]
-    }
-
-    Behavior on color {
-        ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
 }

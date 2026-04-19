@@ -119,6 +119,10 @@
 
   # -- Headset Control --
   hidapi            # HID access library (needed for HyperX Cloud II Wireless script)
+  
+  # -- System Utilities --
+  kdePackages.plasma-browser-integration
+  kdePackages.qtimageformats # Enables WebP support for Quickshell QML
   ];
 
   programs.bash.shellAliases = {

@@ -34,6 +34,11 @@ QtObject {
         readonly property color pressed:     Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, Theme.moduleOpacity)
         readonly property color text:        Theme.palettePaper
         readonly property color border:      Theme.paletteBorderStrong
+        
+        readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.08)
+        readonly property color pillFill:        base
+        readonly property color pillText:        text
+        readonly property color pillTextOutline: _solidBase
     }
 
     readonly property QtObject neutral: QtObject {
@@ -46,6 +51,11 @@ QtObject {
         readonly property color pressed:     Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, 0.04 * Theme.moduleOpacity)
         readonly property color text:        Theme.palettePaper
         readonly property color border:      Theme.paletteBorderStrong
+        
+        readonly property color pillTrack:       Qt.rgba(paletteInk.r, paletteInk.g, paletteInk.b, Theme.moduleOpacity)
+        readonly property color pillFill:        Qt.rgba(1, 1, 1, 0.2 * Theme.moduleOpacity)
+        readonly property color pillText:        text
+        readonly property color pillTextOutline: paletteInk
     }
 
     readonly property QtObject light: QtObject {
@@ -58,6 +68,11 @@ QtObject {
         readonly property color pressed:    Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, Theme.moduleOpacity)
         readonly property color text:       Theme.paletteInk
         readonly property color border:     Theme.paletteBorderSoft
+        
+        readonly property color pillTrack:       Qt.rgba(paletteInk.r, paletteInk.g, paletteInk.b, 0.4)
+        readonly property color pillFill:        Qt.rgba(paletteInk.r, paletteInk.g, paletteInk.b, 0.8)
+        readonly property color pillText:        Theme.palettePaper
+        readonly property color pillTextOutline: "transparent" // no outline needed over dark fill
     }
 
     readonly property QtObject red: QtObject {
@@ -70,6 +85,11 @@ QtObject {
         readonly property color pressed:    Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, Theme.moduleOpacity)
         readonly property color text:       "#2a202f"
         readonly property color border:     "#652e2e"
+        
+        readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.08)
+        readonly property color pillFill:        base
+        readonly property color pillText:        text
+        readonly property color pillTextOutline: "transparent"
     }
 
     // Helper: resolve a variant name string → palette object
@@ -101,6 +121,8 @@ QtObject {
     readonly property int moduleMarginH:  0
     readonly property int moduleMarginV:  0
     readonly property int moduleEdgeMarginV:  0
+
+    // ── Pill Bar Variables ───────────────────────────────────────────
 
     // ── Animations ─────────────────────────────────────────────────
     readonly property int verticalDuration: 250

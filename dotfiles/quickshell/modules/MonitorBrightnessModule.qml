@@ -5,7 +5,7 @@ import QtQuick
 
 import "../elements"
 
-ModuleButton {
+PillBarButton {
     id: root
     
     required property string screenName
@@ -15,7 +15,8 @@ ModuleButton {
     
     variant: SharedState.nightLightActive ? "light" : "dark"
 
-    label: brightness + "% "
+    percent: brightness
+    pillText: brightness + "% "
 
     // Read brightness from cache on startup
     Component.onCompleted: {

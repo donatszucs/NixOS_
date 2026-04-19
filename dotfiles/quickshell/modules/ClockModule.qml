@@ -34,8 +34,8 @@ ModuleButton {
             label: root.date
             variant: "light"
             implicitWidth: root.expanded ? root.textFont * 8 : 0
-            radius: Theme.moduleEdgeRadius / 2
-            implicitHeight: Math.ceil(Theme.moduleHeight * 0.7)
+            radius: implicitHeight / 2
+            implicitHeight: Theme.moduleHeight - 8
             opacity: root.expanded ? 1 : 0
 
             cursorShape: Qt.PointingHandCursor
@@ -63,8 +63,8 @@ ModuleButton {
             label: root.time
             variant: "light"
             implicitWidth: textFont * 8
-            radius: Theme.moduleEdgeRadius / 2
-            implicitHeight: Math.ceil(Theme.moduleHeight * 0.7)
+            radius: implicitHeight / 2
+            implicitHeight: Theme.moduleHeight - 8
         }
     }
 

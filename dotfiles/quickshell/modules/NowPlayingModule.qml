@@ -9,7 +9,7 @@ import "../elements"
 
 ModuleButton {
     id: nowPlayingModule
-    noHoverColorChange: expanded
+    noHoverColorChange: expanded || !isPlaying
     noPressColorChange: true
     property string titleText: "󰎆  Nothing playing"
     property string authorText: "Unknown artist"
@@ -230,7 +230,7 @@ ModuleButton {
             color: "transparent"
             label: nowPlayingModule.authorText
             Layout.fillWidth: true
-            Layout.preferredHeight: Theme.fontSize
+            Layout.preferredHeight: Theme.fontSize + 2
             Layout.alignment: Qt.AlignCenter
         }
     }
@@ -293,7 +293,7 @@ ModuleButton {
         if (!currentPlayer) return
         var id = currentPlayer.identity.toLowerCase().trim()
         console.log("Focusing player with identity:", id)
-        var cls = (id.match(/mozilla zen/)) ? "zen" : id
+        var cls = (id.match(/mozilla firefox/) || id.match(/mozilla zen/)) ? "zen" : id
         focusProc.command = ["bash", "-c", "hyprctl dispatch focuswindow class:" + cls]
         console.log("Running focus command:", focusProc.command)
         focusProc.running = true

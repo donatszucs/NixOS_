@@ -84,9 +84,11 @@ ModuleButton {
             spacing: 0
             layoutDirection: Qt.RightToLeft
 
-            ModuleButton {
+            PillBarButton {
                 id: volumeButton
-                label: "100% "
+                percent: 100
+                pillText: "100% "
+
                 textAlign: "right"
                 
                 rightMargin: Theme.modulePaddingH
@@ -111,6 +113,7 @@ ModuleButton {
                     }
                 }
             }
+
             ModuleButton {
                 implicitWidth: maxSinkBarLength - volumeButton.implicitWidth + 20
                 implicitHeight: Theme.moduleHeight
@@ -227,12 +230,13 @@ ModuleButton {
                     var v = parseInt(s, 10)
                     if (isNaN(v)) return
 
+                    volumeButton.percent = v
                     if (v === 0) {
-                        volumeButton.label = v + "% "
+                        volumeButton.pillText = v + "% "
                     } else if (v > 0 && v < 50) {
-                        volumeButton.label = v + "% "
+                        volumeButton.pillText = v + "% "
                     } else {
-                        volumeButton.label = v + "% "
+                        volumeButton.pillText = v + "% "
                     }
                 }
             }
