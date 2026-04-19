@@ -187,26 +187,26 @@ PanelWindow {
         LightSwitchModule {
             Layout.alignment: Qt.AlignTop
             id: lightSwitchModule
-            variant: !expanded ? SharedState.lightVariant : monitorBrightnessModule.variant
+            variant: !expanded ? SharedState.lightVariant : virtualKeyboardModule.variant
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            rightColor: monitorBrightnessModule.color
+            rightColor: virtualKeyboardModule.color
             rightExpanded: lightSwitchModule.expanded
-        }
-        MonitorBrightnessModule {
-            Layout.alignment: Qt.AlignTop
-            screenName: modelData.name
-            id: monitorBrightnessModule
         }
         VirtualKeyboardModule {
             Layout.alignment: Qt.AlignTop
             id: virtualKeyboardModule
 
         }
+        MonitorBrightnessModule {
+            Layout.alignment: Qt.AlignTop
+            screenName: modelData.name
+            id: monitorBrightnessModule
+        }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            leftColor: virtualKeyboardModule.color
+            leftColor: monitorBrightnessModule.color
             leftExpanded: audioModule.expanded
         }
         AudioModule {
