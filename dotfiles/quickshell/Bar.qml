@@ -41,10 +41,6 @@ PanelWindow {
             item: workspacesModule
         }
 
-        Region {
-            item: workspacesModule.contextPanel
-        }
-
         // Right modules interaction region
         Region {
             item: rightRow
@@ -76,10 +72,9 @@ PanelWindow {
         id: bgMouseArea
         anchors.fill: parent
         visible: enabled
-        enabled: launcherModule.expanded || workspacesModule.contextPanel.visible || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded
+        enabled: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded
         onClicked: {
             launcherModule.expanded = false
-            workspacesModule.contextPanel.visible = false
             wallpaperPicker.expanded = false
             clipboardHistory.expanded = false
             rbwMenu.closeMenu()

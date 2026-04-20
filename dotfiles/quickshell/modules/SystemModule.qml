@@ -41,7 +41,9 @@ ModuleButton {
 
         ModuleButton {
             id: mainButton
-            variant: "light"
+            variant: "neutral"
+            border.color: pal.border
+            border.width: 2
             
             radius: !systemModule.expanded ? closedSize / 2 : Theme.moduleEdgeRadius
 

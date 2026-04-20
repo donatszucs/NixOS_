@@ -32,7 +32,10 @@ ModuleButton {
         ModuleButton {
             id: dateLabel
             label: root.date
-            variant: "light"
+            variant: "neutral"
+            border.color: pal.border
+            border.width: 2
+
             implicitWidth: root.expanded ? root.textFont * 8 : 0
             radius: implicitHeight / 2
             implicitHeight: Theme.moduleHeight - 8
@@ -61,7 +64,9 @@ ModuleButton {
         }
         ModuleButton {
             label: root.time
-            variant: "light"
+            variant: "neutral"
+            border.color: pal.border
+            border.width: 2
             implicitWidth: textFont * 8
             radius: implicitHeight / 2
             implicitHeight: Theme.moduleHeight - 8

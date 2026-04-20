@@ -20,6 +20,8 @@ ModuleButton {
         radius: height / 2
         color: root.pillPal.pillTrack
         clip: true
+        border.color: root.pillPal.pillBorder
+        border.width: 2
 
         // Inner percentage fill (clipped linearly)
         Item {
@@ -31,6 +33,7 @@ ModuleButton {
             width: parent.width * (Math.min(root.percent, 100) / 100)
             clip: true
             
+            
             Behavior on width {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
@@ -40,7 +43,6 @@ ModuleButton {
                 height: parent.parent.height
                 radius: parent.parent.radius
                 color: root.pillPal.pillFill
-
                 Behavior on color {
                     ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
                 }

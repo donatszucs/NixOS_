@@ -22,8 +22,6 @@ ModuleButton {
     bottomRightRadius: Theme.moduleEdgeRadius + 2
     property int overlay: 4
 
-    property alias contextPanel: contextPanelItem
-
     implicitHeight: Theme.moduleHeight * 0.9
 
     // Only workspaces whose monitor name matches this bar's screen
@@ -53,11 +51,15 @@ ModuleButton {
                 id: wsButton
                 required property var modelData
                 required property int index
-                variant: "light"
-                opacity: active ? 1.0 : 0.6
+                variant: active ? "light" : "neutral"
+                
+                property int activeDragCount: 0
+                z: activeDragCount > 0 ? 99 : 0
+                
                 implicitHeight: root.implicitHeight - 2 * root.overlay
                 implicitWidth: active ? 20 + wsContentRow.implicitWidth : 15 + wsContentRow.implicitWidth
                 cursorShape: Qt.PointingHandCursor
+                clip: false
 
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
                 topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
@@ -72,7 +74,22 @@ ModuleButton {
 
                 label: ""
 
-                onClicked: Hyprland.dispatch("workspace " + modelData.id)
+                colorOverride: dropArea.containsDrag
+                overrideColor: hoverColor
+
+                DropArea {
+                    id: dropArea
+                    anchors.fill: parent
+                    onDropped: (drop) => {
+                        if (drop.source && drop.source.address) {
+                            Hyprland.dispatch("movetoworkspacesilent " + wsButton.modelData.id + ",address:0x" + drop.source.address)
+                        }
+                    }
+                }
+
+                onClicked: {
+                    Hyprland.dispatch("workspace " + wsButton.modelData.id)
+                }
 
                 RowLayout {
                     id: wsContentRow
@@ -91,17 +108,45 @@ ModuleButton {
                         visible: wsButton.modelData.toplevels.values.length > 0
                         width: root.overlay
                         height: Theme.moduleHeight - 15
-                        color: Theme.palette("dark").base
-                        opacity: 0.5
+                        color: Theme.paletteInk
+                        opacity: 0.3
                         radius: 2
                     }
 
                     Repeater {
                         model: wsButton.modelData.toplevels.values
-                        delegate: IconImage {
-                            id: windowIcon
+                        delegate: Item {
+                            id: dragContainer
+                            
                             required property var modelData
-                            // Use x11 appId if wayland one is empty or missing (e.g. for Steam games running via XWayland)
+                            
+                            z: windowIcon.Drag.active ? 99 : 0
+                            
+                            // Re-wrap the icon so it returns cleanly to its layout spot
+                            implicitWidth: windowIcon.width
+                            implicitHeight: Theme.moduleHeight - 15
+                            Layout.preferredWidth: implicitWidth
+                            Layout.preferredHeight: implicitHeight
+                            visible: windowIcon.appId !== "" // Use explicit check from the icon
+
+                            IconImage {
+                                id: windowIcon
+                                
+                                anchors.verticalCenter: dragArea.drag.active ? undefined : parent.verticalCenter
+                                anchors.horizontalCenter: dragArea.drag.active ? undefined : parent.horizontalCenter
+                                
+                                property string address: String(modelData.address)
+
+                                height: Theme.moduleHeight - 15
+                                width: {
+                                    var systemIcon = String(source).indexOf("image://icon/") === 0;
+                                    if (systemIcon) return height;
+                                    var w = Math.max(implicitWidth, 1);
+                                    var h = Math.max(implicitHeight, 1);
+                                    return (w / h) * height;
+                                }
+
+                                // Use x11 appId if wayland one is empty or missing (e.g. for Steam games running via XWayland)
                             readonly property string appId: {
                                 if (modelData.wayland && modelData.wayland.appId !== "") return modelData.wayland.appId;
                                 if (modelData.x11 && modelData.x11.appId !== "") return modelData.x11.appId;
@@ -154,25 +199,16 @@ ModuleButton {
                                 return Quickshell.iconPath(appId)
                             }
 
-                            height: Theme.moduleHeight - 15
-
-                            // Check if we are loading a system icon or a local Steam file
-                            readonly property bool isSystemIcon: String(source).indexOf("image://icon/") === 0
-
-                            // If it's a system icon, force a square. If it's Steam, try to preserve aspect ratio.
-                            width: {
-                                if (isSystemIcon) {
-                                    return height; 
-                                }
-                                // Use implicit width/height or sourceSize to guess aspect ratio
-                                var sWidth = implicitWidth > 0 ? implicitWidth : (sourceSize.width > 0 ? sourceSize.width : height);
-                                var sHeight = implicitHeight > 0 ? implicitHeight : (sourceSize.height > 0 ? sourceSize.height : height);
-                                return (sWidth / sHeight) * height;
-                            }
-
                             source: resolvedIcon
                             
                             visible: appId !== ""
+
+                            z: dragArea.drag.active ? 999 : 0
+
+                            Drag.active: dragArea.drag.active
+                            Drag.source: windowIcon
+                            Drag.hotSpot.x: width / 2
+                            Drag.hotSpot.y: height / 2
                             
                             Process {
                                 id: steamIconProc
@@ -187,37 +223,59 @@ ModuleButton {
 
                             MouseArea {
                                 anchors.fill: parent
-                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                acceptedButtons: Qt.MiddleButton
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: (mouse) => {
-                                    if (mouse.button === Qt.RightButton) {
-                                        var pos = mapToItem(root, 0, root.implicitHeight + 4)
-                                        contextPanelItem.x = pos.x - contextPanelItem.width / 2 + width / 2
-                                        contextPanelItem.targetAddress = String(windowIcon.modelData.address)
-                                        contextPanelItem.visible = true
-                                    } else {
-                                        Hyprland.dispatch("focuswindow address:0x" + String(windowIcon.modelData.address))
-                                        contextPanelItem.visible = false
+
+                                onClicked: function(mouse) {
+                                    if (mouse.button === Qt.MiddleButton) {
+                                         Hyprland.dispatch("closewindow address:0x" + dragContainer.modelData.address)
                                     }
                                 }
                             }
-                        }
-                    }
-                }
+
+                            MouseArea {
+                                id: dragArea
+                                anchors.fill: parent
+                                acceptedButtons: Qt.LeftButton
+                                cursorShape: Qt.PointingHandCursor
+                                
+                                drag.target: windowIcon
+                                drag.axis: Drag.XAndYAxis
+                                drag.threshold: 4
+
+                                onReleased: {
+                                    if (drag.active) {
+                                        windowIcon.Drag.drop()
+                                    }
+                                }
+
+                                onClicked: function(mouse) {
+                                    if (dragArea.drag.active) return;
+                                    Hyprland.dispatch("workspace " + wsButton.modelData.id)
+                                }
+                            } // MouseArea
+                            
+                            Connections {
+                                target: dragArea.drag
+                                function onActiveChanged() {
+                                    if (dragArea.drag.active) wsButton.activeDragCount++;
+                                    else wsButton.activeDragCount--;
+                                }
+                            }
+                        } // IconImage
+                        } // Item (dragContainer)
+                    } // Repeater
+                } // RowLayout
 
                 Behavior on implicitWidth {
-                    NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.OutCubic }
-                }
-                Behavior on opacity {
-                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.linear }
                 }
             }
         }
 
         ModuleButton {
             label: ""
-            variant: "light"
-            opacity: 0.6
+            variant: "neutral"
             implicitWidth: root.implicitHeight - 2 * root.overlay
             implicitHeight: root.implicitHeight - 2 * root.overlay
             
@@ -226,6 +284,19 @@ ModuleButton {
 
             topRightRadius: Theme.moduleEdgeRadius
             bottomRightRadius: Theme.moduleEdgeRadius
+
+            colorOverride: emptyDropArea.containsDrag
+            overrideColor: hoverColor
+
+            DropArea {
+                id: emptyDropArea
+                anchors.fill: parent
+                onDropped: (drop) => {
+                    if (drop.source && drop.source.address) {
+                        Hyprland.dispatch("movetoworkspacesilent empty,address:0x" + drop.source.address)
+                    }
+                }
+            }
 
             onClicked: Hyprland.dispatch("workspace empty")
             cursorShape: Qt.PointingHandCursor
@@ -244,8 +315,7 @@ ModuleButton {
             delegate: ModuleButton {
                 required property var modelData
                 required property int index
-                variant: "light"
-                opacity: active ? 1.0 : 0.6
+                variant: active ? "light" : "neutral"
                 implicitHeight: root.implicitHeight - 2 * root.overlay
                 implicitWidth: 25
                 cursorShape: Qt.PointingHandCursor
@@ -260,96 +330,23 @@ ModuleButton {
                     Hyprland.focusedMonitor !== null &&
                     Hyprland.focusedMonitor.activeWorkspace !== null &&
                     Hyprland.focusedMonitor.activeWorkspace.id === modelData.id
+                    
+                colorOverride: othersDropArea.containsDrag
+                overrideColor: hoverColor
+
+                DropArea {
+                    id: othersDropArea
+                    anchors.fill: parent
+                    onDropped: (drop) => {
+                        if (drop.source && drop.source.address) {
+                            Hyprland.dispatch("movetoworkspacesilent " + modelData.id + ",address:0x" + drop.source.address)
+                        }
+                    }
+                }
 
                 label: modelData.name
 
                 onClicked: Hyprland.dispatch("workspace " + modelData.id)
-
-                Behavior on implicitWidth {
-                    NumberAnimation { duration: 80; easing.type: Easing.OutCubic }
-                }
-                Behavior on opacity {
-                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-                }
-            }
-        }
-    }
-
-    Rectangle {
-        id: contextPanelItem
-        property string targetAddress: ""
-        
-        visible: false
-        z: 100
-        y: root.implicitHeight + 6
-        implicitWidth: 160
-        implicitHeight: contentColumn.implicitHeight + 12
-        color: Theme.palette("dark").base
-        radius: Theme.moduleEdgeRadius
-        border.color: Theme.divider
-        border.width: 1
-
-        Behavior on opacity {
-            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-        }
-        opacity: visible ? 1.0 : 0.0
-
-        ColumnLayout {
-            id: contentColumn
-            anchors.fill: parent
-            anchors.margins: 6
-            spacing: 4
-            
-            ModuleButton {
-                Layout.fillWidth: true
-                implicitHeight: 34
-                label: "Close"
-                variant: "red"
-                cursorShape: Qt.PointingHandCursor
-                radius: Theme.moduleEdgeRadius - 4
-                onClicked: {
-                    Hyprland.dispatch("closewindow address:0x" + contextPanelItem.targetAddress)
-                    contextPanelItem.visible = false
-                }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                height: 1
-                color: Theme.divider
-                Layout.topMargin: 2
-                Layout.bottomMargin: 2
-                visible: Hyprland.workspaces.values.length > 0
-            }
-
-            ModuleButton {
-                Layout.fillWidth: true
-                implicitHeight: 34
-                variant: "neutral"
-                cursorShape: Qt.PointingHandCursor
-                radius: Theme.moduleEdgeRadius - 4
-                label: "+ New workspace"
-                onClicked: {
-                    Hyprland.dispatch("movetoworkspacesilent empty,address:0x" + contextPanelItem.targetAddress)
-                    contextPanelItem.visible = false
-                }
-            }
-
-            Repeater {
-                model: Hyprland.workspaces.values
-                delegate: ModuleButton {
-                    required property var modelData
-                    Layout.fillWidth: true
-                    implicitHeight: 34
-                    variant: "neutral"
-                    cursorShape: Qt.PointingHandCursor
-                    radius: Theme.moduleEdgeRadius - 4
-                    label: modelData.name
-                    onClicked: {
-                        Hyprland.dispatch("movetoworkspacesilent " + modelData.id + ",address:0x" + contextPanelItem.targetAddress)
-                        contextPanelItem.visible = false
-                    }
-                }
             }
         }
     }
