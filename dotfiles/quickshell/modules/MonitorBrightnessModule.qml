@@ -13,7 +13,7 @@ PillBarButton {
     property int brightness: 50
     property string cacheFile: "/tmp/ddc_brightness_disp" + displayNumber
     
-    variant: SharedState.nightLightActive ? "light" : "dark"
+    pillVariant: SharedState.nightLightActive ? "light" : "dark"
 
     percent: brightness
     pillText: brightness + "% "

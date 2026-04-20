@@ -187,7 +187,6 @@ PanelWindow {
         LightSwitchModule {
             Layout.alignment: Qt.AlignTop
             id: lightSwitchModule
-            variant: !expanded ? SharedState.lightVariant : virtualKeyboardModule.variant
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop

@@ -89,13 +89,15 @@ ModuleButton {
             spacing: launcherModule.padding
 
             // Header row (same height as collapsed bar, keeps visual alignment)
-            ModuleButton {
+            PillBarButton {
                 id: collapsedRow
                 colorOverride: !expanded
                 noHoverColorChange: !expanded
                 Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
-                label: " Menu"
+                pillText: " Menu"
+                percent: expanded ? 100 : 0
+                pillVariant: expanded ? "light" : "dark"
                 textFont: Theme.fontSize
                 cursorShape: Qt.PointingHandCursor
                 bottomLeftRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0

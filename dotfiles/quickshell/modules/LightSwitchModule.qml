@@ -52,7 +52,7 @@ ModuleButton {
         pillText: SharedState.lightActive
             ? SharedState.lightBrightness + "% 󱩒"
             : "Off 󱩎"
-        variant: SharedState.lightVariant
+        pillVariant: SharedState.lightVariant
         
         bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
         bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius

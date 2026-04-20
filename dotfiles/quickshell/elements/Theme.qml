@@ -38,7 +38,6 @@ QtObject {
         readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.08)
         readonly property color pillFill:        base
         readonly property color pillText:        text
-        readonly property color pillTextOutline: _solidBase
     }
 
     readonly property QtObject neutral: QtObject {
@@ -55,7 +54,6 @@ QtObject {
         readonly property color pillTrack:       Qt.rgba(paletteInk.r, paletteInk.g, paletteInk.b, Theme.moduleOpacity)
         readonly property color pillFill:        Qt.rgba(1, 1, 1, 0.2 * Theme.moduleOpacity)
         readonly property color pillText:        text
-        readonly property color pillTextOutline: paletteInk
     }
 
     readonly property QtObject light: QtObject {
@@ -69,10 +67,9 @@ QtObject {
         readonly property color text:       Theme.paletteInk
         readonly property color border:     Theme.paletteBorderSoft
         
-        readonly property color pillTrack:       Qt.rgba(paletteInk.r, paletteInk.g, paletteInk.b, 0.4)
-        readonly property color pillFill:        Qt.rgba(paletteInk.r, paletteInk.g, paletteInk.b, 0.8)
-        readonly property color pillText:        Theme.palettePaper
-        readonly property color pillTextOutline: "transparent" // no outline needed over dark fill
+        readonly property color pillTrack:       Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.4)
+        readonly property color pillFill:        Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.8)
+        readonly property color pillText:        Theme.paletteInk
     }
 
     readonly property QtObject red: QtObject {

@@ -5,9 +5,11 @@ import QtQuick
 
 import "../elements"
 
-ModuleButton {
+PillBarButton {
     id: virtualKbrd
-    label: ""
+    pillText: ""
+    pillVariant: virtualKbrd.active ? "light" : "dark"
+    percent: virtualKbrd.active ? 100 : 0
     textFont: Theme.fontSize + 1
     cursorShape: Qt.PointingHandCursor
     property bool active: false
@@ -27,10 +29,8 @@ ModuleButton {
         virtualKbrd.active = !virtualKbrd.active; // Toggle the state
         
         if (virtualKbrd.active) {
-            virtualKbrd.variant = "light"
             startProc.running = true;
         } else {
-            virtualKbrd.variant = "dark"
             killProc.running = true;
         }
     }

@@ -40,8 +40,8 @@
     enable = true;
     defaultFonts = {
       monospace = [ "RobotoMono Nerd Font Mono" ];
-      sansSerif = [ "RobotoMono Nerd Font Propo" ];
-      serif = [ "RobotoMono Nerd Font Propo" ];
+      sansSerif = [ "Noto Sans" ];
+      serif = [ "Noto Serif" ];
     };
     localConf = ''
       <?xml version="1.0"?>
