@@ -43,12 +43,13 @@ ModuleButton {
             id: mainButton
             variant: "light"
             
-            radius: !systemModule.expanded ? implicitHeight / 2 : Theme.moduleEdgeRadius
+            radius: !systemModule.expanded ? closedSize / 2 : Theme.moduleEdgeRadius
 
-            topLeftRadius: !systemModule.expanded ? implicitHeight / 2 : 0
-            topRightRadius: !systemModule.expanded ? implicitHeight / 2 : 0
+            topLeftRadius: !systemModule.expanded ? closedSize / 2 : 0
+            topRightRadius: !systemModule.expanded ? closedSize / 2 : 0
             
-            property int padding: (Theme.moduleHeight - (Theme.moduleHeight - 8)) / 2
+            property int closedSize: Theme.moduleHeight - 8
+            property int padding: (Theme.moduleHeight - closedSize) / 2
 
             Layout.alignment: Qt.AlignCenter
             Layout.rightMargin: 10
@@ -56,7 +57,7 @@ ModuleButton {
             Layout.leftMargin: 5
             label: systemModule.expanded ? "System" : ""
             
-            implicitHeight: systemModule.expanded ? Theme.moduleHeight: Theme.moduleHeight - 8
+            implicitHeight: systemModule.expanded ? Theme.moduleHeight: closedSize
             implicitWidth: systemModule.expanded ? 180 : Math.ceil(Theme.moduleHeight * 1.15)
 
             cursorShape: Qt.PointingHandCursor
@@ -77,7 +78,6 @@ ModuleButton {
             Behavior on radius {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
-
         }
 
         Repeater {
@@ -197,9 +197,6 @@ ModuleButton {
                     radius: Theme.moduleEdgeRadius
                 }
 
-                Behavior on implicitWidth {
-                    NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-                }
             }
         }
     }

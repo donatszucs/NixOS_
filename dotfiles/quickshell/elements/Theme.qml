@@ -36,7 +36,7 @@ QtObject {
         readonly property color border:      Theme.paletteBorderStrong
         
         readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.08)
-        readonly property color pillFill:        base
+        readonly property color pillFill:        Qt.darker(base, 1.2)
         readonly property color pillText:        text
     }
 
