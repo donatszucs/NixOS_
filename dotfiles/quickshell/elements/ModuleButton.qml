@@ -64,7 +64,7 @@ Rectangle {
     signal clicked()
 
     implicitHeight: Theme.moduleHeight
-    implicitWidth: Math.ceil(labelText.implicitWidth + 30)
+    implicitWidth: labelText.implicitWidth + 30
     radius: Theme.moduleRadius
 
     color: (root.pressed && !root.noPressColorChange) ? root.pressedColor : ((root.hovered && !root.noHoverColorChange) ? root.hoverColor : colorOverride ? root.overrideColor : root.baseColor)

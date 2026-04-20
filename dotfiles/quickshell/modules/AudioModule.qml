@@ -88,7 +88,7 @@ ModuleButton {
                 id: volumeButton
                 percent: 100
                 pillText: "100% "
-
+                pillVariant: expanded ? "light" : "dark"
                 textAlign: "right"
                 
                 rightMargin: Theme.modulePaddingH
