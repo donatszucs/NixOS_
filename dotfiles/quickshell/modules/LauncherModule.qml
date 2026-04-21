@@ -97,7 +97,7 @@ ModuleButton {
                 implicitHeight: Theme.moduleHeight
                 pillText: " Menu"
                 percent: expanded ? 100 : 0
-                pillVariant: expanded ? "light" : "dark"
+                pillVariant: "dark"
                 textFont: Theme.fontSize
                 cursorShape: Qt.PointingHandCursor
                 bottomLeftRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0

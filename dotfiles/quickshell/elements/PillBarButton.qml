@@ -20,8 +20,6 @@ ModuleButton {
         radius: height / 2
         color: root.pillPal.pillTrack
         clip: true
-        border.color: root.pillPal.pillBorder
-        border.width: 2
 
         // Inner percentage fill (clipped linearly)
         Item {
@@ -47,6 +45,15 @@ ModuleButton {
                     ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
                 }
             }
+        }
+
+        // Overlay border so it displays evenly over both track and fill colors
+        Rectangle {
+            anchors.fill: parent
+            radius: parent.radius
+            color: "transparent"
+            border.color: root.pillPal.pillBorder
+            border.width: 2
         }
 
         // Text inside the pill
