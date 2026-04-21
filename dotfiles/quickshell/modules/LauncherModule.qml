@@ -13,7 +13,7 @@ ModuleButton {
     id: launcherModule
     label: ""
     noHoverColorChange: expanded
-    noPressColorChange: true
+    noPressColorChange: expanded
     property bool expanded: false
     property string screenName: ""
 
@@ -93,6 +93,7 @@ ModuleButton {
                 id: collapsedRow
                 colorOverride: !expanded
                 noHoverColorChange: !expanded
+                noPressColorChange: !expanded
                 Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight
                 pillText: " Menu"
@@ -103,18 +104,32 @@ ModuleButton {
                 bottomLeftRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0
                 bottomRightRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0
 
-                onClicked: {
-                    if (expanded) {
-                        expanded = false
-                    } else {
-                        expanded = true
-                        searchField.text = ""
-                        filterApps("")
-                        Qt.callLater(function() {
-                            searchField.forceActiveFocus()
-                            searchField.selectAll()
-                        })
-                    }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    acceptedButtons: Qt.LeftButton
+
+                    onPressedChanged: {
+                            if(!launcherModule.expanded) {
+                                launcherModule.pressed = !launcherModule.pressed
+                            }
+                            else {
+                                collapsedRow.pressed = !collapsedRow.pressed
+                            }
+                        }
+                    onClicked: (mouse) => {
+                                            if (expanded) {
+                                                expanded = false
+                                            } else {
+                                                expanded = true
+                                                searchField.text = ""
+                                                filterApps("")
+                                                Qt.callLater(function() {
+                                                    searchField.forceActiveFocus()
+                                                    searchField.selectAll()
+                                                })
+                                            }
+                                        }
                 }
             }
 
