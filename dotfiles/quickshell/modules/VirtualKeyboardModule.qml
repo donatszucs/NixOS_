@@ -8,7 +8,7 @@ import "../elements"
 PillBarButton {
     id: virtualKbrd
     pillText: ""
-    pillVariant: virtualKbrd.active ? "light" : "dark"
+    pillVariant: virtualKbrd.active ? "light" : "neutral"
     percent: virtualKbrd.active ? 100 : 0
     textFont: Theme.fontSize + 1
     cursorShape: Qt.PointingHandCursor

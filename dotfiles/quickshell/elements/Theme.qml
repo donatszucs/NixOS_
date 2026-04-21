@@ -3,7 +3,7 @@ import QtQuick
 
 QtObject {
     // ── Divider-anchored palette seed ───────────────────────────────
-    readonly property color palettePaper:        '#e4cdf4'
+    readonly property color palettePaper:        '#e3c4f5'
     readonly property color paletteInk:          '#1e1e1e'
     readonly property color paletteBorderSoft:   Qt.darker(palettePaper, 1.25)
     readonly property color paletteBorderStrong: Qt.darker(palettePaper, 1.6)
@@ -35,9 +35,9 @@ QtObject {
         readonly property color text:        Theme.palettePaper
         readonly property color border:      Theme.paletteBorderStrong
         
-        readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.06)
-        readonly property color pillFill:        Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.2)
-        readonly property color pillBorder:      Qt.rgba(1, 1, 1, 0.24)
+        readonly property color pillTrack:       Qt.lighter(base, 1.6)
+        readonly property color pillFill:        Qt.rgba(1, 1, 1, 0.2)
+        readonly property color pillBorder:      Qt.rgba(1, 1, 1, 0.2)
         readonly property color pillText:        text
     }
 
@@ -52,9 +52,9 @@ QtObject {
         readonly property color text:        Theme.palettePaper
         readonly property color border:      Qt.rgba(1, 1, 1, 0.24)
         
-        readonly property color pillTrack:       Qt.rgba(paletteInk.r, paletteInk.g, paletteInk.b, Theme.moduleOpacity)
-        readonly property color pillFill:        Qt.rgba(1, 1, 1, 0.2 * Theme.moduleOpacity)
-        readonly property color pillBorder:      Qt.darker(pillTrack, 1.3)
+        readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.06)
+        readonly property color pillFill:        Qt.rgba(1, 1, 1, 0.2)
+        readonly property color pillBorder:      Qt.rgba(1, 1, 1, 0.2)
         readonly property color pillText:        text
     }
 
@@ -69,9 +69,9 @@ QtObject {
         readonly property color text:       Theme.paletteInk
         readonly property color border:     Theme.paletteBorderSoft
         
-        readonly property color pillTrack:       Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.5)
+        readonly property color pillTrack:       Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.6)
         readonly property color pillFill:        Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.9)
-        readonly property color pillBorder:      Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.7)
+        readonly property color pillBorder:      Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.9)
         readonly property color pillText:        Theme.paletteInk
     }
 
@@ -85,12 +85,6 @@ QtObject {
         readonly property color pressed:    Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, Theme.moduleOpacity)
         readonly property color text:       "#2a202f"
         readonly property color border:     "#652e2e"
-        
-        readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.08)
-        readonly property color pillFill:        base
-        readonly property color pillBorder:      Qt.lighter(pillTrack, 1.3)
-        readonly property color pillText:        text
-        readonly property color pillTextOutline: "transparent"
     }
 
     // Helper: resolve a variant name string → palette object

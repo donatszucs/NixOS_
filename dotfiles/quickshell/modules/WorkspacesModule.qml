@@ -22,7 +22,7 @@ ModuleButton {
     bottomRightRadius: Theme.moduleEdgeRadius + 2
     property int overlay: 4
 
-    implicitHeight: Theme.moduleHeight * 0.9
+    implicitHeight: Theme.moduleHeight
 
     // Only workspaces whose monitor name matches this bar's screen
     readonly property var monitorWorkspaces: {
@@ -52,7 +52,8 @@ ModuleButton {
                 required property var modelData
                 required property int index
                 variant: active ? "light" : "neutral"
-                
+                border.width: 2
+                border.color: pal.pillBorder
                 property int activeDragCount: 0
                 z: activeDragCount > 0 ? 99 : 0
                 
@@ -276,6 +277,8 @@ ModuleButton {
         ModuleButton {
             label: ""
             variant: "neutral"
+            border.width: 2
+            border.color: pal.pillBorder
             implicitWidth: root.implicitHeight - 2 * root.overlay
             implicitHeight: root.implicitHeight - 2 * root.overlay
             
@@ -316,6 +319,9 @@ ModuleButton {
                 required property var modelData
                 required property int index
                 variant: active ? "light" : "neutral"
+                border.width: 2
+                border.color: pal.pillBorder
+                
                 implicitHeight: root.implicitHeight - 2 * root.overlay
                 implicitWidth: 25
                 cursorShape: Qt.PointingHandCursor

@@ -7,8 +7,8 @@ import "../elements"
 
 ModuleButton {
     id: systemModule
-    color: Theme.palette("dark").base
-    noHoverColorChange: true
+    noHoverColorChange: expanded
+    noPressColorChange: expanded
     property bool expanded: false
     property color buttonColor: mainButton.color
 
@@ -20,7 +20,8 @@ ModuleButton {
             if (!parentHover.hovered && expanded) expanded = false
         }
     }
-
+    onClicked: if (!expanded) expanded = true
+    
     bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
 
     implicitHeight: expanded ? actionColumn.implicitHeight + 10: Theme.moduleHeight
@@ -39,42 +40,46 @@ ModuleButton {
             right: parent.right
         }
 
-        ModuleButton {
+        PillBarButton {
             id: mainButton
-            variant: "neutral"
-            border.color: pal.border
-            border.width: 2
-            
-            radius: !systemModule.expanded ? closedSize / 2 : Theme.moduleEdgeRadius
+            colorOverride: !expanded
+            noHoverColorChange: !expanded
+            noPressColorChange: !expanded
 
-            topLeftRadius: !systemModule.expanded ? closedSize / 2 : 0
-            topRightRadius: !systemModule.expanded ? closedSize / 2 : 0
-            
-            property int closedSize: Theme.moduleHeight - 8
-            property int padding: (Theme.moduleHeight - closedSize) / 2
+            pillVariant: "neutral"
+
+
+            bottomLeftRadius: systemModule.expanded ? Theme.moduleEdgeRadius : 0
+            bottomRightRadius: systemModule.expanded ? Theme.moduleEdgeRadius : 0
+
 
             Layout.alignment: Qt.AlignCenter
-            Layout.rightMargin: 10
-            Layout.topMargin: systemModule.expanded ? 0 : padding
-            Layout.leftMargin: 5
-            label: systemModule.expanded ? "System" : ""
-            
-            implicitHeight: systemModule.expanded ? Theme.moduleHeight: closedSize
-            implicitWidth: systemModule.expanded ? 180 : Math.ceil(Theme.moduleHeight * 1.15)
 
-            cursorShape: Qt.PointingHandCursor
-            onClicked: systemModule.expanded = !systemModule.expanded
+            pillText: systemModule.expanded ? "System" : ""
+            percent: expanded ? 100 : 0
+
+            implicitWidth: systemModule.expanded ? 190 : Math.ceil(Theme.moduleHeight * 1.5)
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                acceptedButtons: Qt.LeftButton
+
+                onPressedChanged: {
+                        if(!systemModule.expanded) {
+                            systemModule.pressed = !systemModule.pressed
+                        }
+                        else {
+                            mainButton.pressed = !mainButton.pressed
+                        }
+                    }
+                onClicked: (mouse) => {
+                                        systemModule.expanded = !systemModule.expanded
+                                    }
+            }
 
             Behavior on implicitWidth {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-            }
-
-            Behavior on implicitHeight {
-                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-            }
-
-            Behavior on Layout.topMargin {
-                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
 
             Behavior on radius {
@@ -167,7 +172,7 @@ ModuleButton {
                 spacing: 10
 
                 Text {
-                    text: "NixOS"
+                    text: "NixOS "
                     color: Theme.textPrimary
                     font.family: Theme.font
                     font.pixelSize: 22
@@ -177,7 +182,7 @@ ModuleButton {
                 ModuleButton {
                     variant: "light"
                     label: "󰚰"
-                    textFont: 24
+                    textFont: 20
 
                     cursorShape: Qt.PointingHandCursor
                     onClicked: updateProc.running = true
@@ -190,7 +195,7 @@ ModuleButton {
                 ModuleButton {
                     variant: "light"
                     label: "󱄅"
-                    textFont: 24
+                    textFont: 20
                     cursorShape: Qt.PointingHandCursor
                     onClicked: rebuildProc.running = true
 
