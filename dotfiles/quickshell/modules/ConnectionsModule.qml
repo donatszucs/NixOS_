@@ -21,8 +21,7 @@ ModuleButton {
         }
     }
     
-    cursorShape: Qt.PointingHandCursor
-    onClicked: expanded = !expanded
+    clip: true
 
     property int cardWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, mouseRow.implicitWidth, headsetRow.implicitWidth) + 20
     // ── State ──────────────────────────────────────────────────
@@ -95,69 +94,93 @@ ModuleButton {
     // 4. Your icon logic
     property string btIcon: connectionsModule.btPowered ? (btDevicesConnected ? "󰂱" : "󰂯") : "󰂲"
     // ── Sizing ─────────────────────────────────────────────────
-    implicitHeight: expanded ? dropdownMenu.implicitHeight : Theme.moduleHeight
-    implicitWidth:  expanded ? Math.ceil(dropdownMenu.implicitWidth) : Math.ceil(labelRow.implicitWidth)
+    implicitHeight: expanded ? baseColumn.implicitHeight : Theme.moduleHeight
+    implicitWidth:  expanded ? Math.ceil(popupCol.implicitWidth) + 20 : Math.ceil(collapsedRow.implicitWidth)
 
-    // ── Collapsed label ────────────────────────────────────────
-    RowLayout {
-        visible: !connectionsModule.expanded
-        id: labelRow
-        anchors.centerIn: parent
-        spacing: 0
+    ColumnLayout {
+        id: baseColumn
+        anchors { left: parent.left; right: parent.right; top: parent.top }
+        spacing: 10
 
-        Text {
-            text: connectionsModule.netIcon
-            color: connectionsModule.netColor
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize + 1
+        // ── Header / Collapsed State ───────────────────────────────
+        PillBarButton {
+            id: collapsedRow
+            Layout.fillWidth: true
+            implicitHeight: Theme.moduleHeight
+            implicitWidth: Math.max(labelRow.implicitWidth, 40)
             
-            // Add padding here if your ModuleButton had specific padding
-            leftPadding: Theme.modulePaddingH; rightPadding: 10
-    }
-        Text {
-            text: connectionsModule.btIcon
-            color: connectionsModule.btColor
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize + 1
-            leftPadding: 10; rightPadding: Theme.modulePaddingH
+            noHoverColorChange: !connectionsModule.expanded
+            noPressColorChange: !connectionsModule.expanded
+            colorOverride: !connectionsModule.expanded
+            
+            pillVariant: "neutral"
+            percent: connectionsModule.expanded ? 100 : 0
+
+            bottomLeftRadius: connectionsModule.expanded ? Theme.moduleEdgeRadius : 0
+            bottomRightRadius: connectionsModule.expanded ? Theme.moduleEdgeRadius : 0
+            
+            Behavior on radius {
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                acceptedButtons: Qt.LeftButton
+
+                onPressedChanged: {
+                    if (!connectionsModule.expanded) {
+                        connectionsModule.pressed = !connectionsModule.pressed
+                    } else {
+                        collapsedRow.pressed = !collapsedRow.pressed
+                    }
+                }
+                onClicked: {
+                    connectionsModule.expanded = !connectionsModule.expanded
+                }
+            }
+
+            Text {
+                visible: connectionsModule.expanded
+                text: "Connections"
+                color: Theme.textPrimary
+                font.family: Theme.font
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+                anchors.centerIn: parent
+            }
+
+            RowLayout {
+                visible: !connectionsModule.expanded
+                id: labelRow
+                anchors.centerIn: parent
+                spacing: 0
+
+                Text {
+                    text: connectionsModule.netIcon
+                    color: connectionsModule.netColor
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize + 1
+                    leftPadding: Theme.modulePaddingH; rightPadding: 10
+                }
+                Text {
+                    text: connectionsModule.btIcon
+                    color: connectionsModule.btColor
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize + 1
+                    leftPadding: 10; rightPadding: Theme.modulePaddingH
+                }
+            }
         }
-    }
 
-    // ── Popup dropdown ─────────────────────────────────────────
-    ModuleButton {
-        id: dropdownMenu
-        visible: connectionsModule.expanded
-        noHoverColorChange: true
-        color: "transparent"
-
-        implicitWidth: connectionsModule.cardWidth + 20
-        implicitHeight: popupCol.implicitHeight + 10
-
+        // ── Popup dropdown ─────────────────────────────────────────
         ColumnLayout {
             id: popupCol
-            anchors {
-                left:    parent.left
-                right:   parent.right
-                top:     parent.top
-                leftMargin: 10
-                rightMargin: 10
-                topMargin: 0
-                bottomMargin: 0
-            }
+            implicitWidth: connectionsModule.cardWidth
+            Layout.leftMargin: 10
+            Layout.rightMargin: 10
+            Layout.bottomMargin: 10
             spacing: 10
-
-            ModuleButton {
-                visible: connectionsModule.expanded
-                implicitWidth: parent.width
-                implicitHeight: Theme.moduleHeight
-                label: "Connections"
-                
-                bottomLeftRadius: Theme.moduleEdgeRadius
-                bottomRightRadius: Theme.moduleEdgeRadius
-
-                cursorShape: Qt.PointingHandCursor
-                onClicked: connectionsModule.expanded = false
-            }
 
             // ── Network ──────────────────────────────────
             ModuleButton {
