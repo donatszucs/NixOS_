@@ -71,7 +71,7 @@ QtObject {
         
         readonly property color pillTrack:       Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.6)
         readonly property color pillFill:        Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.9)
-        readonly property color pillBorder:      Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.9)
+        readonly property color pillBorder:      Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.8)
         readonly property color pillText:        Theme.paletteInk
     }
 

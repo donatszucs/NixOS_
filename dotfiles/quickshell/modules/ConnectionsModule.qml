@@ -24,6 +24,7 @@ ModuleButton {
     clip: true
 
     property int cardWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, mouseRow.implicitWidth, headsetRow.implicitWidth) + 20
+
     // ── State ──────────────────────────────────────────────────
     property string netIcon:     "󰈀"
     property string netName:     "..."
@@ -95,20 +96,26 @@ ModuleButton {
     property string btIcon: connectionsModule.btPowered ? (btDevicesConnected ? "󰂱" : "󰂯") : "󰂲"
     // ── Sizing ─────────────────────────────────────────────────
     implicitHeight: expanded ? baseColumn.implicitHeight : Theme.moduleHeight
-    implicitWidth:  expanded ? Math.ceil(popupCol.implicitWidth) + 20 : Math.ceil(collapsedRow.implicitWidth)
+    implicitWidth:  expanded ? baseColumn.implicitWidth : labelRow.implicitWidth
 
+    Behavior on implicitWidth {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+    }
     ColumnLayout {
         id: baseColumn
-        anchors { left: parent.left; right: parent.right; top: parent.top }
+        anchors { 
+            top: parent.top
+            right: parent.right
+         }
         spacing: 10
 
         // ── Header / Collapsed State ───────────────────────────────
         PillBarButton {
             id: collapsedRow
-            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignRight
             implicitHeight: Theme.moduleHeight
-            implicitWidth: Math.max(labelRow.implicitWidth, 40)
-            
+            implicitWidth: connectionsModule.implicitWidth
+
             noHoverColorChange: !connectionsModule.expanded
             noPressColorChange: !connectionsModule.expanded
             colorOverride: !connectionsModule.expanded
@@ -118,11 +125,9 @@ ModuleButton {
 
             bottomLeftRadius: connectionsModule.expanded ? Theme.moduleEdgeRadius : 0
             bottomRightRadius: connectionsModule.expanded ? Theme.moduleEdgeRadius : 0
-            
-            Behavior on radius {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-            }
 
+            clip: true
+            
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
@@ -548,9 +553,6 @@ ModuleButton {
         }
     }
 
-    Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-    }
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }

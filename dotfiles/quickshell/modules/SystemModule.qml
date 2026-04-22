@@ -12,8 +12,6 @@ ModuleButton {
     property bool expanded: false
     property color buttonColor: mainButton.color
 
-    topMarginButton: 0 // Removes default margin from ModuleButton
-
     HoverHandler {
         id: parentHover
         onHoveredChanged: {
