@@ -52,7 +52,7 @@ QtObject {
         readonly property color text:        Theme.palettePaper
         readonly property color border:      Qt.rgba(1, 1, 1, 0.24)
         
-        readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.06)
+        readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.1)
         readonly property color pillFill:        Qt.rgba(1, 1, 1, 0.2)
         readonly property color pillBorder:      Qt.rgba(1, 1, 1, 0.2)
         readonly property color pillText:        text

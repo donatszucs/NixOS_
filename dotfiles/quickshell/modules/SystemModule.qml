@@ -23,7 +23,7 @@ ModuleButton {
     bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
 
     implicitHeight: expanded ? actionColumn.implicitHeight + 10: Theme.moduleHeight
-    implicitWidth: expanded ? actionColumn.implicitWidth + 5 : actionColumn.implicitWidth
+    implicitWidth: expanded ? actionColumn.implicitWidth + 5 : actionColumn.implicitWidth - 8
 
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }

@@ -12,6 +12,11 @@ Notes:
 
 SuperMouse preset needs to be added in Input Remapper
 
+delete old builds:
+    - **sudo nix-collect-garbage --delete-older-than 5d**
+list generations:
+    - **sudo nixos-rebuild list-generations**
+
 Python scripts setup:
 
     - In scripts folder: uv init scriptsEnv
