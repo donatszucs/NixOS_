@@ -185,7 +185,18 @@ ModuleButton {
             Layout.leftMargin: 10
             Layout.rightMargin: 10
             Layout.bottomMargin: 10
-            spacing: 10
+            spacing: 5
+
+            Text {
+                text: "Hardware"
+                color: Theme.textPrimary
+                font.family: Theme.font
+                font.pixelSize: 22
+                font.bold: true
+                Layout.alignment: Qt.AlignHCenter
+                Layout.margins: 10
+                Layout.topMargin: 0
+            }
 
             // ── Network ──────────────────────────────────
             ModuleButton {
@@ -193,6 +204,9 @@ ModuleButton {
                 visible: connectionsModule.expanded
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
+
+                bottomLeftRadius: 5
+                bottomRightRadius: 5
 
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: netRow.implicitHeight + 20
@@ -261,6 +275,9 @@ ModuleButton {
                 visible: connectionsModule.expanded
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
+
+                topLeftRadius: 5
+                topRightRadius: 5
 
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: btRow.implicitHeight + 20
@@ -389,12 +406,25 @@ ModuleButton {
                 }
             }
 
+            Text {
+                text: "Peripherals"
+                color: Theme.textPrimary
+                font.family: Theme.font
+                font.pixelSize: 22
+                font.bold: true
+                Layout.alignment: Qt.AlignHCenter
+                Layout.margins: 10
+            }
+
             // ── Headset ──────────────────────────────────
             ModuleButton {
                 id: headsetModule
                 visible: connectionsModule.expanded
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
+
+                bottomLeftRadius: 5
+                bottomRightRadius: 5
 
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: headsetRow.implicitHeight + 20
@@ -476,6 +506,9 @@ ModuleButton {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
+                topLeftRadius: 5
+                topRightRadius: 5
+                
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: mouseRow.implicitHeight + 20
                 
