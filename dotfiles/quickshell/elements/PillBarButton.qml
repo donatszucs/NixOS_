@@ -15,7 +15,7 @@ ModuleButton {
         // Outer pill background
     Rectangle {
         anchors.centerIn: parent
-        width: parent.width - 10
+        width: parent.width - 8
         height: Theme.moduleHeight - 8
         radius: height / 2
         color: root.pillPal.pillTrack
