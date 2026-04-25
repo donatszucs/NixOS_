@@ -116,155 +116,9 @@ ModuleButton {
 
                     Repeater {
                         model: wsButton.modelData.toplevels.values
-                        delegate: Item {
-                            id: dragContainer
-                            
-                            required property var modelData
-                            
-                            z: windowIcon.Drag.active ? 99 : 0
-                            
-                            // Re-wrap the icon so it returns cleanly to its layout spot
-                            implicitWidth: windowIcon.width
-                            implicitHeight: Theme.moduleHeight - 15
-                            Layout.preferredWidth: implicitWidth
-                            Layout.preferredHeight: implicitHeight
-                            visible: windowIcon.appId !== "" // Use explicit check from the icon
-
-                            IconImage {
-                                id: windowIcon
-                                
-                                anchors.verticalCenter: dragArea.drag.active ? undefined : parent.verticalCenter
-                                anchors.horizontalCenter: dragArea.drag.active ? undefined : parent.horizontalCenter
-                                
-                                property string address: String(modelData.address)
-
-                                height: Theme.moduleHeight - 15
-                                width: {
-                                    var systemIcon = String(source).indexOf("image://icon/") === 0;
-                                    if (systemIcon) return height;
-                                    var w = Math.max(implicitWidth, 1);
-                                    var h = Math.max(implicitHeight, 1);
-                                    return (w / h) * height;
-                                }
-
-                                // Use x11 appId if wayland one is empty or missing (e.g. for Steam games running via XWayland)
-                            readonly property string appId: {
-                                if (modelData.wayland && modelData.wayland.appId !== "") return modelData.wayland.appId;
-                                if (modelData.x11 && modelData.x11.appId !== "") return modelData.x11.appId;
-                                return "";
-                            }
-                            
-                            readonly property bool isSteam: appId.toLowerCase().indexOf("steam_app_") === 0
-                            readonly property string steamId: isSteam ? appId.substring(10) : ""
-                            property string steamImagePath: ""
-
-                            // Look up the desktop entry by appId to get the correct icon name,
-                            // exactly like LauncherModule does via DesktopEntries.
-                            readonly property string resolvedIcon: {
-                                if (appId === "") return ""
-                                else if (isSteam) 
-                                {
-                                    steamIconProc.exec([
-                                        "bash", 
-                                        "/home/doni/nixos-config/scripts/SteamIcon/SteamIconSearch.sh", 
-                                        "/home/doni/.steam/root/appcache/librarycache/" + steamId
-                                    ]);
-                                    return steamImagePath !== "" ? steamImagePath : Quickshell.iconPath(steam);
-                                }
-                                
-                                var entries = DesktopEntries.applications.values
-                                for (var i = 0; i < entries.length; i++) {
-                                    var entryId = entries[i].id.toLowerCase();
-                                    var appLower = appId.toLowerCase();
-                                    if (entryId === appLower || entryId === appLower + ".desktop" || entryId.indexOf(appLower) >= 0)
-                                        return Quickshell.iconPath(entries[i].icon !== "" ? entries[i].icon : appId)
-                                }
-                                // fallback: match by display name
-                                for (var j = 0; j < entries.length; j++) {
-                                    if (entries[j].name.toLowerCase() === appLower || entries[j].name.toLowerCase().indexOf(appLower) >= 0)
-                                        return Quickshell.iconPath(entries[j].icon !== "" ? entries[j].icon : appId)
-                                }
-                                // extreme fallback: match window title for electron wrappers
-                                if (modelData.title) {
-                                    var titleLower = modelData.title.toLowerCase();
-                                    
-                                    if (titleLower.indexOf("teams") >= 0) return Quickshell.iconPath("teams-for-linux");
-
-                                    for (var k = 0; k < entries.length; k++) {
-                                        var entryName = entries[k].name.toLowerCase();
-                                        if (titleLower.indexOf(entryName) >= 0 || entryName.indexOf(titleLower) >= 0) {
-                                            return Quickshell.iconPath(entries[k].icon !== "" ? entries[k].icon : appId);
-                                        }
-                                    }
-                                }
-                                return Quickshell.iconPath(appId)
-                            }
-
-                            source: resolvedIcon
-                            
-                            visible: appId !== ""
-
-                            z: dragArea.drag.active ? 999 : 0
-
-                            Drag.active: dragArea.drag.active
-                            Drag.source: windowIcon
-                            Drag.hotSpot.x: width / 2
-                            Drag.hotSpot.y: height / 2
-                            
-                            Process {
-                                id: steamIconProc
-                                
-                                stdout: StdioCollector {
-                                    onStreamFinished: {
-                                        var output = text.trim(); 
-                                        windowIcon.steamImagePath = output;
-                                    }
-                                }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                acceptedButtons: Qt.MiddleButton
-                                cursorShape: Qt.PointingHandCursor
-
-                                onClicked: function(mouse) {
-                                    if (mouse.button === Qt.MiddleButton) {
-                                         Hyprland.dispatch("closewindow address:0x" + dragContainer.modelData.address)
-                                    }
-                                }
-                            }
-
-                            MouseArea {
-                                id: dragArea
-                                anchors.fill: parent
-                                acceptedButtons: Qt.LeftButton
-                                cursorShape: Qt.PointingHandCursor
-                                
-                                drag.target: windowIcon
-                                drag.axis: Drag.XAndYAxis
-                                drag.threshold: 4
-
-                                onReleased: {
-                                    if (drag.active) {
-                                        windowIcon.Drag.drop()
-                                    }
-                                }
-
-                                onClicked: function(mouse) {
-                                    if (dragArea.drag.active) return;
-                                    Hyprland.dispatch("workspace " + wsButton.modelData.id)
-                                }
-                            } // MouseArea
-                            
-                            Connections {
-                                target: dragArea.drag
-                                function onActiveChanged() {
-                                    if (dragArea.drag.active) wsButton.activeDragCount++;
-                                    else wsButton.activeDragCount--;
-                                }
-                            }
-                        } // IconImage
-                        } // Item (dragContainer)
+                        delegate: WorkspaceAppIcon {
+                            workspaceBtn: wsButton
+                        }
                     } // Repeater
                 } // RowLayout
 
@@ -316,15 +170,22 @@ ModuleButton {
             model: root.monitorWorkspaces.others
 
             delegate: ModuleButton {
+                id: othersButton
                 required property var modelData
                 required property int index
                 variant: active ? "light" : "neutral"
                 border.width: 2
                 border.color: pal.pillBorder
+                property int activeDragCount: 0
+                z: activeDragCount > 0 ? 99 : 0
                 
+                HoverHandler { id: hoverHandler }
+                property bool isHovered: hoverHandler.hovered
+
                 implicitHeight: root.implicitHeight - 2 * root.overlay
-                implicitWidth: 25
+                implicitWidth: isHovered ? (15 + othersContentRow.implicitWidth) : 25
                 cursorShape: Qt.PointingHandCursor
+                clip: activeDragCount === 0
                 
                 // Apply the parent's radius ONLY if this is the absolute last item in the list!
                 topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
@@ -350,9 +211,191 @@ ModuleButton {
                     }
                 }
 
-                label: modelData.name
+                label: ""
+
+                RowLayout {
+                    id: othersContentRow
+                    anchors.centerIn: parent
+                    spacing: 5
+
+                    Text {
+                        text: modelData.name
+                        color: parent.parent.textColor || "white"
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: true
+                    }
+
+                    Rectangle {
+                        visible: isHovered && modelData.toplevels.values.length > 0
+                        width: root.overlay
+                        height: Theme.moduleHeight - 15
+                        color: Theme.paletteInk
+                        opacity: 0.3
+                        radius: 2
+                    }
+
+                    Repeater {
+                        model: isHovered ? othersButton.modelData.toplevels.values : null
+                        delegate: WorkspaceAppIcon {
+                            workspaceBtn: othersButton
+                        }
+                    } // Repeater
+                }
+
+                Behavior on implicitWidth {
+                    NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.linear }
+                }
 
                 onClicked: Hyprland.dispatch("workspace " + modelData.id)
+            }
+        }
+    }
+
+
+    component WorkspaceAppIcon : Item {
+        id: dragContainer
+        
+        required property var modelData
+        property var workspaceBtn
+        
+        z: windowIcon.Drag.active ? 99 : 0
+        
+        implicitWidth: windowIcon.width
+        implicitHeight: Theme.moduleHeight - 15
+        Layout.preferredWidth: implicitWidth
+        Layout.preferredHeight: implicitHeight
+        visible: windowIcon.appId !== ""
+
+        IconImage {
+            id: windowIcon
+            
+            anchors.verticalCenter: dragArea.drag.active ? undefined : parent.verticalCenter
+            anchors.horizontalCenter: dragArea.drag.active ? undefined : parent.horizontalCenter
+            
+            property string address: String(modelData.address)
+
+            height: Theme.moduleHeight - 15
+            width: {
+                var systemIcon = String(source).indexOf("image://icon/") === 0;
+                if (systemIcon) return height;
+                var w = Math.max(implicitWidth, 1);
+                var h = Math.max(implicitHeight, 1);
+                return (w / h) * height;
+            }
+
+            readonly property string appId: {
+                if (modelData.wayland && modelData.wayland.appId !== "") return modelData.wayland.appId;
+                if (modelData.x11 && modelData.x11.appId !== "") return modelData.x11.appId;
+                return "";
+            }
+            
+            readonly property bool isSteam: appId.toLowerCase().indexOf("steam_app_") === 0
+            readonly property string steamId: isSteam ? appId.substring(10) : ""
+            property string steamImagePath: ""
+
+            readonly property string resolvedIcon: {
+                if (appId === "") return ""
+                else if (isSteam) 
+                {
+                    steamIconProc.exec([
+                        "bash", 
+                        "/home/doni/nixos-config/scripts/SteamIcon/SteamIconSearch.sh", 
+                        "/home/doni/.steam/root/appcache/librarycache/" + steamId
+                    ]);
+                    return steamImagePath !== "" ? steamImagePath : Quickshell.iconPath(steam);
+                }
+                
+                var entries = DesktopEntries.applications.values
+                for (var i = 0; i < entries.length; i++) {
+                    var entryId = entries[i].id.toLowerCase();
+                    var appLower = appId.toLowerCase();
+                    if (entryId === appLower || entryId === appLower + ".desktop" || entryId.indexOf(appLower) >= 0)
+                        return Quickshell.iconPath(entries[i].icon !== "" ? entries[i].icon : appId)
+                }
+                
+                for (var j = 0; j < entries.length; j++) {
+                    if (entries[j].name.toLowerCase() === appLower || entries[j].name.toLowerCase().indexOf(appLower) >= 0)
+                        return Quickshell.iconPath(entries[j].icon !== "" ? entries[j].icon : appId)
+                }
+                
+                if (modelData.title) {
+                    var titleLower = modelData.title.toLowerCase();
+                    
+                    if (titleLower.indexOf("teams") >= 0) return Quickshell.iconPath("teams-for-linux");
+
+                    for (var k = 0; k < entries.length; k++) {
+                        var entryName = entries[k].name.toLowerCase();
+                        if (titleLower.indexOf(entryName) >= 0 || entryName.indexOf(titleLower) >= 0) {
+                            return Quickshell.iconPath(entries[k].icon !== "" ? entries[k].icon : appId);
+                        }
+                    }
+                }
+                return Quickshell.iconPath(appId)
+            }
+
+            source: resolvedIcon
+            visible: appId !== ""
+            z: dragArea.drag.active ? 999 : 0
+
+            Drag.active: dragArea.drag.active
+            Drag.source: windowIcon
+            Drag.hotSpot.x: width / 2
+            Drag.hotSpot.y: height / 2
+            
+            Process {
+                id: steamIconProc
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        var output = text.trim(); 
+                        windowIcon.steamImagePath = output;
+                    }
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.MiddleButton
+                cursorShape: Qt.PointingHandCursor
+
+                onClicked: function(mouse) {
+                    if (mouse.button === Qt.MiddleButton) {
+                        Hyprland.dispatch("closewindow address:0x" + modelData.address)
+                    }
+                }
+            }
+
+            MouseArea {
+                id: dragArea
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton
+                cursorShape: Qt.PointingHandCursor
+                
+                drag.target: windowIcon
+                drag.axis: Drag.XAndYAxis
+                drag.threshold: 4
+
+                onReleased: {
+                    if (drag.active) {
+                        windowIcon.Drag.drop()
+                    }
+                }
+
+                onClicked: function(mouse) {
+                    if (dragArea.drag.active) return;
+                    if (workspaceBtn && workspaceBtn.modelData) {
+                        Hyprland.dispatch("workspace " + workspaceBtn.modelData.id)
+                    }
+                }
+            }
+            
+            Connections {
+                target: dragArea.drag
+                function onActiveChanged() {
+                    if (!workspaceBtn) return;
+                    if (dragArea.drag.active) workspaceBtn.activeDragCount++;
+                    else workspaceBtn.activeDragCount--;
+                }
             }
         }
     }
