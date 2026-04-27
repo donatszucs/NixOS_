@@ -19,10 +19,6 @@ ModuleButton {
 
     HoverHandler {
         id: parentHover
-        onHoveredChanged: {
-            scrollAnim.start()
-        }
-
     }
 
     // Using MPRIS; legacy playerctl state removed
@@ -75,59 +71,19 @@ ModuleButton {
                 bottomRightRadius: Theme.moduleEdgeRadius
 
                 // 3. Make the container a direct child (no contentItem:)
-                Item {
-                    id: textContainer
+                HoverMarqueeText {
+                    id: scrollingText
                     clip: true 
                     anchors.fill: parent
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
 
-                    Text {
-                        id: scrollingText
-                        text: nowPlayingModule.titleText
-                        
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
-                        
-                        anchors.verticalCenter: parent.verticalCenter
-                        
-                        width: nowPlayingModule.expanded ? implicitWidth : textContainer.width
-                        elide: nowPlayingModule.expanded ? Text.ElideNone : Text.ElideRight
-
-                        SequentialAnimation on x {
-                            id: scrollAnim
-                            loops: Animation.Infinite
-                            running: nowPlayingModule.expanded && scrollingText.implicitWidth > textContainer.width
-
-                            onRunningChanged: {
-                                if (!running) {
-                                    scrollingText.x = 0;
-                                }
-                            }
-
-                            PropertyAction { target: scrollingText; property: "x"; value: 0 }
-
-                            PauseAnimation { duration: 500 }
-                            
-                            NumberAnimation {
-                                target: scrollingText
-                                property: "x"
-                                from: 0
-                                to: Math.min(0, textContainer.width - scrollingText.implicitWidth)
-                                duration: Math.max(0, scrollingText.implicitWidth - textContainer.width) * 30 
-                                easing.type: Easing.Linear
-                            }
-                            PauseAnimation { duration: 500 }
-                            NumberAnimation {
-                                target: scrollingText
-                                property: "x"
-                                to: 0
-                                duration: 250
-                                easing.type: Easing.OutCubic
-                            }
-                        }
-                    }
+                    text: nowPlayingModule.titleText
+                    textMaxWidth: 200
+                    fontFamily: Theme.font
+                    pixelSize: Theme.fontSize
+                    textColor: Theme.textPrimary
+                    fontBold: false
                 }
             }
 
@@ -275,9 +231,6 @@ ModuleButton {
             currentTrackId = currentPlayer.trackTitle
             nowPlayingModule.titleText = "󰎆  " + (currentPlayer.trackTitle || "Nothing playing")
             nowPlayingModule.authorText = currentPlayer.trackArtist || "Unknown artist"
-            // Reset scrolling animation when the track actually changes
-            if (nowPlayingModule.expanded)
-                scrollAnim.start()
         }
     }
 

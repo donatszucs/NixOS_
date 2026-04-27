@@ -23,7 +23,8 @@ ModuleButton {
     
     clip: true
 
-    property int cardWidth: Math.max(netRow.implicitWidth, btRow.implicitWidth, mouseRow.implicitWidth, headsetRow.implicitWidth) + 20
+    property int cardWidth: textMaxWidth + 95
+    property int textMaxWidth: 180
 
     // ── State ──────────────────────────────────────────────────
     property string netIcon:     "󰈀"
@@ -166,14 +167,14 @@ ModuleButton {
                     color: connectionsModule.netColor
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize + 1
-                    leftPadding: Theme.modulePaddingH; rightPadding: 10
+                    leftPadding: Theme.modulePaddingH; rightPadding: 5
                 }
                 Text {
                     text: connectionsModule.btIcon
                     color: connectionsModule.btColor
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize + 1
-                    leftPadding: 10; rightPadding: Theme.modulePaddingH
+                    leftPadding: 5; rightPadding: Theme.modulePaddingH
                 }
             }
         }
@@ -209,7 +210,7 @@ ModuleButton {
                 bottomRightRadius: 5
 
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: netRow.implicitHeight + 20
+                implicitHeight: netRow.implicitHeight + 30
 
                 RowLayout {
                     id: netRow
@@ -217,10 +218,7 @@ ModuleButton {
                     anchors {
                         left:    parent.left
                         top:     parent.top
-                        leftMargin: 10
-                        rightMargin: 10
-                        topMargin: 10
-                        bottomMargin: 10
+                        margins: 15
                     }
 
                     spacing: 15
@@ -232,15 +230,15 @@ ModuleButton {
                         colorOverride: true
                         textColor: connectionsModule.netColor
                         textFont: 24
-                        implicitWidth: textFont * 2
-                        Layout.preferredWidth: connectionsModule.statusColumnWidth
-                        radius: Theme.moduleEdgeRadius
+                        radius: 10
+                        implicitWidth: implicitHeight
+                        Layout.preferredWidth: implicitHeight
                         onClicked: netOpen.running = true
                     }
 
                     Rectangle {
                         width: 4
-                        Layout.preferredHeight: parent.height * 0.8
+                        Layout.preferredHeight: parent.height
                         Layout.alignment: Qt.AlignVCenter
                         color: Theme.textPrimary
                         opacity: 0.5
@@ -249,16 +247,15 @@ ModuleButton {
 
                     ColumnLayout {
                         id: netInfoCol
-                        Layout.margins: 10
-                        spacing: 10
-                        Text {
+                        Layout.margins: 5
+                        spacing: 5
+                        
+                        HoverMarqueeText {
                             text: connectionsModule.netName
-                            color: Theme.textPrimary
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
-                            font.bold: true
-
+                            textMaxWidth: connectionsModule.textMaxWidth
+                            Layout.fillWidth: true
                         }
+                        
                         Text {
                             text: connectionsModule.netState
                             color: Theme.textPrimary
@@ -280,7 +277,7 @@ ModuleButton {
                 topRightRadius: 5
 
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: btRow.implicitHeight + 20
+                implicitHeight: btRow.implicitHeight + 30
 
                 RowLayout {
                     id: btRow
@@ -288,29 +285,27 @@ ModuleButton {
                     anchors {
                         left:    parent.left
                         top:     parent.top
-                        leftMargin: 10
-                        rightMargin: 10
-                        topMargin: 10
-                        bottomMargin: 10
+                        margins: 15
                     }
 
                     spacing: 15
 
                     ColumnLayout {
                         id: btStatusCol
-                        Layout.preferredWidth: connectionsModule.statusColumnWidth
-                        Layout.topMargin: 10
-                        Layout.bottomMargin: 10
+                        spacing: 5
+                        Layout.bottomMargin: 5
+                        Layout.topMargin: 5
 
                         ModuleButton {
+                            id: btStatusIcon
                             label: connectionsModule.btIcon
                             Layout.alignment: Qt.AlignHCenter
                             cursorShape: Qt.PointingHandCursor
                             textColor: connectionsModule.btColor
                             colorOverride: true
-                            radius: Theme.moduleEdgeRadius
+                            radius: 10
                             textFont: 24
-                            implicitWidth: textFont * 2
+                            implicitWidth: implicitHeight
 
                             onClicked: btOpen.running = true
                         }
@@ -318,8 +313,8 @@ ModuleButton {
                         // Custom-styled switch (smaller, themed)
                         Rectangle {
                             id: btSwitch
-                            width: 40
-                            height: 22
+                            width: 32
+                            height: 20
                             radius: height / 2
                             color: connectionsModule.btColor
                             border.color: connectionsModule.btColor
@@ -354,7 +349,7 @@ ModuleButton {
 
                     Rectangle {
                         width: 4
-                        Layout.preferredHeight: parent.height * 0.8
+                        Layout.preferredHeight: parent.height
                         Layout.alignment: Qt.AlignVCenter
                         color: Theme.textPrimary
                         opacity: 0.5
@@ -364,24 +359,24 @@ ModuleButton {
                     ColumnLayout {
                         id: btInfoCol
                         Layout.fillWidth: true
-                        Layout.margins: 10
-                        spacing: 10
+                        Layout.margins: 5
+                        spacing: 5
 
                         Repeater {
                             model: connectionsModule.btDevices ? connectionsModule.btDevices : []
                             delegate: RowLayout {
+                                id: btDeviceRow
                                 required property var modelData
                                 visible: modelData && modelData.connected === true
                                 spacing: 10
 
-                                Text {
-                                    text: modelData.name
-                                    color: Theme.textPrimary
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize
-                                    font.bold: true
+                                HoverMarqueeText {
+                                    text: modelData.name || ""
+                                    textMaxWidth: modelData.batteryAvailable ? connectionsModule.textMaxWidth - deviceBatteryBtn.implicitWidth - 20 : connectionsModule.textMaxWidth
                                 }
+
                                 ModuleButton {
+                                    id: deviceBatteryBtn
                                     variant: "light"
                                     visible: modelData.batteryAvailable
                                     label: modelData.battery * 100 + "%"
@@ -427,7 +422,7 @@ ModuleButton {
                 bottomRightRadius: 5
 
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: headsetRow.implicitHeight + 20
+                implicitHeight: headsetRow.implicitHeight + 30
                 
                 RowLayout {
                     id: headsetRow
@@ -435,10 +430,7 @@ ModuleButton {
                     anchors {
                         left:    parent.left
                         top:     parent.top
-                        leftMargin: 10
-                        rightMargin: 10
-                        topMargin: 10
-                        bottomMargin: 10
+                        margins: 15
                     }
                      
                     spacing: 15
@@ -449,15 +441,14 @@ ModuleButton {
                         cursorShape: Qt.PointingHandCursor
                         colorOverride: true
                         textFont: 24
-                        implicitWidth: textFont * 2
-                        Layout.preferredWidth: connectionsModule.statusColumnWidth
-                        radius: Theme.moduleEdgeRadius
+                        Layout.preferredWidth: implicitHeight
+                        radius: 10
                         onClicked: headsetProc.running = true
                     }
 
                     Rectangle {
                         width: 4
-                        Layout.preferredHeight: parent.height * 0.8
+                        Layout.preferredHeight: parent.height
                         Layout.alignment: Qt.AlignVCenter
                         color: Theme.textPrimary
                         opacity: 0.5
@@ -466,19 +457,17 @@ ModuleButton {
                     
                     ColumnLayout {
                         id: headsetInfoCol
-                        spacing: 10
-                        Layout.margins: 10
+                        spacing: 5
+                        Layout.margins: 5
                         RowLayout {
                             spacing: 10
 
-                            Text {
+                            HoverMarqueeText {
                                 text: connectionsModule.headsetBatteryLabel
-                                color: Theme.textPrimary
-                                font.family: Theme.font
-                                font.pixelSize: Theme.fontSize
-                                font.bold: true
+                                textMaxWidth: connectionsModule.headsetBatteryAvailable ? connectionsModule.textMaxWidth - headsetBatteryBtn.width - 20 : connectionsModule.textMaxWidth
                             }
                             ModuleButton {
+                                id: headsetBatteryBtn
                                 variant: "light"
                                 visible: connectionsModule.headsetBatteryAvailable
                                 label: connectionsModule.headsetBatteryPercentLabel
@@ -510,7 +499,7 @@ ModuleButton {
                 topRightRadius: 5
                 
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: mouseRow.implicitHeight + 20
+                implicitHeight: mouseRow.implicitHeight + 30
                 
                 RowLayout {
                     id: mouseRow
@@ -518,10 +507,7 @@ ModuleButton {
                     anchors {
                         left:    parent.left
                         top:     parent.top
-                        leftMargin: 10
-                        rightMargin: 10
-                        topMargin: 10
-                        bottomMargin: 10
+                        margins: 15
                     }
                      
                     spacing: 15
@@ -532,15 +518,14 @@ ModuleButton {
                         cursorShape: Qt.PointingHandCursor
                         colorOverride: true
                         textFont: 24
-                        implicitWidth: textFont * 2
-                        Layout.preferredWidth: connectionsModule.statusColumnWidth
-                        radius: Theme.moduleEdgeRadius
+                        Layout.preferredWidth: implicitHeight
+                        radius: 10
                         onClicked: mouseProc.running = true
                     }
 
                     Rectangle {
                         width: 4
-                        Layout.preferredHeight: parent.height * 0.8
+                        Layout.preferredHeight: parent.height
                         Layout.alignment: Qt.AlignVCenter
                         color: Theme.textPrimary
                         opacity: 0.5
@@ -549,19 +534,17 @@ ModuleButton {
                     
                     ColumnLayout {
                         id: mouseInfoCol
-                        spacing: 10
-                        Layout.margins: 10
+                        spacing: 5
+                        Layout.margins: 5
                         RowLayout {
                             spacing: 10
 
-                            Text {
+                            HoverMarqueeText {
                                 text: connectionsModule.mouseBatteryLabel
-                                color: Theme.textPrimary
-                                font.family: Theme.font
-                                font.pixelSize: Theme.fontSize
-                                font.bold: true
+                                textMaxWidth: connectionsModule.mouseBatteryAvailable ? connectionsModule.textMaxWidth - mouseBatteryBtn.width - 20 : connectionsModule.textMaxWidth
                             }
                             ModuleButton {
+                                id: mouseBatteryBtn
                                 variant: "light"
                                 visible: connectionsModule.mouseBatteryAvailable
                                 label: connectionsModule.mouseBatteryPercentLabel

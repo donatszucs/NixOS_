@@ -150,62 +150,24 @@ ModuleButton {
                 radius: Theme.moduleEdgeRadius
                 label: ""
 
-                readonly property string truncatedName: {
-                    if (modelData.name.length <= sinkNameMaxChars) return modelData.name
-                    if (sinkNameMaxChars <= 3) return modelData.name.slice(0, sinkNameMaxChars)
-                    return modelData.name.slice(0, sinkNameMaxChars - 3) + "..."
-                }
-
-                Item {
-                    id: sinkNameViewport
+                HoverMarqueeText {
                     anchors {
                         fill: parent
                         leftMargin: Theme.modulePaddingH
                         rightMargin: Theme.modulePaddingH
                     }
+                    
+                    text: modelData.name
+                    textMaxWidth: 150 
+                    fontFamily: Theme.font
+                    pixelSize: parentButton.textFont
+                    fontBold: true
+                    textColor: parentButton.textColor
                     clip: true
-
-                    Text {
-                        id: sinkNameText
-                        text: parentButton.hovered ? modelData.name : parentButton.truncatedName
-                        color: parentButton.textColor
-                        font.family: Theme.font
-                        font.pixelSize: parentButton.textFont
-                        font.bold: true
-                        anchors.verticalCenter: parent.verticalCenter
-                        x: 0
-                    }
-
-                    SequentialAnimation {
-                        id: sinkNameMarquee
-                        running: parentButton.hovered && sinkNameText.width > sinkNameViewport.width
-                        loops: Animation.Infinite
-
-                        onRunningChanged: {
-                                if (!running) {
-                                    sinkNameText.x = 0;
-                                }
-                            }
-
-                        PauseAnimation { duration: 250 }
-                        NumberAnimation {
-                            target: sinkNameText
-                            property: "x"
-                            from: 0
-                            to: -(sinkNameText.width - sinkNameViewport.width)
-                            duration: Math.max(1200, (sinkNameText.width - sinkNameViewport.width) * 30)
-                            easing.type: Easing.Linear
-                        }
-                        PauseAnimation { duration: 500 }
-                        NumberAnimation {
-                            target: sinkNameText
-                            property: "x"
-                            to: 0
-                            duration: 250
-                            easing.type: Easing.OutCubic
-                        }
-                    }
+                    
+                    // Center the inner labels within this component's exact layout bounds
                 }
+
                 Process {
                     id: actionProc
                     command: ["bash", "-c", "wpctl set-default " + modelData.id]
