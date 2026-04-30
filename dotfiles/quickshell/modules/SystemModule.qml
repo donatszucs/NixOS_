@@ -20,7 +20,7 @@ ModuleButton {
     }
     onClicked: if (!expanded) expanded = true
     
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
 
     implicitHeight: expanded ? actionColumn.implicitHeight + 10: Theme.moduleHeight
     implicitWidth: expanded ? actionColumn.implicitWidth + 5 : actionColumn.implicitWidth - 8

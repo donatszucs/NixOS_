@@ -25,8 +25,8 @@ ModuleButton {
         id: sinksListModel
     }
 
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
     clip: true
 
     property alias sinksModel: sinksListModel

@@ -85,7 +85,7 @@ Item {
 
             color: Theme.palette("dark").base
             clip: true
-            topLeftRadius: Theme.moduleEdgeRadius + 5
+            topLeftRadius: Theme.moduleEdgeRadius + 10
             
             implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (Math.max(innerLayout.implicitWidth, headerButton.implicitWidth) + 20)
 

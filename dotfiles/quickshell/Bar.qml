@@ -131,7 +131,6 @@ PanelWindow {
         NowPlayingModule {
             Layout.alignment: Qt.AlignTop
             id: nowPlayingModule
-            bottomRightRadius: Theme.moduleEdgeRadius
         }
         InverseRadius {
             Layout.alignment: Qt.AlignTop

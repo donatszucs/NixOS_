@@ -69,8 +69,8 @@ ModuleButton {
         btDevicesConnected = anyConnected;
     }
 
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
     // 3. The exact same logic as your Repeater, but invisible
     Instantiator {
         id: deviceTracker
@@ -166,8 +166,8 @@ ModuleButton {
                     color: connectionsModule.netColor
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize + 1
-                    anchors.right: parent.horizontalCenter
-                    anchors.rightMargin: 4
+                    anchors.left: parent.left
+                    anchors.leftMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
                 }
                 Text {
@@ -175,8 +175,8 @@ ModuleButton {
                     color: connectionsModule.btColor
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize + 1
-                    anchors.left: parent.horizontalCenter
-                    anchors.leftMargin: 6
+                    anchors.right: parent.right
+                    anchors.rightMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }

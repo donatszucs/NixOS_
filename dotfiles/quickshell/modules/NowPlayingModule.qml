@@ -35,8 +35,8 @@ ModuleButton {
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 5 : 0
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleEdgeRadius
 
     ColumnLayout {
         id: column
