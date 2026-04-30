@@ -97,7 +97,7 @@ ModuleButton {
     property string btIcon: connectionsModule.btPowered ? (btDevicesConnected ? "󰂱" : "󰂯") : "󰂲"
     // ── Sizing ─────────────────────────────────────────────────
     implicitHeight: expanded ? baseColumn.implicitHeight : Theme.moduleHeight
-    implicitWidth:  expanded ? baseColumn.implicitWidth : labelRow.implicitWidth
+    implicitWidth:  expanded ? baseColumn.implicitWidth : 65
 
     Behavior on implicitWidth {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -156,25 +156,28 @@ ModuleButton {
                 anchors.centerIn: parent
             }
 
-            RowLayout {
+            Item {
                 visible: !connectionsModule.expanded
                 id: labelRow
-                anchors.centerIn: parent
-                spacing: 0
+                anchors.fill: parent
 
                 Text {
                     text: connectionsModule.netIcon
                     color: connectionsModule.netColor
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize + 1
-                    leftPadding: Theme.modulePaddingH; rightPadding: 5
+                    anchors.right: parent.horizontalCenter
+                    anchors.rightMargin: 4
+                    anchors.verticalCenter: parent.verticalCenter
                 }
                 Text {
                     text: connectionsModule.btIcon
                     color: connectionsModule.btColor
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize + 1
-                    leftPadding: 5; rightPadding: Theme.modulePaddingH
+                    anchors.left: parent.horizontalCenter
+                    anchors.leftMargin: 6
+                    anchors.verticalCenter: parent.verticalCenter
                 }
             }
         }
