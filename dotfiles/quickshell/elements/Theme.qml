@@ -120,6 +120,6 @@ QtObject {
     // ── Pill Bar Variables ───────────────────────────────────────────
 
     // ── Animations ─────────────────────────────────────────────────
-    readonly property int verticalDuration: 250
+    readonly property int verticalDuration: 200
     readonly property int horizontalDuration: verticalDuration
 }

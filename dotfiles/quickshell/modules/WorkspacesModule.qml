@@ -370,6 +370,30 @@ ModuleButton {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton
                 cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
+
+                ToolTip {
+                    id: appToolTip
+                    x: parent.width + 10
+                    visible: dragArea.containsMouse && !dragArea.drag.active
+                    delay: 250
+                    text: modelData.title || windowIcon.appId
+                    
+
+                    contentItem: Text {
+                        text: appToolTip.text
+                        color: "white"
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                    }
+
+                    background: Rectangle {
+                        color: Theme.palette("dark").base
+                        radius: 5
+                        border.color: Theme.palette("dark").border
+                        border.width: 2
+                    }
+                }
                 
                 drag.target: windowIcon
                 drag.axis: Drag.XAndYAxis
