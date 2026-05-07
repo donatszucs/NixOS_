@@ -23,7 +23,7 @@ ModuleButton {
 
     Component.onCompleted: updateTime()
 
-    implicitWidth: timeRow.implicitWidth + 20
+    implicitWidth: timeRow.implicitWidth
 
     RowLayout {
         id: timeRow

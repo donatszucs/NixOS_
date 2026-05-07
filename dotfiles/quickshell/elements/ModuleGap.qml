@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-Item {
+Rectangle {
     id: root
     // Pass the colors of the modules on either side
     property color leftColor: "transparent"
@@ -21,12 +21,13 @@ Item {
     property int sizeHright: Theme.moduleEdgeRadius
     property int sizeVright: Theme.moduleEdgeRadius
 
+    color: Theme.palette("dark").base
 
     // base properties
     property bool smoothCurve: false
     property real smoothTolerance: 0.1
     // The physical gap size between modules
-    implicitWidth: 0
+    implicitWidth: 5
     implicitHeight: Theme.moduleHeight
 
     // 1. The Right-facing corner (attaches to the Left module)

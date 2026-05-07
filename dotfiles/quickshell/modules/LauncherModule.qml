@@ -140,10 +140,10 @@ ModuleButton {
                 Layout.rightMargin: launcherModule.padding
             
                 ModuleButton {
-                    variant: "neutral"
+                    variant: "dark"
                     Layout.fillWidth: true
-                    implicitHeight: Theme.moduleHeight
-                    label: "󰸉  Wallpaper"
+                    implicitHeight: Theme.listHeight
+                    label: "󰸉 Wallpaper"
                     cursorShape: Qt.PointingHandCursor
 
                     radius: Theme.moduleEdgeRadius
@@ -155,9 +155,9 @@ ModuleButton {
                 }
             
                 ModuleButton {
-                    variant: "neutral"
+                    variant: "dark"
                     Layout.fillWidth: true
-                    implicitHeight: Theme.moduleHeight
+                    implicitHeight: Theme.listHeight
                     label: "󰌆 Bitwarden"
                     cursorShape: Qt.PointingHandCursor
 
@@ -174,9 +174,9 @@ ModuleButton {
                 }
 
                 ModuleButton {
-                    variant: "neutral"
+                    variant: "dark"
                     Layout.fillWidth: true
-                    implicitHeight: Theme.moduleHeight
+                    implicitHeight: Theme.listHeight
                     label: " Clipboard"
                     cursorShape: Qt.PointingHandCursor
 
@@ -194,81 +194,6 @@ ModuleButton {
 
             }
 
-            // Search bar
-            ModuleButton {
-                Layout.fillWidth: true
-                Layout.leftMargin: launcherModule.padding
-                Layout.rightMargin: launcherModule.padding
-                implicitHeight: Theme.listHeight
-                color: Theme.divider
-                radius: Theme.moduleEdgeRadius
-                cursorShape: Qt.PointingHandCursor
-
-                TextInput {
-                    id: searchField
-                    anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
-                    color: Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize * 1.1
-                    verticalAlignment: TextInput.AlignVCenter
-                    focus: true
-
-                    Text {
-                        anchors {
-                            left: parent.left
-                            verticalCenter: parent.verticalCenter
-                        }
-                        text: " Search apps..."
-                        color: launcherModule.textColor
-                        opacity: 0.5 // Make it look faded like a placeholder
-                        font.family: parent.font.family
-                        font.pixelSize: parent.font.pixelSize
-                        
-                        // The magic trick: Hide it if the user has typed anything!
-                        // (You can also add `&& !replyInput.activeFocus` if you want it to hide as soon as they click the box)
-                        visible: searchField.text.length === 0
-                    }
-                    onTextEdited: {
-                        launcherModule.filterApps(text)
-                        appList.currentIndex = 0
-                    }
-                    Keys.onEscapePressed: launcherModule.expanded = false
-                    Keys.onReturnPressed: {
-                        var idx = appList.currentIndex >= 0 ? appList.currentIndex : 0
-                        if (launcherModule.filteredApps.length > 0) {
-                            launcherModule.filteredApps[idx].execute()
-                            launcherModule.expanded = false
-                        }
-                    }
-                    Keys.onDownPressed: {
-                        if (launcherModule.filteredApps.length > 0) {
-                            appList.currentIndex = Math.min(
-                                launcherModule.filteredApps.length - 1,
-                                appList.currentIndex + 1
-                            )
-                            appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
-                        }
-                    }
-                    Keys.onUpPressed: {
-                        if (appList.currentIndex > 0) {
-                            appList.currentIndex = appList.currentIndex - 1
-                            appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
-                        } else {
-                            appList.currentIndex = 0
-                        }
-                    }
-                }
-            }
-
-            // Divider
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.leftMargin: launcherModule.padding
-                Layout.rightMargin: launcherModule.padding
-                height: 5
-                color: Theme.divider
-                radius: Theme.moduleEdgeRadius
-            }
 
             // App list
             Rectangle {
@@ -362,6 +287,111 @@ ModuleButton {
                                 font.bold: true
                                 elide: Text.ElideRight
                             }
+                        }
+                    }
+                }
+            }
+
+            // Search bar
+            ModuleButton {
+                Layout.fillWidth: true
+                Layout.leftMargin: launcherModule.padding
+                Layout.rightMargin: launcherModule.padding
+                implicitHeight: Theme.listHeight
+                color: "transparent"
+                radius: Theme.moduleEdgeRadius
+                cursorShape: Qt.PointingHandCursor
+
+                TextInput {
+                    id: searchField
+                    anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
+                    color: Theme.textPrimary
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize * 1.7
+                    font.bold: true
+                    
+                    verticalAlignment: TextInput.AlignVCenter
+                    horizontalAlignment: TextInput.AlignHCenter 
+                    focus: true
+
+                    // Completely hide the default cursor
+                    cursorDelegate: Item {}
+
+                    // Dynamic flashing underline bar
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 2
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        
+                        // Match text width. If empty, default to a 20px dash.
+                        width: searchField.text.length > 0 ? searchField.contentWidth + 8 : placeholder.contentWidth + 8
+                        height: 4
+                        color: Theme.textPrimary 
+                        radius: 2 
+
+                        // Smoothly animate the bar growing/shrinking as you type
+                        Behavior on width {
+                            NumberAnimation { duration: 100; easing.type: Easing.OutQuad }
+                        }
+
+                        // The breathing animation
+                        SequentialAnimation on opacity {
+                            loops: Animation.Infinite
+                            running: searchField.activeFocus // Only breathe when focused
+                            
+                            NumberAnimation { 
+                                to: 0.6 
+                                duration: 2000 // 1 second to exhale
+                                easing.type: Easing.InOutSine 
+                            }
+                            NumberAnimation { 
+                                to: 1.0 // Fades back to full opacity
+                                duration: 1000 // 1 second to inhale
+                                easing.type: Easing.InOutSine 
+                            }
+                        }
+                    }
+
+                    Text {
+                        id: placeholder
+                        anchors.centerIn: parent
+                        text: "search apps" 
+                        
+                        color: launcherModule.textColor
+                        opacity: 0.5 
+                        font.family: parent.font.family
+                        font.pixelSize: parent.font.pixelSize
+                        font.bold: true
+                        
+                        visible: searchField.text.length === 0
+                    }
+                    onTextEdited: {
+                        launcherModule.filterApps(text)
+                        appList.currentIndex = 0
+                    }
+                    Keys.onEscapePressed: launcherModule.expanded = false
+                    Keys.onReturnPressed: {
+                        var idx = appList.currentIndex >= 0 ? appList.currentIndex : 0
+                        if (launcherModule.filteredApps.length > 0) {
+                            launcherModule.filteredApps[idx].execute()
+                            launcherModule.expanded = false
+                        }
+                    }
+                    Keys.onDownPressed: {
+                        if (launcherModule.filteredApps.length > 0) {
+                            appList.currentIndex = Math.min(
+                                launcherModule.filteredApps.length - 1,
+                                appList.currentIndex + 1
+                            )
+                            appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
+                        }
+                    }
+                    Keys.onUpPressed: {
+                        if (appList.currentIndex > 0) {
+                            appList.currentIndex = appList.currentIndex - 1
+                            appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
+                        } else {
+                            appList.currentIndex = 0
                         }
                     }
                 }

@@ -23,7 +23,7 @@ ModuleButton {
     bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
 
     implicitHeight: expanded ? actionColumn.implicitHeight + 10: Theme.moduleHeight
-    implicitWidth: expanded ? actionColumn.implicitWidth + 5 : actionColumn.implicitWidth - 8
+    implicitWidth: mainButton.implicitWidth
 
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -48,7 +48,6 @@ ModuleButton {
 
 
             bottomLeftRadius: systemModule.expanded ? Theme.moduleEdgeRadius : 0
-            bottomRightRadius: systemModule.expanded ? Theme.moduleEdgeRadius : 0
 
 
             Layout.alignment: Qt.AlignCenter
@@ -56,7 +55,7 @@ ModuleButton {
             pillText: systemModule.expanded ? "System" : ""
             percent: expanded ? 100 : 0
 
-            implicitWidth: systemModule.expanded ? 190 : Math.ceil(Theme.moduleHeight * 1.5)
+            implicitWidth: systemModule.expanded ? 200 : 50
 
             MouseArea {
                 anchors.fill: parent
@@ -85,6 +84,17 @@ ModuleButton {
             }
         }
 
+        InverseRadius {
+            id: corner
+            cornerPosition: "topRight"
+            color: mainButton.color
+            size: Theme.moduleEdgeRadius
+
+            Layout.alignment: Qt.AlignTop | Qt.AlignRight
+            Layout.topMargin: -10
+
+        }
+        
         Repeater {
 
             model: [
@@ -100,14 +110,11 @@ ModuleButton {
                 cursorShape: Qt.PointingHandCursor
                 variant: "red"
 
-                implicitWidth: mainButton.implicitWidth
                 implicitHeight: Theme.listHeight
 
                 Layout.alignment: Qt.AlignCenter
-                Layout.preferredWidth: mainButton.implicitWidth
-                Layout.rightMargin: 10
-                Layout.leftMargin: 5
-                Layout.fillWidth: true
+                Layout.preferredWidth: mainButton.implicitWidth - 20
+                Layout.topMargin: actionButton.modelData.index === 0 ? (- corner.size) : 0
 
                 radius: Theme.moduleEdgeRadius
 
@@ -156,10 +163,7 @@ ModuleButton {
         // ── System actions ─────────────────────────────
         Rectangle {
             Layout.alignment: Qt.AlignCenter
-            Layout.preferredWidth: mainButton.implicitWidth
-            Layout.rightMargin: 10
-            Layout.leftMargin: 5
-            Layout.fillWidth: true
+            Layout.preferredWidth: mainButton.implicitWidth - 20
             implicitHeight: Theme.listHeight
             color: Theme.divider
             radius: Theme.moduleEdgeRadius

@@ -118,15 +118,10 @@ PanelWindow {
             leftColor: nowPlayingModule.color
             leftExpanded: nowPlayingModule.expanded
 
-            Rectangle {
-                anchors.fill: parent
-                color: Theme.palette("dark").base
-            }
-
             Behavior on implicitWidth {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
-            implicitWidth: launcherModule.expanded && nowPlayingModule.expanded ? Theme.moduleEdgeRadius * 2 : 0
+            implicitWidth: launcherModule.expanded && nowPlayingModule.expanded ? Theme.moduleEdgeRadius * 2 : 5
         }
         NowPlayingModule {
             Layout.alignment: Qt.AlignTop
@@ -192,6 +187,9 @@ PanelWindow {
             id: virtualKeyboardModule
 
         }
+        ModuleGap {
+            Layout.alignment: Qt.AlignTop
+        }
         MonitorBrightnessModule {
             Layout.alignment: Qt.AlignTop
             screenName: modelData.name
@@ -221,6 +219,7 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
+            implicitWidth: 0
             rightColor: connectionsModule.color
             rightExpanded: connectionsModule.expanded
         }
@@ -231,6 +230,7 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
+            implicitWidth: 0
             leftColor: systemModule.color
             leftExpanded: systemModule.expanded
         }
@@ -240,6 +240,7 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
+            implicitWidth: 0
             leftColor: systemModule.color
             implicitHeight: systemModule.implicitHeight
         }

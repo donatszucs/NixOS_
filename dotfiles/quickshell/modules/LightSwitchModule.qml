@@ -14,6 +14,7 @@ ModuleButton {
 
     // ── Expand / collapse colour picker ────────────────────────────
     property bool expanded: false
+    property color buttonColor: labelText.color
 
     HoverHandler {
         id: parentHover
@@ -26,176 +27,176 @@ ModuleButton {
     bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
 
     implicitHeight: expanded
-        ? Theme.moduleHeight + colorWheelArea.height + 12
+        ? contentColumn.implicitHeight
         : Theme.moduleHeight
-    implicitWidth: expanded
-        ? Math.max(labelText.implicitWidth, colorWheelArea.implicitWidth + 20)
-        : labelText.implicitWidth
-    Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration } }
-    Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration } }
+    implicitWidth: expanded ? 180 : 80
+    Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic  } }
+    Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic  } }
 
-    // Main label — clicking toggles light on/off
-    PillBarButton {
-        id: labelText
-        colorOverride: !root.expanded
-        noHoverColorChange: !root.expanded
+    property int sideMargin: expanded ? 10 : 0
+    Behavior on sideMargin { NumberAnimation { duration: Theme.horizontalDuration } }
 
+    ColumnLayout {
+        id: contentColumn
         anchors {
-            left:  parent.left
-            leftMargin: expanded ? Theme.modulePaddingH : 0
-            right: parent.right
-            top:   parent.top
-        }
-        height: Theme.moduleHeight
-
-        percent: SharedState.lightActive ? SharedState.lightBrightness : 0
-        pillText: SharedState.lightActive
-            ? SharedState.lightBrightness + "% 󱩒"
-            : "Off 󱩎"
-        pillVariant: SharedState.lightVariant
-        
-        bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
-        bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
-
-        Behavior on anchors.leftMargin { NumberAnimation { duration: Theme.horizontalDuration } }
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-            onWheel: wheel => {
-                if (wheel.angleDelta.y > 0) {
-                    SharedState.lightBrightness = Math.min(100, SharedState.lightBrightness + 5)
-                } else {
-                    SharedState.lightBrightness = Math.max(1,   SharedState.lightBrightness - 5)
-                }
-                debounceTimer.restart()
-                wheel.accepted = true
-            }
-
-            onPressedChanged: {
-                if(!root.expanded) {
-                    root.pressed = !root.pressed
-                }
-                else {
-                    labelText.pressed = !labelText.pressed
-                }
-            }
-            onClicked: (mouse) => {
-                                    if (mouse.button === Qt.RightButton) {
-                                        root.expanded = !root.expanded
-                                    } else {
-                                        SharedState.toggleLight()
-                                    }
-                                }
-        }
-    }
-
-    // ── Colour wheel dropdown ───────────────────────────────────────
-    Item {
-        id: colorWheelArea
-        implicitWidth: colorWheel.width + 20
-        height: colorWheel.height + 12
-        anchors {
-            left:     parent.left
-            right:    parent.right
-            top:      labelText.bottom
+            fill: parent
             topMargin: 0
+            // 2. Bind the layout margins to the animated property
+            rightMargin: root.sideMargin
+            leftMargin: root.sideMargin
         }
 
-        Canvas {
-            id: colorWheel
-            width: 160
-            height: 160
-            anchors.centerIn: parent
+        spacing: 0
 
-            // Redraw when stored hue/saturation changes (moves the indicator)
-            Connections {
-                target: SharedState
-                function onLightHueChanged()        { colorWheel.requestPaint() }
-                function onLightSaturationChanged() { colorWheel.requestPaint() }
+        PillBarButton {
+            id: labelText
+            colorOverride: !root.expanded
+            noHoverColorChange: !root.expanded
+            implicitHeight: Theme.moduleHeight
+            
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignCenter
+
+            percent: SharedState.lightActive ? SharedState.lightBrightness : 0
+            pillText: SharedState.lightActive
+                ? SharedState.lightBrightness + "% 󱩒"
+                : "Off 󱩎"
+            pillVariant: SharedState.lightVariant
+            
+            bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
+            bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                onWheel: wheel => {
+                    if (wheel.angleDelta.y > 0) {
+                        SharedState.lightBrightness = Math.min(100, SharedState.lightBrightness + 5)
+                    } else {
+                        SharedState.lightBrightness = Math.max(1,   SharedState.lightBrightness - 5)
+                    }
+                    debounceTimer.restart()
+                    wheel.accepted = true
+                }
+
+                onPressedChanged: {
+                    if (!root.expanded) {
+                        root.pressed = !root.pressed
+                    } else {
+                        labelText.pressed = !labelText.pressed
+                    }
+                }
+                onClicked: (mouse) => {
+                    if (mouse.button === Qt.RightButton) {
+                        root.expanded = !root.expanded
+                    } else {
+                        SharedState.toggleLight()
+                    }
+                }
             }
+        }
+        // ── Colour wheel dropdown ───────────────────────────────────────
+        Item {
+            id: colorWheelArea
+            
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+            height: 180
 
-            Component.onCompleted: requestPaint()
+            Canvas {
+                id: colorWheel
+                width: 160
+                height: 160
+                anchors.centerIn: parent
 
-            onPaint: {
-                var ctx = getContext("2d")
-                ctx.clearRect(0, 0, width, height)
+                // Redraw when stored hue/saturation changes (moves the indicator)
+                Connections {
+                    target: SharedState
+                    function onLightHueChanged()        { colorWheel.requestPaint() }
+                    function onLightSaturationChanged() { colorWheel.requestPaint() }
+                }
 
-                var cx = width  / 2
-                var cy = height / 2
-                var r  = Math.min(cx, cy) - 2
+                Component.onCompleted: requestPaint()
 
-                // Draw the hue/saturation wheel:
-                //   angle → hue   |   distance from centre → saturation (0 = white)
-                var step = 2  // degrees per wedge
-                for (var a = 0; a < 360; a += step) {
-                    var startRad = a * Math.PI / 180
-                    var endRad   = (a + step + 0.5) * Math.PI / 180
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.clearRect(0, 0, width, height)
+
+                    var cx = width  / 2
+                    var cy = height / 2
+                    var r  = Math.min(cx, cy) - 2
+
+                    // Draw the hue/saturation wheel:
+                    //   angle → hue   |   distance from centre → saturation (0 = white)
+                    var step = 2  // degrees per wedge
+                    for (var a = 0; a < 360; a += step) {
+                        var startRad = a * Math.PI / 180
+                        var endRad   = (a + step + 0.5) * Math.PI / 180
+
+                        ctx.beginPath()
+                        ctx.moveTo(cx, cy)
+                        ctx.arc(cx, cy, r, startRad, endRad)
+                        ctx.closePath()
+
+                        var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r)
+                        grad.addColorStop(0, "white")
+                        grad.addColorStop(1, "hsl(" + a + ", 100%, 50%)")
+                        ctx.fillStyle = grad
+                        ctx.fill()
+                    }
+
+                    // Subtle dark border ring
+                    ctx.beginPath()
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2)
+                    ctx.strokeStyle = "#2a202f"
+                    ctx.lineWidth   = 2
+                    ctx.stroke()
+
+                    // Selection indicator
+                    var selAngle = SharedState.lightHue * Math.PI / 180
+                    var selDist  = (SharedState.lightSaturation / 100) * r
+                    var selX = cx + Math.cos(selAngle) * selDist
+                    var selY = cy + Math.sin(selAngle) * selDist
 
                     ctx.beginPath()
-                    ctx.moveTo(cx, cy)
-                    ctx.arc(cx, cy, r, startRad, endRad)
-                    ctx.closePath()
+                    ctx.arc(selX, selY, 7, 0, Math.PI * 2)
+                    ctx.strokeStyle = "#2a202f"
+                    ctx.lineWidth   = 2
+                    ctx.stroke()
 
-                    var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r)
-                    grad.addColorStop(0, "white")
-                    grad.addColorStop(1, "hsl(" + a + ", 100%, 50%)")
-                    ctx.fillStyle = grad
+                    ctx.beginPath()
+                    ctx.arc(selX, selY, 5, 0, Math.PI * 2)
+                    ctx.fillStyle = "rgba(255,255,255,0.9)"
                     ctx.fill()
                 }
 
-                // Subtle dark border ring
-                ctx.beginPath()
-                ctx.arc(cx, cy, r, 0, Math.PI * 2)
-                ctx.strokeStyle = "#2a202f"
-                ctx.lineWidth   = 2
-                ctx.stroke()
+                // Click or drag to pick colour
+                MouseArea {
+                    anchors.fill: parent
+                    propagateComposedEvents: false
 
-                // Selection indicator
-                var selAngle = SharedState.lightHue * Math.PI / 180
-                var selDist  = (SharedState.lightSaturation / 100) * r
-                var selX = cx + Math.cos(selAngle) * selDist
-                var selY = cy + Math.sin(selAngle) * selDist
-
-                ctx.beginPath()
-                ctx.arc(selX, selY, 7, 0, Math.PI * 2)
-                ctx.strokeStyle = "#2a202f"
-                ctx.lineWidth   = 2
-                ctx.stroke()
-
-                ctx.beginPath()
-                ctx.arc(selX, selY, 5, 0, Math.PI * 2)
-                ctx.fillStyle = "rgba(255,255,255,0.9)"
-                ctx.fill()
-            }
-
-            // Click or drag to pick colour
-            MouseArea {
-                anchors.fill: parent
-                propagateComposedEvents: false
-
-                function pickAt(mx, my) {
-                    var cx   = colorWheel.width  / 2
-                    var cy   = colorWheel.height / 2
-                    var r    = Math.min(cx, cy) - 2
-                    var dx   = mx - cx
-                    var dy   = my - cy
-                    var dist = Math.sqrt(dx * dx + dy * dy)
-                    if (dist <= r) {
-                        var hue = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360
-                        var sat = Math.min(dist / r, 1.0) * 100
-                        SharedState.setLightColor(Math.round(hue), Math.round(sat))
+                    function pickAt(mx, my) {
+                        var cx   = colorWheel.width  / 2
+                        var cy   = colorWheel.height / 2
+                        var r    = Math.min(cx, cy) - 2
+                        var dx   = mx - cx
+                        var dy   = my - cy
+                        var dist = Math.sqrt(dx * dx + dy * dy)
+                        if (dist <= r) {
+                            var hue = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360
+                            var sat = Math.min(dist / r, 1.0) * 100
+                            SharedState.setLightColor(Math.round(hue), Math.round(sat))
+                        }
                     }
-                }
 
-                onClicked:         mouse => pickAt(mouse.x, mouse.y)
-                onPositionChanged: mouse => { if (pressed) pickAt(mouse.x, mouse.y) }
+                    onClicked:         mouse => pickAt(mouse.x, mouse.y)
+                    onPositionChanged: mouse => { if (pressed) pickAt(mouse.x, mouse.y) }
+                }
             }
         }
     }
-
     // ── Brightness scroll wheel ─────────────────────────────────────
     Timer {
         id: debounceTimer

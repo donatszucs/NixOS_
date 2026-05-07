@@ -11,7 +11,7 @@ ModuleButton {
     color: implicitHeight === Theme.moduleHeight ? "transparent" : Theme.palette("dark").base
     dontAnimateColor: true
     property bool expanded: false
-    property int maxSinkBarLength: 0
+    property int maxSinkBarLength: 300
     property int sinkNameMaxChars: 30
 
     HoverHandler {
@@ -25,7 +25,7 @@ ModuleButton {
         id: sinksListModel
     }
 
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10: Theme.moduleRadius
     bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
     clip: true
 
@@ -38,7 +38,6 @@ ModuleButton {
 
         if (Pipewire && Pipewire.nodes && Pipewire.nodes.values) {
             var vals = Pipewire.nodes.values
-            var maxSinkLen = 0
             for (var i = 0; i < vals.length; ++i) {
                 var n = vals[i]
                 if (!n || n.isStream) continue
@@ -52,12 +51,9 @@ ModuleButton {
                             active = true
                         }
                     }
-                    var cappedLen = Math.min(desc.length, sinkNameMaxChars)
-                    if (cappedLen > maxSinkLen) maxSinkLen = cappedLen
                     sinksListModel.append({ "name": desc, "active": active, "id" : n.id })
                 }
             }
-            maxSinkBarLength = maxSinkLen * 9 + 7
         }
     }
 
@@ -147,7 +143,12 @@ ModuleButton {
                 cursorShape: Qt.PointingHandCursor
                 implicitWidth: maxSinkBarLength
                 implicitHeight: Theme.listHeight
-                radius: Theme.moduleEdgeRadius
+                
+                topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
+                bottomLeftRadius: index === sinksModel.count - 1 ? Theme.moduleEdgeRadius : 5
+                bottomRightRadius: index === sinksModel.count - 1 ? Theme.moduleEdgeRadius : 5
+                topRightRadius: index === 0 ? Theme.moduleEdgeRadius : 5
+
                 label: ""
 
                 HoverMarqueeText {

@@ -40,6 +40,7 @@ ModuleButton {
         ModuleButton {
             id: notificationButton
             cursorShape: Qt.PointingHandCursor
+            implicitWidth: Theme.moduleHeight
             label: "󱊖"
             textFont: Theme.fontSize + 1
 
