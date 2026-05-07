@@ -69,6 +69,8 @@ Rectangle {
 
     color: (root.pressed && !root.noPressColorChange) ? root.pressedColor : ((root.hovered && !root.noHoverColorChange) ? root.hoverColor : colorOverride ? root.overrideColor : root.baseColor)
 
+    border.width: 0
+    border.color: (root.pressed && !root.noPressColorChange) ? pal.borderPressed : ((root.hovered && !root.noHoverColorChange) ? pal.borderHover : colorOverride ? root.overrideColor : pal.border)
     clip: true
 
     // Simpler: let Text fill the parent and use horizontalAlignment/verticalAlignment
@@ -103,6 +105,11 @@ Rectangle {
     }
 
     Behavior on color {
+        enabled: !root.dontAnimateColor
+        ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+    }
+
+    Behavior on border.color {
         enabled: !root.dontAnimateColor
         ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }

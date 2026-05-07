@@ -33,7 +33,10 @@ QtObject {
         readonly property color hover:       Qt.rgba(_solidHover.r, _solidHover.g, _solidHover.b, Theme.moduleOpacity)
         readonly property color pressed:     Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, Theme.moduleOpacity)
         readonly property color text:        Theme.palettePaper
+
         readonly property color border:      Theme.paletteBorderStrong
+        readonly property color borderHover:    Qt.lighter(border, 1.4)
+        readonly property color borderPressed:  Qt.darker(border, 1.4)
         
         readonly property color pillTrack:       Qt.lighter(base, 1.6)
         readonly property color pillFill:        Qt.rgba(1, 1, 1, 0.2)
@@ -51,6 +54,8 @@ QtObject {
         readonly property color pressed:     Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, 0.14 * Theme.moduleOpacity)
         readonly property color text:        Theme.palettePaper
         readonly property color border:      Qt.rgba(1, 1, 1, 0.24)
+        readonly property color borderHover:    Qt.lighter(border, 1.4)
+        readonly property color borderPressed:  Qt.darker(border, 1.4)
         
         readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.1)
         readonly property color pillFill:        Qt.rgba(1, 1, 1, 0.2)
@@ -68,6 +73,8 @@ QtObject {
         readonly property color pressed:    Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, Theme.moduleOpacity)
         readonly property color text:       Theme.paletteInk
         readonly property color border:     Theme.paletteBorderSoft
+        readonly property color borderHover:    Qt.lighter(border, 1.4)
+        readonly property color borderPressed:  Qt.darker(border, 1.4)
         
         readonly property color pillTrack:       Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.6)
         readonly property color pillFill:        Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.9)
@@ -85,6 +92,8 @@ QtObject {
         readonly property color pressed:    Qt.rgba(_solidPressed.r, _solidPressed.g, _solidPressed.b, Theme.moduleOpacity)
         readonly property color text:       "#2a202f"
         readonly property color border:     "#652e2e"
+        readonly property color borderHover:    Qt.lighter(border, 1.4)
+        readonly property color borderPressed:  Qt.darker(border, 1.4)
     }
 
     // Helper: resolve a variant name string → palette object

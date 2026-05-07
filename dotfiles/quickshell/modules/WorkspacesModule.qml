@@ -53,7 +53,6 @@ ModuleButton {
                 required property int index
                 variant: active ? "light" : "neutral"
                 border.width: 2
-                border.color: pal.pillBorder
                 property int activeDragCount: 0
                 z: activeDragCount > 0 ? 99 : 0
                 
@@ -132,7 +131,6 @@ ModuleButton {
             label: ""
             variant: "neutral"
             border.width: 2
-            border.color: pal.pillBorder
             implicitWidth: root.implicitHeight - 2 * root.overlay
             implicitHeight: root.implicitHeight - 2 * root.overlay
             
@@ -175,7 +173,6 @@ ModuleButton {
                 required property int index
                 variant: active ? "light" : "neutral"
                 border.width: 2
-                border.color: pal.pillBorder
                 property int activeDragCount: 0
                 z: activeDragCount > 0 ? 99 : 0
                 

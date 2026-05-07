@@ -89,7 +89,7 @@ ModuleButton {
 
             Text {
                 id: artistText
-                text: "󰎆"
+                text: " 󰎆"
                 color: Theme.textPrimary
                 font.family: Theme.font
                 font.pixelSize: textFont

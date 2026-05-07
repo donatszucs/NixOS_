@@ -332,12 +332,10 @@ Item {
             id: expireTimer
             interval: toastRow.effectiveTimeout
 
-            running: toastRow.effectiveTimeout > 0 && !hoverHandler.hovered
+            running: toastRow.effectiveTimeout > 0
             repeat: false
 
             onTriggered: toastRow.showing = false
-
-
         }
 
         onClicked: {
@@ -505,7 +503,6 @@ Item {
                     }
                 }
             }
-
             // ─── ROW 2 ─────────────────────────────────────────────────
             // [Row 2, Col 0 & 1] Inline Reply (Spans both columns)
             ModuleButton {
@@ -559,6 +556,42 @@ Item {
                             root.inlineReplyInputFocused = true
                         } else {
                             root.inlineReplyInputFocused = false
+                        }
+                    }
+                }
+            }
+
+            // ─── ROW 3 ─────────────────────────────────────────────────
+            // [Row 3, Col 0 & 1] Actions (Spans both columns)
+            Rectangle {
+                id: notifTimer
+                Layout.row: 3
+                Layout.column: 0
+                Layout.columnSpan: 2
+                Layout.alignment: Qt.AlignHCenter
+
+                visible: expireTimer.running
+
+                height: 4
+                radius: 2
+                color: Theme.paletteInk
+                opacity: 0.5
+
+                property real progress: 1.0
+                width: (parent.width - 2) * progress
+
+                NumberAnimation on progress {
+                    from: 1.0
+                    to: 0.0
+                    duration: expireTimer.interval
+                    running: expireTimer.running
+                }
+
+                Connections {
+                    target: expireTimer
+                    function onRunningChanged() {
+                        if (!expireTimer.running) {
+                            notifTimer.progress = 1.0
                         }
                     }
                 }
