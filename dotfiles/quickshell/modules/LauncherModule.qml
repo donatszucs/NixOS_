@@ -297,6 +297,7 @@ ModuleButton {
                 Layout.fillWidth: true
                 Layout.leftMargin: launcherModule.padding
                 Layout.rightMargin: launcherModule.padding
+                Layout.topMargin: - launcherModule.padding
                 implicitHeight: Theme.listHeight
                 color: "transparent"
                 radius: Theme.moduleEdgeRadius

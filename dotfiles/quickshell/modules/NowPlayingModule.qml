@@ -11,7 +11,7 @@ ModuleButton {
     id: nowPlayingModule
     noHoverColorChange: expanded || !isPlaying
     noPressColorChange: true
-    property string titleText: "󰎆  Nothing playing"
+    property string titleText: "Nothing playing"
     property string authorText: "Unknown artist"
     property string playPauseIcon: "󰐊"
     property bool isPlaying: false
@@ -26,7 +26,7 @@ ModuleButton {
 
 
     implicitHeight: expanded ? column.implicitHeight + 10 : Theme.moduleHeight
-    implicitWidth: expanded ? topRow.implicitWidth + 30 : topRow.implicitWidth
+    implicitWidth: expanded ? topRow.implicitWidth + 20 : topRow.implicitWidth
     clip: true
 
     Behavior on implicitWidth {
@@ -54,7 +54,7 @@ ModuleButton {
             spacing: 0
             Layout.alignment: Qt.AlignTop
             layoutDirection: Qt.RightToLeft
-            Layout.leftMargin: nowPlayingModule.expanded ? 15 : 0
+            Layout.leftMargin: nowPlayingModule.expanded ? 10 : 0
             // Title
             ModuleButton {
                 colorOverride: !expanded
@@ -65,7 +65,7 @@ ModuleButton {
                 cursorShape: isPlaying ? Qt.PointingHandCursor : Qt.ArrowCursor
 
                 // 2. Set your fixed width here
-                implicitWidth: expanded ? 200 : Math.min(200, scrollingText.implicitWidth + 30)
+                implicitWidth: expanded ? 200 : Math.min(200, scrollingText.implicitWidth + 20)
                 onClicked: focusNow()
 
                 bottomRightRadius: Theme.moduleEdgeRadius
@@ -85,6 +85,16 @@ ModuleButton {
                     textColor: Theme.textPrimary
                     fontBold: false
                 }
+            }
+
+            Text {
+                id: artistText
+                text: "󰎆"
+                color: Theme.textPrimary
+                font.family: Theme.font
+                font.pixelSize: textFont
+                font.bold: true
+                visible: !nowPlayingModule.expanded
             }
 
             // Controls — only visible when expanded
@@ -133,7 +143,7 @@ ModuleButton {
         ModuleButton {
             Layout.alignment: Qt.AlignHCenter
             id: trackArt
-            visible: nowPlayingModule.expanded && albumArt.source.toString() !== ""
+            visible: nowPlayingModule.expanded
             color: "transparent"
             implicitWidth: albumArtClip.width
             implicitHeight: albumArtClip.height
@@ -142,17 +152,15 @@ ModuleButton {
                 id: albumArtClip
                 anchors.centerIn: parent
 
-                width: Math.ceil(topRow.implicitWidth)
+                width: topRow.implicitWidth
 
                 // Formula: Height = Width * (Original Height / Original Width)
-                height: albumArt.implicitWidth > 0 
-                        ? (width * (albumArt.implicitHeight / albumArt.implicitWidth)) 
-                        : width
+                height: albumArt.source.toString() !== "" ? topRow.implicitWidth / 2 : artHover.implicitHeight + 10
 
                 Image {
                     id: albumArt
                     anchors.fill: parent
-                    fillMode: Image.PreserveAspectFit
+                    fillMode: Image.PreserveAspectCrop
                     source: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
                     sourceSize.width: 200
                     visible: false 
@@ -178,16 +186,21 @@ ModuleButton {
                         color: "black" 
                     }
                 }
+
+                ModuleButton {
+                    id: artHover
+                    
+                    noHoverColorChange: true
+                    noPressColorChange: true
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 8
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    radius: height / 2
+                    visible: nowPlayingModule.authorText !== ""
+
+                    label: nowPlayingModule.authorText
+                }
             }
-        }
-        ModuleButton {
-            id: artistInfo
-            visible: nowPlayingModule.expanded
-            color: "transparent"
-            label: nowPlayingModule.authorText
-            Layout.fillWidth: true
-            Layout.preferredHeight: Theme.fontSize + 2
-            Layout.alignment: Qt.AlignCenter
         }
     }
 
@@ -199,7 +212,7 @@ ModuleButton {
         var pick = null
         if (!Mpris || !Mpris.players) {
             currentPlayer = null
-            nowPlayingModule.titleText = "󰎆  Nothing playing"
+            nowPlayingModule.titleText = "Nothing playing"
             nowPlayingModule.authorText = "Unknown artist"
             nowPlayingModule.playPauseIcon = "󰐊"
             return
@@ -220,7 +233,7 @@ ModuleButton {
     function updateFromPlayer() {
         if (!currentPlayer) {
             nowPlayingModule.isPlaying = false
-            nowPlayingModule.titleText = "󰎆  Nothing playing"
+            nowPlayingModule.titleText = "Nothing playing"
             nowPlayingModule.authorText = "Unknown artist"
             nowPlayingModule.playPauseIcon = "󰐊"
             return
@@ -229,7 +242,7 @@ ModuleButton {
         nowPlayingModule.isPlaying = true
         if (currentTrackId !== currentPlayer.trackTitle) {
             currentTrackId = currentPlayer.trackTitle
-            nowPlayingModule.titleText = "󰎆  " + (currentPlayer.trackTitle || "Nothing playing")
+            nowPlayingModule.titleText = (currentPlayer.trackTitle || "Nothing playing")
             nowPlayingModule.authorText = currentPlayer.trackArtist || "Unknown artist"
         }
     }
