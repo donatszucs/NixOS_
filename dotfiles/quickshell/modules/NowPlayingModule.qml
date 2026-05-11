@@ -155,7 +155,7 @@ ModuleButton {
                 width: topRow.implicitWidth
 
                 // Formula: Height = Width * (Original Height / Original Width)
-                height: albumArt.source.toString() !== "" ? topRow.implicitWidth / 2 : artHover.implicitHeight + 10
+                height: albumArt.source.toString() !== "" ? topRow.implicitWidth / 2 : artHover.implicitHeight
 
                 Image {
                     id: albumArt
@@ -190,10 +190,10 @@ ModuleButton {
                 ModuleButton {
                     id: artHover
                     
-                    noHoverColorChange: true
-                    noPressColorChange: true
+                    color: Theme.paletteInk
+                    opacity: 0.85
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 8
+                    anchors.bottomMargin: albumArt.source.toString() !== "" ? 5 : 0
                     anchors.horizontalCenter: parent.horizontalCenter
                     radius: height / 2
                     visible: nowPlayingModule.authorText !== ""

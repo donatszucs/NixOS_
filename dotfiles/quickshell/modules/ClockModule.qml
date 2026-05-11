@@ -10,7 +10,6 @@ ModuleButton {
 
     property bool expanded: hovered
 
-    color: Theme.palette("dark").base
 
     property string time
     property string date
@@ -22,8 +21,7 @@ ModuleButton {
     }
 
     Component.onCompleted: updateTime()
-
-    implicitWidth: timeRow.implicitWidth
+    implicitWidth: timeRow.implicitWidth + 10
 
     RowLayout {
         id: timeRow

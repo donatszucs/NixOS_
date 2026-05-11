@@ -25,8 +25,8 @@ ModuleButton {
     // JS array of DesktopEntry objects matching the current search
     property var filteredApps: []
 
-    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
+    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleRadius
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleRadius
     
     clip: true
 
@@ -308,7 +308,7 @@ ModuleButton {
                     anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
                     color: Theme.textPrimary
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize * 1.7
+                    font.pixelSize: Theme.fontSize * 1.3
                     font.bold: true
                     
                     verticalAlignment: TextInput.AlignVCenter
@@ -326,9 +326,9 @@ ModuleButton {
                         
                         // Match text width. If empty, default to a 20px dash.
                         width: searchField.text.length > 0 ? searchField.contentWidth + 8 : placeholder.contentWidth + 8
-                        height: 4
+                        height: 2
                         color: Theme.textPrimary 
-                        radius: 2 
+                        radius: 1 
 
                         // Smoothly animate the bar growing/shrinking as you type
                         Behavior on width {

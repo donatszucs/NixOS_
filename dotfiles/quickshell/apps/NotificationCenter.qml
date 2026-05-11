@@ -568,7 +568,8 @@ Item {
                 Layout.row: 3
                 Layout.column: 0
                 Layout.columnSpan: 2
-                Layout.alignment: Qt.AlignHCenter
+                Layout.alignment: Qt.AlignLeft
+                Layout.fillWidth: true
 
                 visible: expireTimer.running
 
@@ -578,8 +579,7 @@ Item {
                 opacity: 0.5
 
                 property real progress: 1.0
-                width: (parent.width - 2) * progress
-
+                width: contentGrid.width * progress
                 NumberAnimation on progress {
                     from: 1.0
                     to: 0.0

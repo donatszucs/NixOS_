@@ -94,6 +94,7 @@ PanelWindow {
         ModuleGap {
             Layout.alignment: Qt.AlignTop
             rightColor: clockModule.color
+            implicitWidth: 0
         }
         ClockModule {
             Layout.alignment: Qt.AlignTop
