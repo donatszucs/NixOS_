@@ -49,7 +49,7 @@ ModuleButton {
         }
         ModuleButton {
             id: trayButton
-            color: Theme.palette("dark").base
+            noHoverColorChange: true
             Layout.preferredWidth: trayBackground.width + 10
             Layout.preferredHeight: Theme.moduleHeight
             

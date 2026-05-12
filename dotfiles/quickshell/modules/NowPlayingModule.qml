@@ -25,8 +25,8 @@ ModuleButton {
     function refreshAll() { pickPlayer() }
 
 
-    implicitHeight: expanded ? column.implicitHeight + 10 : Theme.moduleHeight
-    implicitWidth: expanded ? topRow.implicitWidth + 20 : topRow.implicitWidth
+    implicitHeight: expanded ? albumArtClip.height + 20: Theme.moduleHeight
+    implicitWidth: expanded ? albumArtClip.width + 20 : titleBtn.implicitWidth
     clip: true
 
     Behavior on implicitWidth {
@@ -41,107 +41,66 @@ ModuleButton {
     ColumnLayout {
         id: column
         anchors.fill: parent
-        spacing: 10
+        anchors.bottomMargin: 10
+        spacing: 0
 
-        anchors {
-            left: parent.left
-            top: parent.top
-            bottomMargin: 10
-        }
+        // Title
+        ModuleButton {
+            colorOverride: !expanded
+            noHoverColorChange: !expanded
+            noPressColorChange: !expanded
+            id: titleBtn
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+            Layout.topMargin: nowPlayingModule.expanded ? 15 : 0
+            cursorShape: isPlaying ? Qt.PointingHandCursor : Qt.ArrowCursor
 
-        RowLayout {
-            id: topRow
-            spacing: 0
-            Layout.alignment: Qt.AlignTop
-            layoutDirection: Qt.RightToLeft
-            Layout.leftMargin: nowPlayingModule.expanded ? 10 : 0
-            // Title
-            ModuleButton {
-                colorOverride: !expanded
-                noHoverColorChange: !expanded
-                noPressColorChange: !expanded
-                id: titleBtn
-                Layout.alignment: Qt.AlignCenter
-                cursorShape: isPlaying ? Qt.PointingHandCursor : Qt.ArrowCursor
 
-                // 2. Set your fixed width here
-                implicitWidth: expanded ? 200 : Math.min(200, scrollingText.implicitWidth + 20)
-                onClicked: focusNow()
+            Behavior on Layout.topMargin {
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
+            
+            implicitWidth: scrollingText.implicitWidth + artistText.implicitWidth + 20
+            onClicked: focusNow()
 
-                bottomRightRadius: Theme.moduleEdgeRadius
+            radius: Theme.moduleEdgeRadius
+            colorOpacity: 0.9
 
-                // 3. Make the container a direct child (no contentItem:)
+            RowLayout {
+                id: topRow
+                anchors.centerIn: parent
+                spacing: 0
+                layoutDirection: Qt.RightToLeft
+
                 HoverMarqueeText {
                     id: scrollingText
                     clip: true 
-                    anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
+                    Layout.alignment: Qt.AlignVCenter
 
                     text: nowPlayingModule.titleText
                     textMaxWidth: 200
                     fontFamily: Theme.font
                     pixelSize: Theme.fontSize
                     textColor: Theme.textPrimary
-                    fontBold: false
-                }
-            }
-
-            Text {
-                id: artistText
-                text: " 󰎆"
-                color: Theme.textPrimary
-                font.family: Theme.font
-                font.pixelSize: textFont
-                font.bold: true
-                visible: !nowPlayingModule.expanded
-            }
-
-            // Controls — only visible when expanded
-            RowLayout {
-                id: controlsRow
-                spacing: 0
-                layoutDirection: Qt.RightToLeft
-
-                Repeater {
-                    model: [
-                        { icon: "󰒭", action: "next" },
-                        { icon: "󰐊", action: "playpause" }
-                    ]
-                    delegate: ModuleButton {
-                        required property var modelData
-                        visible: (currentPlayer && currentPlayer.canGoNext && modelData.action === "next") || (currentPlayer && currentPlayer.canPause && modelData.action === "playpause")
-                        cursorShape: Qt.PointingHandCursor
-                        
-                        implicitHeight: Theme.moduleHeight
-                        implicitWidth: nowPlayingModule.expanded ? 32 : 0
-
-                        label: modelData.action === "playpause" ? nowPlayingModule.playPauseIcon : modelData.icon
-                        bottomLeftRadius: modelData.action === "playpause" ? Theme.moduleEdgeRadius : 0
-
-                        onClicked: {
-                                if (modelData.action === "playpause")
-                                    nowPlayingModule.doTogglePlay()
-                                else
-                                    nowPlayingModule.doNext()
-                        }
-
-                        Behavior on implicitWidth {
-                            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-                        }
-                    }
+                    fontBold: true
                 }
 
-                Item { implicitWidth: 0 }
-            }
-
-            Behavior on Layout.leftMargin {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+                Text {
+                    id: artistText
+                    text: "󰎆 "
+                    color: Theme.textPrimary
+                    font.family: Theme.font
+                    font.pixelSize: textFont
+                    font.bold: true
+                    Layout.alignment: Qt.AlignVCenter
+                }
             }
         }
 
+
         ModuleButton {
             Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: - Theme.moduleHeight - 5
+            z: -1
             id: trackArt
             visible: nowPlayingModule.expanded
             color: "transparent"
@@ -152,17 +111,17 @@ ModuleButton {
                 id: albumArtClip
                 anchors.centerIn: parent
 
-                width: topRow.implicitWidth
-
+                width: 250
                 // Formula: Height = Width * (Original Height / Original Width)
-                height: albumArt.source.toString() !== "" ? topRow.implicitWidth / 2 : artHover.implicitHeight
+                height: albumArt.source.toString() !== "" ? albumArtClip.width / 2 : artHover.implicitHeight + 45
 
                 Image {
                     id: albumArt
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
                     source: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
-                    sourceSize.width: 200
+                    sourceSize.width: 250
+                    
                     visible: false 
                 }
 
@@ -172,6 +131,7 @@ ModuleButton {
                     visible: albumArt.source.toString() !== ""
                     maskEnabled: true
                     maskSource: maskItem
+                    opacity: 0.7
                 }
 
                 Item {
@@ -187,18 +147,78 @@ ModuleButton {
                     }
                 }
 
-                ModuleButton {
-                    id: artHover
-                    
-                    color: Theme.paletteInk
-                    opacity: 0.85
+                RowLayout {
+                    id: controlsRow
+                    spacing: 0
+                    layoutDirection: Qt.RightToLeft
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: albumArt.source.toString() !== "" ? 5 : 0
                     anchors.horizontalCenter: parent.horizontalCenter
-                    radius: height / 2
-                    visible: nowPlayingModule.authorText !== ""
 
-                    label: nowPlayingModule.authorText
+                    ModuleButton {
+                        id: artHover
+                        
+                        bottomRightRadius: height / 2
+                        topRightRadius: height / 2
+                        visible: nowPlayingModule.authorText !== ""
+                        colorOpacity: 0.9
+
+                        implicitWidth: expanded ? scrollingAuthorText.implicitWidth + 20 : 0
+
+                        HoverMarqueeText {
+                            id: scrollingAuthorText
+                            clip: true 
+                            anchors.fill: parent
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+
+                            text: nowPlayingModule.authorText
+                            textMaxWidth: albumArtClip.width - 30 - nextButton.implicitWidth - playPauseButton.implicitWidth
+                            fontFamily: Theme.font
+                            pixelSize: Theme.fontSize
+                            textColor: Theme.textPrimary
+                            fontBold: false
+                        }
+                    }
+
+                    ModuleButton {
+                        id: nextButton
+                        cursorShape: Qt.PointingHandCursor
+                        
+                        implicitHeight: Theme.moduleHeight
+                        implicitWidth: (nowPlayingModule.expanded && currentPlayer.canGoNext) ? Theme.moduleHeight : 0
+
+                        label: "󰒭"
+
+                        colorOpacity: 0.9
+
+                        onClicked: nowPlayingModule.doNext()
+
+                        Behavior on implicitWidth {
+                            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+                        }
+                    }
+
+                    ModuleButton {
+                        id: playPauseButton
+                        cursorShape: Qt.PointingHandCursor
+                        
+                        implicitHeight: Theme.moduleHeight
+                        implicitWidth: nowPlayingModule.expanded ? Theme.moduleHeight : 0
+
+                        label: nowPlayingModule.playPauseIcon
+
+                        topLeftRadius: height / 2
+                        bottomLeftRadius: height / 2
+
+                        colorOpacity: 0.9
+
+                        onClicked: nowPlayingModule.doTogglePlay()
+
+                        Behavior on implicitWidth {
+                            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+                        }
+                    }
                 }
             }
         }

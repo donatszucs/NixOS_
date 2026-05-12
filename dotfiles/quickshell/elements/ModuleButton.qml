@@ -48,11 +48,12 @@ Rectangle {
     // instances (e.g. `Qt.PointingHandCursor: Qt.PointingHandCursor`). Default is arrow.
     property int cursorShape: Qt.ArrowCursor
 
-    // ── variant and palette --------------------------------
+    // ── variant and palette ---overrideColor-----------------------------
+    property real colorOpacity: Theme.moduleOpacity
     property var pal: Theme.palette(variant)
-    property color baseColor: pal.base
-    property color hoverColor: pal.hover
-    property color pressedColor: pal.pressed
+    property color baseColor: Qt.rgba(pal.base.r, pal.base.g, pal.base.b, pal.base.a * colorOpacity)
+    property color hoverColor: Qt.rgba(pal.hover.r, pal.hover.g, pal.hover.b, pal.hover.a * colorOpacity)
+    property color pressedColor: Qt.rgba(pal.pressed.r, pal.pressed.g, pal.pressed.b, pal.pressed.a * colorOpacity)
 
     HoverHandler {
         id: rootHover

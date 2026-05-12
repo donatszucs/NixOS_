@@ -18,7 +18,7 @@ ModuleButton {
         width: parent.width - 8
         height: Theme.moduleHeight - 8
         radius: height / 2
-        color: root.pillPal.pillTrack
+        color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.colorOpacity)
         clip: true
 
         // Inner percentage fill (clipped linearly)
@@ -40,7 +40,7 @@ ModuleButton {
                 width: parent.parent.width
                 height: parent.parent.height
                 radius: parent.parent.radius
-                color: root.pillPal.pillFill
+                color: Qt.rgba(root.pillPal.pillFill.r, root.pillPal.pillFill.g, root.pillPal.pillFill.b, root.pillPal.pillFill.a * root.colorOpacity)
                 Behavior on color {
                     ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
                 }
@@ -52,7 +52,7 @@ ModuleButton {
             anchors.fill: parent
             radius: parent.radius
             color: "transparent"
-            border.color: root.pillPal.pillBorder
+            border.color: Qt.rgba(root.pillPal.pillBorder.r, root.pillPal.pillBorder.g, root.pillPal.pillBorder.b, root.pillPal.pillBorder.a * root.colorOpacity)
             border.width: 2
         }
 

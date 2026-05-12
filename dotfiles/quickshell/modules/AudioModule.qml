@@ -8,7 +8,8 @@ import "../elements"
 
 ModuleButton {
     id: audioModule
-    color: implicitHeight === Theme.moduleHeight ? "transparent" : Theme.palette("dark").base
+    colorOverride: implicitHeight === Theme.moduleHeight
+    noHoverColorChange: true
     dontAnimateColor: true
     property bool expanded: false
     property int maxSinkBarLength: 300

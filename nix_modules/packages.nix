@@ -70,7 +70,8 @@
   wlsunset          # Automatic color temperature adjustment based on time of day
   
   # -- Applications --
-  vscode            
+  vscode
+  gemini-cli
   google-chrome
   inputs.zen-browser.packages."${builtins.currentSystem}".default
   inputs.playit-nixos-module.packages."${builtins.currentSystem}".playit-cli

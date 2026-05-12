@@ -16,7 +16,7 @@ ModuleButton {
 
     clip: false
 
-    color: Theme.palette("dark").base
+    color: Qt.rgba(Theme.palette("dark").base.r, Theme.palette("dark").base.g, Theme.palette("dark").base.b, Theme.moduleOpacity)
 
     bottomLeftRadius: Theme.moduleEdgeRadius + 2
     bottomRightRadius: Theme.moduleEdgeRadius + 2
@@ -385,7 +385,7 @@ ModuleButton {
                     }
 
                     background: Rectangle {
-                        color: Theme.palette("dark").base
+                        color: root.color
                         radius: 5
                         border.color: Theme.palette("dark").border
                         border.width: 2

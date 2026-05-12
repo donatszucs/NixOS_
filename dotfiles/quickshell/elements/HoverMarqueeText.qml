@@ -13,7 +13,7 @@ Item {
     // Removed maxChars! We let text elide based on pixel width correctly.
 
     implicitHeight: visibleText.implicitHeight
-    implicitWidth: Math.min(visibleText.implicitWidth, root.textMaxWidth)
+    implicitWidth: Math.min(visibleText.implicitWidth + 10, root.textMaxWidth)
     Layout.preferredWidth: implicitWidth
     Layout.maximumWidth: root.textMaxWidth
     Layout.fillWidth: true

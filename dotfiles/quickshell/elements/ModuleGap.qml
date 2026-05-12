@@ -21,7 +21,7 @@ Rectangle {
     property int sizeHright: Theme.moduleEdgeRadius
     property int sizeVright: Theme.moduleEdgeRadius
 
-    color: Theme.palette("dark").base
+    color: Qt.rgba(Theme.palette("dark").base.r, Theme.palette("dark").base.g, Theme.palette("dark").base.b, Theme.moduleOpacity)
 
     // base properties
     property bool smoothCurve: false
