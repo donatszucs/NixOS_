@@ -122,7 +122,7 @@ ModuleButton {
                 } // RowLayout
 
                 Behavior on implicitWidth {
-                    NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.linear }
+                    NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.Linear }
                 }
             }
         }

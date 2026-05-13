@@ -48,6 +48,12 @@ async def main():
             print(f"{info.hue},{info.saturation}")
         except Exception:
             print("30,0")
+    elif cmd == "state":
+        try:
+            info = await device.get_device_info()
+            print(f"{'ON' if info.device_on else 'OFF'},{info.brightness},{info.hue},{info.saturation}")
+        except Exception:
+            print("OFF,0,30,0") # Fallback if device is unreachable
     elif cmd == "status":
         try:
             info = await device.get_device_info()

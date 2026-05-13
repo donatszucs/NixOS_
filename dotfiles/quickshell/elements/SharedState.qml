@@ -19,35 +19,31 @@ Item {
     property string tapoScriptPath: "~/nixos-config/scripts/scriptsEnv/.venv/bin/python ~/nixos-config/scripts/TapoLight/tapo_control.py"
 
     function refreshLightStatus() {
-        lightStatusProc.running = true
-        lightBrightnessProc.running = true
-        lightColorProc.running = true
-    }
-
-    Process {
-        id: lightStatusProc
-        command: ["bash", "-c", root.tapoScriptPath + " status"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (text.trim() === "ON") {
-                    root.lightVariant = "light"
-                    root.lightActive = true
-                } else {
-                    root.lightVariant = "dark"
-                    root.lightActive = false
-                }
-            }
+        if (!lightRefreshProc.running) {
+            lightRefreshProc.running = true
         }
     }
 
     Process {
-        id: lightBrightnessProc
-        command: ["bash", "-c", root.tapoScriptPath + " brightness"]
+        id: lightRefreshProc
+        command: ["bash", "-c", root.tapoScriptPath + " state"]
         stdout: StdioCollector {
             onStreamFinished: {
-                var val = parseInt(text.trim())
-                if (!isNaN(val)) {
-                    root.lightBrightness = val
+                var parts = text.trim().split(",")
+                if (parts.length >= 4) {
+                    if (parts[0] === "ON") {
+                        root.lightVariant = "light"
+                        root.lightActive = true
+                    } else {
+                        root.lightVariant = "dark"
+                        root.lightActive = false
+                    }
+                    var b = parseInt(parts[1])
+                    var h = parseInt(parts[2])
+                    var s = parseInt(parts[3])
+                    if (!isNaN(b)) root.lightBrightness = b
+                    if (!isNaN(h)) root.lightHue = h
+                    if (!isNaN(s)) root.lightSaturation = s
                 }
             }
         }
@@ -88,22 +84,6 @@ Item {
         property int targetBrightness: 100
         command: ["bash", "-c", root.tapoScriptPath + " set " + targetBrightness]
         onRunningChanged: if (!running) refreshLightStatus()
-    }
-
-    Process {
-        id: lightColorProc
-        command: ["bash", "-c", root.tapoScriptPath + " get_color"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var parts = text.trim().split(",")
-                if (parts.length === 2) {
-                    var h = parseInt(parts[0])
-                    var s = parseInt(parts[1])
-                    if (!isNaN(h)) root.lightHue = h
-                    if (!isNaN(s)) root.lightSaturation = s
-                }
-            }
-        }
     }
 
     function setLightColor(hue, sat) {
