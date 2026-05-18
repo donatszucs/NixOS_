@@ -3,8 +3,8 @@ import QtQuick
 
 QtObject {
     // ── Divider-anchored palette seed ───────────────────────────────
-    readonly property color palettePaper:        '#e3c4f5'
-    readonly property color paletteInk:          '#1e1e1e'
+    readonly property color palettePaper:        '#e5c2f7'
+    readonly property color paletteInk:          '#292131'
     readonly property color paletteBorderSoft:   Qt.darker(palettePaper, 1.25)
     readonly property color paletteBorderStrong: Qt.darker(palettePaper, 1.6)
 

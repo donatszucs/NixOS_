@@ -174,10 +174,10 @@ ModuleButton {
                 spacing: 10
 
                 Text {
-                    text: "NixOS "
+                    text: "NixOS"
                     color: Theme.textPrimary
                     font.family: Theme.font
-                    font.pixelSize: 22
+                    font.pixelSize: 24
                     font.bold: true
                 }
 

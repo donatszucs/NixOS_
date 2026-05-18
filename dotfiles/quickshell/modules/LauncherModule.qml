@@ -341,7 +341,7 @@ ModuleButton {
                             running: searchField.activeFocus // Only breathe when focused
                             
                             NumberAnimation { 
-                                to: 0.6 
+                                to: 0.3
                                 duration: 2000 // 1 second to exhale
                                 easing.type: Easing.InOutSine 
                             }

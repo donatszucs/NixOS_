@@ -90,6 +90,15 @@ ModuleButton {
                     Hyprland.dispatch("workspace " + wsButton.modelData.id)
                 }
 
+                scale: 0
+                Component.onCompleted: {
+                    scale = 1
+                }
+                
+                Behavior on scale {
+                    NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutBack }
+                }
+
                 RowLayout {
                     id: wsContentRow
                     anchors.centerIn: parent
@@ -201,6 +210,15 @@ ModuleButton {
 
                 label: ""
 
+                scale: 0
+                Component.onCompleted: {
+                    scale = 1
+                }
+                
+                Behavior on scale {
+                    NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutBack }
+                }
+
                 RowLayout {
                     id: othersContentRow
                     anchors.centerIn: parent
@@ -246,6 +264,15 @@ ModuleButton {
         Layout.preferredWidth: implicitWidth
         Layout.preferredHeight: implicitHeight
         visible: windowIcon.appId !== ""
+
+        scale: 0
+        Component.onCompleted: {
+            scale = 1
+        }
+        
+        Behavior on scale {
+            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutBack }
+        }
 
         IconImage {
             id: windowIcon
