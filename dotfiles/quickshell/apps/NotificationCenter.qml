@@ -94,14 +94,7 @@ Item {
                 
             Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
-            property real hoverProgress: hoverHandler.hovered ? 1.0 : 0.0
-            Behavior on hoverProgress { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
-
-            // Height is non-zero so you can actually hover on it!
-            property real activePadding: innerLayout.implicitHeight > 0 ? 20 : 0
-            Behavior on activePadding { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
-
-            implicitHeight: Math.min(innerLayout.smoothHeight + activePadding, Layout.maximumHeight)
+            implicitHeight: Math.min(notifFlickable.contentHeight, Layout.maximumHeight)
 
             // ── SCROLLING AREA ──────────────────────────────────────────
             Flickable {
@@ -138,7 +131,7 @@ Item {
                 }
                 
                 contentWidth: width
-                contentHeight: Math.max(innerLayout.smoothHeight + containerRect.activePadding, height)
+                contentHeight: innerLayout.smoothHeight
                 
                 clip: true
                 interactive: true
@@ -230,7 +223,7 @@ Item {
                         }
                     }
                     
-                    property real smoothHeight: implicitHeight
+                    property real smoothHeight: implicitHeight === 0 ? 0 : implicitHeight + 20
                     Behavior on smoothHeight {
                         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                     }
