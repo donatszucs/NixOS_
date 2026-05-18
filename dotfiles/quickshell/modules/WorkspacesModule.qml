@@ -81,13 +81,14 @@ ModuleButton {
                     anchors.fill: parent
                     onDropped: (drop) => {
                         if (drop.source && drop.source.address) {
-                            Hyprland.dispatch("movetoworkspacesilent " + wsButton.modelData.id + ",address:0x" + drop.source.address)
+                            Hyprland.dispatch("hl.dsp.window.move({ workspace = '" + wsButton.modelData.id + "', window = 'address:0x" + drop.source.address + "', follow = false })")
                         }
                     }
                 }
 
                 onClicked: {
-                    Hyprland.dispatch("workspace " + wsButton.modelData.id)
+                    Hyprland.dispatch("hl.dsp.focus({ workspace = '" + wsButton.modelData.id + "' })")
+
                 }
 
                 scale: 0
@@ -148,12 +149,12 @@ ModuleButton {
                 anchors.fill: parent
                 onDropped: (drop) => {
                     if (drop.source && drop.source.address) {
-                        Hyprland.dispatch("movetoworkspacesilent empty,address:0x" + drop.source.address)
+                        Hyprland.dispatch("hl.dsp.window.move({ workspace = 'empty', window = 'address:0x" + drop.source.address + "', follow = false })")
                     }
                 }
             }
 
-            onClicked: Hyprland.dispatch("workspace empty")
+            onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = 'empty' })")
             cursorShape: Qt.PointingHandCursor
         }
         // Spacer between "my" workspaces and the others (if any)
@@ -203,7 +204,7 @@ ModuleButton {
                     anchors.fill: parent
                     onDropped: (drop) => {
                         if (drop.source && drop.source.address) {
-                            Hyprland.dispatch("movetoworkspacesilent " + modelData.id + ",address:0x" + drop.source.address)
+                            Hyprland.dispatch("hl.dsp.window.move({ workspace = '" + modelData.id + "', window = 'address:0x" + drop.source.address + "', follow = false })")
                         }
                     }
                 }
@@ -245,7 +246,7 @@ ModuleButton {
                     NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.linear }
                 }
 
-                onClicked: Hyprland.dispatch("workspace " + modelData.id)
+                onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = '" + modelData.id + "' })")
             }
         }
     }
@@ -367,7 +368,7 @@ ModuleButton {
 
                 onClicked: function(mouse) {
                     if (mouse.button === Qt.MiddleButton) {
-                        Hyprland.dispatch("closewindow address:0x" + modelData.address)
+                        Hyprland.dispatch("hl.dsp.window.close({ window = 'address:0x" + modelData.address + "' })")
                     }
                 }
             }
@@ -415,7 +416,7 @@ ModuleButton {
                 onClicked: function(mouse) {
                     if (dragArea.drag.active) return;
                     if (workspaceBtn && workspaceBtn.modelData) {
-                        Hyprland.dispatch("workspace " + workspaceBtn.modelData.id)
+                        Hyprland.dispatch("hl.dsp.focus({ workspace = '" + workspaceBtn.modelData.id + "' })")
                     }
                 }
             }
