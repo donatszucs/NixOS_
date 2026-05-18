@@ -18,11 +18,11 @@ ModuleButton {
 
     color: Qt.rgba(Theme.palette("dark").base.r, Theme.palette("dark").base.g, Theme.palette("dark").base.b, Theme.moduleOpacity)
 
-    bottomLeftRadius: Theme.moduleEdgeRadius + 2
-    bottomRightRadius: Theme.moduleEdgeRadius + 2
-    property int overlay: 4
+    radius: Theme.moduleEdgeRadius + 2
+    property int overlay: 3
 
-    implicitHeight: Theme.moduleHeight
+    anchors.topMargin: 3
+    implicitHeight: Theme.moduleHeight - 3
 
     // Only workspaces whose monitor name matches this bar's screen
     readonly property var monitorWorkspaces: {
@@ -57,11 +57,10 @@ ModuleButton {
                 z: activeDragCount > 0 ? 99 : 0
                 
                 implicitHeight: root.implicitHeight - 2 * root.overlay
-                implicitWidth: active ? 20 + wsContentRow.implicitWidth : 15 + wsContentRow.implicitWidth
+                implicitWidth: 10 + wsContentRow.implicitWidth
                 cursorShape: Qt.PointingHandCursor
                 clip: false
 
-                // Apply the parent's radius ONLY if this is the absolute last item in the list!
                 topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
                 bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
                 topRightRadius: 5
@@ -94,7 +93,7 @@ ModuleButton {
                 RowLayout {
                     id: wsContentRow
                     anchors.centerIn: parent
-                    spacing: active ? 10 : 5
+                    spacing: 5
 
                     Text {
                         text: wsButton.modelData.name
@@ -102,15 +101,7 @@ ModuleButton {
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize
                         font.bold: true
-                    }
-
-                    Rectangle {
-                        visible: wsButton.modelData.toplevels.values.length > 0
-                        width: root.overlay
-                        height: Theme.moduleHeight - 15
-                        color: Theme.paletteInk
-                        opacity: 0.3
-                        radius: 2
+                        Layout.margins: 5
                     }
 
                     Repeater {
@@ -180,7 +171,7 @@ ModuleButton {
                 property bool isHovered: hoverHandler.hovered
 
                 implicitHeight: root.implicitHeight - 2 * root.overlay
-                implicitWidth: isHovered ? (15 + othersContentRow.implicitWidth) : 25
+                implicitWidth: Math.max(othersContentRow.implicitWidth + 10, implicitHeight)
                 cursorShape: Qt.PointingHandCursor
                 clip: activeDragCount === 0
                 
@@ -217,19 +208,11 @@ ModuleButton {
 
                     Text {
                         text: modelData.name
-                        color: parent.parent.textColor || "white"
+                        color: parent.parent.textColor
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize
                         font.bold: true
-                    }
-
-                    Rectangle {
-                        visible: isHovered && modelData.toplevels.values.length > 0
-                        width: root.overlay
-                        height: Theme.moduleHeight - 15
-                        color: Theme.paletteInk
-                        opacity: 0.3
-                        radius: 2
+                        Layout.margins: 3
                     }
 
                     Repeater {

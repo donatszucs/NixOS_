@@ -27,7 +27,7 @@ Rectangle {
     property bool smoothCurve: false
     property real smoothTolerance: 0.1
     // The physical gap size between modules
-    implicitWidth: 5
+    implicitWidth: 0
     implicitHeight: Theme.moduleHeight
 
     // 1. The Right-facing corner (attaches to the Left module)

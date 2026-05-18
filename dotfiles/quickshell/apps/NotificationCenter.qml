@@ -2,6 +2,7 @@
 // Renders a stack of toast notifications in the bottom-right corner of the Bar.
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import QtQuick.Controls
 import Quickshell.Services.Notifications as Notif
@@ -70,8 +71,8 @@ Item {
             sizeH: Math.max(containerRect.implicitHeight / 8, Theme.moduleEdgeRadius)
             sizeV: containerRect.implicitHeight
             color: Theme.palette("dark").base
-            expandingH: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
-            expandingV: (innerLayout.implicitWidth !== 0 || hoverHandler.hovered)
+            expandingH: (notificationRepeater.count > 0 || hoverHandler.hovered)
+            expandingV: (notificationRepeater.count > 0 || hoverHandler.hovered)
             animated: false
         }
 
@@ -86,111 +87,21 @@ Item {
             color: Theme.palette("dark").base
             clip: true
             topLeftRadius: Theme.moduleEdgeRadius + 10
-            
-            implicitWidth: (innerLayout.implicitWidth === 0 && !hoverHandler.hovered) ? topRadius.size : (Math.max(innerLayout.implicitWidth, headerButton.implicitWidth) + 20)
+
+            implicitWidth: (innerLayout.implicitHeight === 0 && !hoverHandler.hovered) 
+                ? Theme.moduleEdgeRadius 
+                : Math.max(root.notifWidth, innerLayout.implicitWidth) + 20
+                
+            Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
             property real hoverProgress: hoverHandler.hovered ? 1.0 : 0.0
             Behavior on hoverProgress { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
 
-            property real headerOffset: hoverProgress * (20 + headerButton.implicitHeight)
-
+            // Height is non-zero so you can actually hover on it!
             property real activePadding: innerLayout.implicitHeight > 0 ? 20 : 0
             Behavior on activePadding { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
 
-            implicitHeight: Math.min(headerOffset + innerLayout.smoothHeight + activePadding, Layout.maximumHeight)
-
-            Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
-
-            // ── HEADER ──────────────────────────────────────────────────
-            Rectangle {
-                id: headerButton
-                
-                // Simplified positioning mapping seamlessly above the notification scroll area
-                anchors.bottom: notifFlickable.top
-                anchors.bottomMargin: 20
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                
-                opacity: containerRect.hoverProgress
-                visible: opacity > 0
-                
-                implicitHeight: headerColumn.implicitHeight + 15
-                implicitWidth: headerColumn.implicitWidth
-                
-                radius: Theme.moduleEdgeRadius
-                color: Theme.divider
-                clip: true
-
-                ColumnLayout {
-                    id: headerColumn
-                    anchors{
-                        top: parent.top
-                        left: parent.left
-                        right: parent.right
-                        topMargin: 10
-                        leftMargin: 10
-                        rightMargin: 10
-                    }
-                    
-                    ModuleButton {
-                        id: headerLabel
-                        
-                        textFont: 20
-                        variant: "dark"
-                        color: "transparent"
-                        label: "󰎟 Notification Center"
-                        radius: Theme.moduleEdgeRadius
-                        
-                        Layout.preferredHeight: Theme.listHeight
-                        Layout.fillWidth: true
-
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: volumeSliderContainer.showing = !volumeSliderContainer.showing
-                    }
-
-                    Item {
-                        id: volumeSliderContainer
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.preferredWidth: parent.width * 0.9
-                        
-                        property bool showing: false
-                        Layout.preferredHeight: showing ? 40 : 0
-                        opacity: showing ? 1 : 0
-                        clip: true
-
-                        Behavior on Layout.preferredHeight {
-                            NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
-                        }
-                        Behavior on opacity {
-                            NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
-                        }
-
-                        RowLayout {
-                            anchors.fill: parent
-                            spacing: 10
-
-                            ModuleButton {
-                                label: SharedState.muted ? "󰖁" : "󰕾"
-                                color: "transparent"
-                                implicitWidth: 30
-                                textFont: 20
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: SharedState.muted = !SharedState.muted
-                            }
-
-                            StyledSlider {
-                                Layout.fillWidth: true
-                                from: 0.0
-                                to: 1.0
-                                value: SharedState.notifVolume
-                                onValueChanged: SharedState.notifVolume = value
-                            }
-                        }
-                    }
-                }
-            }
+            implicitHeight: Math.min(innerLayout.smoothHeight + activePadding, Layout.maximumHeight)
 
             // ── SCROLLING AREA ──────────────────────────────────────────
             Flickable {
@@ -198,10 +109,33 @@ Item {
                 property real previousContentHeight: 0
                 
                 anchors.top: parent.top
-                anchors.topMargin: containerRect.headerOffset + 10
+                anchors.topMargin: 10
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
+
+                layer.enabled: true
+                layer.smooth: true
+                layer.effect: MultiEffect {
+                    maskEnabled: true
+                    maskSource: notifMask
+                }
+
+                Item {
+                    id: notifMask
+                    anchors.fill: parent
+                    visible: false
+                    layer.enabled: true
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+                        topLeftRadius: Theme.moduleEdgeRadius
+                        topRightRadius: Theme.moduleEdgeRadius
+                        color: "black"
+                    }
+                }
                 
                 contentWidth: width
                 contentHeight: Math.max(innerLayout.smoothHeight + containerRect.activePadding, height)
@@ -231,6 +165,70 @@ Item {
                     width: parent.width - 20
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 10
+
+                    // ── HEADER ──────────────────────────────────────────────────
+                    Column {
+                        id: headerColumn
+                        width: parent.width
+                        spacing: 5
+                        
+                        // Hide smoothly when zero notifications and NOT hovered
+                        opacity: hoverHandler.hovered ? 1.0 : 0.0
+                        visible: opacity > 0
+                        
+                        // Shrink layout height when completely invisible
+                        height: visible ? implicitHeight : 0
+                        Behavior on height { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
+                        
+                        ModuleButton {
+                            width: parent.width
+                            height: 40
+                            textFont: 20
+                            variant: "dark"
+                            color: Theme.divider
+                            label: "󰎟 Notification Center"
+                            radius: Theme.moduleEdgeRadius
+                            
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: volumeSliderContainer.showing = !volumeSliderContainer.showing
+                        }
+
+                        Item {
+                            id: volumeSliderContainer
+                            width: parent.width * 0.9
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            
+                            property bool showing: false
+                            height: showing ? 40 : 0
+                            opacity: showing ? 1 : 0
+                            clip: true
+
+                            Behavior on height { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
+                            Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                spacing: 10
+
+                                ModuleButton {
+                                    label: SharedState.muted ? "󰖁" : "󰕾"
+                                    radius: Theme.moduleEdgeRadius
+                                    implicitWidth: 40
+                                    textFont: 20
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: SharedState.muted = !SharedState.muted
+                                }
+
+                                StyledSlider {
+                                    Layout.fillWidth: true
+                                    from: 0.0
+                                    to: 1.0
+                                    value: SharedState.notifVolume
+                                    onValueChanged: SharedState.notifVolume = value
+                                }
+                            }
+                        }
+                    }
                     
                     property real smoothHeight: implicitHeight
                     Behavior on smoothHeight {
@@ -305,6 +303,9 @@ Item {
         property real moduleHeight: contentGrid.implicitHeight + Theme.modulePaddingH * 2
         property real moduleWidth: contentGrid.implicitWidth + Theme.modulePaddingH * 2
 
+        // Collapse implicit bounds instantly so parent layout shrinks, while width/height animate smoothly.
+        implicitHeight: shouldBeVisible ? moduleHeight : 0.0
+        implicitWidth: shouldBeVisible ? moduleWidth : 0.0
 
         height: shouldBeVisible ? moduleHeight : 0.0
         width: shouldBeVisible ? moduleWidth : 0.0

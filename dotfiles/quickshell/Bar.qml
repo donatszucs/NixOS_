@@ -137,27 +137,11 @@ PanelWindow {
 
     // ── CENTER ───────────────────────────────────────────────────────────
 
-    InverseRadius {
-        cornerPosition: "topRight"
-        color: workspacesModule.color
-        anchors {
-            right: workspacesModule.left
-            top: parent.top
-        }
-    }
     WorkspacesModule {
         id: workspacesModule
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         screenName: modelData.name
-    }
-    InverseRadius {
-        cornerPosition: "topLeft"
-        color: workspacesModule.color
-        anchors {
-            left: workspacesModule.right
-            top: parent.top
-        }
     }
 
     // ── RIGHT ────────────────────────────────────────────────────────────
