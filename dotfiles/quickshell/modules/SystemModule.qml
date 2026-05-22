@@ -99,8 +99,8 @@ ModuleButton {
 
             model: [
                 { index: 0, icon: "", text: "Shutdown", cmd: "systemctl poweroff", },
-                { index: 1, icon: "", text: "Reboot", cmd: "systemctl reboot", },
-                { index: 2, icon: "󰌪", text: "Suspend", cmd: "systemctl suspend", },
+                { index: 1, icon: "󰌪", text: "Suspend", cmd: "systemctl suspend", },
+                { index: 2, icon: "", text: "Reboot", cmd: "systemctl reboot", },
                 { index: 3, icon: "", text: "Lock", cmd: "hyprlock", }
             ]
             delegate: ModuleButton {
@@ -110,19 +110,18 @@ ModuleButton {
                 cursorShape: Qt.PointingHandCursor
                 variant: "red"
 
-                implicitHeight: Theme.listHeight
+                implicitHeight: Theme.listHeight - 10
 
                 Layout.alignment: Qt.AlignCenter
                 Layout.preferredWidth: mainButton.implicitWidth - 20
                 Layout.topMargin: actionButton.modelData.index === 0 ? (- corner.size) : 0
 
-                radius: Theme.moduleEdgeRadius
+                radius: Theme.moduleEdgeRadius - 5
 
                 RowLayout {
-                    anchors.left: parent.left
-                    anchors.leftMargin: Theme.modulePaddingH
+                    anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: 15
+                    spacing: 10
 
                     Text {
                         text: actionButton.modelData.icon
@@ -147,6 +146,8 @@ ModuleButton {
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize
                         font.bold: true
+                        Layout.preferredWidth: actionButton.Layout.preferredWidth - 55
+                        horizontalAlignment: Text.AlignLeft
                     }
                 }
 
@@ -189,6 +190,7 @@ ModuleButton {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: updateProc.running = true
 
+                    implicitHeight: 30
                     implicitWidth: implicitHeight
 
                     radius: Theme.moduleEdgeRadius
@@ -201,6 +203,7 @@ ModuleButton {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: rebuildProc.running = true
 
+                    implicitHeight: 30
                     implicitWidth: implicitHeight
 
                     radius: Theme.moduleEdgeRadius

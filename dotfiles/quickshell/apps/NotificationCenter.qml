@@ -90,7 +90,7 @@ Item {
 
             implicitWidth: (innerLayout.implicitHeight === 0 && !hoverHandler.hovered) 
                 ? Theme.moduleEdgeRadius 
-                : Math.max(root.notifWidth, innerLayout.implicitWidth) + 20
+                : Math.max(root.notifWidth, innerLayout.implicitWidth) + 20 // +20 for Flickable margins
                 
             Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
@@ -102,10 +102,11 @@ Item {
                 property real previousContentHeight: 0
                 
                 anchors.top: parent.top
-                anchors.topMargin: 10
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
+                anchors.margins: 10
+                anchors.bottomMargin: 0
 
                 layer.enabled: true
                 layer.smooth: true
@@ -122,8 +123,6 @@ Item {
 
                     Rectangle {
                         anchors.fill: parent
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
                         topLeftRadius: Theme.moduleEdgeRadius
                         topRightRadius: Theme.moduleEdgeRadius
                         color: "black"
@@ -155,7 +154,7 @@ Item {
                 Column {
                     id: innerLayout
                     
-                    width: parent.width - 20
+                    width: parent.width
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 10
 
@@ -223,13 +222,11 @@ Item {
                         }
                     }
                     
+                    y: 10
                     property real smoothHeight: implicitHeight === 0 ? 0 : implicitHeight + 20
                     Behavior on smoothHeight {
                         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                     }
-
-                    // Bottom alignment glide to prevent layout jumps
-                    y: Math.max(10, notifFlickable.height - smoothHeight - 10)
 
                     move: Transition {
                         NumberAnimation { properties: "y"; duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic }
