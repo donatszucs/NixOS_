@@ -68,19 +68,22 @@
   pinentry-qt     # Qt5 pinentry for rbw
   usbutils          # For lsusb and other USB tools
   wlsunset          # Automatic color temperature adjustment based on time of day
+  overskride
   
   # -- Applications --
   vscode
   gemini-cli
   google-chrome
   inputs.zen-browser.packages."${builtins.currentSystem}".default
-  inputs.playit-nixos-module.packages."${builtins.currentSystem}".playit-cli
+  inputs.playit-nixos-module.packages."${builtins.currentSystem}".playit
   spotify
   pkgs.vesktop
   discord
   qalculate-gtk
   texlive.combined.scheme-full
   teams-for-linux
+  heroic
+  # szeretlek eszter
 
   (prismlauncher.override {
     jdks = [ 

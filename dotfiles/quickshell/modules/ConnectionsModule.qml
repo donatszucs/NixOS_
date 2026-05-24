@@ -621,7 +621,7 @@ ModuleButton {
     Process {
         id: btOpen
         // Try blueman-manager first, fall back to gnome control center bluetooth
-        command: ["bash", "-c", "blueman-manager || gnome-control-center bluetooth || true"]
+        command: ["bash", "-c", " overskride || blueman-manager || gnome-control-center bluetooth || true"]
     }
 
     // Headset battery probe (calls wrapper script)

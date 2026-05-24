@@ -25,10 +25,13 @@
     settings = {
       General = {
         Experimental = true; # Show battery charge for supported devices
-        JustWorksRepairing = "always"; # Helps with some devices that fail to pair
+        Privacy = "device";
+        #JustWorksRepairing = "always"; # Helps with some devices that fail to pair
       };
     };
   };
+
+  hardware.xpadneo.enable = true;
 
   # 3. Force load the kernel module (Driver)
   boot.kernelModules = [ "btusb" "ntsync" "usbmon" ];
