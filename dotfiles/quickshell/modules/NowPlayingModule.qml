@@ -24,13 +24,14 @@ ModuleButton {
     // Using MPRIS; legacy playerctl state removed
     function refreshAll() { pickPlayer() }
 
+    property real expandedHeight: albumArt.source.toString() !== "" ? 125 : (Theme.moduleHeight + 45)
 
-    implicitHeight: expanded ? albumArtClip.height + 20: Theme.moduleHeight
-    implicitWidth: expanded ? albumArtClip.width + 20 : titleBtn.implicitWidth
+    implicitHeight: expanded ? expandedHeight + 20 : Theme.moduleHeight
+    implicitWidth: expanded ? 270 : titleBtn.implicitWidth
     clip: true
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -50,20 +51,23 @@ ModuleButton {
             noHoverColorChange: !expanded
             noPressColorChange: !expanded
             id: titleBtn
+            
+            variant: "light"
+            
             Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
             Layout.topMargin: nowPlayingModule.expanded ? 15 : 0
             cursorShape: isPlaying ? Qt.PointingHandCursor : Qt.ArrowCursor
 
 
             Behavior on Layout.topMargin {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
             
             implicitWidth: scrollingText.implicitWidth + artistText.implicitWidth + 20
             onClicked: focusNow()
 
             radius: Theme.moduleEdgeRadius
-            colorOpacity: 0.9
+            colorOpacity: 0.8
 
             RowLayout {
                 id: topRow
@@ -80,14 +84,14 @@ ModuleButton {
                     textMaxWidth: 200
                     fontFamily: Theme.font
                     pixelSize: Theme.fontSize
-                    textColor: Theme.textPrimary
+                    textColor: expanded ? Theme.textDark : Theme.textPrimary
                     fontBold: true
                 }
 
                 Text {
                     id: artistText
                     text: "󰎆 "
-                    color: Theme.textPrimary
+                    color: expanded ? Theme.textDark : Theme.textPrimary
                     font.family: Theme.font
                     font.pixelSize: textFont
                     font.bold: true
@@ -102,18 +106,27 @@ ModuleButton {
             Layout.topMargin: - Theme.moduleHeight - 5
             z: -1
             id: trackArt
-            visible: nowPlayingModule.expanded
+            opacity: nowPlayingModule.expanded ? 1 : 0
             color: "transparent"
-            implicitWidth: albumArtClip.width
-            implicitHeight: albumArtClip.height
+            implicitWidth: nowPlayingModule.expanded ? 250 : titleBtn.implicitWidth
+            implicitHeight: nowPlayingModule.expanded ? nowPlayingModule.expandedHeight : 0
+            
+            Behavior on opacity {
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
+            Behavior on implicitWidth {
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
+            Behavior on implicitHeight {
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
 
             Item { 
                 id: albumArtClip
                 anchors.centerIn: parent
 
-                width: 250
-                // Formula: Height = Width * (Original Height / Original Width)
-                height: albumArt.source.toString() !== "" ? albumArtClip.width / 2 : artHover.implicitHeight + 45
+                width: trackArt.implicitWidth
+                height: trackArt.implicitHeight
 
                 Image {
                     id: albumArt
@@ -157,11 +170,12 @@ ModuleButton {
 
                     ModuleButton {
                         id: artHover
-                        
+                        variant: "light"
+
                         bottomRightRadius: height / 2
                         topRightRadius: height / 2
                         visible: nowPlayingModule.authorText !== ""
-                        colorOpacity: 0.9
+                        colorOpacity: 0.8
 
                         implicitWidth: expanded ? scrollingAuthorText.implicitWidth + 20 : 0
 
@@ -176,7 +190,7 @@ ModuleButton {
                             textMaxWidth: albumArtClip.width - 30 - nextButton.implicitWidth - playPauseButton.implicitWidth
                             fontFamily: Theme.font
                             pixelSize: Theme.fontSize
-                            textColor: Theme.textPrimary
+                            textColor: Theme.textDark
                             fontBold: false
                         }
                     }
@@ -184,13 +198,14 @@ ModuleButton {
                     ModuleButton {
                         id: nextButton
                         cursorShape: Qt.PointingHandCursor
+                        variant: "light"
                         
                         implicitHeight: Theme.moduleHeight
                         implicitWidth: (nowPlayingModule.expanded && currentPlayer.canGoNext) ? Theme.moduleHeight : 0
 
                         label: "󰒭"
 
-                        colorOpacity: 0.9
+                        colorOpacity: 0.8
 
                         onClicked: nowPlayingModule.doNext()
 
@@ -202,6 +217,7 @@ ModuleButton {
                     ModuleButton {
                         id: playPauseButton
                         cursorShape: Qt.PointingHandCursor
+                        variant: "light"
                         
                         implicitHeight: Theme.moduleHeight
                         implicitWidth: nowPlayingModule.expanded ? Theme.moduleHeight : 0
@@ -211,7 +227,7 @@ ModuleButton {
                         topLeftRadius: height / 2
                         bottomLeftRadius: height / 2
 
-                        colorOpacity: 0.9
+                        colorOpacity: 0.8
 
                         onClicked: nowPlayingModule.doTogglePlay()
 

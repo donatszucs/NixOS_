@@ -80,7 +80,7 @@ Rectangle {
     // ── Autofill: close panel first, then type into the previously focused window
     Timer {
         id: autofillTimer
-        interval: 200
+        interval: 100
         repeat: false
         property string pendingItem: ""
         onTriggered: {
@@ -92,7 +92,7 @@ Rectangle {
     Process {
         id: autofillProc
         property string itemId: ""
-        command: ["bash", "-c", "rbw get \"$0\" | wtype -", itemId]
+        command: ["bash", "-c", "pass=$(rbw get \"$0\") && sleep 0.5 && printf '%s' \"$pass\" | wtype -", itemId]
     }
 
     // ── Keyboard navigation ────────────────────────────────────────────────

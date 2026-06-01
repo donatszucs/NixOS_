@@ -13,14 +13,20 @@
   # Enable dconf for application settings
   programs.dconf.enable = true;
 
-  # Enable display manager with hyprlock
-  services.displayManager = {
-    autoLogin = {
-      enable = true;
-      user = "doni";
-    };
-    gdm = {
-      enable = true;
+  # Enable greetd
+  services.greetd = {
+    enable = true;
+    settings = {
+      # This handles your autologin
+      initial_session = {
+        command = "start-hyprland";
+        user = "doni";
+      };
+      # This is the fallback minimal terminal prompt if you ever log out
+      default_session = {
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd start-hyprland";
+        user = "greeter";
+      };
     };
   };
 

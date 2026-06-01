@@ -68,7 +68,7 @@ Rectangle {
     Process {
         id: applyCliphist
         property string targetLine: ""
-        command: ["bash", "-c", "printf '%s\\n' \"$0\" | cliphist decode | wl-copy && sleep 0.1 && wtype -M ctrl -k v -m ctrl", targetLine]
+        command: ["bash", "-c", "printf '%s\\n' \"$0\" | cliphist decode | wl-copy && sleep 0.5 && wtype -M ctrl -k v -m ctrl", targetLine]
     }
 
     // ── Public API ────────────────────────────────────────────────────────

@@ -101,7 +101,8 @@ hl.config({
     },
     misc = {
         force_default_wallpaper = -1,
-        disable_hyprland_logo = true
+        disable_hyprland_logo = true,
+        focus_on_activate = true
     },
     input = {
         kb_layout = "hu",
@@ -110,6 +111,7 @@ hl.config({
         kb_options = "",
         kb_rules = "",
         follow_mouse = 1,
+        focus_on_close = 1,
         sensitivity = 0,
         scroll_method = "on_button_down",
         scroll_button = 274,
@@ -193,11 +195,11 @@ for i = 1, 9 do
     -- Switch workspace
     hl.bind(mainMod .. " + " .. tostring(i), hl.dsp.focus({ workspace = i }))
     -- Move active window to workspace
-    -- hl.bind(mainMod .. " + SHIFT + " .. tostring(i), hl.dsp.window.move({ workspace = i }))
+    hl.bind(mainMod .. " + SHIFT + " .. tostring(i), hl.dsp.window.move({ workspace = i }))
 end
 
 hl.bind(mainMod .. " + 0", hl.dsp.focus({ workspace = "empty" }))
-hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }))
+hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = "empty" }))
 
 -- Scroll through existing workspaces
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "+1" }))
