@@ -40,7 +40,11 @@ hl.env("QT_SCALE_FACTOR_ROUNDING_POLICY", "Round")
 -- ==========================================
 hl.on("hyprland.start", function()
     hl.exec_cmd("kdeconnect-indicator &")
-    hl.exec_cmd("quickshell & code & zen &")
+    hl.exec_cmd("quickshell &")
+    hl.exec_cmd("[workspace 1 silent] zen &")
+    hl.exec_cmd("[workspace 3 silent] code &")
+    hl.exec_cmd("discord --minimized &")
+
     hl.exec_cmd("~/nixos-config/scripts/WallpaperSetup/init-hyprpaper.sh &")
     hl.exec_cmd("~/nixos-config/scripts/KeychronMouse/mouse-battery &")
     
@@ -89,7 +93,6 @@ hl.config({
             vibrancy = 0.2
         }
     },
-    -- Migrated animations to the new dynamic lua binding methods
     animations = {
         enabled = true
     },
@@ -140,6 +143,13 @@ hl.layer_rule({
     ignore_alpha = 0.65
 })
 
+-- ==========================================
+-- WINDOW RULES
+-- ==========================================
+hl.window_rule({
+    match = { class = "^(discord)$" },
+    workspace = "2 silent"
+})
 -- ==========================================
 -- ANIMATIONS (Lua API)
 -- ==========================================

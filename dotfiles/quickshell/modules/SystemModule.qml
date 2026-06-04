@@ -215,11 +215,11 @@ ModuleButton {
 
     Process {
         id: rebuildProc
-        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config && sudo nixos-rebuild switch --flake .#doni --impure; notify-send 'Rebuild finished'"]
+        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config/nix_files && sudo nixos-rebuild switch --flake .#doni --impure; notify-send 'Rebuild finished'"]
     }
 
     Process {
         id: updateProc
-        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config && sudo nix flake update; notify-send 'Flake update finished'"]
+        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config/nix_files && sudo nix flake update; notify-send 'Flake update finished'"]
     }
 }
