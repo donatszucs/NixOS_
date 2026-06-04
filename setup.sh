@@ -3,33 +3,12 @@
 # Define paths
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 DOTFILES_DIR="$SCRIPT_DIR/dotfiles"
-REPO_CONFIG="$SCRIPT_DIR/configuration.nix"
-NIX_PATH="/etc/nixos/configuration.nix"
 CONFIG_DIR="$HOME/.config"
 
 echo "--- ❄️  NixOS System & Dotfiles Setup ---"
 
-# --- PART 1: Link configuration.nix ---
-echo -e "\n[1/2] Checking System Configuration..."
-if [ -L "$NIX_PATH" ]; then
-    echo "✅ /etc/nixos/configuration.nix is already linked."
-else
-    if [ -f "$NIX_PATH" ]; then
-        echo "⚠️  Found existing file at $NIX_PATH."
-        read -p "   Backup and link repo version? (y/n): " resp
-        if [[ "$resp" =~ ^([yY])$ ]]; then
-            sudo mv "$NIX_PATH" "$NIX_PATH.bak"
-            sudo ln -s "$REPO_CONFIG" "$NIX_PATH"
-            echo "🔗 Link created (Backup at .bak)."
-        fi
-    else
-        sudo ln -s "$REPO_CONFIG" "$NIX_PATH"
-        echo "🔗 Link created."
-    fi
-fi
-
-# --- PART 2: Link All Dotfiles ---
-echo -e "\n[2/2] Linking Dotfiles to $CONFIG_DIR..."
+# --- PART 1: Link All Dotfiles ---
+echo -e "\n[1/2] Linking Dotfiles to $CONFIG_DIR..."
 
 if [ ! -d "$DOTFILES_DIR" ]; then
     echo "❌ Error: 'dotfiles' folder not found in $SCRIPT_DIR"
@@ -64,8 +43,8 @@ for folder in "$DOTFILES_DIR"/*/; do
     fi
 done
 
-# --- PART 3: Make All Scripts Executable ---
-echo -e "\n[3/3] Making scripts executable..."
+# --- PART 2: Make All Scripts Executable ---
+echo -e "\n[2/2] Making scripts executable..."
 
 find "$SCRIPT_DIR/scripts" -type f -name "*.sh" -exec chmod +x {} \;
 echo "🔧 Scripts in $SCRIPT_DIR/scripts are now executable."
@@ -74,4 +53,4 @@ chmod +x "$SCRIPT_DIR/link_dotfiles.sh"
 echo "🔧 $SCRIPT_DIR/link_dotfiles.sh is now executable."
 
 echo -e "\n--- 🎉 Setup Complete! ---"
-echo "Run 'sudo nixos-rebuild switch' to apply system changes."
+echo "Run 'cd ~/nixos-config/nix_files && sudo nixos-rebuild switch --flake .#doni --impure' to apply system changes."
