@@ -252,6 +252,6 @@ hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | wl-
 
 -- Utilities (Lock, Calc, Cliphist, RBW)
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
-hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("hyprctl dispatch exec \"[float;width 400;height 600] qalculate-gtk\""))
+hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("[float; size 800 600] qalculate-gtk"))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("bash -c 'echo open > /tmp/qs-cliphist-$(hyprctl activeworkspace -j | jq -r \".monitor\")'"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("bash -c 'echo open > /tmp/qs-rbw-$(hyprctl activeworkspace -j | jq -r \".monitor\")'"))
