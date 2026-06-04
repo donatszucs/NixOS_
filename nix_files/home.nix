@@ -30,10 +30,6 @@
       QT_QPA_PLATFORMTHEME = "kde";
       QT_STYLE_OVERRIDE = "Dracula";
 
-      # Help apps detect a KDE-like desktop for choosing dark variant
-      XDG_CURRENT_DESKTOP = "KDE";
-      KDE_FULL_SESSION = "true";
-
       QSG_RHI_BACKEND = "vulkan";
       MOZ_ENABLE_WAYLAND = "1";
 

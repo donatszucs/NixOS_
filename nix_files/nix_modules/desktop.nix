@@ -17,14 +17,13 @@
   services.greetd = {
     enable = true;
     settings = {
-      # This handles your autologin
       initial_session = {
-        command = "start-hyprland";
+        command = "bash -l -c start-hyprland";
         user = "doni";
       };
-      # This is the fallback minimal terminal prompt if you ever log out
+      # If you use the tuigreet fallback, update that command too:
       default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd start-hyprland";
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd 'bash -l -c start-hyprland'";
         user = "greeter";
       };
     };
