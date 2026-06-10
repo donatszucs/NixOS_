@@ -88,9 +88,7 @@ Item {
             clip: true
             topLeftRadius: Theme.moduleEdgeRadius + 10
 
-            implicitWidth: (innerLayout.implicitHeight === 0 && !hoverHandler.hovered) 
-                ? Theme.moduleEdgeRadius 
-                : Math.max(root.notifWidth, innerLayout.implicitWidth) + 20 // +20 for Flickable margins
+            implicitWidth: innerLayout.implicitWidth + 20
                 
             Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
@@ -161,7 +159,6 @@ Item {
                     // ── HEADER ──────────────────────────────────────────────────
                     Column {
                         id: headerColumn
-                        width: parent.width
                         spacing: 5
                         
                         // Hide smoothly when zero notifications and NOT hovered
@@ -173,7 +170,7 @@ Item {
                         Behavior on height { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
                         
                         ModuleButton {
-                            width: parent.width
+                            implicitWidth: hoverHandler.hovered ? Math.max(notifFlickable.contentWidth, root.notifWidth) : 0
                             height: 40
                             textFont: 20
                             variant: "dark"

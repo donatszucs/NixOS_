@@ -66,8 +66,8 @@ ModuleButton {
             implicitWidth: scrollingText.implicitWidth + artistText.implicitWidth + 20
             onClicked: focusNow()
 
-            radius: Theme.moduleEdgeRadius
-            colorOpacity: 0.8
+            radius: Theme.moduleEdgeRadius - 5
+            colorOpacity: 0.9
 
             RowLayout {
                 id: topRow
@@ -172,10 +172,10 @@ ModuleButton {
                         id: artHover
                         variant: "light"
 
-                        bottomRightRadius: height / 2
-                        topRightRadius: height / 2
+                        bottomRightRadius: Theme.moduleEdgeRadius -5
+                        topRightRadius: Theme.moduleEdgeRadius -5
                         visible: nowPlayingModule.authorText !== ""
-                        colorOpacity: 0.8
+                        colorOpacity: 0.9
 
                         implicitWidth: expanded ? scrollingAuthorText.implicitWidth + 20 : 0
 
@@ -205,7 +205,7 @@ ModuleButton {
 
                         label: "󰒭"
 
-                        colorOpacity: 0.8
+                        colorOpacity: 0.9
 
                         onClicked: nowPlayingModule.doNext()
 
@@ -224,10 +224,10 @@ ModuleButton {
 
                         label: nowPlayingModule.playPauseIcon
 
-                        topLeftRadius: height / 2
-                        bottomLeftRadius: height / 2
+                        topLeftRadius: Theme.moduleEdgeRadius - 5
+                        bottomLeftRadius: Theme.moduleEdgeRadius - 5
 
-                        colorOpacity: 0.8
+                        colorOpacity: 0.9
 
                         onClicked: nowPlayingModule.doTogglePlay()
 

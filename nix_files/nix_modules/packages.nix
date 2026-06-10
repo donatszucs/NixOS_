@@ -72,6 +72,7 @@
   
   # -- Applications --
   vscode
+  antigravity
   gemini-cli
   google-chrome
   inputs.zen-browser.packages."${builtins.currentSystem}".default
