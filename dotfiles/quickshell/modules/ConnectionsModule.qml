@@ -12,7 +12,10 @@ import "../elements"
 ModuleButton {
     id: connectionsModule
     property bool expanded: false
+    property int currentPage: 0
     noHoverColorChange: expanded ? true : false
+
+
 
     HoverHandler {
         id: parentHover
@@ -191,21 +194,60 @@ ModuleButton {
             Layout.bottomMargin: 10
             spacing: 5
 
-            Text {
-                text: "Hardware"
-                color: Theme.textPrimary
-                font.family: Theme.font
-                font.pixelSize: 22
-                font.bold: true
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                onWheel: (wheel) => {
+                    if (wheel.angleDelta.y > 0) connectionsModule.currentPage = 0
+                    else if (wheel.angleDelta.y < 0) connectionsModule.currentPage = 1
+                }
+            }
+
+            RowLayout {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.margins: 10
                 Layout.topMargin: 0
+                spacing: 20
+
+                Text {
+                    text: "Hardware"
+                    color: Theme.textPrimary
+                    opacity: connectionsModule.currentPage === 0 ? 1.0 : 0.5
+                    font.family: Theme.font
+                    font.pixelSize: 18
+                    font.bold: true
+                    
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: connectionsModule.currentPage = 0
+                    }
+                }
+
+                Text {
+                    text: "Peripherals"
+                    color: Theme.textPrimary
+                    opacity: connectionsModule.currentPage === 1 ? 1.0 : 0.5
+                    font.family: Theme.font
+                    font.pixelSize: 18
+                    font.bold: true
+                    
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: connectionsModule.currentPage = 1
+                    }
+                }
             }
 
             // ── Network ──────────────────────────────────
             ModuleButton {
                 id: netModule
-                visible: connectionsModule.expanded
+                visible: connectionsModule.expanded && connectionsModule.currentPage === 0
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
@@ -272,7 +314,7 @@ ModuleButton {
             // ── Bluetooth ──────────────────────────────────
             ModuleButton {
                 id: btModule
-                visible: connectionsModule.expanded
+                visible: connectionsModule.expanded && connectionsModule.currentPage === 0
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
@@ -404,20 +446,10 @@ ModuleButton {
                 }
             }
 
-            Text {
-                text: "Peripherals"
-                color: Theme.textPrimary
-                font.family: Theme.font
-                font.pixelSize: 22
-                font.bold: true
-                Layout.alignment: Qt.AlignHCenter
-                Layout.margins: 10
-            }
-
             // ── Headset ──────────────────────────────────
             ModuleButton {
                 id: headsetModule
-                visible: connectionsModule.expanded
+                visible: connectionsModule.expanded && connectionsModule.currentPage === 1
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
@@ -494,7 +526,7 @@ ModuleButton {
             // ── Mouse ──────────────────────────────────
             ModuleButton {
                 id: mouseModule
-                visible: connectionsModule.expanded
+                visible: connectionsModule.expanded && connectionsModule.currentPage === 1
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
