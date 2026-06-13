@@ -8,23 +8,20 @@ import "../elements"
 Rectangle {
     id: rbwPanel
 
-    property real targetWidth: 400
-    property real targetHeight: 480
+    property real targetWidth: 600
+    property real targetHeight: 400
     property bool expanded: false
     property string screenName: ""
     property int selectedIndex: -1
     property var allItems: []
     property var filteredItems: []
 
-    // Fixed corner cap size — must not depend on animated implicitHeight
-    property real cornerSize: targetHeight / 8
-
     focus: expanded
     color: "transparent"
 
     // Drop down from below the bar — animate height growth downward
     implicitHeight: expanded ? targetHeight : 0
-    implicitWidth: targetWidth + cornerSize * 2
+    implicitWidth: targetWidth
     Behavior on implicitHeight {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
@@ -148,12 +145,15 @@ Rectangle {
         id: mainLayout
         anchors.fill: parent
         spacing: 0
+
         InverseRadius {
             cornerPosition: "bottomRight"
-            implicitHeight: rbwPanel.cornerSize
-            implicitWidth: rbwPanel.cornerSize
+            sizeV: targetHeight / 4
+            sizeH: targetWidth / 8
+            color: containerRect.color
             Layout.alignment: Qt.AlignBottom
             expandingV: rbwPanel.expanded
+            expandingH: rbwPanel.expanded
         }
         
         // ── Visual panel (drops below the bar) ────────────────────────────────
@@ -161,9 +161,9 @@ Rectangle {
             id: containerRect
             implicitHeight: rbwPanel.implicitHeight
             Layout.fillWidth: true
-            color: Theme.dark.base
-            topLeftRadius: Theme.moduleEdgeRadius
-            topRightRadius: Theme.moduleEdgeRadius
+            color: Qt.rgba(Theme.dark.base.r, Theme.dark.base.g, Theme.dark.base.b, Theme.moduleOpacity)
+            topLeftRadius: Theme.moduleEdgeRadius * 2
+            topRightRadius: Theme.moduleEdgeRadius * 2
             clip: true
 
             ColumnLayout {
@@ -288,11 +288,17 @@ Rectangle {
 
                 ModuleButton {
                     label: "Close"
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.fillWidth: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: rbwPanel.closeMenu()
                     radius: Theme.moduleEdgeRadius
+
+                    Layout.alignment: Qt.AlignHCenter
+                    
+                    
+                    variant: "neutral"
+                    border.width: 2
+
+                    implicitWidth: 100
                 }
             }
         }
@@ -300,11 +306,12 @@ Rectangle {
         // Inverse radius caps at the bar edge (top of the dropping panel)
         InverseRadius {
             cornerPosition: "bottomLeft"
-            implicitHeight: rbwPanel.cornerSize
-            implicitWidth: rbwPanel.cornerSize
-            color: Theme.dark.base
+            sizeV: targetHeight / 4
+            sizeH: targetWidth / 8
+            color: containerRect.color
             Layout.alignment: Qt.AlignBottom
             expandingV: rbwPanel.expanded
+            expandingH: rbwPanel.expanded
         }
 }
 }

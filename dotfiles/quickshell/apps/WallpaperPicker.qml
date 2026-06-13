@@ -16,8 +16,6 @@ Rectangle {
     property real targetWidth: 550
     property real targetHeight: 900
     property bool expanded: false
-    
-    property real cornerSize: targetWidth / 8
 
     color: "transparent"
     

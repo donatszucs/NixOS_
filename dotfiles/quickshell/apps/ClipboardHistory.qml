@@ -16,9 +16,6 @@ Rectangle {
     property int selectedIndex: -1
     focus: expanded
     property string screenName: ""
-    
-    // Fixed corner cap size — must not depend on animated implicitWidth
-    property real cornerSize: implicitWidth / 8
 
     color: "transparent"
     clip: true
