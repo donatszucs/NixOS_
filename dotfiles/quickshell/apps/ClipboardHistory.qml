@@ -187,7 +187,7 @@ Rectangle {
                         
                         property string currentClipId: typeof clipId !== "undefined" ? clipId : ""
                         property bool isImage: clipContent.startsWith("[[ binary data") && (clipContent.includes("png") || clipContent.includes("jpg") || clipContent.includes("jpeg") || clipContent.includes("webp"))
-                        property string imagePath: currentClipId !== "" ? "/tmp/qs-cliphist-img-" + currentClipId + ".png" : ""
+                        property string imagePath: currentClipId !== "" ? "/tmp/qs-cliphist/img-" + currentClipId + ".png" : ""
 
                         implicitHeight: isImage ? Theme.listHeight * 4 : Theme.listHeight
                         radius: Theme.moduleEdgeRadius / 2
@@ -198,7 +198,7 @@ Rectangle {
 
                         Process {
                             id: decodeImage
-                            command: ["bash", "-c", "if [ ! -f \"$2\" ]; then printf '%s\\n' \"$1\" | cliphist decode > \"$2\"; fi", "--", clipLine, delegateItem.imagePath]
+                            command: ["bash", "-c", "if [ ! -f \"$2\" ]; then mkdir -p \"$(dirname \"$2\")\" && printf '%s\\n' \"$1\" | cliphist decode > \"$2\"; fi", "--", clipLine, delegateItem.imagePath]
                             onExited: {
                                 if (delegateItem.isImage) {
                                     img.source = "file://" + delegateItem.imagePath;

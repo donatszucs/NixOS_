@@ -91,7 +91,7 @@ Rectangle {
                         id: previewButton
                         implicitWidth: wallpaperPanel.targetWidth - 40
                         implicitHeight: hovered ? 250 : 150
-                        variant: "neutral"
+                        variant: "dark"
                         
                         Behavior on implicitHeight { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
