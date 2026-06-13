@@ -55,7 +55,7 @@ Item {
             smoothTolerance: 0.4477 * Theme.moduleEdgeRadius / sizeH
             sizeH: Math.max(containerRect.implicitWidth, Theme.moduleEdgeRadius)
             sizeV: Math.max(containerRect.implicitWidth / 8, Theme.moduleEdgeRadius)
-            color: Theme.palette("dark").base
+            color: containerRect.color
             animated: false
         }
 
@@ -70,7 +70,7 @@ Item {
             smoothTolerance: 0.4477 * Theme.moduleEdgeRadius / sizeV
             sizeH: Math.max(containerRect.implicitHeight / 8, Theme.moduleEdgeRadius)
             sizeV: containerRect.implicitHeight
-            color: Theme.palette("dark").base
+            color: containerRect.color
             expandingH: (notificationRepeater.count > 0 || hoverHandler.hovered)
             expandingV: (notificationRepeater.count > 0 || hoverHandler.hovered)
             animated: false
@@ -84,7 +84,7 @@ Item {
             Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             Layout.maximumHeight: 900 
 
-            color: Theme.palette("dark").base
+            color: Qt.rgba(Theme.dark.base.r, Theme.dark.base.g, Theme.dark.base.b, Theme.moduleOpacity)
             clip: true
             topLeftRadius: Theme.moduleEdgeRadius + 10
 

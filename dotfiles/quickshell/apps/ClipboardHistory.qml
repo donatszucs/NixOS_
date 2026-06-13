@@ -11,14 +11,14 @@ Rectangle {
     id: clipboardPanel
     
     property real targetWidth: 400
-    property real targetHeight: 650
+    property real targetHeight: 800
     property bool expanded: false
     property int selectedIndex: -1
     focus: expanded
     property string screenName: ""
     
     // Fixed corner cap size — must not depend on animated implicitWidth
-    property real cornerSize: targetWidth / 8
+    property real cornerSize: implicitWidth / 8
 
     color: "transparent"
     clip: true
@@ -26,7 +26,7 @@ Rectangle {
     // Animate width for side sliding!
     implicitWidth: expanded ? targetWidth : 0
     Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
-    implicitHeight: targetHeight + cornerSize * 2
+    implicitHeight: targetHeight + targetHeight / 8
     
     // List model for the clipboard history
     ListModel {
@@ -136,11 +136,12 @@ Rectangle {
 
         InverseRadius {
             cornerPosition: "bottomLeft"
-            implicitWidth: clipboardPanel.cornerSize
-            implicitHeight: clipboardPanel.cornerSize
-            color: Theme.dark.base
+            sizeH: targetWidth / 4
+            sizeV: targetWidth / 8
+            color: containerRect.color
             Layout.alignment: Qt.AlignLeft
             expandingH: clipboardPanel.expanded
+            expandingV: clipboardPanel.expanded
         }
 
         // ── Visual panel (slides out from the left) ───────────────────────────
@@ -149,10 +150,10 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            color: Theme.dark.base
+            color: Qt.rgba(Theme.dark.base.r, Theme.dark.base.g, Theme.dark.base.b, Theme.moduleOpacity)
 
-            topRightRadius: Theme.moduleEdgeRadius
-            bottomRightRadius: Theme.moduleEdgeRadius
+            topRightRadius: Theme.moduleEdgeRadius * 2
+            bottomRightRadius: Theme.moduleEdgeRadius * 2
             topLeftRadius: 0
             bottomLeftRadius: 0
 
@@ -163,13 +164,14 @@ Rectangle {
                     fill: parent
                     margins: 20
                 }
-                spacing: 15
+                spacing: 20
             
-                Text {
-                    text: " Clipboard History"
-                    font.family: Theme.font
-                    font.pixelSize: 24
-                    color: Theme.textPrimary
+                ModuleButton {
+                    label: " Clipboard History"
+                    color: "transparent"
+
+                    textFont: 22
+                    Layout.fillWidth: true
                 }
                 
                 ListView {
@@ -207,21 +209,26 @@ Rectangle {
                 ModuleButton {
                     label: "Close"
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.fillWidth: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: clipboardPanel.closeMenu()
                     radius: Theme.moduleEdgeRadius
+
+                    variant: "neutral"
+                    border.width: 2
+
+                    implicitWidth: 100
                 }
             }
         }
 
         InverseRadius {
             cornerPosition: "topLeft"
-            implicitWidth: clipboardPanel.cornerSize
-            implicitHeight: clipboardPanel.cornerSize
-            color: Theme.dark.base
+            sizeH: targetWidth / 4
+            sizeV: targetWidth / 8
+            color: containerRect.color
             Layout.alignment: Qt.AlignLeft
             expandingH: clipboardPanel.expanded
+            expandingV: clipboardPanel.expanded
         }
     }
 }

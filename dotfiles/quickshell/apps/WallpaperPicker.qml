@@ -1,20 +1,20 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Layouts
+import QtQuick.Controls
 import Qt.labs.folderlistmodel
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import QtQuick.Effects
 
 import "../elements"
 
 Rectangle {
     id: wallpaperPanel
     
-    // Fit 4 columns (210 cellWidth * 4 = 840 + 40 margins = 880)
-    property real targetWidth: 520
-    // Fit 3 rows + padding
-    property real targetHeight: 800
+    property real targetWidth: 550
+    property real targetHeight: 900
     property bool expanded: false
     
     property real cornerSize: targetWidth / 8
@@ -33,11 +33,12 @@ Rectangle {
 
         InverseRadius {
             cornerPosition: "bottomRight"
-            implicitWidth: wallpaperPanel.cornerSize
-            implicitHeight: wallpaperPanel.cornerSize
-            color: Theme.dark.base
+            sizeH: targetHeight / 4
+            sizeV: targetWidth / 8
+            color: containerRect.color
             Layout.alignment: Qt.AlignRight
             expandingH: wallpaperPanel.expanded
+            expandingV: wallpaperPanel.expanded
         }
 
         Rectangle {
@@ -46,10 +47,10 @@ Rectangle {
             width: wallpaperPanel.implicitWidth
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: Theme.dark.base
+            color: Qt.rgba(Theme.dark.base.r, Theme.dark.base.g, Theme.dark.base.b, Theme.moduleOpacity)
             
-            topLeftRadius: Theme.moduleEdgeRadius
-            bottomLeftRadius: Theme.moduleEdgeRadius
+            topLeftRadius: Theme.moduleEdgeRadius * 2
+            bottomLeftRadius: Theme.moduleEdgeRadius * 2
             topRightRadius: 0
             bottomRightRadius: 0
             
@@ -61,57 +62,78 @@ Rectangle {
             ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 20
-                spacing: 15
+                spacing: 20
                 
-                Text {
-                    text: "󰸉 Select Wallpaper"
-                    font.family: Theme.font
-                    font.pixelSize: 24
-                    color: Theme.textPrimary
-                    Layout.alignment: Qt.AlignHCenter
+                ModuleButton {
+                    label: "󰸉 Select Wallpaper"
+                    color: "transparent"
+
+                    textFont: 22
+                    Layout.fillWidth: true
                 }
                 
-                GridView {
+                ListView {
                     id: grid
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    cellWidth: 240
-                    cellHeight: 180
                     clip: true
+                    spacing: 10
                     
+                    ScrollBar.vertical: ScrollBar {
+                        active: true 
+                        rightPadding: 5
+                    }
+
                     model: FolderListModel {
                         folder: "file://" + Quickshell.env("HOME") + "/Pictures/wallpapers"
                         nameFilters: ["*.png", "*.jpg", "*.jpeg"]
                     }
                     
                     delegate: ModuleButton {
-                        implicitWidth: 220
-                        implicitHeight: 160
+                        id: previewButton
+                        implicitWidth: wallpaperPanel.targetWidth - 40
+                        implicitHeight: 200
                         variant: "neutral"
-                        radius: Theme.moduleEdgeRadius / 2
-                        cursorShape: Qt.PointingHandCursor
                         
+                        // The button's border radius
+                        radius: Theme.moduleEdgeRadius / 2 
+                        cursorShape: Qt.PointingHandCursor
+
                         Image {
                             id: preview
-                            anchors.top: parent.top
-                            anchors.topMargin: 20
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            width: 180
-                            height: 110
+                            anchors.fill: parent
                             
-                            // PERFORMANCE FIX: Decode images at thumbnail size to save VRAM 
-                            sourceSize.width: 180
-                            sourceSize.height: 110
-                            asynchronous: true // Load off the main thread to prevent UI stutter
+                            sourceSize.width: width
+                            asynchronous: true
                             
                             source: fileUrl
                             fillMode: Image.PreserveAspectCrop
-                            clip: true
+                            visible: false // Hidden, as the MultiEffect handles the drawing
                         }
-                        
-                        label: fileName
-                        topMargin: 130
-                        
+
+                        MultiEffect {
+                            // Point this to the ID of the Image component, NOT the fileUrl
+                            source: preview 
+                            anchors.fill: previewButton
+                            maskEnabled: true
+                            maskSource: maskItem
+                            opacity: 0.7
+                        }
+
+                        Item {
+                            id: maskItem
+                            anchors.fill: parent
+                            visible: false
+                            layer.enabled: true
+                            
+                            Rectangle {
+                                anchors.fill: parent
+                                // Matched perfectly to the button's radius
+                                radius: Theme.moduleEdgeRadius / 2 
+                                color: "black" 
+                            }
+                        }
+
                         onClicked: {
                             var rawPath = String(fileUrl).replace("file://", "");
                             applyProc.targetFile = rawPath;
@@ -125,18 +147,25 @@ Rectangle {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: wallpaperPanel.expanded = false
                     radius: Theme.moduleEdgeRadius
-                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
+                    
+                    
+                    variant: "neutral"
+                    border.width: 2
+
+                    implicitWidth: 100
                 }
             }
         }
 
         InverseRadius {
             cornerPosition: "topRight"
-            implicitWidth: wallpaperPanel.cornerSize
-            implicitHeight: wallpaperPanel.cornerSize
-            color: Theme.dark.base
+            sizeH: targetHeight / 4
+            sizeV: targetWidth / 8
+            color: containerRect.color
             Layout.alignment: Qt.AlignRight
             expandingH: wallpaperPanel.expanded
+            expandingV: wallpaperPanel.expanded
         }
     }
 
