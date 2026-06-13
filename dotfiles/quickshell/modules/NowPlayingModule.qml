@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import Quickshell.Services.Mpris
 import Quickshell.Io
 import QtQuick.Effects
+import Quickshell.Hyprland
 
 import "../elements"
 
@@ -52,7 +53,7 @@ ModuleButton {
             noPressColorChange: !expanded
             id: titleBtn
             
-            variant: "light"
+            variant: "neutral"
             
             Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
             Layout.topMargin: nowPlayingModule.expanded ? 15 : 0
@@ -67,7 +68,7 @@ ModuleButton {
             onClicked: focusNow()
 
             radius: Theme.moduleEdgeRadius - 5
-            colorOpacity: 0.9
+            colorOpacity: 3.0
 
             RowLayout {
                 id: topRow
@@ -170,12 +171,12 @@ ModuleButton {
 
                     ModuleButton {
                         id: artHover
-                        variant: "light"
+                        variant: "neutral"
 
                         bottomRightRadius: Theme.moduleEdgeRadius -5
                         topRightRadius: Theme.moduleEdgeRadius -5
                         visible: nowPlayingModule.authorText !== ""
-                        colorOpacity: 0.9
+                        colorOpacity: 3.5
 
                         implicitWidth: expanded ? scrollingAuthorText.implicitWidth + 20 : 0
 
@@ -198,14 +199,15 @@ ModuleButton {
                     ModuleButton {
                         id: nextButton
                         cursorShape: Qt.PointingHandCursor
-                        variant: "light"
+                        variant: "neutral"
+                        textColor: Theme.textDark
                         
                         implicitHeight: Theme.moduleHeight
                         implicitWidth: (nowPlayingModule.expanded && currentPlayer.canGoNext) ? Theme.moduleHeight : 0
 
                         label: "󰒭"
 
-                        colorOpacity: 0.9
+                        colorOpacity: 3.5
 
                         onClicked: nowPlayingModule.doNext()
 
@@ -217,7 +219,8 @@ ModuleButton {
                     ModuleButton {
                         id: playPauseButton
                         cursorShape: Qt.PointingHandCursor
-                        variant: "light"
+                        variant: "neutral"
+                        textColor: Theme.textDark
                         
                         implicitHeight: Theme.moduleHeight
                         implicitWidth: nowPlayingModule.expanded ? Theme.moduleHeight : 0
@@ -227,7 +230,7 @@ ModuleButton {
                         topLeftRadius: Theme.moduleEdgeRadius - 5
                         bottomLeftRadius: Theme.moduleEdgeRadius - 5
 
-                        colorOpacity: 0.9
+                        colorOpacity: 3.5
 
                         onClicked: nowPlayingModule.doTogglePlay()
 
@@ -286,19 +289,14 @@ ModuleButton {
     function doTogglePlay() { if (currentPlayer && currentPlayer.togglePlaying) currentPlayer.togglePlaying() }
     function doNext() { if (currentPlayer && currentPlayer.next) currentPlayer.next() }
 
-    Process {
-        id: focusProc
-        // command will be set before running in focusNow()
-    }
-
     function focusNow() {
         if (!currentPlayer) return
         var id = currentPlayer.identity.toLowerCase().trim()
         console.log("Focusing player with identity:", id)
-        var cls = (id.match(/mozilla firefox/) || id.match(/mozilla zen/)) ? "zen" : id
-        focusProc.command = ["bash", "-c", "hyprctl dispatch focuswindow class:" + cls]
-        console.log("Running focus command:", focusProc.command)
-        focusProc.running = true
+        var cls = id.match(/mozilla zen/) ? "zen" : id
+        var cmd = "hl.dsp.focus({ window = 'class:(?i)" + cls + "' })"
+        console.log("Dispatching:", cmd)
+        Hyprland.dispatch(cmd)
     }
 
     Timer {

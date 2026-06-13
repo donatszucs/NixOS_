@@ -140,13 +140,14 @@ ModuleButton {
                 Layout.rightMargin: launcherModule.padding
             
                 ModuleButton {
-                    variant: "dark"
+                    variant: "neutral"
                     Layout.fillWidth: true
                     implicitHeight: Theme.listHeight
                     label: "󰸉 Wallpaper"
                     cursorShape: Qt.PointingHandCursor
 
                     radius: Theme.moduleEdgeRadius
+                    border.width: 2
 
                     onClicked: {
                         launcherModule.expanded = false;
@@ -155,14 +156,15 @@ ModuleButton {
                 }
             
                 ModuleButton {
-                    variant: "dark"
+                    variant: "neutral"
                     Layout.fillWidth: true
                     implicitHeight: Theme.listHeight
                     label: "󰌆 Bitwarden"
                     cursorShape: Qt.PointingHandCursor
 
                     radius: Theme.moduleEdgeRadius
-
+                    border.width: 2
+                    
                     onClicked: {
                         launcherModule.expanded = false;
                         if (rbwMenu.expanded) {
@@ -174,14 +176,15 @@ ModuleButton {
                 }
 
                 ModuleButton {
-                    variant: "dark"
+                    variant: "neutral"
                     Layout.fillWidth: true
                     implicitHeight: Theme.listHeight
                     label: " Clipboard"
                     cursorShape: Qt.PointingHandCursor
 
                     radius: Theme.moduleEdgeRadius
-                    
+                    border.width: 2
+
                     onClicked: {
                         launcherModule.expanded = false;
                         if (clipboardHistory.expanded) {

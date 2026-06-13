@@ -243,7 +243,7 @@ Rectangle {
                         width: resultsList.width
                         height: modelData.user ? 54 : 44
                         variant: index === rbwPanel.selectedIndex ? "light" : "neutral"
-                        radius: Theme.moduleEdgeRadius
+                        radius: Theme.moduleEdgeRadius / 2
 
                         Column {
                             anchors {

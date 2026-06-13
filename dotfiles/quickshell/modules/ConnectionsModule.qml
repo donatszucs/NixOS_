@@ -186,22 +186,29 @@ ModuleButton {
         }
 
         // ── Popup dropdown ─────────────────────────────────────────
-        ColumnLayout {
-            id: popupCol
+        MouseArea {
             implicitWidth: connectionsModule.cardWidth
+            Layout.preferredHeight: popupCol.implicitHeight
             Layout.leftMargin: 10
             Layout.rightMargin: 10
             Layout.bottomMargin: 10
-            spacing: 5
 
-            MouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.NoButton
-                onWheel: (wheel) => {
-                    if (wheel.angleDelta.y > 0) connectionsModule.currentPage = 0
-                    else if (wheel.angleDelta.y < 0) connectionsModule.currentPage = 1
+            acceptedButtons: Qt.NoButton
+            onWheel: (wheel) => {
+                if (wheel.angleDelta.y > 0) {
+                    if (connectionsModule.currentPage !== 1) connectionsModule.currentPage = 1
+                    else connectionsModule.currentPage = 0
+                }
+                else if (wheel.angleDelta.y < 0) {
+                    if (connectionsModule.currentPage !== 0) connectionsModule.currentPage = 0
+                    else connectionsModule.currentPage = 1
                 }
             }
+
+            ColumnLayout {
+                id: popupCol
+                width: parent.width
+                spacing: 5
 
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
@@ -601,6 +608,7 @@ ModuleButton {
                 }
             }
 
+        }
         }
     }
 

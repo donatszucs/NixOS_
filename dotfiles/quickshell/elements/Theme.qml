@@ -4,7 +4,7 @@ import QtQuick
 QtObject {
     // ── Divider-anchored palette seed ───────────────────────────────
     readonly property color palettePaper:        '#e5c2f7'
-    readonly property color paletteInk:          '#292131'
+    readonly property color paletteInk:          '#1f1f1f'
     readonly property color paletteBorderSoft:   Qt.darker(palettePaper, 1.25)
     readonly property color paletteBorderStrong: Qt.darker(palettePaper, 1.6)
 
@@ -114,7 +114,7 @@ QtObject {
     // ── Module sizing ────────────────────────────────────────────────
     readonly property real moduleHeight: 33
     readonly property real listHeight: 50
-    readonly property real moduleOpacity: 0.75
+    readonly property real moduleOpacity: 0.85
     readonly property int moduleRadius:   0
     readonly property int moduleEdgeRadius:   18
     readonly property int modulePaddingH: 15

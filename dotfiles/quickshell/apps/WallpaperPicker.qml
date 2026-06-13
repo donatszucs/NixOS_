@@ -13,7 +13,7 @@ import "../elements"
 Rectangle {
     id: wallpaperPanel
     
-    property real targetWidth: 550
+    property real targetWidth: 500
     property real targetHeight: 900
     property bool expanded: false
 
@@ -90,11 +90,12 @@ Rectangle {
                     delegate: ModuleButton {
                         id: previewButton
                         implicitWidth: wallpaperPanel.targetWidth - 40
-                        implicitHeight: 200
+                        implicitHeight: hovered ? 250 : 150
                         variant: "neutral"
                         
-                        // The button's border radius
-                        radius: Theme.moduleEdgeRadius / 2 
+                        Behavior on implicitHeight { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
+
+                        radius: Theme.moduleEdgeRadius / 2
                         cursorShape: Qt.PointingHandCursor
 
                         Image {
@@ -115,7 +116,8 @@ Rectangle {
                             anchors.fill: previewButton
                             maskEnabled: true
                             maskSource: maskItem
-                            opacity: 0.7
+                            opacity: hovered ? 1.0 : 0.6
+                            Behavior on opacity { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
                         }
 
                         Item {

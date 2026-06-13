@@ -243,7 +243,7 @@ ModuleButton {
                 }
 
                 Behavior on implicitWidth {
-                    NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.linear }
+                    NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.Linear }
                 }
 
                 onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = '" + modelData.id + "' })")

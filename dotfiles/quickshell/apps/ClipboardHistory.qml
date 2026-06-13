@@ -41,7 +41,8 @@ Rectangle {
                     var tabIndex = line.indexOf("\t");
                     if (tabIndex === -1) tabIndex = line.indexOf("  ");
                     var content = line.substring(tabIndex + 1).trim();
-                    clipboardModel.append({ "clipLine": line, "clipContent": content });
+                    var idStr = line.substring(0, tabIndex).trim();
+                    clipboardModel.append({ "clipLine": line, "clipContent": content, "clipId": idStr });
                 }
             }
         }
@@ -180,14 +181,52 @@ Rectangle {
                     
                     model: clipboardModel
                     delegate: ModuleButton {
+                        id: delegateItem
                         implicitWidth: list.width
                         variant: clipboardPanel.selectedIndex === index ? "light" : "neutral"
-                        implicitHeight: Theme.listHeight
-                        radius: Theme.moduleEdgeRadius
                         
-                        label: clipContent.length > 38? clipContent.substring(0, 35) + "..." : clipContent
+                        property string currentClipId: typeof clipId !== "undefined" ? clipId : ""
+                        property bool isImage: clipContent.startsWith("[[ binary data") && (clipContent.includes("png") || clipContent.includes("jpg") || clipContent.includes("jpeg") || clipContent.includes("webp"))
+                        property string imagePath: currentClipId !== "" ? "/tmp/qs-cliphist-img-" + currentClipId + ".png" : ""
+
+                        implicitHeight: isImage ? Theme.listHeight * 4 : Theme.listHeight
+                        radius: Theme.moduleEdgeRadius / 2
+                        
+                        label: isImage ? "" : (clipContent.length > 38? clipContent.substring(0, 35) + "..." : clipContent)
                         textAlign: "left"
                         leftMargin: 20
+
+                        Process {
+                            id: decodeImage
+                            command: ["bash", "-c", "if [ ! -f \"$2\" ]; then printf '%s\\n' \"$1\" | cliphist decode > \"$2\"; fi", "--", clipLine, delegateItem.imagePath]
+                            onExited: {
+                                if (delegateItem.isImage) {
+                                    img.source = "file://" + delegateItem.imagePath;
+                                }
+                            }
+                        }
+
+                        Image {
+                            id: img
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            fillMode: Image.PreserveAspectCrop
+                            visible: delegateItem.isImage
+                        }
+
+                        onCurrentClipIdChanged: {
+                            img.source = "";
+                            if (delegateItem.isImage) {
+                                decodeImage.running = false;
+                                decodeImage.running = true;
+                            }
+                        }
+
+                        Component.onCompleted: {
+                            if (delegateItem.isImage) {
+                                decodeImage.running = true;
+                            }
+                        }
 
                         MouseArea {
                             id: itemMouseArea
