@@ -5,6 +5,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell._Window
 import Quickshell.Io
+import Quickshell.Networking
 import Quickshell.Bluetooth
 
 import "../elements"
@@ -617,39 +618,55 @@ ModuleButton {
     }
 
     // ── Data refresh ───────────────────────────────────────────
-    Process {
-        id: nmProc
-        command: ["bash", "-c",
-            "nmcli -t -f NAME,TYPE,STATE connection show --active 2>/dev/null | grep -v loopback | head -1"
-        ]
-        running: true
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var line = text.trim()
-                if (line === "") {
-                    connectionsModule.netName  = "Disconnected"
-                    connectionsModule.netState = "disconnected"
-                    connectionsModule.netIcon  = "󰈂"
-                    connectionsModule.netColor = Theme.statusRed
-                    return
-                }
-                var parts = line.split(":")
-                connectionsModule.netName  = parts[0] || "Unknown"
-                connectionsModule.netState = (parts[2] || "").toLowerCase().includes("activated") ? "connected" : parts[2] || "unknown"
-                connectionsModule.netColor = connectionsModule.netState === "connected" ? Theme.statusGreen : Theme.statusRed
-                var t = (parts[1] || "").toLowerCase()
-                if      (t.includes("wifi") || t.includes("802-11"))      connectionsModule.netIcon = "󰤨"
-                else if (t.includes("ethernet") || t.includes("802-3"))   connectionsModule.netIcon = "󰈀"
-                else                                                       connectionsModule.netIcon = "󰈂"
-            }
-        }
-    }
-
     Timer {
-        interval: 5000
+        interval: 2000
         running: true
         repeat: true
-        onTriggered: nmProc.running = true
+        triggeredOnStart: true
+        onTriggered: {
+            var devs = (Networking.devices && Networking.devices.values) ? Networking.devices.values : [];
+            var bestDev = null;
+            var bestNet = null;
+            
+            for (var i = 0; i < devs.length; i++) {
+                var d = devs[i];
+                if (d && d.connected) {
+                    bestDev = d;
+                    // DeviceType.Wifi is 1, DeviceType.Wired is 2
+                    if (d.type === DeviceType.Wifi || d.type === 1) {
+                        var nets = (d.networks && d.networks.values) ? d.networks.values : [];
+                        for (var j = 0; j < nets.length; j++) {
+                            var net = nets[j];
+                            if (net && net.connected) {
+                                bestNet = net;
+                                break;
+                            }
+                        }
+                    } else if (d.type === DeviceType.Wired || d.type === 2) {
+                        bestNet = d.network;
+                    }
+                    if (bestNet) break;
+                }
+            }
+            
+            if (bestDev) {
+                connectionsModule.netName  = bestNet ? (bestNet.name || bestDev.name) : bestDev.name;
+                connectionsModule.netState = "connected";
+                connectionsModule.netColor = Theme.statusGreen;
+                if (bestDev.type === DeviceType.Wifi || bestDev.type === 1) {
+                    connectionsModule.netIcon = "󰤨";
+                } else if (bestDev.type === DeviceType.Wired || bestDev.type === 2) {
+                    connectionsModule.netIcon = "󰈀";
+                } else {
+                    connectionsModule.netIcon = "󰈂";
+                }
+            } else {
+                connectionsModule.netName  = "Disconnected";
+                connectionsModule.netState = "disconnected";
+                connectionsModule.netIcon  = "󰈂";
+                connectionsModule.netColor = Theme.statusRed;
+            }
+        }
     }
 
     Process {
