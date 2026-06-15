@@ -33,7 +33,7 @@ ModuleButton {
         border.color: pal.border
         border.width: 2
         radius: implicitHeight / 2
-        implicitHeight: Theme.moduleHeight - 8
+        implicitHeight: Theme.moduleHeight - 10
         implicitWidth: clockContent.implicitWidth + 20
 
         cursorShape: Qt.PointingHandCursor

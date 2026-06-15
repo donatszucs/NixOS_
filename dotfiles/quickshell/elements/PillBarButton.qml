@@ -15,8 +15,8 @@ ModuleButton {
         // Outer pill background
     Rectangle {
         anchors.centerIn: parent
-        width: parent.width - 8
-        height: Theme.moduleHeight - 8
+        width: parent.width - 10
+        height: Theme.moduleHeight - 10
         radius: height / 2
         color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.colorOpacity)
         clip: true

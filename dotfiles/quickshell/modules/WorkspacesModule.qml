@@ -19,10 +19,10 @@ ModuleButton {
     color: Qt.rgba(Theme.palette("dark").base.r, Theme.palette("dark").base.g, Theme.palette("dark").base.b, Theme.moduleOpacity)
 
     radius: Theme.moduleEdgeRadius + 2
-    property int overlay: 3
+    property int overlay: 4
 
-    anchors.topMargin: 3
-    implicitHeight: Theme.moduleHeight - 3
+    anchors.topMargin: 4
+    implicitHeight: Theme.moduleHeight - 4
 
     // Only workspaces whose monitor name matches this bar's screen
     readonly property var monitorWorkspaces: {
@@ -261,7 +261,7 @@ ModuleButton {
         z: windowIcon.Drag.active ? 99 : 0
         
         implicitWidth: windowIcon.width
-        implicitHeight: Theme.moduleHeight - 15
+        implicitHeight: Theme.moduleHeight - 18
         Layout.preferredWidth: implicitWidth
         Layout.preferredHeight: implicitHeight
         visible: windowIcon.appId !== ""
@@ -283,7 +283,7 @@ ModuleButton {
             
             property string address: String(modelData.address)
 
-            height: Theme.moduleHeight - 15
+            height: Theme.moduleHeight - 18
             width: {
                 var systemIcon = String(source).indexOf("image://icon/") === 0;
                 if (systemIcon) return height;
