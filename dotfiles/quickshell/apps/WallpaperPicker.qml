@@ -108,7 +108,7 @@ Rectangle {
                         id: previewButton
                         implicitWidth: wallpaperPanel.targetWidth - 40
                         implicitHeight: previewButton.ListView.isCurrentItem ? 250 : 150
-                        variant: "dark"
+                        variant: previewButton.ListView.isCurrentItem ? "light" : "dark"
                         
                         onHoveredChanged: {
                             if (hovered) {
@@ -147,6 +147,14 @@ Rectangle {
                             maskSource: maskItem
                             opacity: previewButton.ListView.isCurrentItem ? 1.0 : 0.6
                             Behavior on opacity { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
+                        }
+
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "transparent"
+                            border.width: 3
+                            border.color: previewButton.ListView.isCurrentItem ? Qt.rgba(1, 1, 1, 0.8) : Qt.rgba(1, 1, 1, 0.2)
+                            radius: Theme.moduleEdgeRadius / 2
                         }
 
                         Item {
