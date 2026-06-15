@@ -1,5 +1,6 @@
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts
 
@@ -24,8 +25,19 @@ PanelWindow {
     }
     // No space reservation here — handled by the spacer window below
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.keyboardFocus: (launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || notificationCenter.inlineReplyInputFocused) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
+    HyprlandFocusGrab {
+        windows: [topPanel]
+        active: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || notificationCenter.inlineReplyInputFocused || wallpaperPicker.expanded
+        onCleared: {
+            launcherModule.expanded = false
+            wallpaperPicker.expanded = false
+            clipboardHistory.expanded = false
+            rbwMenu.closeMenu()
+            notificationCenter.inlineReplyInputFocused = false
+        }
+    }
 
     mask: Region {
         

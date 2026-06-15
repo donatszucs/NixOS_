@@ -89,7 +89,7 @@ Rectangle {
     Process {
         id: autofillProc
         property string itemId: ""
-        command: ["bash", "-c", "pass=$(rbw get \"$0\") && sleep 0.5 && printf '%s' \"$pass\" | wtype -", itemId]
+        command: ["bash", "-c", "pass=$(rbw get \"$0\") && sleep 0.1 && printf '%s' \"$pass\" | wtype -", itemId]
     }
 
     // ── Keyboard navigation ────────────────────────────────────────────────

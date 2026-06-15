@@ -46,7 +46,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("kdeconnect-indicator &")
     hl.exec_cmd("quickshell &")
     hl.exec_cmd("[workspace 1 silent] zen &")
-    hl.exec_cmd("[workspace 3 silent] code &")
+    hl.exec_cmd("[workspace 3 silent] antigravity &")
     hl.exec_cmd("discord --minimized &")
 
     hl.exec_cmd("~/nixos-config/scripts/WallpaperSetup/init-hyprpaper.sh &")
