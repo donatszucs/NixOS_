@@ -93,9 +93,13 @@ hl.config({
         },
         blur = {
             enabled = true,
-            size = 1,
-            passes = 5,
-            vibrancy = 0.2
+            size = 5,
+            passes = 4,
+            noise = 0.05,
+            contrast = 0.9,
+            brightness = 0.9,
+            vibrancy = 0.5,
+            vibrancy_darkness = 0.6
         }
     },
     animations = {
@@ -147,7 +151,6 @@ hl.layer_rule({
     blur = true,
     ignore_alpha = 0.8
 })
-
 -- ==========================================
 -- WINDOW RULES
 -- ==========================================
@@ -155,6 +158,12 @@ hl.window_rule({
     match = { class = "^(discord)$" },
     workspace = "2 silent"
 })
+
+hl.window_rule({
+    match = { class = "^([Ss]potify|[Dd]iscord|[Aa]ntigravity)$" },
+    opacity = "0.9 0.9"
+})
+
 -- ==========================================
 -- ANIMATIONS (Lua API)
 -- ==========================================
