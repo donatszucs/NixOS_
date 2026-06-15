@@ -87,11 +87,40 @@ Rectangle {
                         }
                     }
 
+                    property bool keyboardMode: false
+                    
+                    highlightRangeMode: keyboardMode ? ListView.ApplyRange : ListView.NoHighlightRange
+                    preferredHighlightBegin: height / 2 - 125
+                    preferredHighlightEnd: height / 2 + 125
+                    highlightMoveDuration: Theme.verticalDuration
+
+                    Timer {
+                        id: kbdTimer
+                        interval: Theme.verticalDuration + 100
+                        onTriggered: grid.keyboardMode = false
+                    }
+
                     Keys.onEscapePressed: wallpaperPanel.expanded = false
                     Keys.onReturnPressed: {
                         if (currentItem) {
                             currentItem.applyWallpaper()
                         }
+                    }
+                    Keys.onUpPressed: event => {
+                        grid.keyboardMode = true;
+                        kbdTimer.restart();
+                        if (grid.currentIndex > 0) {
+                            grid.currentIndex--;
+                        }
+                        event.accepted = true;
+                    }
+                    Keys.onDownPressed: event => {
+                        grid.keyboardMode = true;
+                        kbdTimer.restart();
+                        if (grid.currentIndex < grid.count - 1) {
+                            grid.currentIndex++;
+                        }
+                        event.accepted = true;
                     }
                     
                     ScrollBar.vertical: ScrollBar {
@@ -111,7 +140,7 @@ Rectangle {
                         variant: previewButton.ListView.isCurrentItem ? "light" : "dark"
                         
                         onHoveredChanged: {
-                            if (hovered) {
+                            if (hovered && !grid.keyboardMode) {
                                 grid.currentIndex = index
                             }
                         }
