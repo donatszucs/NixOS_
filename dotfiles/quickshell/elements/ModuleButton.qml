@@ -22,7 +22,7 @@ Rectangle {
 
     property int leftMarginButton: 0
     property int rightMarginButton: 0
-    property int topMarginButton: Theme.moduleMarginH
+    property int topMarginButton: 0
     property int bottomMarginButton: 0
 
     anchors {
@@ -66,7 +66,7 @@ Rectangle {
 
     implicitHeight: Theme.moduleHeight
     implicitWidth: labelText.implicitWidth + 30
-    radius: Theme.moduleRadius
+    radius: 0
 
     color: (root.pressed && !root.noPressColorChange) ? root.pressedColor : ((root.hovered && !root.noHoverColorChange) ? root.hoverColor : colorOverride ? root.overrideColor : root.baseColor)
 

@@ -73,8 +73,8 @@ ModuleButton {
         btDevicesConnected = anyConnected;
     }
 
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleRadius
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
     // 3. The exact same logic as your Repeater, but invisible
     Instantiator {
         id: deviceTracker

@@ -109,19 +109,14 @@ QtObject {
     // ── Typography ───────────────────────────────────────────────────
     readonly property string font: "RobotoMono Nerd Font Propo"
     readonly property int    fontSize:  14
-    readonly property int    barHeight: 33
 
     // ── Module sizing ────────────────────────────────────────────────
-    readonly property real moduleHeight: 33
+    readonly property real moduleHeight: 36
     readonly property real listHeight: 50
     readonly property real moduleOpacity: 0.85
-    readonly property int moduleRadius:   0
-    readonly property int moduleEdgeRadius:   18
+    readonly property int moduleEdgeRadius: 18
     readonly property int modulePaddingH: 15
     readonly property int modulePaddingV: 5
-    readonly property int moduleMarginH:  0
-    readonly property int moduleMarginV:  0
-    readonly property int moduleEdgeMarginV:  0
 
     // ── Pill Bar Variables ───────────────────────────────────────────
 

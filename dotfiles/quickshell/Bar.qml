@@ -252,7 +252,6 @@ PanelWindow {
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
-            rightMargin: Theme.moduleEdgeMarginV
         }
     }
 
@@ -262,7 +261,6 @@ PanelWindow {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: Theme.moduleEdgeMarginV
         }
     }
 
@@ -302,7 +300,7 @@ PanelWindow {
     PanelWindow {
         screen: topPanel.modelData
         anchors { top: true; left: true; right: true }
-        implicitHeight: Theme.barHeight
+        implicitHeight: Theme.moduleHeight
         color: "transparent"
         mask: Region {}
     }

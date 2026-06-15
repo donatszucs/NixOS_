@@ -25,8 +25,8 @@ ModuleButton {
     // JS array of DesktopEntry objects matching the current search
     property var filteredApps: []
 
-    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleRadius
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleRadius
+    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius * 2 : 0
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius * 2 : 0
     
     clip: true
 

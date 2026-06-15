@@ -81,7 +81,7 @@ hl.config({
         layout = "dwindle"
     },
     decoration = {
-        rounding = 12,
+        rounding = 13,
         rounding_power = 2,
         active_opacity = 1.0,
         inactive_opacity = 1.0,
@@ -159,10 +159,6 @@ hl.window_rule({
     workspace = "2 silent"
 })
 
-hl.window_rule({
-    match = { class = "^([Ss]potify|[Dd]iscord|[Aa]ntigravity)$" },
-    opacity = "0.9 0.9"
-})
 
 -- ==========================================
 -- ANIMATIONS (Lua API)

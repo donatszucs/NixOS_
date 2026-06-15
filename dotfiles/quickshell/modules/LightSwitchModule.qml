@@ -24,7 +24,7 @@ ModuleButton {
     }
 
     bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : 0
 
     implicitHeight: expanded
         ? contentColumn.implicitHeight
@@ -64,7 +64,7 @@ ModuleButton {
             pillVariant: SharedState.lightVariant
             
             bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
-            bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleRadius
+            bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : 0
 
             MouseArea {
                 anchors.fill: parent
