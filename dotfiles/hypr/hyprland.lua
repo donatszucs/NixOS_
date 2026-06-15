@@ -6,7 +6,7 @@
 local terminal = "kitty"
 local fileManager = "thunar"
 -- Escaping the quotes properly for the bash command
-local menu = "bash -c 'echo open > /tmp/qs-launcher-$(hyprctl activeworkspace -j | jq -r \".monitor\")'"
+local menu = "bash -c 'quickshell ipc call launcher-$(hyprctl activeworkspace -j | jq -r \".monitor\") toggle'"
 local mainMod = "SUPER"
 
 -- ==========================================
@@ -253,5 +253,5 @@ hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | wl-
 -- Utilities (Lock, Calc, Cliphist, RBW)
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("[float; size 800 600] qalculate-gtk"))
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("bash -c 'echo open > /tmp/qs-cliphist-$(hyprctl activeworkspace -j | jq -r \".monitor\")'"))
-hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("bash -c 'echo open > /tmp/qs-rbw-$(hyprctl activeworkspace -j | jq -r \".monitor\")'"))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("bash -c 'quickshell ipc call cliphist-$(hyprctl activeworkspace -j | jq -r \".monitor\") toggle'"))
+hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("bash -c 'quickshell ipc call rbw-$(hyprctl activeworkspace -j | jq -r \".monitor\") toggle'"))

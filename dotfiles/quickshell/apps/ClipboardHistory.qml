@@ -81,21 +81,13 @@ Rectangle {
     }
 
     // IPC Trigger for Super+V
-    Process {
-        id: clipboardListener
-        command: ["bash", "-c",
-            "rm -f /tmp/qs-cliphist-" + clipboardPanel.screenName + "; " +
-            "mkfifo /tmp/qs-cliphist-" + clipboardPanel.screenName + "; " +
-            "while true; do read -r _ < /tmp/qs-cliphist-" + clipboardPanel.screenName + " && echo open; done"
-        ]
-        running: true
-        stdout: SplitParser {
-            onRead: _ => {
-                if (clipboardPanel.expanded) {
-                    closeMenu();
-                } else {
-                    openMenu();
-                }
+    IpcHandler {
+        target: "cliphist-" + clipboardPanel.screenName
+        function toggle(): void {
+            if (clipboardPanel.expanded) {
+                clipboardPanel.closeMenu();
+            } else {
+                clipboardPanel.openMenu();
             }
         }
     }

@@ -26,22 +26,14 @@ Rectangle {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
 
-    // ── IPC trigger (keybind: echo open > /tmp/qs-rbw-<screenName>) ───────
-    Process {
-        id: rbwListener
-        command: ["bash", "-c",
-            "rm -f /tmp/qs-rbw-" + rbwPanel.screenName + "; " +
-            "mkfifo /tmp/qs-rbw-" + rbwPanel.screenName + "; " +
-            "while true; do read -r _ < /tmp/qs-rbw-" + rbwPanel.screenName + " && echo open; done"
-        ]
-        running: true
-        stdout: SplitParser {
-            onRead: _ => {
-                if (rbwPanel.expanded) {
-                    rbwPanel.closeMenu();
-                } else {
-                    rbwPanel.openMenu();
-                }
+    // ── IPC trigger (keybind: quickshell ipc call rbw-<screenName> toggle) ───────
+    IpcHandler {
+        target: "rbw-" + rbwPanel.screenName
+        function toggle(): void {
+            if (rbwPanel.expanded) {
+                rbwPanel.closeMenu();
+            } else {
+                rbwPanel.openMenu();
             }
         }
     }

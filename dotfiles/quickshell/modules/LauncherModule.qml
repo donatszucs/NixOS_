@@ -52,16 +52,12 @@ ModuleButton {
     }
 
     // ── IPC trigger (Super+R from hyprland) ──────────────────────
-    Process {
-        id: launcherListener
-        command: ["bash", "-c",
-            "rm -f /tmp/qs-launcher-" + launcherModule.screenName + "; " +
-            "mkfifo /tmp/qs-launcher-" + launcherModule.screenName + "; " +
-            "while true; do read -r _ < /tmp/qs-launcher-" + launcherModule.screenName + " && echo open; done"
-        ]
-        running: true
-        stdout: SplitParser {
-            onRead: _ => {
+    IpcHandler {
+        target: "launcher-" + launcherModule.screenName
+        function toggle(): void {
+            if (launcherModule.expanded) {
+                launcherModule.expanded = false
+            } else {
                 launcherModule.expanded = true
                 searchField.text = ""
                 launcherModule.filterApps("")
