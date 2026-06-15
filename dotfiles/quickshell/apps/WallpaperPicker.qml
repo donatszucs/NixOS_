@@ -76,6 +76,23 @@ Rectangle {
                     Layout.fillHeight: true
                     clip: true
                     spacing: 10
+                    focus: true
+
+                    Connections {
+                        target: wallpaperPanel
+                        function onExpandedChanged() {
+                            if (wallpaperPanel.expanded) {
+                                grid.forceActiveFocus()
+                            }
+                        }
+                    }
+
+                    Keys.onEscapePressed: wallpaperPanel.expanded = false
+                    Keys.onReturnPressed: {
+                        if (currentItem) {
+                            currentItem.applyWallpaper()
+                        }
+                    }
                     
                     ScrollBar.vertical: ScrollBar {
                         active: true 
@@ -90,8 +107,20 @@ Rectangle {
                     delegate: ModuleButton {
                         id: previewButton
                         implicitWidth: wallpaperPanel.targetWidth - 40
-                        implicitHeight: hovered ? 250 : 150
+                        implicitHeight: previewButton.ListView.isCurrentItem ? 250 : 150
                         variant: "dark"
+                        
+                        onHoveredChanged: {
+                            if (hovered) {
+                                grid.currentIndex = index
+                            }
+                        }
+                        
+                        function applyWallpaper() {
+                            var rawPath = String(fileUrl).replace("file://", "");
+                            applyProc.targetFile = rawPath;
+                            applyProc.running = true;
+                        }
                         
                         Behavior on implicitHeight { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
@@ -116,7 +145,7 @@ Rectangle {
                             anchors.fill: previewButton
                             maskEnabled: true
                             maskSource: maskItem
-                            opacity: hovered ? 1.0 : 0.6
+                            opacity: previewButton.ListView.isCurrentItem ? 1.0 : 0.6
                             Behavior on opacity { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
                         }
 
@@ -134,11 +163,7 @@ Rectangle {
                             }
                         }
 
-                        onClicked: {
-                            var rawPath = String(fileUrl).replace("file://", "");
-                            applyProc.targetFile = rawPath;
-                            applyProc.running = true;
-                        }
+                        onClicked: applyWallpaper()
                     }
                 }
                 
