@@ -129,16 +129,18 @@ PanelWindow {
             rightExpanded: launcherModule.expanded
 
             leftColor: nowPlayingModule.color
-            leftExpanded: nowPlayingModule.expanded
+            leftExpanded: nowPlayingModule.expanded && !launcherModule.expanded
 
-            Behavior on implicitWidth {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            implicitHeight: launcherModule.expanded && nowPlayingModule.expanded ? nowPlayingModule.expandedHeight + 20 : Theme.moduleHeight
+
+            Behavior on implicitHeight {
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
-            implicitWidth: launcherModule.expanded && nowPlayingModule.expanded ? Theme.moduleEdgeRadius * 2 : 5
         }
         NowPlayingModule {
             Layout.alignment: Qt.AlignTop
             id: nowPlayingModule
+            bottomLeftRadius: launcherModule.expanded ? 0 : (expanded ? Theme.moduleEdgeRadius + 10 : 0)
         }
         InverseRadius {
             Layout.alignment: Qt.AlignTop

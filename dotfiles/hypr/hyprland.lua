@@ -145,7 +145,7 @@ hl.gesture({
 hl.layer_rule({
     match = { namespace = "quickshell" },
     blur = true,
-    ignore_alpha = 0.65
+    ignore_alpha = 0.8
 })
 
 -- ==========================================

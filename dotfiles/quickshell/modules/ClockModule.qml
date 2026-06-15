@@ -10,6 +10,8 @@ ModuleButton {
 
     property bool expanded: hovered
 
+    noHoverColorChange: true
+    noPressColorChange: true
 
     property string time
     property string date
@@ -17,57 +19,54 @@ ModuleButton {
     function updateTime() {
         var now = new Date()
         time = Qt.formatDateTime(now, "HH:mm:ss")
-        date = Qt.formatDateTime(now, "ddd, MMM d")
+        date = Qt.formatDateTime(now, "MMM d")
     }
 
     Component.onCompleted: updateTime()
-    implicitWidth: timeRow.implicitWidth + 10
+    implicitWidth: clockBtn.implicitWidth + 10
 
-    RowLayout {
-        id: timeRow
+    ModuleButton {
         anchors.centerIn: parent
-        spacing: 0
-        ModuleButton {
-            id: dateLabel
-            label: root.date
-            variant: "neutral"
-            border.color: pal.border
-            border.width: 2
+        id: clockBtn
+        label: ""
+        variant: "neutral"
+        border.color: pal.border
+        border.width: 2
+        radius: implicitHeight / 2
+        implicitHeight: Theme.moduleHeight - 8
+        implicitWidth: clockContent.implicitWidth + 20
 
-            implicitWidth: root.expanded ? root.textFont * 8 : 0
-            radius: implicitHeight / 2
-            implicitHeight: Theme.moduleHeight - 8
-            opacity: root.expanded ? 1 : 0
+        cursorShape: Qt.PointingHandCursor
+        onClicked: calendarProc.running = true
 
-            cursorShape: Qt.PointingHandCursor
-            onClicked: calendarProc.running = true
+        RowLayout {
+            id: clockContent
+            anchors.centerIn: parent
+            spacing: 2
 
-            Behavior on opacity {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            Text {
+                text: root.time
+                color: Theme.textPrimary
+                font.family: Theme.font
+                font.pixelSize: Theme.fontSize
+                font.bold: true
             }
-
-            Behavior on implicitWidth {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            Text {
+                text: "|"
+                color: Theme.textPrimary
+                font.family: Theme.font
+                font.pixelSize: Theme.fontSize
+                font.bold: false
+                opacity: 0.5
             }
-        }
-
-        Rectangle {
-            implicitWidth: root.expanded ? 10 : 0
-            height: timeRow.implicitHeight
-            color: "transparent"
-
-            Behavior on implicitWidth {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            Text {
+                text: root.date
+                color: Theme.textPrimary
+                font.family: Theme.font
+                font.pixelSize: Theme.fontSize - 2
+                font.bold: false
+                opacity: 0.8
             }
-        }
-        ModuleButton {
-            label: root.time
-            variant: "neutral"
-            border.color: pal.border
-            border.width: 2
-            implicitWidth: textFont * 8
-            radius: implicitHeight / 2
-            implicitHeight: Theme.moduleHeight - 8
         }
     }
 
