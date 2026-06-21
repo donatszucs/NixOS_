@@ -5,8 +5,8 @@ QtObject {
     // ── Divider-anchored palette seed ───────────────────────────────
     readonly property color palettePaper:        '#e5c2f7'
     readonly property color paletteInk:          '#1f1f1f'
-    readonly property color paletteBorderSoft:   Qt.darker(palettePaper, 1.25)
-    readonly property color paletteBorderStrong: Qt.darker(palettePaper, 1.6)
+    readonly property color paletteBorderSoft:   Qt.darker(palettePaper, 1.2)
+    readonly property color paletteBorderStrong: Qt.lighter(paletteInk, 1.2)
 
     // ── Base colors ──────────────────────────────────────────────────
     readonly property color textPrimary:  palettePaper
@@ -62,7 +62,7 @@ QtObject {
     readonly property QtObject light: QtObject {
         
         readonly property color base:       Theme.palettePaper
-        readonly property color hover:      Qt.lighter(Theme.palettePaper, 1.4)
+        readonly property color hover:      Qt.lighter(Theme.palettePaper, 1.2)
         readonly property color pressed:    Qt.darker(Theme.palettePaper, 1.4)
         readonly property color text:       Theme.paletteInk
 
@@ -79,11 +79,11 @@ QtObject {
     readonly property QtObject red: QtObject {
         
         readonly property color base:       '#e17580'
-        readonly property color hover:      Qt.lighter(base, 1.4)
-        readonly property color pressed:    Qt.darker(base, 1.4)
+        readonly property color hover:      Qt.lighter(base, 1.2)
+        readonly property color pressed:    Qt.darker(base, 1.2)
         readonly property color text:       "#2a202f"
 
-        readonly property color border:     "#652e2e"
+        readonly property color border:     Qt.darker(statusRed, 1.2)
         readonly property color borderHover:    Qt.lighter(border, 1.4)
         readonly property color borderPressed:  Qt.darker(border, 1.4)
         

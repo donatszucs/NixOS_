@@ -188,6 +188,8 @@ Rectangle {
                         textAlign: "left"
                         leftMargin: 20
 
+                        border.width: 2
+
                         Process {
                             id: decodeImage
                             command: ["bash", "-c", "if [ ! -f \"$2\" ]; then mkdir -p \"$(dirname \"$2\")\" && printf '%s\\n' \"$1\" | cliphist decode > \"$2\"; fi", "--", clipLine, delegateItem.imagePath]

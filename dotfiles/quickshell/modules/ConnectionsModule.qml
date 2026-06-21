@@ -263,7 +263,33 @@ ModuleButton {
                 bottomRightRadius: 5
 
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: netRow.implicitHeight + 30
+                implicitHeight: netRow.implicitHeight
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: 70
+                    color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+                    topLeftRadius: netModule.topLeftRadius
+                    bottomLeftRadius: netModule.bottomLeftRadius
+
+                    InverseRadius {
+                        anchors.top: parent.top
+                        anchors.left: parent.right
+                        cornerPosition: "topLeft"
+                        color: parent.color
+                        size: 10
+                    }
+
+                    InverseRadius {
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.right
+                        cornerPosition: "bottomLeft"
+                        color: parent.color
+                        size: 10
+                    }
+                }
 
                 RowLayout {
                     id: netRow
@@ -271,36 +297,37 @@ ModuleButton {
                     anchors {
                         left:    parent.left
                         top:     parent.top
-                        margins: 15
+                        right:   parent.right
                     }
 
                     spacing: 15
 
-                    ModuleButton {
-                        id: netStatusIcon
-                        label: connectionsModule.netIcon
-                        cursorShape: Qt.PointingHandCursor
-                        colorOverride: true
-                        textColor: connectionsModule.netColor
-                        textFont: 24
-                        radius: 10
-                        implicitWidth: implicitHeight
-                        Layout.preferredWidth: implicitHeight
-                        onClicked: netOpen.running = true
-                    }
+                    Item {
+                        implicitWidth: 70
+                        implicitHeight: 70
+                        Layout.fillHeight: true
 
-                    Rectangle {
-                        width: 4
-                        Layout.preferredHeight: parent.height
-                        Layout.alignment: Qt.AlignVCenter
-                        color: Theme.textPrimary
-                        opacity: 0.5
-                        radius: 2
+                        ModuleButton {
+                            id: netStatusIcon
+                            anchors.centerIn: parent
+                            label: connectionsModule.netIcon
+                            cursorShape: Qt.PointingHandCursor
+                            colorOverride: true
+                            textColor: connectionsModule.netColor
+                            textFont: 24
+                            radius: 10
+                            implicitWidth: 40
+                            implicitHeight: 40
+                            onClicked: netOpen.running = true
+                        }
                     }
 
                     ColumnLayout {
                         id: netInfoCol
-                        Layout.margins: 5
+                        Layout.fillWidth: true
+                        Layout.topMargin: 15
+                        Layout.bottomMargin: 15
+                        Layout.rightMargin: 15
                         spacing: 5
                         
                         HoverMarqueeText {
@@ -330,7 +357,33 @@ ModuleButton {
                 topRightRadius: 5
 
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: btRow.implicitHeight + 30
+                implicitHeight: btRow.implicitHeight
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: 70
+                    color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+                    topLeftRadius: btModule.topLeftRadius
+                    bottomLeftRadius: btModule.bottomLeftRadius
+
+                    InverseRadius {
+                        anchors.top: parent.top
+                        anchors.left: parent.right
+                        cornerPosition: "topLeft"
+                        color: parent.color
+                        size: 10
+                    }
+
+                    InverseRadius {
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.right
+                        cornerPosition: "bottomLeft"
+                        color: parent.color
+                        size: 10
+                    }
+                }
 
                 RowLayout {
                     id: btRow
@@ -338,30 +391,35 @@ ModuleButton {
                     anchors {
                         left:    parent.left
                         top:     parent.top
-                        margins: 15
+                        right:   parent.right
                     }
 
                     spacing: 15
 
-                    ColumnLayout {
-                        id: btStatusCol
-                        spacing: 5
-                        Layout.bottomMargin: 5
-                        Layout.topMargin: 5
+                    Item {
+                        implicitWidth: 70
+                        implicitHeight: 90
+                        Layout.fillHeight: true
 
-                        ModuleButton {
-                            id: btStatusIcon
-                            label: connectionsModule.btIcon
-                            Layout.alignment: Qt.AlignHCenter
-                            cursorShape: Qt.PointingHandCursor
-                            textColor: connectionsModule.btColor
-                            colorOverride: true
-                            radius: 10
-                            textFont: 24
-                            implicitWidth: implicitHeight
+                        ColumnLayout {
+                            id: btStatusCol
+                            anchors.centerIn: parent
+                            spacing: 5
 
-                            onClicked: btOpen.running = true
-                        }
+                            ModuleButton {
+                                id: btStatusIcon
+                                label: connectionsModule.btIcon
+                                Layout.alignment: Qt.AlignHCenter
+                                cursorShape: Qt.PointingHandCursor
+                                textColor: connectionsModule.btColor
+                                colorOverride: true
+                                radius: 10
+                                textFont: 24
+                                implicitWidth: 40
+                                implicitHeight: 40
+
+                                onClicked: btOpen.running = true
+                            }
 
                         // Custom-styled switch (smaller, themed)
                         Rectangle {
@@ -399,20 +457,14 @@ ModuleButton {
                             }
                         }
                     }
-
-                    Rectangle {
-                        width: 4
-                        Layout.preferredHeight: parent.height
-                        Layout.alignment: Qt.AlignVCenter
-                        color: Theme.textPrimary
-                        opacity: 0.5
-                        radius: 2
                     }
 
                     ColumnLayout {
                         id: btInfoCol
                         Layout.fillWidth: true
-                        Layout.margins: 5
+                        Layout.topMargin: 15
+                        Layout.bottomMargin: 15
+                        Layout.rightMargin: 15
                         spacing: 5
 
                         Repeater {
@@ -449,6 +501,8 @@ ModuleButton {
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize
                             font.bold: true
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignLeft
                         }
                     }
                 }
@@ -465,7 +519,33 @@ ModuleButton {
                 bottomRightRadius: 5
 
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: headsetRow.implicitHeight + 30
+                implicitHeight: headsetRow.implicitHeight
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: 70
+                    color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+                    topLeftRadius: headsetModule.topLeftRadius
+                    bottomLeftRadius: headsetModule.bottomLeftRadius
+
+                    InverseRadius {
+                        anchors.top: parent.top
+                        anchors.left: parent.right
+                        cornerPosition: "topLeft"
+                        color: parent.color
+                        size: 10
+                    }
+
+                    InverseRadius {
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.right
+                        cornerPosition: "bottomLeft"
+                        color: parent.color
+                        size: 10
+                    }
+                }
                 
                 RowLayout {
                     id: headsetRow
@@ -473,35 +553,37 @@ ModuleButton {
                     anchors {
                         left:    parent.left
                         top:     parent.top
-                        margins: 15
+                        right:   parent.right
                     }
                      
                     spacing: 15
 
-                    ModuleButton {
-                        label: ""
-                        textColor: connectionsModule.headsetBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
-                        cursorShape: Qt.PointingHandCursor
-                        colorOverride: true
-                        textFont: 24
-                        Layout.preferredWidth: implicitHeight
-                        radius: 10
-                        onClicked: headsetProc.running = true
-                    }
+                    Item {
+                        implicitWidth: 70
+                        implicitHeight: 70
+                        Layout.fillHeight: true
 
-                    Rectangle {
-                        width: 4
-                        Layout.preferredHeight: parent.height
-                        Layout.alignment: Qt.AlignVCenter
-                        color: Theme.textPrimary
-                        opacity: 0.5
-                        radius: 2
+                        ModuleButton {
+                            anchors.centerIn: parent
+                            label: ""
+                            textColor: connectionsModule.headsetBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
+                            cursorShape: Qt.PointingHandCursor
+                            colorOverride: true
+                            textFont: 24
+                            radius: 10
+                            implicitWidth: 40
+                            implicitHeight: 40
+                            onClicked: headsetProc.running = true
+                        }
                     }
                     
                     ColumnLayout {
                         id: headsetInfoCol
+                        Layout.fillWidth: true
+                        Layout.topMargin: 15
+                        Layout.bottomMargin: 15
+                        Layout.rightMargin: 15
                         spacing: 5
-                        Layout.margins: 5
                         RowLayout {
                             spacing: 10
 
@@ -526,6 +608,8 @@ ModuleButton {
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize * 0.9
                             text: connectionsModule.headsetBatteryState
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignLeft
                         }
                     }
                 }
@@ -542,7 +626,33 @@ ModuleButton {
                 topRightRadius: 5
                 
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: mouseRow.implicitHeight + 30
+                implicitHeight: mouseRow.implicitHeight
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: 70
+                    color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+                    topLeftRadius: mouseModule.topLeftRadius
+                    bottomLeftRadius: mouseModule.bottomLeftRadius
+
+                    InverseRadius {
+                        anchors.top: parent.top
+                        anchors.left: parent.right
+                        cornerPosition: "topLeft"
+                        color: parent.color
+                        size: 10
+                    }
+
+                    InverseRadius {
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.right
+                        cornerPosition: "bottomLeft"
+                        color: parent.color
+                        size: 10
+                    }
+                }
                 
                 RowLayout {
                     id: mouseRow
@@ -550,35 +660,37 @@ ModuleButton {
                     anchors {
                         left:    parent.left
                         top:     parent.top
-                        margins: 15
+                        right:   parent.right
                     }
                      
                     spacing: 15
 
-                    ModuleButton {
-                        label: "󰍽"
-                        textColor: connectionsModule.mouseBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
-                        cursorShape: Qt.PointingHandCursor
-                        colorOverride: true
-                        textFont: 24
-                        Layout.preferredWidth: implicitHeight
-                        radius: 10
-                        onClicked: mouseProc.running = true
-                    }
+                    Item {
+                        implicitWidth: 70
+                        implicitHeight: 70
+                        Layout.fillHeight: true
 
-                    Rectangle {
-                        width: 4
-                        Layout.preferredHeight: parent.height
-                        Layout.alignment: Qt.AlignVCenter
-                        color: Theme.textPrimary
-                        opacity: 0.5
-                        radius: 2
+                        ModuleButton {
+                            anchors.centerIn: parent
+                            label: "󰍽"
+                            textColor: connectionsModule.mouseBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
+                            cursorShape: Qt.PointingHandCursor
+                            colorOverride: true
+                            textFont: 24
+                            radius: 10
+                            implicitWidth: 40
+                            implicitHeight: 40
+                            onClicked: mouseProc.running = true
+                        }
                     }
                     
                     ColumnLayout {
                         id: mouseInfoCol
+                        Layout.fillWidth: true
+                        Layout.topMargin: 15
+                        Layout.bottomMargin: 15
+                        Layout.rightMargin: 15
                         spacing: 5
-                        Layout.margins: 5
                         RowLayout {
                             spacing: 10
 
@@ -604,6 +716,8 @@ ModuleButton {
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize * 0.9
                             text: connectionsModule.mouseBatteryState
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignLeft
                         }
                     }
                 }

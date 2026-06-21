@@ -247,6 +247,7 @@ ModuleButton {
                         width: appList.width
                         height: Theme.listHeight
                         radius: Theme.moduleEdgeRadius
+                        border.width: 2
                         onClicked: {
                             modelData.execute()
                             launcherModule.expanded = false
@@ -260,21 +261,38 @@ ModuleButton {
                         }
 
                         RowLayout {
-                            anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
+                            anchors { fill: parent; rightMargin: 10 }
                             spacing: 10
 
-                            IconImage {
-                                implicitSize: Theme.moduleHeight - 10
-                                source: modelData.icon !== "" ? Quickshell.iconPath(modelData.icon) : ""
-                                visible: modelData.icon !== ""
-                            }
-
                             Rectangle {
-                                width: 4
-                                height: Theme.moduleHeight - 10
-                                color: appButton.textColor
-                                opacity: 0.5
-                                radius: 2
+                                color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 1.7)
+                                topLeftRadius: Theme.moduleEdgeRadius
+                                bottomLeftRadius: Theme.moduleEdgeRadius
+                                implicitWidth: Theme.listHeight
+                                implicitHeight: Theme.listHeight
+
+                                InverseRadius {
+                                    anchors.top: parent.top
+                                    anchors.left: parent.right
+                                    cornerPosition: "topLeft"
+                                    color: parent.color
+                                    size: 10
+                                }
+
+                                InverseRadius {
+                                    anchors.bottom: parent.bottom
+                                    anchors.left: parent.right
+                                    cornerPosition: "bottomLeft"
+                                    color: parent.color
+                                    size: 10
+                                }
+
+                                IconImage {
+                                    anchors.centerIn: parent
+                                    implicitSize: Theme.moduleHeight - 10
+                                    source: modelData.icon !== "" ? Quickshell.iconPath(modelData.icon) : ""
+                                    visible: modelData.icon !== ""
+                                }
                             }
 
                             Text {

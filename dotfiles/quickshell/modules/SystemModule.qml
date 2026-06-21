@@ -100,9 +100,8 @@ ModuleButton {
             model: [
                 { index: 0, icon: "", text: "Shutdown", cmd: "systemctl poweroff", },
                 { index: 1, icon: "󰌪", text: "Suspend", cmd: "systemctl suspend", },
-                { index: 2, icon: "", text: "Reboot", cmd: "systemctl reboot", },
-                { index: 3, icon: "", text: "Lock", cmd: "hyprlock", },
-                { index: 4, icon: "󰨡", text: "Windows", cmd: "sudo /run/current-system/sw/bin/efibootmgr --bootnext 0000 && systemctl reboot", }
+                { index: 3, icon: "", text: "Reboot", cmd: "systemctl reboot", },
+                { index: 2, icon: "", text: "Lock", cmd: "hyprlock", }
             ]
             delegate: ModuleButton {
                 id: actionButton
@@ -118,27 +117,46 @@ ModuleButton {
                 Layout.topMargin: actionButton.modelData.index === 0 ? (- corner.size) : 0
 
                 radius: Theme.moduleEdgeRadius - 5
+                border.width: 2
 
                 RowLayout {
-                    anchors.right: parent.right
+                    anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 10
 
-                    Text {
-                        text: actionButton.modelData.icon
-                        color: actionButton.textColor
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize * 1.5
-                        font.bold: true
-                    }
-
                     Rectangle {
+                        color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+                        topLeftRadius: Theme.moduleEdgeRadius - 5
+                        bottomLeftRadius: Theme.moduleEdgeRadius - 5
+                        implicitWidth: 40
+                        implicitHeight: 40
 
-                        width: 4
-                        height: Theme.moduleHeight - 10
-                        color: Theme.palette("dark").base
-                        opacity: 0.5
-                        radius: 2
+                        InverseRadius {
+                            anchors.top: parent.top
+                            anchors.left: parent.right
+                            cornerPosition: "topLeft"
+                            color: parent.color
+                            size: 10
+                        }
+
+                        InverseRadius {
+                            anchors.bottom: parent.bottom
+                            anchors.left: parent.right
+                            cornerPosition: "bottomLeft"
+                            color: parent.color
+                            size: 10
+                        }
+
+                        Text {
+                            anchors.fill: parent
+                            text: actionButton.modelData.icon
+                            color: actionButton.textColor
+                            font.family: Theme.font
+                            font.pixelSize: 20
+                            font.bold: true
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
                     }
 
                     Text {
@@ -147,8 +165,32 @@ ModuleButton {
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize
                         font.bold: true
-                        Layout.preferredWidth: actionButton.Layout.preferredWidth - 55
+                        Layout.preferredWidth: actionButton.modelData.index === 3 ? actionButton.Layout.preferredWidth - 65 - winBtn.implicitWidth : actionButton.Layout.preferredWidth - 55
                         horizontalAlignment: Text.AlignLeft
+                    }
+
+                    ModuleButton {
+                        id: winBtn
+                        visible: actionButton.modelData.index === 3
+                        variant: "neutral"
+                        cursorShape: Qt.PointingHandCursor
+                        radius: Theme.moduleEdgeRadius - 8
+
+                        colorOpacity: 2.0
+                        textColor: Theme.palette("red").text
+
+                        label: "󰨡"
+                        textFont: 20
+                        border.width: 0
+                        implicitWidth: 40
+                        implicitHeight: 30
+                        
+
+                        Process {
+                            id: procWin
+                            command: ["bash", "-c", "sudo /run/current-system/sw/bin/efibootmgr --bootnext 0000 && systemctl reboot"]
+                        }
+                        onClicked: procWin.running = true
                     }
                 }
 
@@ -175,12 +217,27 @@ ModuleButton {
                 anchors.centerIn: parent
                 spacing: 10
 
-                Text {
-                    text: "NixOS"
-                    color: Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: 24
-                    font.bold: true
+                HoverMarqueeText {
+                    id: userNameText
+                    text: "User 󰚭"
+                    textMaxWidth: 80
+                    fontFamily: Theme.font
+                    pixelSize: 24
+                    fontBold: true
+                    textColor: Theme.textPrimary
+
+                    Process {
+                        command: ["whoami"]
+                        running: true
+                        stdout: StdioCollector {
+                            onStreamFinished: {
+                                var username = text.trim();
+                                if (username.length > 0) {
+                                    userNameText.text = username.charAt(0).toUpperCase() + username.slice(1)
+                                }
+                            }
+                        }
+                    }
                 }
 
                 ModuleButton {
@@ -195,6 +252,8 @@ ModuleButton {
                     implicitWidth: implicitHeight
 
                     radius: Theme.moduleEdgeRadius
+
+                    border.width: 2
                 }
                 
                 ModuleButton {
@@ -208,6 +267,8 @@ ModuleButton {
                     implicitWidth: implicitHeight
 
                     radius: Theme.moduleEdgeRadius
+
+                    border.width: 2
                 }
 
             }

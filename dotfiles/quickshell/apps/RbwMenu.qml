@@ -237,6 +237,8 @@ Rectangle {
                         variant: index === rbwPanel.selectedIndex ? "light" : "neutral"
                         radius: Theme.moduleEdgeRadius / 2
 
+                        border.width: 2
+
                         Column {
                             anchors {
                                 verticalCenter: parent.verticalCenter

@@ -12,7 +12,7 @@ ModuleButton {
     noHoverColorChange: true
     dontAnimateColor: true
     property bool expanded: false
-    property int maxSinkBarLength: 300
+    property int maxSinkBarLength: 270
     property int sinkNameMaxChars: 30
 
     HoverHandler {
@@ -46,13 +46,24 @@ ModuleButton {
                     var desc = (n.description && n.description.length) ? n.description : ((n.nickname && n.nickname.length) ? n.nickname : n.name)
                     if (!desc) desc = "sink:" + (n.id !== undefined ? n.id : i)
 
+                    var iconStr = "";
+                    var p = n.properties || {};
+                    var typeInfo = ((p["device.form_factor"] || "") + " " + (p["device.icon_name"] || "") + " " + (p["device.bus"] || "") + " " + desc).toLowerCase();
+                    console.log(typeInfo)
+
+                    if (typeInfo.includes("headset") || typeInfo.includes("headphone") || typeInfo.includes("hyperx cloud ii")) iconStr = "";
+                    else if (typeInfo.includes("bluetooth") || typeInfo.includes("bluez")) iconStr = "";
+                    else if (typeInfo.includes("hdmi") || typeInfo.includes("displayport")) iconStr = "󰽟";
+                    else if (typeInfo.includes("iec958") || typeInfo.includes("speaker")) iconStr = "󰓃";
+                    else if (typeInfo.includes("usb")) iconStr = "󰟀";
+
                     var active = false
                     if (defaultSink) {
                         if ((defaultSink.name && n.name && defaultSink.name === n.name) || (defaultSink.id !== undefined && n.id !== undefined && defaultSink.id === n.id)) {
                             active = true
                         }
                     }
-                    sinksListModel.append({ "name": desc, "active": active, "id" : n.id })
+                    sinksListModel.append({ "name": desc, "active": active, "id": n.id, "icon": iconStr })
                 }
             }
         }
@@ -151,23 +162,58 @@ ModuleButton {
                 topRightRadius: index === 0 ? Theme.moduleEdgeRadius : 5
 
                 label: ""
+                
+                border.width: 2
 
-                HoverMarqueeText {
-                    anchors {
-                        fill: parent
-                        leftMargin: Theme.modulePaddingH
-                        rightMargin: Theme.modulePaddingH
+                RowLayout {
+                    anchors { fill: parent; rightMargin: 10 }
+                    spacing: 10
+
+                    Rectangle {
+                        color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 1.7)
+                        topLeftRadius: parentButton.topLeftRadius
+                        bottomLeftRadius: parentButton.bottomLeftRadius
+                        implicitWidth: Theme.listHeight
+                        implicitHeight: Theme.listHeight
+
+                        InverseRadius {
+                            anchors.top: parent.top
+                            anchors.left: parent.right
+                            cornerPosition: "topLeft"
+                            color: parent.color
+                            size: 10
+                        }
+
+                        InverseRadius {
+                            anchors.bottom: parent.bottom
+                            anchors.left: parent.right
+                            cornerPosition: "bottomLeft"
+                            color: parent.color
+                            size: 10
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData.icon
+                            color: Theme.paletteInk
+                            font.family: Theme.font
+                            font.pixelSize: 20
+                            font.bold: true
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
                     }
-                    
-                    text: modelData.name
-                    textMaxWidth: 150 
-                    fontFamily: Theme.font
-                    pixelSize: parentButton.textFont
-                    fontBold: true
-                    textColor: parentButton.textColor
-                    clip: true
-                    
-                    // Center the inner labels within this component's exact layout bounds
+
+                    HoverMarqueeText {
+                        Layout.fillWidth: true
+                        text: modelData.name
+                        textMaxWidth: 200 
+                        fontFamily: Theme.font
+                        pixelSize: parentButton.textFont
+                        fontBold: true
+                        textColor: parentButton.textColor
+                        clip: true
+                    }
                 }
 
                 Process {
