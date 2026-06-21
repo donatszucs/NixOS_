@@ -42,4 +42,14 @@
 
   # Flakes support
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # Allow user doni to execute efibootmgr without a password
+  environment.systemPackages = with pkgs; [ efibootmgr ];
+  security.sudo.extraRules = [{
+    users = [ "doni" ];
+    commands = [{
+      command = "/run/current-system/sw/bin/efibootmgr";
+      options = [ "NOPASSWD" ];
+    }];
+  }];
 }

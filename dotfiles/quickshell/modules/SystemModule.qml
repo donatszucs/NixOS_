@@ -101,7 +101,8 @@ ModuleButton {
                 { index: 0, icon: "", text: "Shutdown", cmd: "systemctl poweroff", },
                 { index: 1, icon: "󰌪", text: "Suspend", cmd: "systemctl suspend", },
                 { index: 2, icon: "", text: "Reboot", cmd: "systemctl reboot", },
-                { index: 3, icon: "", text: "Lock", cmd: "hyprlock", }
+                { index: 3, icon: "", text: "Lock", cmd: "hyprlock", },
+                { index: 4, icon: "󰨡", text: "Windows", cmd: "sudo /run/current-system/sw/bin/efibootmgr --bootnext 0000 && systemctl reboot", }
             ]
             delegate: ModuleButton {
                 id: actionButton
