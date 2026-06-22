@@ -46,153 +46,19 @@ ModuleButton {
 
         Repeater {
             model: root.monitorWorkspaces.workspaces
-
-            delegate: ModuleButton {
-                id: wsButton
-                required property var modelData
-                required property int index
-                variant: active ? "light" : "neutral"
-                border.width: 2
-                property int activeDragCount: 0
-                z: activeDragCount > 0 ? 99 : 0
-                
-                implicitHeight: root.implicitHeight - 2 * root.overlay
-                implicitWidth: wsContentRow.implicitWidth
-                cursorShape: Qt.PointingHandCursor
-                clip: false
-
-                topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
-                bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
-                topRightRadius: 5
-                bottomRightRadius: 5
-
-                readonly property bool active:
-                    Hyprland.focusedMonitor !== null &&
-                    Hyprland.focusedMonitor.activeWorkspace !== null &&
-                    Hyprland.focusedMonitor.activeWorkspace.id === modelData.id
-
-                label: ""
-
-                colorOverride: active || dropArea.containsDrag
-                overrideColor: dropArea.containsDrag ? hoverColor : (active ? Qt.darker(Theme.palettePaper, 1.6) : "transparent")
-
-                DropArea {
-                    id: dropArea
-                    anchors.fill: parent
-                    onDropped: (drop) => {
-                        if (drop.source && drop.source.address) {
-                            Hyprland.dispatch("hl.dsp.window.move({ workspace = '" + wsButton.modelData.id + "', window = 'address:0x" + drop.source.address + "', follow = false })")
-                        }
-                    }
-                }
-
-                onClicked: {
-                    Hyprland.dispatch("hl.dsp.focus({ workspace = '" + wsButton.modelData.id + "' })")
-
-                }
-
-                scale: 0
-                Component.onCompleted: {
-                    scale = 1
-                }
-                
-                Behavior on scale {
-                    NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutBack }
-                }
-
-                RowLayout {
-                    id: wsContentRow
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    height: parent.height
-                    spacing: 5
-
-                    Rectangle {
-                        color: wsButton.pal.base
-                        topLeftRadius: wsButton.topLeftRadius
-                        bottomLeftRadius: wsButton.bottomLeftRadius
-                        topRightRadius: wsButton.modelData.toplevels.values.length > 0 ? 0 : wsButton.topRightRadius
-                        bottomRightRadius: wsButton.modelData.toplevels.values.length > 0 ? 0 : wsButton.bottomRightRadius
-                        implicitWidth: 24
-                        implicitHeight: wsButton.height
-
-                        InverseRadius {
-                            visible: wsButton.modelData.toplevels.values.length > 0
-                            anchors.top: parent.top
-                            anchors.left: parent.right
-                            cornerPosition: "topLeft"
-                            color: parent.color
-                            size: 5
-                        }
-
-                        InverseRadius {
-                            visible: wsButton.modelData.toplevels.values.length > 0
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.right
-                            cornerPosition: "bottomLeft"
-                            color: parent.color
-                            size: 5
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: wsButton.modelData.name
-                            color: Qt.lighter(wsButton.textColor, 1.1)
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
-                            font.bold: true
-                        }
-                    }
-
-                    RowLayout {
-                        visible: wsButton.modelData.toplevels.values.length > 0
-                        spacing: 5
-                        Layout.rightMargin: 5
-                        Repeater {
-                            model: wsButton.modelData.toplevels.values
-                            delegate: WorkspaceAppIcon {
-                                workspaceBtn: wsButton
-                            }
-                        }
-                    }
-                } // RowLayout
-
-                Behavior on implicitWidth {
-                    NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.Linear }
-                }
+            delegate: WorkspaceButton {
+                isOtherWorkspace: false
+                isLastInGroup: false
             }
         }
 
-        ModuleButton {
-            label: ""
-            variant: "neutral"
-            border.width: 2
-            implicitWidth: root.implicitHeight - 2 * root.overlay
-            implicitHeight: root.implicitHeight - 2 * root.overlay
-            
-            topLeftRadius: 5
-            bottomLeftRadius: 5
-
-            topRightRadius: Theme.moduleEdgeRadius
-            bottomRightRadius: Theme.moduleEdgeRadius
-
-            colorOverride: emptyDropArea.containsDrag
-            overrideColor: hoverColor
-
-            DropArea {
-                id: emptyDropArea
-                anchors.fill: parent
-                onDropped: (drop) => {
-                    if (drop.source && drop.source.address) {
-                        Hyprland.dispatch("hl.dsp.window.move({ workspace = 'empty', window = 'address:0x" + drop.source.address + "', follow = false })")
-                    }
-                }
-            }
-
-            onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = 'empty' })")
-            cursorShape: Qt.PointingHandCursor
+        WorkspaceButton {
+            isEmptyWorkspace: true
+            modelData: null
+            index: -1
+            isLastInGroup: true
         }
-        // Spacer between "my" workspaces and the others (if any)
+
         Rectangle {
             visible: root.monitorWorkspaces.others.length > 0
             width: root.overlay
@@ -202,125 +68,143 @@ ModuleButton {
 
         Repeater {
             model: root.monitorWorkspaces.others
-
-            delegate: ModuleButton {
-                id: othersButton
-                required property var modelData
-                required property int index
-                variant: active ? "light" : "neutral"
-                border.width: 2
-                property int activeDragCount: 0
-                z: activeDragCount > 0 ? 99 : 0
-                
-                HoverHandler { id: hoverHandler }
-                property bool isHovered: hoverHandler.hovered
-
-                implicitHeight: root.implicitHeight - 2 * root.overlay
-                implicitWidth: Math.max(othersContentRow.implicitWidth, implicitHeight)
-                cursorShape: Qt.PointingHandCursor
-                clip: activeDragCount === 0
-                
-                // Apply the parent's radius ONLY if this is the absolute last item in the list!
-                topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
-                bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
-                topRightRadius: index === root.monitorWorkspaces.others.length - 1 ? Theme.moduleEdgeRadius : 5
-                bottomRightRadius: index === root.monitorWorkspaces.others.length - 1 ? Theme.moduleEdgeRadius : 5
-
-                readonly property bool active:
-                    Hyprland.focusedMonitor !== null &&
-                    Hyprland.focusedMonitor.activeWorkspace !== null &&
-                    Hyprland.focusedMonitor.activeWorkspace.id === modelData.id
-                    
-                colorOverride: active || othersDropArea.containsDrag
-                overrideColor: othersDropArea.containsDrag ? hoverColor : (active ? Qt.darker(Theme.palettePaper, 1.6) : Theme.neutral.base)
-
-                DropArea {
-                    id: othersDropArea
-                    anchors.fill: parent
-                    onDropped: (drop) => {
-                        if (drop.source && drop.source.address) {
-                            Hyprland.dispatch("hl.dsp.window.move({ workspace = '" + modelData.id + "', window = 'address:0x" + drop.source.address + "', follow = false })")
-                        }
-                    }
-                }
-
-                label: ""
-
-                scale: 0
-                Component.onCompleted: {
-                    scale = 1
-                }
-                
-                Behavior on scale {
-                    NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutBack }
-                }
-
-                RowLayout {
-                    id: othersContentRow
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    height: parent.height
-                    spacing: 5
-
-                    Rectangle {
-                        color: othersButton.pal.base
-                        topLeftRadius: othersButton.topLeftRadius
-                        bottomLeftRadius: othersButton.bottomLeftRadius
-                        topRightRadius: othersButton.modelData.toplevels.values.length > 0 && hoverHandler.hovered ? 0 : othersButton.topRightRadius
-                        bottomRightRadius: othersButton.modelData.toplevels.values.length > 0 && hoverHandler.hovered ? 0 : othersButton.bottomRightRadius
-                        implicitWidth: 24
-                        implicitHeight: othersButton.height
-
-                        InverseRadius {
-                            visible: othersButton.modelData.toplevels.values.length > 0 && hoverHandler.hovered
-                            anchors.top: parent.top
-                            anchors.left: parent.right
-                            cornerPosition: "topLeft"
-                            color: parent.color
-                            size: 5
-                        }
-
-                        InverseRadius {
-                            visible: othersButton.modelData.toplevels.values.length > 0 && hoverHandler.hovered
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.right
-                            cornerPosition: "bottomLeft"
-                            color: parent.color
-                            size: 5
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: modelData.name
-                            color: Qt.lighter(othersButton.textColor, 1.1)
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
-                            font.bold: true
-                        }
-                    }
-
-                    RowLayout {
-                        visible: isHovered && othersButton.modelData.toplevels.values.length > 0
-                        spacing: 5
-                        Layout.rightMargin: isHovered ? 5 : 0
-                        Repeater {
-                            model: isHovered ? othersButton.modelData.toplevels.values : null
-                            delegate: WorkspaceAppIcon {
-                                workspaceBtn: othersButton
-                            }
-                        }
-                    }
-                }
-
-                Behavior on implicitWidth {
-                    NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.Linear }
-                }
-
-                onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = '" + modelData.id + "' })")
+            delegate: WorkspaceButton {
+                isOtherWorkspace: true
+                isLastInGroup: index === root.monitorWorkspaces.others.length - 1
             }
         }
     }
 
+
+    component WorkspaceButton : ModuleButton {
+        id: control
+        required property var modelData
+        required property int index
+        property bool isOtherWorkspace: false
+        property bool isLastInGroup: false
+        property bool isEmptyWorkspace: false
+
+        variant: active ? "light" : "neutral"
+        border.width: 2
+        property int activeDragCount: 0
+        z: activeDragCount > 0 ? 99 : 0
+        
+        HoverHandler { id: hoverHandler }
+        property bool isHovered: hoverHandler.hovered
+        property bool showApps: (!isOtherWorkspace || isHovered) && !isEmptyWorkspace
+        property bool hasApps: !isEmptyWorkspace && modelData !== null && modelData.toplevels && modelData.toplevels.values.length > 0
+
+        implicitHeight: root.implicitHeight - 2 * root.overlay
+        implicitWidth: isEmptyWorkspace ? implicitHeight : Math.max(contentRow.implicitWidth, implicitHeight)
+        cursorShape: Qt.PointingHandCursor
+        clip: activeDragCount === 0
+
+        topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
+        bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
+        topRightRadius: isLastInGroup ? Theme.moduleEdgeRadius : 5
+        bottomRightRadius: isLastInGroup ? Theme.moduleEdgeRadius : 5
+
+        readonly property bool active: !isEmptyWorkspace &&
+            Hyprland.focusedMonitor !== null &&
+            Hyprland.focusedMonitor.activeWorkspace !== null &&
+            modelData !== null &&
+            Hyprland.focusedMonitor.activeWorkspace.id === modelData.id
+
+        label: isEmptyWorkspace ? "" : ""
+
+        colorOverride: true
+        overrideColor: dropArea.containsDrag ? hoverColor : Qt.darker(control.pal.base, 1.3)
+        border.color: (control.pressed && !control.noPressColorChange) ? control.pal.borderPressed : ((control.hovered && !control.noHoverColorChange) ? control.pal.borderHover : control.pal.border)
+
+        DropArea {
+            id: dropArea
+            anchors.fill: parent
+            onDropped: (drop) => {
+                if (drop.source && drop.source.address) {
+                    var targetId = isEmptyWorkspace ? 'empty' : modelData.id;
+                    Hyprland.dispatch("hl.dsp.window.move({ workspace = '" + targetId + "', window = 'address:0x" + drop.source.address + "', follow = false })")
+                }
+            }
+        }
+
+        onClicked: {
+            var targetId = isEmptyWorkspace ? 'empty' : modelData.id;
+            Hyprland.dispatch("hl.dsp.focus({ workspace = '" + targetId + "' })")
+        }
+
+        scale: 0
+        Component.onCompleted: {
+            scale = 1
+        }
+        
+        Behavior on scale {
+            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutBack }
+        }
+
+        RowLayout {
+            id: contentRow
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height
+            spacing: 5
+            visible: !isEmptyWorkspace
+
+            Rectangle {
+                color: control.pal.base
+                topLeftRadius: control.topLeftRadius
+                bottomLeftRadius: control.bottomLeftRadius
+                property bool cutoutsActive: hasApps && showApps
+
+                topRightRadius: cutoutsActive ? 0 : control.topRightRadius
+                bottomRightRadius: cutoutsActive ? 0 : control.bottomRightRadius
+                implicitWidth: 24
+                implicitHeight: control.height
+
+                InverseRadius {
+                    visible: parent.cutoutsActive
+                    anchors.top: parent.top
+                    anchors.left: parent.right
+                    cornerPosition: "topLeft"
+                    color: parent.color
+                    size: 5
+                }
+
+                InverseRadius {
+                    visible: parent.cutoutsActive
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.right
+                    cornerPosition: "bottomLeft"
+                    color: parent.color
+                    size: 5
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: isEmptyWorkspace ? "" : (modelData ? modelData.name : "")
+                    color: active ? Theme.textDark : Theme.textPrimary
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize
+                    font.bold: true
+                }
+            }
+
+            RowLayout {
+                visible: hasApps && showApps
+                spacing: 5
+                Layout.rightMargin: showApps ? 5 : 0
+                Repeater {
+                    model: (hasApps && showApps) ? modelData.toplevels.values : null
+                    delegate: WorkspaceAppIcon {
+                        workspaceBtn: control
+                    }
+                }
+            }
+        }
+
+        Behavior on implicitWidth {
+            NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.Linear }
+        }
+    }
 
     component WorkspaceAppIcon : Item {
         id: dragContainer
