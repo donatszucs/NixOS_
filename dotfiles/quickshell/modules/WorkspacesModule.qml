@@ -57,7 +57,7 @@ ModuleButton {
                 z: activeDragCount > 0 ? 99 : 0
                 
                 implicitHeight: root.implicitHeight - 2 * root.overlay
-                implicitWidth: 10 + wsContentRow.implicitWidth
+                implicitWidth: wsContentRow.implicitWidth
                 cursorShape: Qt.PointingHandCursor
                 clip: false
 
@@ -73,8 +73,8 @@ ModuleButton {
 
                 label: ""
 
-                colorOverride: dropArea.containsDrag
-                overrideColor: hoverColor
+                colorOverride: active || dropArea.containsDrag
+                overrideColor: dropArea.containsDrag ? hoverColor : (active ? Qt.darker(Theme.palettePaper, 1.6) : "transparent")
 
                 DropArea {
                     id: dropArea
@@ -102,24 +102,59 @@ ModuleButton {
 
                 RowLayout {
                     id: wsContentRow
-                    anchors.centerIn: parent
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: parent.height
                     spacing: 5
 
-                    Text {
-                        text: wsButton.modelData.name
-                        color: wsButton.textColor
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
-                        font.bold: true
-                        Layout.margins: 5
+                    Rectangle {
+                        color: wsButton.active ? Qt.rgba(pal.base.r, pal.base.g, pal.base.b, pal.base.a * 0.7) : Theme.neutral.base
+                        topLeftRadius: wsButton.topLeftRadius
+                        bottomLeftRadius: wsButton.bottomLeftRadius
+                        topRightRadius: wsButton.modelData.toplevels.values.length > 0 ? 0 : wsButton.topRightRadius
+                        bottomRightRadius: wsButton.modelData.toplevels.values.length > 0 ? 0 : wsButton.bottomRightRadius
+                        implicitWidth: 24
+                        implicitHeight: wsButton.height
+
+                        InverseRadius {
+                            visible: wsButton.modelData.toplevels.values.length > 0
+                            anchors.top: parent.top
+                            anchors.left: parent.right
+                            cornerPosition: "topLeft"
+                            color: parent.color
+                            size: 5
+                        }
+
+                        InverseRadius {
+                            visible: wsButton.modelData.toplevels.values.length > 0
+                            anchors.bottom: parent.bottom
+                            anchors.left: parent.right
+                            cornerPosition: "bottomLeft"
+                            color: parent.color
+                            size: 5
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: wsButton.modelData.name
+                            color: wsButton.textColor
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize
+                            font.bold: true
+                        }
                     }
 
-                    Repeater {
-                        model: wsButton.modelData.toplevels.values
-                        delegate: WorkspaceAppIcon {
-                            workspaceBtn: wsButton
+                    RowLayout {
+                        visible: wsButton.modelData.toplevels.values.length > 0
+                        spacing: 5
+                        Layout.rightMargin: 5
+                        Repeater {
+                            model: wsButton.modelData.toplevels.values
+                            delegate: WorkspaceAppIcon {
+                                workspaceBtn: wsButton
+                            }
                         }
-                    } // Repeater
+                    }
                 } // RowLayout
 
                 Behavior on implicitWidth {
@@ -181,7 +216,7 @@ ModuleButton {
                 property bool isHovered: hoverHandler.hovered
 
                 implicitHeight: root.implicitHeight - 2 * root.overlay
-                implicitWidth: Math.max(othersContentRow.implicitWidth + 10, implicitHeight)
+                implicitWidth: Math.max(othersContentRow.implicitWidth, implicitHeight)
                 cursorShape: Qt.PointingHandCursor
                 clip: activeDragCount === 0
                 
@@ -196,8 +231,8 @@ ModuleButton {
                     Hyprland.focusedMonitor.activeWorkspace !== null &&
                     Hyprland.focusedMonitor.activeWorkspace.id === modelData.id
                     
-                colorOverride: othersDropArea.containsDrag
-                overrideColor: hoverColor
+                colorOverride: active || othersDropArea.containsDrag
+                overrideColor: othersDropArea.containsDrag ? hoverColor : (active ? Qt.darker(Theme.palettePaper, 1.6) : "transparent")
 
                 DropArea {
                     id: othersDropArea
@@ -222,24 +257,59 @@ ModuleButton {
 
                 RowLayout {
                     id: othersContentRow
-                    anchors.centerIn: parent
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: parent.height
                     spacing: 5
 
-                    Text {
-                        text: modelData.name
-                        color: parent.parent.textColor
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
-                        font.bold: true
-                        Layout.margins: 3
+                    Rectangle {
+                        color: othersButton.active ? Qt.rgba(pal.base.r, pal.base.g, pal.base.b, pal.base.a * 0.7) : Theme.neutral.base
+                        topLeftRadius: othersButton.topLeftRadius
+                        bottomLeftRadius: othersButton.bottomLeftRadius
+                        topRightRadius: othersButton.modelData.toplevels.values.length > 0 && hoverHandler.hovered ? 0 : othersButton.topRightRadius
+                        bottomRightRadius: othersButton.modelData.toplevels.values.length > 0 && hoverHandler.hovered ? 0 : othersButton.bottomRightRadius
+                        implicitWidth: 24
+                        implicitHeight: othersButton.height
+
+                        InverseRadius {
+                            visible: othersButton.modelData.toplevels.values.length > 0 && hoverHandler.hovered
+                            anchors.top: parent.top
+                            anchors.left: parent.right
+                            cornerPosition: "topLeft"
+                            color: parent.color
+                            size: 5
+                        }
+
+                        InverseRadius {
+                            visible: othersButton.modelData.toplevels.values.length > 0 && hoverHandler.hovered
+                            anchors.bottom: parent.bottom
+                            anchors.left: parent.right
+                            cornerPosition: "bottomLeft"
+                            color: parent.color
+                            size: 5
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData.name
+                            color: othersButton.textColor
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize
+                            font.bold: true
+                        }
                     }
 
-                    Repeater {
-                        model: isHovered ? othersButton.modelData.toplevels.values : null
-                        delegate: WorkspaceAppIcon {
-                            workspaceBtn: othersButton
+                    RowLayout {
+                        visible: isHovered && othersButton.modelData.toplevels.values.length > 0
+                        spacing: 5
+                        Layout.rightMargin: isHovered ? 5 : 0
+                        Repeater {
+                            model: isHovered ? othersButton.modelData.toplevels.values : null
+                            delegate: WorkspaceAppIcon {
+                                workspaceBtn: othersButton
+                            }
                         }
-                    } // Repeater
+                    }
                 }
 
                 Behavior on implicitWidth {
