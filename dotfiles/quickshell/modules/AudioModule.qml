@@ -155,10 +155,6 @@ ModuleButton {
                 cursorShape: Qt.PointingHandCursor
                 implicitWidth: maxSinkBarLength
                 implicitHeight: Theme.listHeight
-
-                                    
-                colorOverride: modelData.active 
-                overrideColor: Qt.darker(Theme.palettePaper, 1.4)
                 
                 topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
                 bottomLeftRadius: index === sinksModel.count - 1 ? Theme.moduleEdgeRadius : 5

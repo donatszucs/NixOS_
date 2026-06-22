@@ -259,8 +259,8 @@ ModuleButton {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
-                bottomLeftRadius: 5
-                bottomRightRadius: 5
+                border.width: 2
+                border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
 
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: netRow.implicitHeight
@@ -353,8 +353,8 @@ ModuleButton {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
-                topLeftRadius: 5
-                topRightRadius: 5
+                border.width: 2
+                border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
 
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: btRow.implicitHeight
@@ -514,9 +514,9 @@ ModuleButton {
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 1
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
-
-                bottomLeftRadius: 5
-                bottomRightRadius: 5
+                
+                border.width: 2
+                border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
 
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: headsetRow.implicitHeight
@@ -621,10 +621,10 @@ ModuleButton {
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 1
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
-
-                topLeftRadius: 5
-                topRightRadius: 5
                 
+                border.width: 2
+                border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: mouseRow.implicitHeight
 

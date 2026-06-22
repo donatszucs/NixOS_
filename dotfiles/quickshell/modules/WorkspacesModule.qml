@@ -113,8 +113,7 @@ ModuleButton {
         label: isEmptyWorkspace ? "" : ""
 
         colorOverride: true
-        overrideColor: dropArea.containsDrag ? hoverColor : Qt.darker(control.pal.base, 1.3)
-        border.color: (control.pressed && !control.noPressColorChange) ? control.pal.borderPressed : ((control.hovered && !control.noHoverColorChange) ? control.pal.borderHover : control.pal.border)
+        overrideColor: dropArea.containsDrag ? hoverColor : Qt.darker(control.pal.base, 1.4)
 
         DropArea {
             id: dropArea
@@ -191,6 +190,7 @@ ModuleButton {
             RowLayout {
                 visible: hasApps && showApps
                 spacing: 5
+                Layout.leftMargin: showApps ? 2 : 0
                 Layout.rightMargin: showApps ? 5 : 0
                 Repeater {
                     model: (hasApps && showApps) ? modelData.toplevels.values : null
