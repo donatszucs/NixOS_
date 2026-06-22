@@ -191,7 +191,7 @@ ModuleButton {
                 visible: hasApps && showApps
                 spacing: 5
                 Layout.leftMargin: showApps ? 2 : 0
-                Layout.rightMargin: showApps ? 5 : 0
+                Layout.rightMargin: showApps ? 7 : 0
                 Repeater {
                     model: (hasApps && showApps) ? modelData.toplevels.values : null
                     delegate: WorkspaceAppIcon {
@@ -215,7 +215,7 @@ ModuleButton {
         z: windowIcon.Drag.active ? 99 : 0
         
         implicitWidth: windowIcon.width
-        implicitHeight: Theme.moduleHeight - 18
+        implicitHeight: Theme.moduleHeight - 20
         Layout.preferredWidth: implicitWidth
         Layout.preferredHeight: implicitHeight
         visible: windowIcon.appId !== ""
@@ -237,7 +237,7 @@ ModuleButton {
             
             property string address: String(modelData.address)
 
-            height: Theme.moduleHeight - 18
+            height: Theme.moduleHeight - 20
             width: {
                 var systemIcon = String(source).indexOf("image://icon/") === 0;
                 if (systemIcon) return height;
