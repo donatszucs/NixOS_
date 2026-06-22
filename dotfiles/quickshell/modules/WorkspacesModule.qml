@@ -108,7 +108,7 @@ ModuleButton {
                     spacing: 5
 
                     Rectangle {
-                        color: wsButton.active ? Qt.rgba(pal.base.r, pal.base.g, pal.base.b, pal.base.a * 0.7) : Theme.neutral.base
+                        color: wsButton.pal.base
                         topLeftRadius: wsButton.topLeftRadius
                         bottomLeftRadius: wsButton.bottomLeftRadius
                         topRightRadius: wsButton.modelData.toplevels.values.length > 0 ? 0 : wsButton.topRightRadius
@@ -137,7 +137,7 @@ ModuleButton {
                         Text {
                             anchors.centerIn: parent
                             text: wsButton.modelData.name
-                            color: wsButton.textColor
+                            color: Qt.lighter(wsButton.textColor, 1.1)
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize
                             font.bold: true
@@ -232,7 +232,7 @@ ModuleButton {
                     Hyprland.focusedMonitor.activeWorkspace.id === modelData.id
                     
                 colorOverride: active || othersDropArea.containsDrag
-                overrideColor: othersDropArea.containsDrag ? hoverColor : (active ? Qt.darker(Theme.palettePaper, 1.6) : "transparent")
+                overrideColor: othersDropArea.containsDrag ? hoverColor : (active ? Qt.darker(Theme.palettePaper, 1.6) : Theme.neutral.base)
 
                 DropArea {
                     id: othersDropArea
@@ -263,7 +263,7 @@ ModuleButton {
                     spacing: 5
 
                     Rectangle {
-                        color: othersButton.active ? Qt.rgba(pal.base.r, pal.base.g, pal.base.b, pal.base.a * 0.7) : Theme.neutral.base
+                        color: othersButton.pal.base
                         topLeftRadius: othersButton.topLeftRadius
                         bottomLeftRadius: othersButton.bottomLeftRadius
                         topRightRadius: othersButton.modelData.toplevels.values.length > 0 && hoverHandler.hovered ? 0 : othersButton.topRightRadius
@@ -292,7 +292,7 @@ ModuleButton {
                         Text {
                             anchors.centerIn: parent
                             text: modelData.name
-                            color: othersButton.textColor
+                            color: Qt.lighter(othersButton.textColor, 1.1)
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize
                             font.bold: true

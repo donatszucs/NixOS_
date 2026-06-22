@@ -449,8 +449,9 @@ Item {
                     visible: bodyText.visible && (bodyText.truncated || bodyText.maximumLineCount > 6)
                     
                     label: bodyText.maximumLineCount === 6 ? "Show More" : "Show Less"
-                    
                     radius: Theme.moduleEdgeRadius
+
+                    border.width: 2
 
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
@@ -482,6 +483,7 @@ Item {
 
                     delegate: ModuleButton {
                         label: modelData.text
+                        border.width: 2
                         Layout.preferredHeight: 28
                         radius: Theme.moduleEdgeRadius
                         textFont: Theme.fontSize - 2

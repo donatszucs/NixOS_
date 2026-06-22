@@ -155,6 +155,10 @@ ModuleButton {
                 cursorShape: Qt.PointingHandCursor
                 implicitWidth: maxSinkBarLength
                 implicitHeight: Theme.listHeight
+
+                                    
+                colorOverride: modelData.active 
+                overrideColor: Qt.darker(Theme.palettePaper, 1.4)
                 
                 topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
                 bottomLeftRadius: index === sinksModel.count - 1 ? Theme.moduleEdgeRadius : 5
@@ -170,7 +174,7 @@ ModuleButton {
                     spacing: 10
 
                     Rectangle {
-                        color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 1.7)
+                        color: parentButton.pal.base
                         topLeftRadius: parentButton.topLeftRadius
                         bottomLeftRadius: parentButton.bottomLeftRadius
                         implicitWidth: Theme.listHeight

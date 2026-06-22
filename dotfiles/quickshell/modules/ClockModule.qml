@@ -81,7 +81,7 @@ ModuleButton {
                 Text {
                     anchors.centerIn: parent
                     text: root.date
-                    color: Theme.textPrimary
+                    color: Theme.textDark
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize - 2
                     font.bold: false
