@@ -22,6 +22,7 @@
 
   # Time zone
   time.timeZone = "Europe/Budapest";
+  time.hardwareClockInLocalTime = true;
 
   # Internationalisation
   i18n.defaultLocale = "en_US.UTF-8";
