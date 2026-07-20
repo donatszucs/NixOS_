@@ -41,12 +41,13 @@
   home.sessionVariables.GTK_THEME = "Dracula";
   # Cursor Theme
   home.pointerCursor = {
-      name = "Bibata-Modern-Ice"; 
-      package = pkgs.bibata-cursors;
-      size = 24;
-      gtk.enable = true;
-      x11.enable = true;
-      hyprcursor.enable = true;
+    enable = true;
+    name = "Bibata-Modern-Ice"; 
+    package = pkgs.bibata-cursors;
+    size = 24;
+    gtk.enable = true;
+    x11.enable = true;
+    hyprcursor.enable = true;
   };
   
   # 4. Theming

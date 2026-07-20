@@ -81,7 +81,7 @@
   pkgs.vesktop
   discord
   qalculate-gtk
-  texlive.combined.scheme-full
+  texliveSmall
   teams-for-linux
   heroic
   # szeretlek eszter
