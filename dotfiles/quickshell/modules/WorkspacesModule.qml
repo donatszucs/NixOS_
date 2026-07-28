@@ -75,7 +75,6 @@ ModuleButton {
         }
     }
 
-
     component WorkspaceButton : ModuleButton {
         id: control
         required property var modelData

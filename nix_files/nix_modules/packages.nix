@@ -9,6 +9,8 @@
 
   programs.nix-ld.enable = true;
 
+  programs.direnv.enable = true;
+
   # KDE Connect for phone integration
   programs.kdeconnect.enable = true;
   
@@ -69,10 +71,11 @@
   usbutils          # For lsusb and other USB tools
   wlsunset          # Automatic color temperature adjustment based on time of day
   overskride
+  nixfmt
   
   # -- Applications --
   vscode
-  antigravity
+  antigravity-ide
   gemini-cli
   google-chrome
   inputs.zen-browser.packages."${builtins.currentSystem}".default
@@ -84,6 +87,7 @@
   texliveSmall
   teams-for-linux
   heroic
+  protontricks
   # szeretlek eszter
 
   (prismlauncher.override {

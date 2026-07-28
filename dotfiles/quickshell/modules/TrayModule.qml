@@ -68,7 +68,7 @@ ModuleButton {
                     anchors.fill: parent
                     anchors.leftMargin: 5
                     anchors.rightMargin: 5
-                    spacing: 5
+                    spacing: 0
                     layoutDirection: Qt.RightToLeft
 
                     Repeater {
@@ -109,8 +109,8 @@ ModuleButton {
                                     }
                                     return modelData.icon
                                 }
-                                width: Theme.moduleHeight * 0.6
-                                height: Theme.moduleHeight * 0.6
+                                width: Theme.moduleHeight - 20
+                                height: Theme.moduleHeight - 20
                                 sourceSize.width: 20
                                 sourceSize.height: 20
                                 fillMode: Image.PreserveAspectFit

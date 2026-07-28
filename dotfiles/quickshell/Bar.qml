@@ -271,6 +271,20 @@ PanelWindow {
             bottom: parent.bottom
             horizontalCenter: parent.horizontalCenter
         }
+
+    }
+
+    Item {
+        anchors.left: workspacesModule.right
+        anchors.right: rightRow.left
+        anchors.top: workspacesModule.top
+        height: workspacesModule.height
+
+        ResourceWatcherApp {
+            id: sysmonApp
+            screenName: modelData.name
+            anchors.centerIn: parent
+        }
     }
 
 
