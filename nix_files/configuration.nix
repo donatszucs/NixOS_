@@ -2,27 +2,41 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, inputs, ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
+  imports = [
+    # Include the results of the hardware scan.
 
-      inputs.home-manager.nixosModules.default
+    inputs.home-manager.nixosModules.default
 
-      ./hardware-configuration.nix
-      ./nix_modules/core.nix
-      ./nix_modules/hardware.nix
-      ./nix_modules/desktop.nix
-      ./nix_modules/packages.nix
-      ./nix_modules/minecraft.nix
-    ];
+    ./hardware-configuration.nix
+    ./nix_modules/core.nix
+    ./nix_modules/hardware.nix
+    ./nix_modules/desktop.nix
+    ./nix_modules/packages.nix
+    ./nix_modules/minecraft.nix
+  ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.doni = {
     isNormalUser = true;
     description = "Doni";
-    extraGroups = [ "networkmanager" "wheel" "i2c" "video" "input" "uinput" "wireshark" "plugdev" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "i2c"
+      "video"
+      "input"
+      "uinput"
+      "wireshark"
+      "plugdev"
+    ];
     packages = with pkgs; [
       git
     ];

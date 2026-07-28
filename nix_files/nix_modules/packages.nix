@@ -1,4 +1,9 @@
-{ config, pkgs, inputs, ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
   # Allow unfree packages
@@ -13,7 +18,7 @@
 
   # KDE Connect for phone integration
   programs.kdeconnect.enable = true;
-  
+
   programs.gamemode = {
     enable = true;
     settings = {
@@ -39,99 +44,98 @@
   # Enable Wireshark and configure permissions
   programs.wireshark.enable = true;
   programs.wireshark.package = pkgs.wireshark;
-  
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
 
-  # -- Network --
-  networkmanagerapplet
+    # -- Network --
+    networkmanagerapplet
 
-  # -- Audio --
-  blueman      # Bluetooth manager
-  pavucontrol  # This is the GUI to control specific apps
-  pamixer      # Helps with keybindings (optional but good)
-  playerctl    # Media key support for various apps
-    
-  # -- Essential Tools --
-  kitty             # Terminal (default for Hyprland, needed to start debugging)
-  brightnessctl     # Screen brightness control
-  ddcutil           # Control monitor settings like brightness, contrast, etc.
-  libnotify        # Notification library
-  pwvucontrol     # Pipewire volume control CLI
-  input-remapper   # Input remapping service
-  pkgs.uv          # Python package manager
-  jq               # Command-line JSON processor
-  quickshell        # A quick launcher for commands and scripts (like Rofi but for CLI)
-  ffmpeg            # For video processing and screen recording
-  baobab             # Disk usage analyzer
-  wtype             # CLI keyboard input tool
-  rbw               # CLI password manager
-  pinentry-qt     # Qt5 pinentry for rbw
-  usbutils          # For lsusb and other USB tools
-  wlsunset          # Automatic color temperature adjustment based on time of day
-  overskride
-  nixfmt
-  
-  # -- Applications --
-  vscode
-  antigravity-ide
-  gemini-cli
-  google-chrome
-  inputs.zen-browser.packages."${builtins.currentSystem}".default
-  inputs.playit-nixos-module.packages."${builtins.currentSystem}".playit
-  spotify
-  pkgs.vesktop
-  discord
-  qalculate-gtk
-  texliveSmall
-  teams-for-linux
-  heroic
-  protontricks
-  # szeretlek eszter
+    # -- Audio --
+    blueman # Bluetooth manager
+    pavucontrol # This is the GUI to control specific apps
+    pamixer # Helps with keybindings (optional but good)
+    playerctl # Media key support for various apps
 
-  (prismlauncher.override {
-    jdks = [ 
-      jdk8 
-      jdk17 
-      jdk21 
-      jdk25
-    ];
-  })
+    # -- Essential Tools --
+    kitty # Terminal (default for Hyprland, needed to start debugging)
+    brightnessctl # Screen brightness control
+    ddcutil # Control monitor settings like brightness, contrast, etc.
+    libnotify # Notification library
+    pwvucontrol # Pipewire volume control CLI
+    input-remapper # Input remapping service
+    pkgs.uv # Python package manager
+    jq # Command-line JSON processor
+    quickshell # A quick launcher for commands and scripts (like Rofi but for CLI)
+    ffmpeg # For video processing and screen recording
+    baobab # Disk usage analyzer
+    wtype # CLI keyboard input tool
+    rbw # CLI password manager
+    pinentry-qt # Qt5 pinentry for rbw
+    usbutils # For lsusb and other USB tools
+    wlsunset # Automatic color temperature adjustment based on time of day
+    overskride
+    nixfmt
 
+    # -- Applications --
+    vscode
+    antigravity-ide
+    gemini-cli
+    google-chrome
+    inputs.zen-browser.packages."${builtins.currentSystem}".default
+    inputs.playit-nixos-module.packages."${builtins.currentSystem}".playit
+    spotify
+    pkgs.vesktop
+    discord
+    qalculate-gtk
+    texliveSmall
+    teams-for-linux
+    heroic
+    protontricks
+    # szeretlek eszter
 
-  # -- keyboard --
-  wvkbd             # On-screen keyboard
+    (prismlauncher.override {
+      jdks = [
+        jdk8
+        jdk17
+        jdk21
+        jdk25
+      ];
+    })
 
-  # -- Wallpapers & Screen Locking --
-  hyprpaper         # Wallpaper utility
-  hyprlock          # Screen locker
+    # -- keyboard --
+    wvkbd # On-screen keyboard
 
-  # -- File Management --
-  pkgs.thunar       # File manager
-  pkgs.thunar-archive-plugin # Archive plugin for Thunar
-  file-roller       # Archive manager GUI
-  zip               # CLI zip tool
-  unzip             # CLI unzip tool
-  p7zip             # CLI 7z tool
-  unar              # CLI unar tool
+    # -- Wallpapers & Screen Locking --
+    hyprpaper # Wallpaper utility
+    hyprlock # Screen locker
 
-  # -- Screenshots / Clipboard --
-  grim              # Screenshot tool
-  slurp             # Select area for screenshot
-  cliphist         # Clipboard manager backend
-  wl-clipboard      # Clipboard manager
+    # -- File Management --
+    pkgs.thunar # File manager
+    pkgs.thunar-archive-plugin # Archive plugin for Thunar
+    file-roller # Archive manager GUI
+    zip # CLI zip tool
+    unzip # CLI unzip tool
+    p7zip # CLI 7z tool
+    unar # CLI unar tool
 
-  # -- Task Management --
-  btop              # The cool terminal one
-  mission-center    # The Windows-style GUI one
+    # -- Screenshots / Clipboard --
+    grim # Screenshot tool
+    slurp # Select area for screenshot
+    cliphist # Clipboard manager backend
+    wl-clipboard # Clipboard manager
 
-  # -- Headset Control --
-  hidapi            # HID access library (needed for HyperX Cloud II Wireless script)
-  
-  # -- System Utilities --
-  kdePackages.plasma-browser-integration
-  kdePackages.qtimageformats # Enables WebP support for Quickshell QML
+    # -- Task Management --
+    btop # The cool terminal one
+    mission-center # The Windows-style GUI one
+
+    # -- Headset Control --
+    hidapi # HID access library (needed for HyperX Cloud II Wireless script)
+
+    # -- System Utilities --
+    kdePackages.plasma-browser-integration
+    kdePackages.qtimageformats # Enables WebP support for Quickshell QML
   ];
 
   programs.bash.shellAliases = {

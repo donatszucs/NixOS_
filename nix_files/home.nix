@@ -7,7 +7,7 @@
 
   # DO NOT change this value, even when you upgrade NixOS in the future.
   # It tells Home Manager what version it was originally installed on.
-  home.stateVersion = "25.11"; 
+  home.stateVersion = "25.11";
 
   # 2. Let Home Manager manage itself
   programs.home-manager.enable = true;
@@ -19,22 +19,22 @@
   ];
 
   home.sessionVariables = {
-      HYPRCURSOR_THEME = "Bibata-Modern-Ice";
-      HYPRCURSOR_SIZE = 24;
+    HYPRCURSOR_THEME = "Bibata-Modern-Ice";
+    HYPRCURSOR_SIZE = 24;
 
-      # Not used on Hyprland, HYPRCURSOR values takes precedence
-      XCURSOR_THEME = "Bibata-Modern-Ice";
-      XCURSOR_SIZE = 24;
+    # Not used on Hyprland, HYPRCURSOR values takes precedence
+    XCURSOR_THEME = "Bibata-Modern-Ice";
+    XCURSOR_SIZE = 24;
 
-      # Make Qt apps use KDE integration and prefer Breeze style
-      QT_QPA_PLATFORMTHEME = "kde";
-      QT_STYLE_OVERRIDE = "Dracula";
+    # Make Qt apps use KDE integration and prefer Breeze style
+    QT_QPA_PLATFORMTHEME = "kde";
+    QT_STYLE_OVERRIDE = "Dracula";
 
-      QSG_RHI_BACKEND = "vulkan";
-      MOZ_ENABLE_WAYLAND = "1";
+    QSG_RHI_BACKEND = "vulkan";
+    MOZ_ENABLE_WAYLAND = "1";
 
-      NIXOS_OZONE_WL = "1";
-    };
+    NIXOS_OZONE_WL = "1";
+  };
 
   # Ensure GTK apps (and browsers) report dark mode
   # Force GTK theme in the environment and write GTK settings files
@@ -42,14 +42,14 @@
   # Cursor Theme
   home.pointerCursor = {
     enable = true;
-    name = "Bibata-Modern-Ice"; 
+    name = "Bibata-Modern-Ice";
     package = pkgs.bibata-cursors;
     size = 24;
     gtk.enable = true;
     x11.enable = true;
     hyprcursor.enable = true;
   };
-  
+
   # 4. Theming
   gtk = {
     enable = true;
@@ -81,7 +81,7 @@
 
   # Write a minimal KDE config for the dark color scheme, which some Qt apps check for
   home.file.".config/kdeglobals".text = ''
-  [General]
-  ColorScheme=Dracula
+    [General]
+    ColorScheme=Dracula
   '';
 }

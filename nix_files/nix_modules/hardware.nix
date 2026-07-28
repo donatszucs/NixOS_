@@ -34,13 +34,17 @@
   hardware.xpadneo.enable = true;
 
   # 3. Force load the kernel module (Driver)
-  boot.kernelModules = [ "btusb" "ntsync" "usbmon" ];
+  boot.kernelModules = [
+    "btusb"
+    "ntsync"
+    "usbmon"
+  ];
 
   # Enable the graphics driver
   hardware.graphics.enable = true;
 
   # Load the Nvidia driver
-  services.xserver.videoDrivers = ["nvidia"];
+  services.xserver.videoDrivers = [ "nvidia" ];
 
   hardware.nvidia = {
     # Modesetting is usually required for Hyprland
@@ -59,7 +63,7 @@
 
   # Enable sound with pipewire.
   services.pulseaudio.enable = false; # Disable the old backend
-  security.rtkit.enable = true;       # Recommended for audio scheduling
+  security.rtkit.enable = true; # Recommended for audio scheduling
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -68,7 +72,12 @@
     extraConfig.pipewire."92-high-quality" = {
       "context.properties" = {
         "default.clock.rate" = 48000;
-        "default.clock.allowed-rates" = [ 44100 48000 88200 96000 ];
+        "default.clock.allowed-rates" = [
+          44100
+          48000
+          88200
+          96000
+        ];
         "default.clock.quantum" = 1024;
         "default.clock.min-quantum" = 32;
         "default.clock.max-quantum" = 2048;

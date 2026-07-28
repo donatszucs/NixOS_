@@ -4,12 +4,16 @@
   xdg.portal = {
     enable = true;
     wlr.enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-hyprland pkgs.xdg-desktop-portal pkgs.xdg-desktop-portal-gtk ];
+    extraPortals = [
+      pkgs.xdg-desktop-portal-hyprland
+      pkgs.xdg-desktop-portal
+      pkgs.xdg-desktop-portal-gtk
+    ];
   };
 
   # Enable Hyprland
   programs.hyprland.enable = true;
-  
+
   # Enable dconf for application settings
   programs.dconf.enable = true;
 
@@ -42,26 +46,26 @@
     ];
 
     fontconfig = {
-    enable = true;
-    defaultFonts = {
-      monospace = [ "RobotoMono Nerd Font Mono" ];
-      sansSerif = [ "Noto Sans" ];
-      serif = [ "Noto Serif" ];
-    };
-    localConf = ''
-      <?xml version="1.0"?>
-      <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
-      <fontconfig>
-        <match target="pattern">
-          <test name="family" compare="eq">
-            <string>RobotoMono Nerd Font Propo</string>
-          </test>
-          <edit name="weight" mode="assign">
-            <const>demibold</const>
-          </edit>
-        </match>
-      </fontconfig>
-    '';
+      enable = true;
+      defaultFonts = {
+        monospace = [ "RobotoMono Nerd Font Mono" ];
+        sansSerif = [ "Noto Sans" ];
+        serif = [ "Noto Serif" ];
+      };
+      localConf = ''
+        <?xml version="1.0"?>
+        <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+        <fontconfig>
+          <match target="pattern">
+            <test name="family" compare="eq">
+              <string>RobotoMono Nerd Font Propo</string>
+            </test>
+            <edit name="weight" mode="assign">
+              <const>demibold</const>
+            </edit>
+          </match>
+        </fontconfig>
+      '';
     };
   };
 

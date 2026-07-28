@@ -7,17 +7,20 @@
 
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  
+
   # Supported filesystems for the initrd (for mounting /boot and other partitions)
-  boot.supportedFilesystems = ["ntfs"];
+  boot.supportedFilesystems = [ "ntfs" ];
 
   # Networking
   networking.hostName = "nixos"; # Define your hostname.
   networking.networkmanager.enable = true;
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 25565 25575 ]; # 25565 for players, 25575 for RCON
-    allowedUDPPorts = [ 25565 ];       # Minecraft uses both
+    allowedTCPPorts = [
+      25565
+      25575
+    ]; # 25565 for players, 25575 for RCON
+    allowedUDPPorts = [ 25565 ]; # Minecraft uses both
   };
 
   # Time zone
@@ -42,15 +45,22 @@
   console.keyMap = "hu";
 
   # Flakes support
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # Allow user doni to execute efibootmgr without a password
   environment.systemPackages = with pkgs; [ efibootmgr ];
-  security.sudo.extraRules = [{
-    users = [ "doni" ];
-    commands = [{
-      command = "/run/current-system/sw/bin/efibootmgr";
-      options = [ "NOPASSWD" ];
-    }];
-  }];
+  security.sudo.extraRules = [
+    {
+      users = [ "doni" ];
+      commands = [
+        {
+          command = "/run/current-system/sw/bin/efibootmgr";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
 }
