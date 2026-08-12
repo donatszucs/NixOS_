@@ -81,7 +81,7 @@
     # -- Applications --
     vscode
     antigravity-ide
-    gemini-cli
+    antigravity-cli
     google-chrome
     inputs.zen-browser.packages."${builtins.currentSystem}".default
     inputs.playit-nixos-module.packages."${builtins.currentSystem}".playit

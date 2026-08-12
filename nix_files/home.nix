@@ -28,7 +28,7 @@
 
     # Make Qt apps use KDE integration and prefer Breeze style
     QT_QPA_PLATFORMTHEME = "kde";
-    QT_STYLE_OVERRIDE = "Dracula";
+    QT_STYLE_OVERRIDE = "Orchis-Dark";
 
     QSG_RHI_BACKEND = "vulkan";
     MOZ_ENABLE_WAYLAND = "1";
@@ -38,7 +38,7 @@
 
   # Ensure GTK apps (and browsers) report dark mode
   # Force GTK theme in the environment and write GTK settings files
-  home.sessionVariables.GTK_THEME = "Dracula";
+  home.sessionVariables.GTK_THEME = "Orchis-Dark";
   # Cursor Theme
   home.pointerCursor = {
     enable = true;
@@ -54,8 +54,8 @@
   gtk = {
     enable = true;
     theme = {
-      name = "Dracula";
-      package = pkgs.dracula-theme;
+      name = "Orchis-Dark";
+      package = pkgs.orchis-theme;
     };
     iconTheme = {
       name = "Dracula";
@@ -75,13 +75,13 @@
     enable = true;
     platformTheme.name = "kde";
     style = {
-      name = "Dracula";
+      name = "Orchis-Dark";
     };
   };
 
   # Write a minimal KDE config for the dark color scheme, which some Qt apps check for
   home.file.".config/kdeglobals".text = ''
     [General]
-    ColorScheme=Dracula
+    ColorScheme=Orchis-Dark
   '';
 }
