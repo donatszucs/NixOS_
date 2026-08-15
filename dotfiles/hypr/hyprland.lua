@@ -31,13 +31,13 @@ hl.monitor({
 -- ==========================================
 -- ENVIRONMENT VARIABLES
 -- ==========================================
-hl.env("GTK_THEME", "Orchis-Dark")
+hl.env("GTK_THEME", "catppuccin-mocha-mauve-standard+normal")
 hl.env("COLOR_SCHEME", "prefer-dark")
 hl.env("QT_SCALE_FACTOR_ROUNDING_POLICY", "Round")
 
 -- Qt Theme Overrides
 hl.env("QT_QPA_PLATFORMTHEME", "kde")
-hl.env("QT_STYLE_OVERRIDE", "Orchis-Dark")
+hl.env("QT_STYLE_OVERRIDE", "Breeze")
 
 -- ==========================================
 -- AUTOSTART
@@ -53,7 +53,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("~/nixos-config/scripts/KeychronMouse/mouse-battery &")
     
     -- GTK, KDE and Cursor Theming
-    hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Orchis-Dark'")
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'catppuccin-mocha-mauve-standard+normal'")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
     hl.exec_cmd("hyprctl setcursor Bibata-Modern-Ice 24")
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE")

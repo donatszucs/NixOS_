@@ -28,7 +28,7 @@
 
     # Make Qt apps use KDE integration and prefer Breeze style
     QT_QPA_PLATFORMTHEME = "kde";
-    QT_STYLE_OVERRIDE = "Orchis-Dark";
+    QT_STYLE_OVERRIDE = "Breeze";
 
     QSG_RHI_BACKEND = "vulkan";
     MOZ_ENABLE_WAYLAND = "1";
@@ -38,7 +38,7 @@
 
   # Ensure GTK apps (and browsers) report dark mode
   # Force GTK theme in the environment and write GTK settings files
-  home.sessionVariables.GTK_THEME = "Orchis-Dark";
+  home.sessionVariables.GTK_THEME = "catppuccin-mocha-mauve-standard+normal";
   # Cursor Theme
   home.pointerCursor = {
     enable = true;
@@ -54,14 +54,45 @@
   gtk = {
     enable = true;
     theme = {
-      name = "Orchis-Dark";
-      package = pkgs.orchis-theme;
+      name = "catppuccin-mocha-mauve-standard+normal";
+      package = pkgs.catppuccin-gtk.override {
+        accents = [ "mauve" ];
+        size = "standard";
+        tweaks = [ "normal" ];
+        variant = "mocha";
+      };
     };
     iconTheme = {
       name = "Dracula";
       package = pkgs.dracula-icon-theme;
     };
+    gtk3.extraConfig = {
+      gtk-application-prefer-dark-theme = 1;
+    };
     gtk4.theme = null;
+    gtk4.extraCss = ''
+      @define-color accent_color #cba6f7;
+      @define-color accent_bg_color #cba6f7;
+      @define-color accent_fg_color #1e1e2e;
+      @define-color window_bg_color #1e1e2e;
+      @define-color window_fg_color #cdd6f4;
+      @define-color view_bg_color #181825;
+      @define-color view_fg_color #cdd6f4;
+      @define-color headerbar_bg_color #181825;
+      @define-color headerbar_fg_color #cdd6f4;
+      @define-color card_bg_color #1e1e2e;
+      @define-color card_fg_color #cdd6f4;
+      @define-color popover_bg_color #181825;
+      @define-color popover_fg_color #cdd6f4;
+      @define-color sidebar_bg_color #181825;
+      @define-color sidebar_fg_color #cdd6f4;
+      @define-color dialog_bg_color #1e1e2e;
+      @define-color dialog_fg_color #cdd6f4;
+      @define-color warning_color #f9e2af;
+      @define-color error_color #f38ba8;
+      @define-color success_color #a6e3a1;
+      @define-color destructive_color #f38ba8;
+    '';
   };
 
   # Also set the FreeDesktop/GNOME color-scheme portal preference
@@ -75,13 +106,49 @@
     enable = true;
     platformTheme.name = "kde";
     style = {
-      name = "Orchis-Dark";
+      name = "Breeze";
     };
   };
 
-  # Write a minimal KDE config for the dark color scheme, which some Qt apps check for
+  # Write KDE config for the dark color scheme, which Qt/KDE apps (incl. KDE Connect) check for
   home.file.".config/kdeglobals".text = ''
     [General]
-    ColorScheme=Orchis-Dark
+    ColorScheme=BreezeDark
+
+    [KDE]
+    LookAndFeelPackage=org.kde.breezedark.desktop
+    widgetStyle=BreezeDark
+    SingleClick=false
+
+    [Icons]
+    Theme=Dracula
+  '';
+
+  # kdedefaults/kdeglobals is read by KDE apps as a system-level override layer.
+  # Without this, KDE Connect (and other KDE apps) ignore kdeglobals and fall back
+  # to the stale BreezeLight entry that KDE Plasma wrote here previously.
+  home.file.".config/kdedefaults/kdeglobals".text = ''
+    [General]
+    ColorScheme=BreezeDark
+
+    [KDE]
+    LookAndFeelPackage=org.kde.breezedark.desktop
+    widgetStyle=BreezeDark
+
+    [Icons]
+    Theme=Dracula
+  '';
+
+  home.file.".config/xsettingsd/xsettingsd.conf".text = ''
+    Net/ThemeName "catppuccin-mocha-mauve-standard+normal"
+    Net/IconThemeName "Dracula"
+    Gtk/CursorThemeName "Bibata-Modern-Ice"
+    Gtk/CursorThemeSize 24
+    Net/EnableEventSounds 1
+    EnableInputFeedbackSounds 0
+    Xft/Antialias 1
+    Xft/Hinting 1
+    Xft/HintStyle "hintslight"
+    Xft/RGBA "rgb"
   '';
 }

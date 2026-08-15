@@ -114,6 +114,13 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
+        }
+        WeatherModule {
+            Layout.alignment: Qt.AlignTop
+            id: weatherModule
+        }
+        ModuleGap {
+            Layout.alignment: Qt.AlignTop
             leftColor: launcherModule.color
             leftExpanded: launcherModule.expanded
         }
