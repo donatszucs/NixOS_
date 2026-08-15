@@ -91,6 +91,11 @@ PanelWindow {
         Region { item: rbwMenu }
         Region { item: notificationCenter }
         Region { item: sysmonAppWrapper }
+        
+        // Expose the protruding corners from the specific gaps you labeled
+        Region { item: leftCorner.leftRadius }
+        Region { item: rightCorner.rightRadius }
+        Region { item: bottomLeftBorder }
     }
 
     // Background MouseArea to close the launcher when clicking outside of it
@@ -127,6 +132,7 @@ PanelWindow {
         }
 
         ModuleGap {
+            id: leftCorner
             Layout.alignment: Qt.AlignTop
             rightColor: clockModule.color
             implicitWidth: 0
@@ -286,6 +292,7 @@ PanelWindow {
             id: systemModule
         }
         ModuleGap {
+            id: rightCorner
             Layout.alignment: Qt.AlignTop
             implicitWidth: 0
             leftColor: systemModule.color
@@ -394,6 +401,7 @@ PanelWindow {
     // Borders
 
     InverseRadius {
+        id: bottomLeftBorder
         cornerPosition: "bottomLeft"
         color: Theme.palette("dark").base
         anchors {

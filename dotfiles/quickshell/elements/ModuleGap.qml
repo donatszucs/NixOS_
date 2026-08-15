@@ -15,6 +15,10 @@ Rectangle {
     property bool leftExpandedBottom: true
     property bool rightExpandedBottom: true
 
+    // Aliases to expose the InverseRadius items for Quickshell's blurRegion mapping
+    property alias rightRadius: rightRadius
+    property alias leftRadius: leftRadius
+
     // Vertival and Horizontal sizes of the radius corvers.
     property int sizeHleft: Theme.moduleEdgeRadius
     property int sizeVleft: Theme.moduleEdgeRadius
@@ -32,6 +36,7 @@ Rectangle {
 
     // 1. The Right-facing corner (attaches to the Left module)
     InverseRadius {
+        id: rightRadius
         cornerPosition: "topRight"
         color: root.leftColor
         expandingV: root.leftExpanded
@@ -50,6 +55,7 @@ Rectangle {
 
     // 2. The Left-facing corner (attaches to the Right module)
     InverseRadius {
+        id: leftRadius
         cornerPosition: "topLeft"
         color: root.rightColor
         expandingV: root.rightExpanded
