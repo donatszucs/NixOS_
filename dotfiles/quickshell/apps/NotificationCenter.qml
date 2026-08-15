@@ -288,7 +288,7 @@ Item {
 
         // ── Sizing & shape ────────────────────────────────────────────
         property real moduleHeight: contentGrid.implicitHeight + Theme.modulePaddingH * 2
-        property real moduleWidth: contentGrid.implicitWidth + Theme.modulePaddingH * 2
+        property real moduleWidth: 350
 
         // Collapse implicit bounds instantly so parent layout shrinks, while width/height animate smoothly.
         implicitHeight: shouldBeVisible ? moduleHeight : 0.0
@@ -341,14 +341,12 @@ Item {
         // ── Content ────────────────────────────────────────────────────
         GridLayout {
             id: contentGrid
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
+            anchors.fill: parent
+            anchors.margins: Theme.modulePaddingH
 
             columns: 2
             rowSpacing: Theme.modulePaddingH
             columnSpacing: Theme.modulePaddingH
-            anchors.margins: Theme.modulePaddingH
 
             // ─── ROW 0 ─────────────────────────────────────────────────
             // [Row 0, Col 0] Image Block
@@ -466,30 +464,40 @@ Item {
 
             // ─── ROW 1 ─────────────────────────────────────────────────
             // [Row 1, Col 0 & 1] Actions (Spans both columns)
-            RowLayout {
-                id: actionRow
+            Flickable {
+                id: actionFlickable
                 Layout.row: 1
                 Layout.column: 0
                 Layout.columnSpan: 2
                 
-                Layout.alignment: Qt.AlignLeft
-                spacing: 8
+                Layout.fillWidth: true
+                Layout.preferredHeight: 28
                 
-                // Only show this row if the notification actually has actions
                 visible: toastRow.notif && toastRow.notif.actions.length > 0
+                clip: true
+                contentWidth: actionRow.implicitWidth
+                contentHeight: 28
+                interactive: true
+                boundsBehavior: Flickable.StopAtBounds
 
-                Repeater {
-                    model: toastRow.notif ? toastRow.notif.actions : []
+                Row {
+                    id: actionRow
+                    spacing: 8
+                    anchors.verticalCenter: parent.verticalCenter
 
-                    delegate: ModuleButton {
-                        label: modelData.text
-                        border.width: 2
-                        Layout.preferredHeight: 28
-                        radius: Theme.moduleEdgeRadius
-                        textFont: Theme.fontSize - 2
-                        
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: modelData.invoke()
+                    Repeater {
+                        model: toastRow.notif ? toastRow.notif.actions : []
+
+                        delegate: ModuleButton {
+                            label: modelData.text
+                            border.width: 2
+                            height: 28
+                            radius: Theme.moduleEdgeRadius
+                            textFont: Theme.fontSize - 2
+                            
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: modelData.invoke()
+                        }
                     }
                 }
             }
