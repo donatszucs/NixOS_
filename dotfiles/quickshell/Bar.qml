@@ -3,6 +3,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 
 import "./modules"
 import "./elements"
@@ -13,6 +14,8 @@ PanelWindow {
 
     required property var modelData
     screen: modelData
+
+    property color moduleShadowColor: Qt.rgba(0, 0, 0, 0.55)
 
     color: "transparent"
 
@@ -79,6 +82,17 @@ PanelWindow {
 
     }
 
+    BackgroundEffect.blurRegion: Region {
+        Region { item: leftRow }
+        Region { item: workspacesModule }
+        Region { item: rightRow }
+        Region { item: wallpaperPicker }
+        Region { item: clipboardHistory }
+        Region { item: rbwMenu }
+        Region { item: notificationCenter }
+        Region { item: sysmonAppWrapper }
+    }
+
     // Background MouseArea to close the launcher when clicking outside of it
     MouseArea {
         id: bgMouseArea
@@ -102,6 +116,15 @@ PanelWindow {
             top: parent.top
         }
         spacing: 0
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: topPanel.moduleShadowColor
+            shadowBlur: 1.0
+            shadowVerticalOffset: 3
+            shadowHorizontalOffset: 0
+        }
 
         ModuleGap {
             Layout.alignment: Qt.AlignTop
@@ -163,6 +186,15 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         screenName: modelData.name
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: topPanel.moduleShadowColor
+            shadowBlur: 1.0
+            shadowVerticalOffset: 3
+            shadowHorizontalOffset: 0
+        }
     }
 
     // ── RIGHT ────────────────────────────────────────────────────────────
@@ -173,6 +205,15 @@ PanelWindow {
             top: parent.top
         }
         spacing: 0
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: topPanel.moduleShadowColor
+            shadowBlur: 1.0
+            shadowVerticalOffset: 3
+            shadowHorizontalOffset: 0
+        }
 
         InverseRadius {
             Layout.alignment: Qt.AlignTop
@@ -260,6 +301,15 @@ PanelWindow {
             verticalCenter: parent.verticalCenter
             right: parent.right
         }
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: topPanel.moduleShadowColor
+            shadowBlur: 1.0
+            shadowVerticalOffset: 3
+            shadowHorizontalOffset: 0
+        }
     }
 
     ClipboardHistory {
@@ -268,6 +318,15 @@ PanelWindow {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
+        }
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: topPanel.moduleShadowColor
+            shadowBlur: 1.0
+            shadowVerticalOffset: 3
+            shadowHorizontalOffset: 0
         }
     }
 
@@ -279,9 +338,18 @@ PanelWindow {
             horizontalCenter: parent.horizontalCenter
         }
 
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: topPanel.moduleShadowColor
+            shadowBlur: 1.0
+            shadowVerticalOffset: 3
+            shadowHorizontalOffset: 0
+        }
     }
 
     Item {
+        id: sysmonAppWrapper
         anchors.left: workspacesModule.right
         anchors.right: rightRow.left
         anchors.top: workspacesModule.top
@@ -292,6 +360,15 @@ PanelWindow {
             screenName: modelData.name
             anchors.centerIn: parent
         }
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: topPanel.moduleShadowColor
+            shadowBlur: 1.0
+            shadowVerticalOffset: 3
+            shadowHorizontalOffset: 0
+        }
     }
 
 
@@ -301,6 +378,15 @@ PanelWindow {
         anchors {
             bottom: parent.bottom
             right: parent.right
+        }
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: topPanel.moduleShadowColor
+            shadowBlur: 1.0
+            shadowVerticalOffset: 3
+            shadowHorizontalOffset: 0
         }
     }
 

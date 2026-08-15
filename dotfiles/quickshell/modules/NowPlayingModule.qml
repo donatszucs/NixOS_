@@ -53,7 +53,7 @@ ModuleButton {
             noPressColorChange: !expanded
             id: titleBtn
             
-            variant: "neutral"
+            variant: "dark"
             
             Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
             Layout.topMargin: nowPlayingModule.expanded ? 15 : 0
@@ -68,7 +68,6 @@ ModuleButton {
             onClicked: focusNow()
 
             radius: Theme.moduleEdgeRadius - 5
-            colorOpacity: 3.0
 
             RowLayout {
                 id: topRow
@@ -85,14 +84,14 @@ ModuleButton {
                     textMaxWidth: 200
                     fontFamily: Theme.font
                     pixelSize: Theme.fontSize
-                    textColor: expanded ? Theme.textDark : Theme.textPrimary
+                    textColor: Theme.textPrimary
                     fontBold: true
                 }
 
                 Text {
                     id: artistText
                     text: "󰎆 "
-                    color: expanded ? Theme.textDark : Theme.textPrimary
+                    color: Theme.textPrimary
                     font.family: Theme.font
                     font.pixelSize: textFont
                     font.bold: true
@@ -171,12 +170,11 @@ ModuleButton {
 
                     ModuleButton {
                         id: artHover
-                        variant: "neutral"
+                        variant: "dark"
 
                         bottomRightRadius: Theme.moduleEdgeRadius -5
                         topRightRadius: Theme.moduleEdgeRadius -5
                         visible: nowPlayingModule.authorText !== ""
-                        colorOpacity: 3.5
 
                         implicitWidth: expanded ? scrollingAuthorText.implicitWidth + 20 : 0
 
@@ -191,7 +189,7 @@ ModuleButton {
                             textMaxWidth: albumArtClip.width - 30 - nextButton.implicitWidth - playPauseButton.implicitWidth
                             fontFamily: Theme.font
                             pixelSize: Theme.fontSize
-                            textColor: Theme.textDark
+                            textColor: Theme.textPrimary
                             fontBold: false
                         }
                     }
@@ -199,15 +197,13 @@ ModuleButton {
                     ModuleButton {
                         id: nextButton
                         cursorShape: Qt.PointingHandCursor
-                        variant: "neutral"
-                        textColor: Theme.textDark
+                        variant: "dark"
+                        textFont: 18
                         
                         implicitHeight: Theme.moduleHeight
                         implicitWidth: (nowPlayingModule.expanded && currentPlayer.canGoNext) ? Theme.moduleHeight : 0
 
                         label: "󰒭"
-
-                        colorOpacity: 3.5
 
                         onClicked: nowPlayingModule.doNext()
 
@@ -219,8 +215,8 @@ ModuleButton {
                     ModuleButton {
                         id: playPauseButton
                         cursorShape: Qt.PointingHandCursor
-                        variant: "neutral"
-                        textColor: Theme.textDark
+                        variant: "dark"
+                        textFont: 18
                         
                         implicitHeight: Theme.moduleHeight
                         implicitWidth: nowPlayingModule.expanded ? Theme.moduleHeight : 0
@@ -229,8 +225,6 @@ ModuleButton {
 
                         topLeftRadius: Theme.moduleEdgeRadius - 5
                         bottomLeftRadius: Theme.moduleEdgeRadius - 5
-
-                        colorOpacity: 3.5
 
                         onClicked: nowPlayingModule.doTogglePlay()
 
