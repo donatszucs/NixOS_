@@ -39,6 +39,40 @@ ModuleButton {
     Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration;   easing.type: Easing.OutCubic } }
     Behavior on anchors.topMargin { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
+    Rectangle {
+        id: headerBg
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: Theme.moduleHeight - 4
+        color: Qt.rgba(0, 0, 0, 0.3) // Darkens the header area
+        visible: expanded
+        
+        radius: launcherModule.radius
+        topLeftRadius: launcherModule.radius
+        topRightRadius: launcherModule.radius
+        bottomLeftRadius: launcherModule.expanded ? 0 : launcherModule.bottomLeftRadius
+        bottomRightRadius: launcherModule.expanded ? 0 : launcherModule.bottomRightRadius
+        
+        Behavior on bottomLeftRadius { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+        Behavior on bottomRightRadius { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+    }
+
+    InverseRadius {
+        anchors.top: headerBg.bottom
+        anchors.left: headerBg.left
+        visible: expanded
+        color: headerBg.color
+    }
+
+    InverseRadius {
+        cornerPosition: "topRight"
+        anchors.top: headerBg.bottom
+        anchors.right: headerBg.right
+        visible: expanded
+        color: headerBg.color
+    }
+
     // ── Helpers ───────────────────────────────────────────────────
     function filterApps(query) {
         var q = query.toLowerCase()
@@ -108,7 +142,7 @@ ModuleButton {
                     id: collapsedRow
                     Layout.fillWidth: true
                     implicitHeight: Theme.moduleHeight - 4
-                    implicitWidth: menuText.implicitWidth + 10
+                    implicitWidth: expanded ? menuText.implicitWidth + 40 : menuText.implicitWidth + 10
 
                     Text {
                         id: menuText
@@ -152,8 +186,14 @@ ModuleButton {
                 }
             }
 
-            RowLayout {
+            ColumnLayout {
                 Layout.fillWidth: true
+                spacing: launcherModule.padding
+                opacity: launcherModule.expanded ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+
+                RowLayout {
+                    Layout.fillWidth: true
                 spacing: launcherModule.padding
                 Layout.leftMargin: launcherModule.padding
                 Layout.rightMargin: launcherModule.padding
@@ -436,6 +476,7 @@ ModuleButton {
                         }
                     }
                 }
+            }
             }
         }
     }

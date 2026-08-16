@@ -102,11 +102,11 @@ ModuleButton {
         implicitWidth: isEmptyWorkspace ? implicitHeight : Math.max(contentRow.implicitWidth, implicitHeight)
         cursorShape: Qt.PointingHandCursor
         clip: activeDragCount === 0
-
-        topLeftRadius: (!isOtherWorkspace && index === 0) ? Theme.moduleEdgeRadius : 5
-        bottomLeftRadius: (!isOtherWorkspace && index === 0 && !root.expanded) ? Theme.moduleEdgeRadius : 5
-        topRightRadius: (isOtherWorkspace && isLastInGroup) ? Theme.moduleEdgeRadius : 5
-        bottomRightRadius: (isOtherWorkspace && isLastInGroup && !root.expanded) ? Theme.moduleEdgeRadius : 5
+        
+        topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
+        bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
+        topRightRadius: isLastInGroup ? Theme.moduleEdgeRadius : 5
+        bottomRightRadius: isLastInGroup ? Theme.moduleEdgeRadius : 5
 
         readonly property bool active: !isEmptyWorkspace &&
             Hyprland.focusedMonitor !== null &&
