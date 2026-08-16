@@ -102,7 +102,7 @@ ModuleButton {
         return "Unknown"
     }
 
-    // ── Pill button (mirrors ClockModule's inner pill) ────────────────
+    // ── Distinct Pill Button ──────────────────────────────────────────
     ModuleButton {
         anchors.centerIn: parent
         id: weatherPill
@@ -114,6 +114,8 @@ ModuleButton {
         implicitHeight: Theme.moduleHeight - 10
         implicitWidth: pillContent.implicitWidth
 
+        color: pressedColor
+
         cursorShape: Qt.ArrowCursor
 
         RowLayout {
@@ -122,6 +124,9 @@ ModuleButton {
             height: parent.height
             spacing: 8
 
+            // Left padding
+            Item { Layout.preferredWidth: 2 }
+
             // Weather icon (Nerd Font glyph)
             Text {
                 text: root.weatherIcon
@@ -129,7 +134,6 @@ ModuleButton {
                 font.family: Theme.font
                 font.pixelSize: Theme.fontSize + 2
                 verticalAlignment: Text.AlignVCenter
-                Layout.leftMargin: 12
                 opacity: root.loaded ? 1.0 : 0.4
                 Behavior on opacity { NumberAnimation { duration: 300 } }
             }
@@ -144,41 +148,29 @@ ModuleButton {
                 verticalAlignment: Text.AlignVCenter
             }
 
-            // Description chip — darker pill on the right (like the date in ClockModule)
+            // Separator
             Rectangle {
-                color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 0.7)
-                topRightRadius: weatherPill.radius
-                bottomRightRadius: weatherPill.radius
-                implicitWidth: descText.implicitWidth + 16
-                implicitHeight: Theme.moduleHeight - 10
-
-                InverseRadius {
-                    anchors.top: parent.top
-                    anchors.right: parent.left
-                    cornerPosition: "topRight"
-                    color: parent.color
-                    size: weatherPill.radius
-                }
-                InverseRadius {
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.left
-                    cornerPosition: "bottomRight"
-                    color: parent.color
-                    size: weatherPill.radius
-                }
-
-                Text {
-                    id: descText
-                    anchors.centerIn: parent
-                    text: root.loaded ? root.weatherDesc : "Loading"
-                    color: "black"
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 2
-                    font.bold: false
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
+                Layout.preferredWidth: 1
+                Layout.preferredHeight: 14
+                color: Theme.textPrimary
+                opacity: 0.2
+                visible: root.loaded
             }
+
+            // Description text
+            Text {
+                id: descText
+                text: root.loaded ? root.weatherDesc : "Loading"
+                color: Theme.textPrimary
+                opacity: 0.7
+                font.family: Theme.font
+                font.pixelSize: Theme.fontSize - 1
+                font.bold: false
+                verticalAlignment: Text.AlignVCenter
+            }
+            
+            // Right padding
+            Item { Layout.preferredWidth: 2 }
         }
     }
 }
