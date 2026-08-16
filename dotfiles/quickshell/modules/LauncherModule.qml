@@ -45,7 +45,7 @@ ModuleButton {
         anchors.right: parent.right
         anchors.top: parent.top
         height: Theme.moduleHeight - 4
-        color: Qt.rgba(0, 0, 0, 0.3) // Darkens the header area
+        color: Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.15) // Darkens the header area
         visible: expanded
         
         radius: launcherModule.radius
