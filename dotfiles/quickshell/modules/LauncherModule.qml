@@ -13,10 +13,10 @@ ModuleButton {
     id: launcherModule
     label: ""
     noHoverColorChange: expanded
-    noPressColorChange: expanded
     property bool expanded: false
     property string screenName: ""
-
+    property int activeDragCount: (activeWorkspaces ? activeWorkspaces.activeDragCount : 0) + (otherWorkspaces ? otherWorkspaces.activeDragCount : 0)
+    clip: activeDragCount === 0
 
     property int  panelWidth:  400
     property int  maxVisible:  5
@@ -25,16 +25,19 @@ ModuleButton {
     // JS array of DesktopEntry objects matching the current search
     property var filteredApps: []
 
-    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius * 2 : 0
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius * 2 : 0
+    radius: Theme.moduleEdgeRadius - 2
+    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
     
-    clip: true
+    anchors.topMargin: expanded ? 100 : 4
+    cursorShape: Qt.PointingHandCursor
 
-    implicitWidth:  expanded ? panelWidth : collapsedRow.implicitWidth
-    implicitHeight: expanded ? dropPanel.implicitHeight : Theme.moduleHeight
+    implicitWidth:  expanded ? Math.max(panelWidth, headerRow.implicitWidth) : headerRow.implicitWidth
+    implicitHeight: expanded ? dropPanel.implicitHeight : Theme.moduleHeight - 4
 
     Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
     Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration;   easing.type: Easing.OutCubic } }
+    Behavior on anchors.topMargin { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
     // ── Helpers ───────────────────────────────────────────────────
     function filterApps(query) {
@@ -74,10 +77,11 @@ ModuleButton {
         id: dropPanel
         noHoverColorChange: true
         color: "transparent"
+        clip: launcherModule.activeDragCount === 0
         topMarginButton: 0 // Removes default margin from ModuleButton
         anchors { left: parent.left; right: parent.right; top: parent.top }
-        implicitWidth:  launcherModule.expanded ? launcherModule.panelWidth : collapsedRow.implicitWidth
-        implicitHeight: expanded ? panelCol.implicitHeight + 10 : Theme.moduleHeight
+        implicitWidth:  launcherModule.expanded ? Math.max(launcherModule.panelWidth, headerRow.implicitWidth) : headerRow.implicitWidth
+        implicitHeight: expanded ? panelCol.implicitHeight + 10 : Theme.moduleHeight - 4
 
         ColumnLayout {
             id: panelCol
@@ -85,47 +89,66 @@ ModuleButton {
             spacing: launcherModule.padding
 
             // Header row (same height as collapsed bar, keeps visual alignment)
-            PillBarButton {
-                id: collapsedRow
-                colorOverride: !expanded
-                noHoverColorChange: !expanded
-                noPressColorChange: !expanded
-                Layout.fillWidth: true
-                implicitHeight: Theme.moduleHeight
-                pillText: " Menu"
-                percent: expanded ? 100 : 0
-                pillVariant: "neutral"
-                textFont: Theme.fontSize
-                cursorShape: Qt.PointingHandCursor
-                bottomLeftRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0
-                bottomRightRadius: launcherModule.expanded ? Theme.moduleEdgeRadius : 0
+            RowLayout {
+                id: headerRow
+                implicitHeight: Theme.moduleHeight - 4
+                spacing: 0
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    acceptedButtons: Qt.LeftButton
+                WorkspacesModule {
+                    id: activeWorkspaces
+                    expanded: launcherModule.expanded
+                    Layout.alignment: Qt.AlignVCenter
+                    screenName: launcherModule.screenName
+                    displayMode: "monitor"
+                    color: "transparent"
+                    anchors.topMargin: 0
+                }
 
-                    onPressedChanged: {
-                            if(!launcherModule.expanded) {
-                                launcherModule.pressed = !launcherModule.pressed
-                            }
-                            else {
-                                collapsedRow.pressed = !collapsedRow.pressed
+                Item {
+                    id: collapsedRow
+                    Layout.fillWidth: true
+                    implicitHeight: Theme.moduleHeight - 4
+                    implicitWidth: menuText.implicitWidth + 10
+
+                    Text {
+                        id: menuText
+                        anchors.centerIn: parent
+                        text: " Menu"
+                        color: launcherModule.textColor
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: true
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (launcherModule.expanded) {
+                                launcherModule.expanded = false
+                            } else {
+                                launcherModule.expanded = true
+                                searchField.text = ""
+                                launcherModule.filterApps("")
+                                Qt.callLater(function() {
+                                    searchField.forceActiveFocus()
+                                    searchField.selectAll()
+                                })
                             }
                         }
-                    onClicked: (mouse) => {
-                                            if (expanded) {
-                                                expanded = false
-                                            } else {
-                                                expanded = true
-                                                searchField.text = ""
-                                                filterApps("")
-                                                Qt.callLater(function() {
-                                                    searchField.forceActiveFocus()
-                                                    searchField.selectAll()
-                                                })
-                                            }
-                                        }
+                    }
+                }
+
+                WorkspacesModule {
+                    id: otherWorkspaces
+                    expanded: launcherModule.expanded
+                    Layout.alignment: Qt.AlignVCenter
+                    screenName: launcherModule.screenName
+                    displayMode: "other"
+                    alwaysShowApps: launcherModule.expanded
+                    color: "transparent"
+                    anchors.topMargin: 0
+                    visible: otherWorkspaces.monitorWorkspaces.others.length > 0
                 }
             }
 

@@ -56,7 +56,7 @@ PanelWindow {
         }
 
         Region {
-            item: workspacesModule
+            item: launcherModule
         }
 
         // Right modules interaction region
@@ -87,7 +87,7 @@ PanelWindow {
 
     BackgroundEffect.blurRegion: Region {
         Region { item: leftRow }
-        Region { item: workspacesModule }
+        Region { item: launcherModule }
         Region { item: rightRow }
         Region { item: wallpaperPicker }
         Region { item: clipboardHistory }
@@ -119,7 +119,7 @@ PanelWindow {
     Item {
         id: dragRegionItem
         anchors.fill: parent
-        visible: workspacesModule.activeDragCount > 0
+        visible: launcherModule.activeDragCount > 0
     }
 
     // ── LEFT ─────────────────────────────────────────────────────────────
@@ -159,24 +159,11 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            leftColor: launcherModule.color
-            leftExpanded: launcherModule.expanded
-        }
-        LauncherModule {
-            Layout.alignment: Qt.AlignTop
-            id: launcherModule
-            screenName: modelData.name
-        }
-        ModuleGap {
-            Layout.alignment: Qt.AlignTop
-
-            rightColor: launcherModule.color
-            rightExpanded: launcherModule.expanded
 
             leftColor: nowPlayingModule.color
-            leftExpanded: nowPlayingModule.expanded && !launcherModule.expanded
+            leftExpanded: nowPlayingModule.expanded
 
-            implicitHeight: launcherModule.expanded && nowPlayingModule.expanded ? nowPlayingModule.expandedHeight + 20 : Theme.moduleHeight
+            implicitHeight: Theme.moduleHeight
 
             Behavior on implicitHeight {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -185,7 +172,7 @@ PanelWindow {
         NowPlayingModule {
             Layout.alignment: Qt.AlignTop
             id: nowPlayingModule
-            bottomLeftRadius: launcherModule.expanded ? 0 : (expanded ? Theme.moduleEdgeRadius + 10 : 0)
+            bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
         }
         InverseRadius {
             Layout.alignment: Qt.AlignTop
@@ -196,8 +183,8 @@ PanelWindow {
 
     // ── CENTER ───────────────────────────────────────────────────────────
 
-    WorkspacesModule {
-        id: workspacesModule
+    LauncherModule {
+        id: launcherModule
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         screenName: modelData.name
@@ -366,10 +353,10 @@ PanelWindow {
 
     Item {
         id: sysmonAppWrapper
-        anchors.left: workspacesModule.right
+        anchors.left: launcherModule.right
         anchors.right: rightRow.left
-        anchors.top: workspacesModule.top
-        height: workspacesModule.height
+        anchors.top: launcherModule.top
+        height: launcherModule.height
 
         ResourceWatcherApp {
             id: sysmonApp

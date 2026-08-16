@@ -13,6 +13,9 @@ import "../elements"
 ModuleButton {
     id: root
     property string screenName: ""
+    property string displayMode: "all"
+    property bool alwaysShowApps: false
+    property bool expanded: false
 
     clip: false
 
@@ -46,7 +49,7 @@ ModuleButton {
         spacing: root.overlay - 1
 
         Repeater {
-            model: root.monitorWorkspaces.workspaces
+            model: (root.displayMode === "all" || root.displayMode === "monitor") ? root.monitorWorkspaces.workspaces : []
             delegate: WorkspaceButton {
                 isOtherWorkspace: false
                 isLastInGroup: false
@@ -54,6 +57,7 @@ ModuleButton {
         }
 
         WorkspaceButton {
+            visible: root.displayMode === "all" || root.displayMode === "monitor"
             isEmptyWorkspace: true
             modelData: null
             index: -1
@@ -61,14 +65,14 @@ ModuleButton {
         }
 
         Rectangle {
-            visible: root.monitorWorkspaces.others.length > 0
+            visible: root.displayMode === "all" && root.monitorWorkspaces.others.length > 0
             width: root.overlay
             height: 1
             color: "transparent"
         }
 
         Repeater {
-            model: root.monitorWorkspaces.others
+            model: (root.displayMode === "all" || root.displayMode === "other") ? root.monitorWorkspaces.others : []
             delegate: WorkspaceButton {
                 isOtherWorkspace: true
                 isLastInGroup: index === root.monitorWorkspaces.others.length - 1
@@ -91,7 +95,7 @@ ModuleButton {
         
         HoverHandler { id: hoverHandler }
         property bool isHovered: hoverHandler.hovered
-        property bool showApps: (!isOtherWorkspace || isHovered) && !isEmptyWorkspace
+        property bool showApps: (!isOtherWorkspace || isHovered || root.alwaysShowApps) && !isEmptyWorkspace
         property bool hasApps: !isEmptyWorkspace && modelData !== null && modelData.toplevels && modelData.toplevels.values.length > 0
 
         implicitHeight: root.implicitHeight - 2 * root.overlay
@@ -99,10 +103,10 @@ ModuleButton {
         cursorShape: Qt.PointingHandCursor
         clip: activeDragCount === 0
 
-        topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
-        bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
-        topRightRadius: isLastInGroup ? Theme.moduleEdgeRadius : 5
-        bottomRightRadius: isLastInGroup ? Theme.moduleEdgeRadius : 5
+        topLeftRadius: (!isOtherWorkspace && index === 0) ? Theme.moduleEdgeRadius : 5
+        bottomLeftRadius: (!isOtherWorkspace && index === 0 && !root.expanded) ? Theme.moduleEdgeRadius : 5
+        topRightRadius: (isOtherWorkspace && isLastInGroup) ? Theme.moduleEdgeRadius : 5
+        bottomRightRadius: (isOtherWorkspace && isLastInGroup && !root.expanded) ? Theme.moduleEdgeRadius : 5
 
         readonly property bool active: !isEmptyWorkspace &&
             Hyprland.focusedMonitor !== null &&
@@ -337,6 +341,7 @@ ModuleButton {
                 ToolTip {
                     id: appToolTip
                     x: parent.width + 10
+                    y: -parent.height / 2
                     visible: dragArea.containsMouse && !dragArea.drag.active
                     delay: 250
                     text: modelData.title || windowIcon.appId
@@ -350,7 +355,7 @@ ModuleButton {
                     }
 
                     background: Rectangle {
-                        color: root.color
+                        color: Theme.palette("dark").base
                         radius: 5
                         border.color: Theme.palette("dark").border
                         border.width: 2
