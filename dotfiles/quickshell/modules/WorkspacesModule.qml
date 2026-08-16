@@ -20,6 +20,7 @@ ModuleButton {
 
     radius: Theme.moduleEdgeRadius + 2
     property int overlay: 4
+    property int activeDragCount: 0
 
     anchors.topMargin: 4
     implicitHeight: Theme.moduleHeight - 4
@@ -378,8 +379,13 @@ ModuleButton {
                 target: dragArea.drag
                 function onActiveChanged() {
                     if (!workspaceBtn) return;
-                    if (dragArea.drag.active) workspaceBtn.activeDragCount++;
-                    else workspaceBtn.activeDragCount--;
+                    if (dragArea.drag.active) {
+                        workspaceBtn.activeDragCount++;
+                        root.activeDragCount++;
+                    } else {
+                        workspaceBtn.activeDragCount--;
+                        root.activeDragCount--;
+                    }
                 }
             }
         }

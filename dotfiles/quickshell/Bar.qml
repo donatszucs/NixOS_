@@ -47,6 +47,9 @@ PanelWindow {
         Region {
             item: bgMouseArea.enabled ? bgMouseArea : null
         }
+        Region {
+            item: dragRegionItem.visible ? dragRegionItem : null
+        }
         // Left modules interaction region
         Region {
             item: leftRow
@@ -111,6 +114,12 @@ PanelWindow {
             rbwMenu.closeMenu()
         }
         z: -1
+    }
+
+    Item {
+        id: dragRegionItem
+        anchors.fill: parent
+        visible: workspacesModule.activeDragCount > 0
     }
 
     // ── LEFT ─────────────────────────────────────────────────────────────
@@ -193,7 +202,7 @@ PanelWindow {
         anchors.top: parent.top
         screenName: modelData.name
 
-        layer.enabled: true
+        layer.enabled: activeDragCount === 0
         layer.effect: MultiEffect {
             shadowEnabled: true
             shadowColor: topPanel.moduleShadowColor
