@@ -55,10 +55,11 @@ ModuleButton {
             
             variant: "dark"
             
+            implicitHeight: Theme.moduleHeight - 10
+            
             Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-            Layout.topMargin: nowPlayingModule.expanded ? 15 : 0
+            Layout.topMargin: nowPlayingModule.expanded ? 15 : 5
             cursorShape: isPlaying ? Qt.PointingHandCursor : Qt.ArrowCursor
-
 
             Behavior on Layout.topMargin {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -68,6 +69,64 @@ ModuleButton {
             onClicked: focusNow()
 
             radius: Theme.moduleEdgeRadius - 5
+
+            Item {
+                id: titleBgClip
+                anchors.fill: parent
+                anchors.leftMargin: 5
+                anchors.rightMargin: 5
+                visible: !nowPlayingModule.expanded && currentPlayer && currentPlayer.trackArtUrl !== ""
+                
+                Item {
+                    id: pictureContainer
+                    anchors.fill: parent
+                    anchors.margins: 2
+                    
+                    Image {
+                        id: titleAlbumArt
+                        anchors.fill: parent
+                        fillMode: Image.PreserveAspectCrop
+                        source: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
+                        visible: false
+                    }
+                    
+                    MultiEffect {
+                        source: titleAlbumArt
+                        anchors.fill: titleAlbumArt
+                        maskEnabled: true
+                        maskSource: titleMaskItem
+                        visible: !expanded
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: titleBtn.radius - 2
+                        color: Qt.lighter(Theme.palette("dark").base, 1.7)
+                        opacity: 0.8
+                    }
+                    
+                    Item {
+                        id: titleMaskItem
+                        anchors.fill: parent
+                        visible: false
+                        layer.enabled: true
+                        
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: titleBtn.radius - 2
+                            color: "black"
+                        }
+                    }
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: titleBtn.radius
+                    color: "transparent"
+                    border.width: 2
+                    border.color: Theme.palette("light").border
+                }
+            }
 
             RowLayout {
                 id: topRow
@@ -96,6 +155,7 @@ ModuleButton {
                     font.pixelSize: textFont
                     font.bold: true
                     Layout.alignment: Qt.AlignVCenter
+                    Layout.leftMargin: 5
                 }
             }
         }
@@ -171,6 +231,7 @@ ModuleButton {
                     ModuleButton {
                         id: artHover
                         variant: "dark"
+                        implicitHeight: Theme.moduleHeight - 10
 
                         bottomRightRadius: Theme.moduleEdgeRadius -5
                         topRightRadius: Theme.moduleEdgeRadius -5
@@ -200,7 +261,7 @@ ModuleButton {
                         variant: "dark"
                         textFont: 18
                         
-                        implicitHeight: Theme.moduleHeight
+                        implicitHeight: Theme.moduleHeight - 10
                         implicitWidth: (nowPlayingModule.expanded && currentPlayer.canGoNext) ? Theme.moduleHeight : 0
 
                         label: "󰒭"
@@ -218,7 +279,7 @@ ModuleButton {
                         variant: "dark"
                         textFont: 18
                         
-                        implicitHeight: Theme.moduleHeight
+                        implicitHeight: Theme.moduleHeight - 10
                         implicitWidth: nowPlayingModule.expanded ? Theme.moduleHeight : 0
 
                         label: nowPlayingModule.playPauseIcon
