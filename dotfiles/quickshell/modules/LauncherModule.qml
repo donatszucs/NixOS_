@@ -205,7 +205,7 @@ ModuleButton {
                     label: "󰸉 Wallpaper"
                     cursorShape: Qt.PointingHandCursor
 
-                    radius: Theme.moduleEdgeRadius
+                    radius: Theme.moduleEdgeRadius - 5
                     border.width: 2
 
                     onClicked: {
@@ -221,7 +221,7 @@ ModuleButton {
                     label: "󰌆 Bitwarden"
                     cursorShape: Qt.PointingHandCursor
 
-                    radius: Theme.moduleEdgeRadius
+                    radius: Theme.moduleEdgeRadius - 5
                     border.width: 2
                     
                     onClicked: {
@@ -241,7 +241,7 @@ ModuleButton {
                     label: " Clipboard"
                     cursorShape: Qt.PointingHandCursor
 
-                    radius: Theme.moduleEdgeRadius
+                    radius: Theme.moduleEdgeRadius - 5
                     border.width: 2
 
                     onClicked: {

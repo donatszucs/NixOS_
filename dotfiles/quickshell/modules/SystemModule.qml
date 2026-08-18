@@ -277,7 +277,7 @@ ModuleButton {
 
     Process {
         id: rebuildProc
-        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config/nix_files && sudo nixos-rebuild switch --flake .#doni --impure; notify-send 'Rebuild finished'"]
+        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config/nix_files && sudo nixos-rebuild switch --flake .#doni --impure && nix run nixpkgs#nvd -- diff $(ls -d1v /nix/var/nix/profiles/system-*-link | tail -2); notify-send 'Rebuild finished'"]
     }
 
     Process {

@@ -17,6 +17,17 @@ PanelWindow {
 
     property color moduleShadowColor: Qt.rgba(0, 0, 0, 0.55)
 
+    Component {
+        id: panelShadowEffect
+        MultiEffect {
+            shadowEnabled: true
+            shadowColor: topPanel.moduleShadowColor
+            shadowBlur: 1.0
+            shadowVerticalOffset: 3
+            shadowHorizontalOffset: 0
+        }
+    }
+
     color: "transparent"
 
     // Cover the full screen so children can render below the bar strip
@@ -42,8 +53,22 @@ PanelWindow {
         }
     }
 
+    Rectangle {
+        id: screenDimmer
+        anchors.fill: parent
+        z: -2
+        color: "black"
+        property bool active: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded
+        opacity: active ? 0.2 : 0.0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+    }
+
     mask: Region {
         
+        Region {
+            item: screenDimmer.visible ? screenDimmer : null
+        }
         Region {
             item: bgMouseArea.enabled ? bgMouseArea : null
         }
@@ -86,6 +111,7 @@ PanelWindow {
     }
 
     BackgroundEffect.blurRegion: Region {
+        Region { item: screenDimmer.visible ? screenDimmer : null }
         Region { item: leftRow }
         Region { item: launcherModule }
         Region { item: rightRow }
@@ -132,13 +158,7 @@ PanelWindow {
         spacing: 0
 
         layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: topPanel.moduleShadowColor
-            shadowBlur: 1.0
-            shadowVerticalOffset: 3
-            shadowHorizontalOffset: 0
-        }
+        layer.effect: panelShadowEffect
 
         ModuleGap {
             id: leftCorner
@@ -190,13 +210,7 @@ PanelWindow {
         screenName: modelData.name
 
         layer.enabled: activeDragCount === 0
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: topPanel.moduleShadowColor
-            shadowBlur: 1.0
-            shadowVerticalOffset: 3
-            shadowHorizontalOffset: 0
-        }
+        layer.effect: panelShadowEffect
     }
 
     // ── RIGHT ────────────────────────────────────────────────────────────
@@ -209,13 +223,7 @@ PanelWindow {
         spacing: 0
 
         layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: topPanel.moduleShadowColor
-            shadowBlur: 1.0
-            shadowVerticalOffset: 3
-            shadowHorizontalOffset: 0
-        }
+        layer.effect: panelShadowEffect
 
         InverseRadius {
             Layout.alignment: Qt.AlignTop
@@ -306,13 +314,7 @@ PanelWindow {
         }
 
         layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: topPanel.moduleShadowColor
-            shadowBlur: 1.0
-            shadowVerticalOffset: 3
-            shadowHorizontalOffset: 0
-        }
+        layer.effect: panelShadowEffect
     }
 
     ClipboardHistory {
@@ -324,13 +326,7 @@ PanelWindow {
         }
 
         layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: topPanel.moduleShadowColor
-            shadowBlur: 1.0
-            shadowVerticalOffset: 3
-            shadowHorizontalOffset: 0
-        }
+        layer.effect: panelShadowEffect
     }
 
     RbwMenu {
@@ -342,13 +338,7 @@ PanelWindow {
         }
 
         layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: topPanel.moduleShadowColor
-            shadowBlur: 1.0
-            shadowVerticalOffset: 3
-            shadowHorizontalOffset: 0
-        }
+        layer.effect: panelShadowEffect
     }
 
     Item {
@@ -365,13 +355,7 @@ PanelWindow {
         }
 
         layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: topPanel.moduleShadowColor
-            shadowBlur: 1.0
-            shadowVerticalOffset: 3
-            shadowHorizontalOffset: 0
-        }
+        layer.effect: panelShadowEffect
     }
 
 
@@ -384,13 +368,7 @@ PanelWindow {
         }
 
         layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: topPanel.moduleShadowColor
-            shadowBlur: 1.0
-            shadowVerticalOffset: 3
-            shadowHorizontalOffset: 0
-        }
+        layer.effect: panelShadowEffect
     }
 
 
