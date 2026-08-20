@@ -23,7 +23,7 @@ PanelWindow {
             shadowEnabled: true
             shadowColor: topPanel.moduleShadowColor
             shadowBlur: 1.0
-            shadowVerticalOffset: 3
+            shadowVerticalOffset: 4
             shadowHorizontalOffset: 0
         }
     }
@@ -210,7 +210,37 @@ PanelWindow {
         screenName: modelData.name
 
         layer.enabled: activeDragCount === 0
-        layer.effect: panelShadowEffect
+        layer.effect: Component {
+            MultiEffect {
+                shadowEnabled: true
+                shadowHorizontalOffset: 0
+
+                property real shadowPulse: 1.0
+
+                SequentialAnimation on shadowPulse {
+                    loops: Animation.Infinite
+                    running: launcherModule.expanded
+                    
+                    NumberAnimation { 
+                        to: 0.3
+                        duration: 4000
+                        easing.type: Easing.InOutSine 
+                    }
+                    NumberAnimation { 
+                        to: 1.0
+                        duration: 2000
+                        easing.type: Easing.InOutSine 
+                    }
+                }
+
+                shadowBlur: launcherModule.expanded ? (0.5 + shadowPulse * 1.5) : 1.0
+                shadowVerticalOffset: launcherModule.expanded ? (2 + shadowPulse * 2) : 4
+
+                shadowColor: launcherModule.expanded 
+                    ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.8 * shadowPulse) 
+                    : moduleShadowColor
+            }
+        }
     }
 
     // ── RIGHT ────────────────────────────────────────────────────────────

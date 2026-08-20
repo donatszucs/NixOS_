@@ -82,6 +82,7 @@
     vscode
     antigravity-ide
     antigravity-cli
+    qbittorrent
     google-chrome
     inputs.zen-browser.packages."${builtins.currentSystem}".default
     inputs.playit-nixos-module.packages."${builtins.currentSystem}".playit
