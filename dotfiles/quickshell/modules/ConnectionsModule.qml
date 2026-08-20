@@ -152,27 +152,36 @@ ModuleButton {
             }
 
             Text {
-                visible: connectionsModule.expanded
                 text: "Connections"
                 color: Theme.textPrimary
                 font.family: Theme.font
                 font.pixelSize: Theme.fontSize
                 font.bold: true
                 anchors.centerIn: parent
+                
+                opacity: connectionsModule.expanded ? 1.0 : 0.0
+                visible: opacity > 0
+                Behavior on opacity { 
+                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
+                }
             }
 
-            Item {
-                visible: !connectionsModule.expanded
+            Row {
                 id: labelRow
-                anchors.fill: parent
+                anchors.centerIn: parent
+                spacing: 12
+                
+                opacity: connectionsModule.expanded ? 0.0 : 1.0
+                visible: opacity > 0
+                Behavior on opacity { 
+                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
+                }
 
                 Text {
                     text: connectionsModule.netIcon
                     color: connectionsModule.netColor
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize + 1
-                    anchors.left: parent.left
-                    anchors.leftMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
                 }
                 Text {
@@ -180,8 +189,6 @@ ModuleButton {
                     color: connectionsModule.btColor
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize + 1
-                    anchors.right: parent.right
-                    anchors.rightMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
