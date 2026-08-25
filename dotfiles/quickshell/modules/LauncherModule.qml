@@ -18,6 +18,10 @@ ModuleButton {
     property int activeDragCount: (activeWorkspaces ? activeWorkspaces.activeDragCount : 0) + (otherWorkspaces ? otherWorkspaces.activeDragCount : 0)
     clip: activeDragCount === 0
 
+    signal toggleWallpaperPicker()
+    signal toggleBitwardenMenu()
+    signal toggleClipboardHistory()
+
     property int  panelWidth:  400
     property int  maxVisible:  5
     property int  padding:    10
@@ -210,7 +214,7 @@ ModuleButton {
 
                     onClicked: {
                         launcherModule.expanded = false;
-                        wallpaperPicker.expanded = !wallpaperPicker.expanded;
+                        launcherModule.toggleWallpaperPicker();
                     }
                 }
             
@@ -226,11 +230,7 @@ ModuleButton {
                     
                     onClicked: {
                         launcherModule.expanded = false;
-                        if (rbwMenu.expanded) {
-                            rbwMenu.closeMenu();
-                        } else {
-                            rbwMenu.openMenu();
-                        }
+                        launcherModule.toggleBitwardenMenu();
                     }
                 }
 
@@ -246,11 +246,7 @@ ModuleButton {
 
                     onClicked: {
                         launcherModule.expanded = false;
-                        if (clipboardHistory.expanded) {
-                            clipboardHistory.closeMenu();
-                        } else {
-                            clipboardHistory.openMenu();
-                        }
+                        launcherModule.toggleClipboardHistory();
                     }
                 }
 

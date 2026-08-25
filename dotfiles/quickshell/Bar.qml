@@ -209,6 +209,22 @@ PanelWindow {
         anchors.top: parent.top
         screenName: modelData.name
 
+        onToggleWallpaperPicker: wallpaperPicker.expanded = !wallpaperPicker.expanded
+        onToggleBitwardenMenu: {
+            if (rbwMenu.expanded) {
+                rbwMenu.closeMenu();
+            } else {
+                rbwMenu.openMenu();
+            }
+        }
+        onToggleClipboardHistory: {
+            if (clipboardHistory.expanded) {
+                clipboardHistory.closeMenu();
+            } else {
+                clipboardHistory.openMenu();
+            }
+        }
+
         layer.enabled: activeDragCount === 0
         layer.effect: Component {
             MultiEffect {
