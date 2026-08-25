@@ -74,6 +74,7 @@
     playerctl # Media key support for various apps
 
     # -- Essential Tools --
+    nodejs # Node.js runtime
     glib # Provides gsettings for GTK themes
     kitty # Terminal (default for Hyprland, needed to start debugging)
     brightnessctl # Screen brightness control

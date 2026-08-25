@@ -53,6 +53,7 @@ ModuleButton {
         "&current=temperature_2m,weather_code,is_day" +
         "&hourly=temperature_2m,weather_code,is_day" +
         "&daily=weather_code,temperature_2m_max,temperature_2m_min" +
+        "&forecast_days=10" +
         "&timezone=Europe%2FBudapest"
 
     function fetchWeather() {
@@ -90,7 +91,7 @@ ModuleButton {
                             break
                         }
                     }
-                    for (var j = 0; j < 5; j++) {
+                    for (var j = 0; j < 13; j++) {
                         var idx = startIndex + j
                         if (idx < h.time.length) {
                             var t = new Date(h.time[idx])
@@ -109,11 +110,14 @@ ModuleButton {
                     var d = data.daily
                     var dData = []
                     var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+                    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
                     for (var k = 0; k < d.time.length; k++) {
                         var date = new Date(d.time[k])
                         var dayName = (k === 0) ? "Today" : days[date.getDay()]
+                        var dateStr = date.getDate() + " " + months[date.getMonth()]
                         dData.push({
                             day: dayName,
+                            date: dateStr,
                             icon: root.wmoIcon(d.weather_code[k], true),
                             maxTemp: Math.round(d.temperature_2m_max[k]),
                             minTemp: Math.round(d.temperature_2m_min[k])
@@ -301,7 +305,7 @@ ModuleButton {
 
         MouseArea {
             visible: root.expanded
-            Layout.preferredWidth: 350
+            Layout.preferredWidth: 440
             Layout.preferredHeight: popupCol.implicitHeight
             Layout.leftMargin: 10
             Layout.rightMargin: 10
@@ -311,7 +315,7 @@ ModuleButton {
             ColumnLayout {
                 id: popupCol
                 width: parent.width
-                spacing: 15
+                spacing: 10
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -333,42 +337,193 @@ ModuleButton {
                     }
                 }
 
-                RowLayout {
+                ModuleButton {
+                    color: Qt.rgba(1, 1, 1, 0.04)
+                    radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
-                    spacing: 10
-                    Repeater {
-                        model: root.hourlyForecast
-                        delegate: ModuleButton {
-                            variant: "light"
-                            radius: Theme.moduleEdgeRadius / 2
-                            Layout.fillWidth: true
-                            implicitHeight: hourlyCol.implicitHeight + 20
-                            
-                            ColumnLayout {
-                                id: hourlyCol
-                                anchors.centerIn: parent
-                                spacing: 5
+                    implicitHeight: 200
+
+                    Text {
+                        id: hourlyTitle
+                        text: "Hourly"
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: true
+                        anchors.top: parent.top
+                        anchors.topMargin: 10
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    Item {
+                        id: graphContainer
+                        anchors.top: hourlyTitle.bottom
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+                        anchors.topMargin: 10
+                        anchors.bottomMargin: 25
+
+                        property var model: root.hourlyForecast
+                        property real minTemp: 0
+                        property real maxTemp: 0
+
+                        onModelChanged: {
+                            if (!model || model.length === 0) return;
+                            var mn = model[0].temp;
+                            var mx = model[0].temp;
+                            for (var i = 1; i < model.length; i++) {
+                                if (model[i].temp < mn) mn = model[i].temp;
+                                if (model[i].temp > mx) mx = model[i].temp;
+                            }
+                            if (mn === mx) { mn -= 1; mx += 1; }
+                            minTemp = mn;
+                            maxTemp = mx;
+                            if (graphCanvas.available) graphCanvas.requestPaint();
+                        }
+
+                        Canvas {
+                            id: graphCanvas
+                            anchors.fill: parent
+                            property bool available: true
+
+                            onWidthChanged: requestPaint()
+                            onHeightChanged: requestPaint()
+
+                            property real sidePadding: 20
+                            property real topPadding: 45
+                            property real bottomPadding: 20
+                            property real graphWidth: Math.max(10, width - 2 * sidePadding)
+                            property real graphHeight: Math.max(10, height - topPadding - bottomPadding)
+
+                            onPaint: {
+                                var ctx = getContext("2d");
+                                ctx.clearRect(0, 0, width, height);
+
+                                var m = graphContainer.model;
+                                if (!m || m.length === 0) return;
+
+                                var tempRange = graphContainer.maxTemp - graphContainer.minTemp;
+                                if (tempRange === 0) tempRange = 1;
+                                var stepX = graphWidth / (m.length - 1);
+
+                                function getPt(idx) {
+                                    if (idx < 0) idx = 0;
+                                    if (idx >= m.length) idx = m.length - 1;
+                                    return {
+                                        x: sidePadding + idx * stepX,
+                                        y: topPadding + graphHeight - ((m[idx].temp - graphContainer.minTemp) / tempRange) * graphHeight
+                                    };
+                                }
+
+                                function drawSpline() {
+                                    var p0 = getPt(0);
+                                    ctx.moveTo(p0.x, p0.y);
+                                    for (var i = 0; i < m.length - 1; i++) {
+                                        var pm1 = getPt(i - 1);
+                                        var pi = getPt(i);
+                                        var pp1 = getPt(i + 1);
+                                        var pp2 = getPt(i + 2);
+                                        
+                                        // tx controls horizontal stretching (0.25 is similar to the old stepX / 2)
+                                        // ty controls vertical swooping (0 is flat plateaus, 0.25 is full swooping splines)
+                                        var tx = 0.25;
+                                        var ty = 0.15;
+                                        ctx.bezierCurveTo(
+                                            pi.x + (pp1.x - pm1.x) * tx, pi.y + (pp1.y - pm1.y) * ty,
+                                            pp1.x - (pp2.x - pi.x) * tx, pp1.y - (pp2.y - pi.y) * ty,
+                                            pp1.x, pp1.y
+                                        );
+                                    }
+                                }
+
+                                // Draw filled area
+                                ctx.beginPath();
+                                drawSpline();
+                                ctx.lineTo(sidePadding + graphWidth, height - bottomPadding + 15);
+                                ctx.lineTo(sidePadding, height - bottomPadding + 15);
+                                ctx.closePath();
+
+                                var gradient = ctx.createLinearGradient(0, 0, 0, height);
+                                gradient.addColorStop(0, Theme.textPrimary.toString());
+                                gradient.addColorStop(1, "transparent");
+                                ctx.fillStyle = gradient;
+                                ctx.globalAlpha = 0.15;
+                                ctx.fill();
+                                ctx.globalAlpha = 1.0;
+
+                                // Draw line
+                                ctx.beginPath();
+                                drawSpline();
+                                ctx.strokeStyle = Theme.textPrimary.toString();
+                                ctx.lineWidth = 2.5;
+                                ctx.stroke();
+
+                                // Draw dots
+                                ctx.fillStyle = Theme.textPrimary.toString();
+                                for (var i = 0; i < m.length; i++) {
+                                    var pt = getPt(i);
+                                    ctx.beginPath();
+                                    ctx.arc(pt.x, pt.y, 3.5, 0, 2 * Math.PI);
+                                    ctx.fill();
+                                }
+                            }
+                        }
+
+                        Repeater {
+                            model: graphContainer.model
+                            delegate: Item {
+                                x: graphCanvas.sidePadding + index * (graphCanvas.graphWidth / Math.max(1, graphContainer.model.length - 1))
+                                y: 0
+                                width: 0
+                                height: graphContainer.height
+
+                                Column {
+                                    anchors.bottom: dotPoint.top
+                                    anchors.bottomMargin: 6
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    spacing: 4
+                                    Text {
+                                        text: modelData.icon
+                                        color: Theme.textPrimary
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize + 2
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        visible: index % 2 === 0
+                                    }
+                                    Text {
+                                        text: modelData.temp + "°"
+                                        color: Theme.textPrimary
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize - 1
+                                        font.bold: true
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        visible: index % 2 === 0
+                                    }
+                                }
+
+                                Item {
+                                    id: dotPoint
+                                    y: {
+                                        var tempRange = graphContainer.maxTemp - graphContainer.minTemp;
+                                        if (tempRange === 0) tempRange = 1;
+                                        return graphCanvas.topPadding + graphCanvas.graphHeight - ((modelData.temp - graphContainer.minTemp) / tempRange) * graphCanvas.graphHeight;
+                                    }
+                                    width: 1
+                                    height: 1
+                                }
+
                                 Text {
                                     text: modelData.time
-                                    color: Theme.textDark
+                                    color: Theme.textPrimary
                                     font.family: Theme.font
                                     font.pixelSize: Theme.fontSize - 2
-                                    Layout.alignment: Qt.AlignHCenter
-                                }
-                                Text {
-                                    text: modelData.icon
-                                    color: Theme.textDark
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize + 4
-                                    Layout.alignment: Qt.AlignHCenter
-                                }
-                                Text {
-                                    text: modelData.temp + "°"
-                                    color: Theme.textDark
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize
-                                    font.bold: true
-                                    Layout.alignment: Qt.AlignHCenter
+                                    anchors.bottom: parent.bottom
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    opacity: 0.6
+                                    visible: index % 2 === 0
                                 }
                             }
                         }
@@ -376,73 +531,153 @@ ModuleButton {
                 }
 
                 Rectangle {
+                    color: Qt.rgba(1, 1, 1, 0.04)
+                    radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 1
-                    color: Theme.textPrimary
-                    opacity: 0.1
-                }
+                    implicitHeight: 200
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 5
-                    Repeater {
+                    Text {
+                        id: dailyTitle
+                        text: "10-Day"
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: true
+                        anchors.top: parent.top
+                        anchors.topMargin: 10
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    ListView {
+                        id: carousel
+                        anchors.top: dailyTitle.bottom
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.topMargin: 5
+                        anchors.bottomMargin: 10
                         model: root.dailyForecast
-                        delegate: ModuleButton {
-                            variant: "light"
-                            radius: Theme.moduleEdgeRadius / 2 + 10
-                            Layout.fillWidth: true
-                            implicitHeight: dayRow.implicitHeight + 16
-                            
-                            RowLayout {
-                                id: dayRow
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.leftMargin: 15
-                                anchors.rightMargin: 15
-                                spacing: 15
-                                
-                                Text {
-                                    text: modelData.day
-                                    color: Theme.textDark
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize
-                                    font.bold: modelData.day === "Today"
-                                    Layout.preferredWidth: 60
-                                }
-                                Text {
-                                    text: modelData.icon
-                                    color: Theme.textDark
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize + 4
-                                    Layout.alignment: Qt.AlignHCenter
-                                }
-                                Item { Layout.fillWidth: true }
-                                Text {
-                                    text: modelData.minTemp + "°"
-                                    color: Theme.textDark
-                                    opacity: 0.6
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize
-                                }
-                                Rectangle {
-                                    Layout.preferredWidth: 30
-                                    Layout.preferredHeight: 4
-                                    radius: 2
-                                    color: Theme.textDark
-                                    opacity: 0.2
-                                }
-                                Text {
-                                    text: modelData.maxTemp + "°"
-                                    color: Theme.textDark
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize
-                                    font.bold: true
-                                    horizontalAlignment: Text.AlignRight
-                                    Layout.preferredWidth: 30
-                                }
+                        orientation: ListView.Horizontal
+                    
+                    // Center the selected item without wrapping
+                    preferredHighlightBegin: carousel.width / 2 - 37.5
+                    preferredHighlightEnd: carousel.width / 2 + 37.5
+                    highlightRangeMode: ListView.StrictlyEnforceRange
+                    snapMode: ListView.SnapToItem
+                    
+                    spacing: 15
+                    
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.NoButton
+                        onWheel: (wheel) => {
+                            if (wheel.angleDelta.y > 0 || wheel.angleDelta.x > 0) {
+                                carousel.decrementCurrentIndex()
+                            } else {
+                                carousel.incrementCurrentIndex()
                             }
                         }
+                    }
+                    
+                    delegate: Item {
+                        id: delegateRoot
+                        width: 75
+                        height: 160
+                        
+                        property real itemCenter: x + width / 2
+                        property real viewCenter: carousel.contentX + carousel.width / 2
+                        property real centerDist: itemCenter - viewCenter
+                        
+                        // Create a deadzone so 3 cards stay in full focus (centers are at 0, 90, -90)
+                        property real absCenterDist: Math.abs(centerDist)
+                        property real outOfFocusDist: Math.max(0, absCenterDist - 95)
+                        
+                        property real absDist: Math.min(1.0, outOfFocusDist / 100)
+                        property real effectiveNormDist: (centerDist < 0 ? -1 : 1) * absDist
+                        
+                        z: 100 - absDist * 100
+                        
+                        Item {
+                            width: 75
+                            height: 110
+                            anchors.centerIn: parent
+                            
+                            // 1.1 base scale for focus zone, plus an extra 0.1 bump for the true center card
+                            scale: 1.1 - 0.4 * delegateRoot.absDist + Math.max(0, 1.0 - delegateRoot.absCenterDist / 90) * 0.1
+                            
+                            transform: Translate {
+                                x: -Math.pow(delegateRoot.effectiveNormDist, 3) * 55
+                            }
+                            
+                            ModuleButton {
+                                anchors.fill: parent
+                                color: Theme.palettePaper
+                                radius: Theme.moduleEdgeRadius / 2
+                                
+                                ColumnLayout {
+                                    id: dailyCol
+                                    anchors.centerIn: parent
+                                    spacing: 2
+                                    
+                                    Text {
+                                        text: modelData.day
+                                        color: Theme.textDark
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize - 2
+                                        font.bold: modelData.day === "Today" || carousel.currentIndex === index
+                                        Layout.alignment: Qt.AlignHCenter
+                                    }
+                                    Text {
+                                        text: modelData.date
+                                        color: Theme.textDark
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize - 4
+                                        opacity: 0.7
+                                        Layout.alignment: Qt.AlignHCenter
+                                    }
+                                    Item { Layout.preferredHeight: 3 }
+                                    Text {
+                                        text: modelData.icon
+                                        color: Theme.textDark
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize + 4
+                                        Layout.alignment: Qt.AlignHCenter
+                                    }
+                                    Text {
+                                        text: modelData.maxTemp + "°"
+                                        color: Theme.textDark
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize
+                                        font.bold: true
+                                        Layout.alignment: Qt.AlignHCenter
+                                    }
+                                    Text {
+                                        text: modelData.minTemp + "°"
+                                        color: Theme.textDark
+                                        opacity: 0.6
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize - 2
+                                        Layout.alignment: Qt.AlignHCenter
+                                    }
+                                }
+                                
+                                // Darkening shadow for distant cards
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: Theme.moduleEdgeRadius / 2
+                                    color: "black"
+                                    opacity: 0.6 * delegateRoot.absDist
+                                }
+                            }
+                        
+                        }
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            preventStealing: false
+                            onClicked: carousel.currentIndex = index
+                        }
+                    }
                     }
                 }
             }

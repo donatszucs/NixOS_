@@ -273,9 +273,11 @@ ModuleButton {
                 }
                 
                 var entries = DesktopEntries.applications.values
+                var appLower = appId.toLowerCase();
+                if (appLower.indexOf("minecraft") >= 0) return Quickshell.iconPath("minecraft");
+
                 for (var i = 0; i < entries.length; i++) {
                     var entryId = entries[i].id.toLowerCase();
-                    var appLower = appId.toLowerCase();
                     if (entryId === appLower || entryId === appLower + ".desktop" || entryId.indexOf(appLower) >= 0)
                         return Quickshell.iconPath(entries[i].icon !== "" ? entries[i].icon : appId)
                 }
@@ -289,6 +291,7 @@ ModuleButton {
                     var titleLower = modelData.title.toLowerCase();
                     
                     if (titleLower.indexOf("teams") >= 0) return Quickshell.iconPath("teams-for-linux");
+                    if (titleLower.indexOf("minecraft") >= 0) return Quickshell.iconPath("minecraft");
 
                     for (var k = 0; k < entries.length; k++) {
                         var entryName = entries[k].name.toLowerCase();
