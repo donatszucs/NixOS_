@@ -8,3 +8,4 @@ dotfiles/hypr/temps/*
 scripts/HyprHeadset/hyperx_hex_dump.txt
 scripts/HyprHeadset/hyprx.pcapng
 .gitignore
+AUDIT2.md

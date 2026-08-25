@@ -58,7 +58,7 @@
     powerManagement.finegrained = false;
 
     # Ensure you are using the latest driver
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    package = config.boot.kernelPackages.nvidiaPackages.latest;
   };
 
   # Enable sound with pipewire.

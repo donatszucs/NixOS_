@@ -480,7 +480,7 @@ ModuleButton {
                         ModuleButton {
                             id: toggleUnpairedBtn
                             variant: "light"
-                            visible: connectionsModule.btPowered && btDeviceRepeater.count > 0
+                            visible: connectionsModule.btPowered && pairedDeviceRepeater.count > 0
                             label: connectionsModule.showUnpairedDevices ? " Hide Unpaired" : " Show Unpaired"
                             implicitHeight: 25
                             textFont: Theme.fontSize * 0.8
@@ -492,18 +492,18 @@ ModuleButton {
                         }
 
                         Repeater {
-                            id: btDeviceRepeater
-                            model: connectionsModule.btDevices ? connectionsModule.btDevices : []
+                            id: pairedDeviceRepeater
+                            model: connectionsModule.btPowered && connectionsModule.btDevices ? connectionsModule.btDevices : []
                             delegate: ModuleButton {
-                                id: btDeviceBtn
+                                id: pairedDeviceBtn
                                 required property var modelData
                                 
-                                visible: connectionsModule.showUnpairedDevices || modelData.paired
+                                visible: modelData.paired
                                 
                                 Layout.fillWidth: true
-                                implicitHeight: btDeviceRow.implicitHeight + 10
+                                implicitHeight: pairedDeviceRow.implicitHeight + 10
                                 radius: Theme.moduleEdgeRadius / 2
-                                opacity: modelData.paired ? 1.0 : 0.6
+                                opacity: 1.0
                                 cursorShape: Qt.PointingHandCursor
 
                                 onClicked: {
@@ -515,7 +515,7 @@ ModuleButton {
                                 }
 
                                 RowLayout {
-                                    id: btDeviceRow
+                                    id: pairedDeviceRow
                                     anchors {
                                         left: parent.left
                                         right: parent.right
@@ -525,7 +525,7 @@ ModuleButton {
                                     spacing: 10
 
                                     Text {
-                                        text: modelData.connected ? "󰂱" : (modelData.paired ? "󰂯" : "󰂲")
+                                        text: modelData.connected ? "󰂱" : "󰂯"
                                         color: modelData.connected ? Theme.statusBlue : Theme.textPrimary
                                         font.family: Theme.font
                                         font.pixelSize: Theme.fontSize
@@ -534,12 +534,73 @@ ModuleButton {
 
                                     HoverMarqueeText {
                                         text: modelData.name || "Unknown Device"
-                                        textMaxWidth: modelData.batteryAvailable ? connectionsModule.textMaxWidth - deviceBatteryBtn.implicitWidth - 40 : connectionsModule.textMaxWidth - 20
+                                        textMaxWidth: modelData.batteryAvailable ? connectionsModule.textMaxWidth - pairedDeviceBatteryBtn.implicitWidth - 40 : connectionsModule.textMaxWidth - 20
                                         Layout.fillWidth: true
                                     }
 
                                     ModuleButton {
-                                        id: deviceBatteryBtn
+                                        id: pairedDeviceBatteryBtn
+                                        variant: "light"
+                                        visible: modelData.batteryAvailable
+                                        label: Math.round(modelData.battery * 100) + "%"
+                                        radius: Theme.moduleEdgeRadius / 2
+                                        implicitHeight: Theme.fontSize + 10
+                                        implicitWidth: label.length * (Theme.fontSize * 0.6) + 10
+                                        color: modelData.battery > 0.2 ? Theme.statusGreen : Theme.statusRed
+                                    }
+                                }
+                            }
+                        }
+
+                        Repeater {
+                            id: unpairedDeviceRepeater
+                            model: connectionsModule.btPowered && connectionsModule.btDevices ? connectionsModule.btDevices : []
+                            delegate: ModuleButton {
+                                id: unpairedDeviceBtn
+                                required property var modelData
+                                
+                                visible: connectionsModule.showUnpairedDevices && !modelData.paired
+                                
+                                Layout.fillWidth: true
+                                implicitHeight: unpairedDeviceRow.implicitHeight + 10
+                                radius: Theme.moduleEdgeRadius / 2
+                                opacity: 0.6
+                                cursorShape: Qt.PointingHandCursor
+
+                                onClicked: {
+                                    if (modelData.connected) {
+                                        modelData.connected = false;
+                                    } else {
+                                        modelData.connected = true;
+                                    }
+                                }
+
+                                RowLayout {
+                                    id: unpairedDeviceRow
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        top: parent.top
+                                        margins: 5
+                                    }
+                                    spacing: 10
+
+                                    Text {
+                                        text: modelData.connected ? "󰂱" : "󰂲"
+                                        color: modelData.connected ? Theme.statusBlue : Theme.textPrimary
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize
+                                        Layout.leftMargin: 5
+                                    }
+
+                                    HoverMarqueeText {
+                                        text: modelData.name || "Unknown Device"
+                                        textMaxWidth: modelData.batteryAvailable ? connectionsModule.textMaxWidth - unpairedDeviceBatteryBtn.implicitWidth - 40 : connectionsModule.textMaxWidth - 20
+                                        Layout.fillWidth: true
+                                    }
+
+                                    ModuleButton {
+                                        id: unpairedDeviceBatteryBtn
                                         variant: "light"
                                         visible: modelData.batteryAvailable
                                         label: Math.round(modelData.battery * 100) + "%"
@@ -553,12 +614,13 @@ ModuleButton {
                         }
 
                         Text {
-                            visible: !connectionsModule.btPowered || btDeviceRepeater.count === 0
+                            visible: !connectionsModule.btPowered || pairedDeviceRepeater.count === 0
                             text: connectionsModule.btPowered ? "No devices" : "disabled"
-                            color: Theme.textPrimary
+                            color: !connectionsModule.btPowered ? Theme.statusDisabled : Theme.textPrimary
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize
-                            font.bold: true
+                            font.bold: connectionsModule.btPowered
+                            font.italic: !connectionsModule.btPowered
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignLeft
                         }

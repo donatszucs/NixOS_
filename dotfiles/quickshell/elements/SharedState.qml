@@ -134,4 +134,17 @@ Item {
             Quickshell.execDetached(["pw-play", "--volume", root.notifVolume, "/home/doni/nixos-config/misc/ping.ogg"])
         }
     }
+
+    property alias trackedNotifications: server.trackedNotifications
+
+    Notif.NotificationServer {
+        id: server
+        keepOnReload: false
+        actionsSupported: true
+        inlineReplySupported: true
+        onNotification: notification => {
+            notification.tracked = true
+            root.playNotificationSound()
+        }
+    }
 }

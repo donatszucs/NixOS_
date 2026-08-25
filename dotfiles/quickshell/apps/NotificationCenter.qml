@@ -23,18 +23,7 @@ Item {
     implicitWidth:  notifGrid.implicitWidth
     implicitHeight: notifGrid.implicitHeight
 
-    // ── DBus notification server ─────────────────────
-    Notif.NotificationServer {
-        id: server
-        keepOnReload: false
-        actionsSupported: true
-        inlineReplySupported: true
-        onNotification: notification => {
-            notification.tracked = true
 
-            SharedState.playNotificationSound()
-        }
-    }
 
     // ── Notification stack ───────────────────────────────────────────────
     GridLayout {
@@ -231,7 +220,7 @@ Item {
                     
                     Repeater {
                         id: notificationRepeater
-                        model: server.trackedNotifications
+                        model: SharedState.trackedNotifications
                         delegate: NotificationToast {
                             id: toast
                             required property var modelData
