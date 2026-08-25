@@ -7,8 +7,8 @@ VENV="$SCRIPT_DIR/../scriptsEnv/.venv/bin/python"
 HIDAPI_SYSTEM="/run/current-system/sw/lib"
 HIDAPI_LIB="$HIDAPI_SYSTEM"
 
-if [[ -z "$HIDAPI_LIB" ]]; then
-    echo "Error: libhidapi not found." >&2
+if ! ls "$HIDAPI_LIB"/libhidapi-hidraw.so* 1> /dev/null 2>&1; then
+    echo "Error: libhidapi not found in $HIDAPI_LIB" >&2
     exit 1
 fi
 

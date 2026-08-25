@@ -21,12 +21,12 @@ for folder in "$DOTFILES_DIR"/*/; do
     target_conf="$CONFIG_DIR/$target"
     target_dot="$DOTFILES_DIR/$target"
 
-    # Check if it's a link AND if the target actually exists
+    # Check if it's a link AND if it points to the correct target
     if [ -L "$target_conf" ]; then
-        if [ -e "$target_conf" ]; then
-            echo "✅ $target is already linked and valid."
+        if [ "$(realpath "$target_conf" 2>/dev/null)" = "$(realpath "$target_dot" 2>/dev/null)" ]; then
+            echo "✅ $target is already linked correctly."
         else
-            echo "❌ $target link is BROKEN. Repairing..."
+            echo "❌ $target link is BROKEN or INCORRECT. Repairing..."
             rm "$target_conf"
             ln -s "$target_dot" "$target_conf"
         fi

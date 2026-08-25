@@ -17,7 +17,8 @@ for MON in $MONITORS; do
     LINK="$TEMPS_DIR/wallpaper_$MON"
     
     # Create a placeholder symlink if it doesn't exist
-    if [ ! -L "$LINK" ]; then
+    if [ ! -e "$LINK" ]; then
+        rm -f "$LINK"
         ln -s "$DEFAULT" "$LINK"
     fi
 
