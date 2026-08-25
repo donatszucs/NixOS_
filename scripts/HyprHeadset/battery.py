@@ -49,7 +49,8 @@ def send_command(h: hid.Device, command: int, value: int | None = None) -> list[
     deadline = time.monotonic() + (READ_TIMEOUT_MS / 1000.0)
     last_hdr = None
     while time.monotonic() < deadline:
-        response = h.read(READ_PACKET_SIZE + 1, int((deadline - time.monotonic()) * 1000))
+        timeout = max(0, int((deadline - time.monotonic()) * 1000))
+        response = h.read(READ_PACKET_SIZE + 1, timeout)
         if not response:
             # try again until deadline
             continue

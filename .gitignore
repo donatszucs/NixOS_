@@ -7,5 +7,6 @@ dotfiles/hypr/temps/*
 .github/copilot-instructions.md
 scripts/HyprHeadset/hyperx_hex_dump.txt
 scripts/HyprHeadset/hyprx.pcapng
+scripts/scriptsEnv/.venv
 .gitignore
 AUDIT2.md
