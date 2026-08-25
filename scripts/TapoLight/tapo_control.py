@@ -11,25 +11,41 @@ IP = os.getenv("TAPO_IP")
 EMAIL = os.getenv("TAPO_EMAIL")
 PASSWORD = os.getenv("TAPO_PASSWORD")
 
+async def get_device():
+    if not EMAIL or not PASSWORD or not IP:
+        raise Exception("Missing credentials")
+    client = ApiClient(EMAIL, PASSWORD)
+    return await client.l530(IP)
+
 async def main():
     if len(sys.argv) < 2: return
     
-    client = ApiClient(EMAIL, PASSWORD)
-    device = await client.l530(IP)
     cmd = sys.argv[1]
 
-    if cmd == "on": await device.on()
-    elif cmd == "off": await device.off()
+    if cmd == "on":
+        try:
+            device = await get_device()
+            await device.on()
+        except Exception:
+            pass
+    elif cmd == "off":
+        try:
+            device = await get_device()
+            await device.off()
+        except Exception:
+            pass
     elif cmd == "set":
         # Safeguard: Ensure sys.argv[2] exists and is not empty
         if len(sys.argv) > 2 and sys.argv[2].strip():
             try:
                 val = int(sys.argv[2])
+                device = await get_device()
                 await device.set_brightness(val)
-            except ValueError:
-                pass # Ignore bad input
+            except Exception:
+                pass # Ignore bad input or connection error
     elif cmd == "brightness":
         try:
+            device = await get_device()
             info = await device.get_device_info()
             print(f"{info.brightness}")
         except Exception:
@@ -39,23 +55,27 @@ async def main():
             try:
                 h = int(sys.argv[2])
                 s = int(sys.argv[3])
+                device = await get_device()
                 await device.set_hue_saturation(h, s)
-            except ValueError:
+            except Exception:
                 pass
     elif cmd == "get_color":
         try:
+            device = await get_device()
             info = await device.get_device_info()
             print(f"{info.hue},{info.saturation}")
         except Exception:
             print("30,0")
     elif cmd == "state":
         try:
+            device = await get_device()
             info = await device.get_device_info()
             print(f"{'ON' if info.device_on else 'OFF'},{info.brightness},{info.hue},{info.saturation}")
         except Exception:
             print("OFF,0,30,0") # Fallback if device is unreachable
     elif cmd == "status":
         try:
+            device = await get_device()
             info = await device.get_device_info()
             print(f"{'ON' if info.device_on else 'OFF'}")
         except Exception:

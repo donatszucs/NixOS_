@@ -6,25 +6,14 @@ if [ -z "$1" ] || [ ! -d "$1" ]; then
     exit 1
 fi
 
-# Search for the files, routing permission errors to /dev/null so they don't print
-LOGOS=$(find "$1" -type f -name "logo.png" 2>/dev/null)
-HEADERS=$(find "$1" -type f -name "header.jpg" 2>/dev/null)
+# Search for the first matching file, routing permission errors to /dev/null
+LOGO=$(find "$1" -type f -name "logo.png" -print -quit 2>/dev/null)
+HEADER=$(find "$1" -type f -name "header.jpg" -print -quit 2>/dev/null)
 
-FOUND_ANY=0
-
-# Print logo.png paths first if found
-if [ -n "$LOGOS" ]; then
-    echo "file://$LOGOS"
-    FOUND_ANY=1
-fi
-
-# Print header.jpg paths next if found
-if [ -n "$HEADERS" ]; then
-    echo "file://$HEADERS"
-    FOUND_ANY=1
-fi
-
-# If nothing was found, output ERROR
-if [ "$FOUND_ANY" -eq 0 ]; then
+if [ -n "$LOGO" ]; then
+    echo "file://$LOGO"
+elif [ -n "$HEADER" ]; then
+    echo "file://$HEADER"
+else
     echo "image://icon/steam"
 fi

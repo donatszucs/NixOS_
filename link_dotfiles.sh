@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Define paths (Change these if your dotfiles folder name is different)
-DOTFILES_DIR="$(pwd)/dotfiles"
+DOTFILES_DIR="$(dirname "$(realpath "$0")")/dotfiles"
 CONFIG_DIR="$HOME/.config"
 
 # Ensure the dotfiles destination directory exists
