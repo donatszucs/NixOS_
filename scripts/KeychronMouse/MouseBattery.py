@@ -46,7 +46,7 @@ def main():
                         print(f"Captured Push Update: {battery}%")
                 time.sleep(10) # Low CPU usage polling loop
                 
-        except OSError:
+        except (OSError, hid.HIDException):
             # Mouse went to sleep or unplugged, close handles and restart loop
             for h in handles:
                 h.close()

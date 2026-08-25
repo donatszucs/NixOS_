@@ -12,6 +12,8 @@
   # Flatpak support
   services.flatpak.enable = true;
 
+  programs.hyprlock.enable = true;
+
   programs.nix-ld.enable = true;
 
   programs.direnv.enable = true;
@@ -84,8 +86,8 @@
     antigravity-cli
     qbittorrent
     google-chrome
-    inputs.zen-browser.packages."${builtins.currentSystem}".default
-    inputs.playit-nixos-module.packages."${builtins.currentSystem}".playit
+    inputs.zen-browser.packages."${pkgs.stdenv.hostPlatform.system}".default
+    inputs.playit-nixos-module.packages."${pkgs.stdenv.hostPlatform.system}".playit
     spotify
     pkgs.vesktop
     discord
@@ -110,7 +112,6 @@
 
     # -- Wallpapers & Screen Locking --
     hyprpaper # Wallpaper utility
-    hyprlock # Screen locker
 
     # -- File Management --
     pkgs.thunar # File manager

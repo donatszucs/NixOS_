@@ -282,6 +282,6 @@ ModuleButton {
 
     Process {
         id: updateProc
-        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config/nix_files && sudo nix flake update; notify-send 'Flake update finished'"]
+        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config/nix_files && nix flake update; notify-send 'Flake update finished'"]
     }
 }
