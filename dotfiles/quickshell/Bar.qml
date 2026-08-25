@@ -172,6 +172,9 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
+
+            leftColor: weatherModule.color
+            leftExpanded: weatherModule.expanded
         }
         WeatherModule {
             Layout.alignment: Qt.AlignTop
@@ -179,6 +182,9 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
+
+            rightColor: weatherModule.color
+            rightExpanded: weatherModule.expanded
 
             leftColor: nowPlayingModule.color
             leftExpanded: nowPlayingModule.expanded

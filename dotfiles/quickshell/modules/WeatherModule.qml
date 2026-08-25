@@ -8,8 +8,17 @@ import "../elements"
 ModuleButton {
     id: root
 
-    noHoverColorChange: true
-    noPressColorChange: true
+    noHoverColorChange: expanded ? true : false
+    noPressColorChange: expanded ? true : false
+
+    HoverHandler {
+        id: parentHover
+        onHoveredChanged: {
+            if (!parentHover.hovered && expanded) expanded = false
+        }
+    }
+    
+    clip: true
 
     // ── State ─────────────────────────────────────────────────────────
     property real temperature: 0
@@ -17,8 +26,24 @@ ModuleButton {
     property string weatherDesc: "…"
     property bool   isDay: true
     property bool   loaded: false
+    property bool   isUpdating: false
+    property bool   fetchFinished: true
+    property bool   expanded: false
+    property var    hourlyForecast: []
+    property var    dailyForecast: []
 
-    implicitWidth: weatherPill.implicitWidth + 10
+    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
+    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
+
+    implicitWidth: expanded ? baseColumn.implicitWidth : pillContent.implicitWidth + 30
+    implicitHeight: expanded ? baseColumn.implicitHeight : Theme.moduleHeight
+
+    Behavior on implicitWidth {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+    }
+    Behavior on implicitHeight {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+    }
 
     // ── Open-Meteo fetch ──────────────────────────────────────────────
     // Budapest V district: lat 47.5049 lon 19.0495
@@ -26,13 +51,23 @@ ModuleButton {
         "https://api.open-meteo.com/v1/forecast" +
         "?latitude=47.5049&longitude=19.0495" +
         "&current=temperature_2m,weather_code,is_day" +
+        "&hourly=temperature_2m,weather_code,is_day" +
+        "&daily=weather_code,temperature_2m_max,temperature_2m_min" +
         "&timezone=Europe%2FBudapest"
 
     function fetchWeather() {
+        if (root.isUpdating) return
+        root.isUpdating = true
+        root.fetchFinished = false
+        updateMinTimer.restart()
         var xhr = new XMLHttpRequest()
         xhr.open("GET", root.apiUrl)
         xhr.onreadystatechange = function() {
             if (xhr.readyState !== XMLHttpRequest.DONE) return
+            root.fetchFinished = true
+            if (!updateMinTimer.running) {
+                root.isUpdating = false
+            }
             if (xhr.status === 200) {
                 try {
                     var data = JSON.parse(xhr.responseText)
@@ -42,6 +77,50 @@ ModuleButton {
                     var wmo = cur.weather_code
                     root.weatherIcon = root.wmoIcon(wmo, root.isDay)
                     root.weatherDesc = root.wmoDesc(wmo)
+
+                    // Parse hourly
+                    var h = data.hourly
+                    var hData = []
+                    var nowTime = new Date().getTime()
+                    var startIndex = 0
+                    for (var i = 0; i < h.time.length; i++) {
+                        var tzTime = new Date(h.time[i]) 
+                        if (tzTime.getTime() > nowTime) {
+                            startIndex = i
+                            break
+                        }
+                    }
+                    for (var j = 0; j < 5; j++) {
+                        var idx = startIndex + j
+                        if (idx < h.time.length) {
+                            var t = new Date(h.time[idx])
+                            var hrs = t.getHours().toString().padStart(2, '0')
+                            var mins = t.getMinutes().toString().padStart(2, '0')
+                            hData.push({
+                                time: hrs + ":" + mins,
+                                temp: Math.round(h.temperature_2m[idx]),
+                                icon: root.wmoIcon(h.weather_code[idx], h.is_day[idx] === 1)
+                            })
+                        }
+                    }
+                    root.hourlyForecast = hData
+
+                    // Parse daily
+                    var d = data.daily
+                    var dData = []
+                    var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+                    for (var k = 0; k < d.time.length; k++) {
+                        var date = new Date(d.time[k])
+                        var dayName = (k === 0) ? "Today" : days[date.getDay()]
+                        dData.push({
+                            day: dayName,
+                            icon: root.wmoIcon(d.weather_code[k], true),
+                            maxTemp: Math.round(d.temperature_2m_max[k]),
+                            minTemp: Math.round(d.temperature_2m_min[k])
+                        })
+                    }
+                    root.dailyForecast = dData
+                    
                     root.loaded = true
                 } catch (e) {
                     console.warn("WeatherModule: JSON parse error", e)
@@ -60,6 +139,18 @@ ModuleButton {
         running: true
         repeat: true
         onTriggered: root.fetchWeather()
+    }
+
+    Timer {
+        id: updateMinTimer
+        interval: 1000
+        running: false
+        repeat: false
+        onTriggered: {
+            if (root.fetchFinished) {
+                root.isUpdating = false
+            }
+        }
     }
 
     // ── WMO code → Nerd Font icon (Nerd Font v3, RobotoMono Nerd Font Propo) ──
@@ -102,75 +193,259 @@ ModuleButton {
         return "Unknown"
     }
 
-    // ── Distinct Pill Button ──────────────────────────────────────────
-    ModuleButton {
-        anchors.centerIn: parent
-        id: weatherPill
-        label: ""
-        variant: "neutral"
-        border.color: pal.border
-        border.width: 2
-        radius: implicitHeight / 2
-        implicitHeight: Theme.moduleHeight - 10
-        implicitWidth: pillContent.implicitWidth
+    // ── Layout ──────────────────────────────────────────
+    ColumnLayout {
+        id: baseColumn
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 10
 
-        color: pressedColor
+        PillBarButton {
+            id: weatherPill
+            Layout.alignment: Qt.AlignHCenter
+            implicitHeight: Theme.moduleHeight
+            implicitWidth: root.implicitWidth
 
-        cursorShape: Qt.ArrowCursor
+            noHoverColorChange: !root.expanded
+            noPressColorChange: !root.expanded
+            colorOverride: !root.expanded
+            
+            pillVariant: "neutral"
+            percent: root.expanded ? 100 : 0
 
-        RowLayout {
-            id: pillContent
-            anchors.verticalCenter: parent.verticalCenter
-            height: parent.height
-            spacing: 8
+            bottomLeftRadius: root.expanded ? Theme.moduleEdgeRadius : 0
+            bottomRightRadius: root.expanded ? Theme.moduleEdgeRadius : 0
 
-            // Left padding
-            Item { Layout.preferredWidth: 2 }
+            clip: true
+            
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                acceptedButtons: Qt.LeftButton
 
-            // Weather icon (Nerd Font glyph)
-            Text {
-                text: root.weatherIcon
-                color: Theme.textPrimary
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize + 2
-                verticalAlignment: Text.AlignVCenter
-                opacity: root.loaded ? 1.0 : 0.4
-                Behavior on opacity { NumberAnimation { duration: 300 } }
+                onPressedChanged: {
+                    if (!root.expanded) {
+                        root.pressed = !root.pressed
+                    } else {
+                        weatherPill.pressed = !weatherPill.pressed
+                    }
+                }
+                onClicked: {
+                    root.expanded = !root.expanded
+                }
             }
 
-            // Temperature text
             Text {
-                text: root.loaded ? root.temperature + "°C" : "—"
+                text: "Weather"
                 color: Theme.textPrimary
                 font.family: Theme.font
                 font.pixelSize: Theme.fontSize
                 font.bold: true
-                verticalAlignment: Text.AlignVCenter
+                anchors.centerIn: parent
+                
+                opacity: root.expanded ? 1.0 : 0.0
+                visible: opacity > 0
+                Behavior on opacity { 
+                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
+                }
             }
 
-            // Separator
-            Rectangle {
-                Layout.preferredWidth: 1
-                Layout.preferredHeight: 14
-                color: Theme.textPrimary
-                opacity: 0.2
-                visible: root.loaded
-            }
+            RowLayout {
+                id: pillContent
+                anchors.centerIn: parent
+                spacing: 8
 
-            // Description text
-            Text {
-                id: descText
-                text: root.loaded ? root.weatherDesc : "Loading"
-                color: Theme.textPrimary
-                opacity: 0.7
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 1
-                font.bold: false
-                verticalAlignment: Text.AlignVCenter
+                opacity: root.expanded ? 0.0 : 1.0
+                visible: opacity > 0
+                Behavior on opacity { 
+                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
+                }
+
+                Text {
+                    text: root.weatherIcon
+                    color: Theme.textPrimary
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize + 2
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                Text {
+                    text: root.loaded ? root.temperature + "°C" : "—"
+                    color: Theme.textPrimary
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize
+                    font.bold: true
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                Rectangle {
+                    Layout.preferredWidth: 1
+                    Layout.preferredHeight: 14
+                    color: Theme.textPrimary
+                    opacity: 0.2
+                    visible: root.loaded
+                }
+
+                Text {
+                    id: descText
+                    text: root.isUpdating ? "Updating..." : (root.loaded ? root.weatherDesc : "Loading")
+                    color: Theme.textPrimary
+                    opacity: 0.7
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize - 1
+                    font.bold: false
+                    verticalAlignment: Text.AlignVCenter
+                }
             }
-            
-            // Right padding
-            Item { Layout.preferredWidth: 2 }
+        }
+
+        MouseArea {
+            visible: root.expanded
+            Layout.preferredWidth: 350
+            Layout.preferredHeight: popupCol.implicitHeight
+            Layout.leftMargin: 10
+            Layout.rightMargin: 10
+            Layout.bottomMargin: 10
+            acceptedButtons: Qt.NoButton
+
+            ColumnLayout {
+                id: popupCol
+                width: parent.width
+                spacing: 15
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Text {
+                        text: "Forecast"
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize + 2
+                        font.bold: true
+                        Layout.fillWidth: true
+                    }
+                    ModuleButton {
+                        variant: "light"
+                        label: root.isUpdating ? "Updating..." : "󰑐"
+                        implicitHeight: 30
+                        radius: Theme.moduleEdgeRadius / 2
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.fetchWeather()
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    Repeater {
+                        model: root.hourlyForecast
+                        delegate: ModuleButton {
+                            variant: "light"
+                            radius: Theme.moduleEdgeRadius / 2
+                            Layout.fillWidth: true
+                            implicitHeight: hourlyCol.implicitHeight + 20
+                            
+                            ColumnLayout {
+                                id: hourlyCol
+                                anchors.centerIn: parent
+                                spacing: 5
+                                Text {
+                                    text: modelData.time
+                                    color: Theme.textDark
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize - 2
+                                    Layout.alignment: Qt.AlignHCenter
+                                }
+                                Text {
+                                    text: modelData.icon
+                                    color: Theme.textDark
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize + 4
+                                    Layout.alignment: Qt.AlignHCenter
+                                }
+                                Text {
+                                    text: modelData.temp + "°"
+                                    color: Theme.textDark
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize
+                                    font.bold: true
+                                    Layout.alignment: Qt.AlignHCenter
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: Theme.textPrimary
+                    opacity: 0.1
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 5
+                    Repeater {
+                        model: root.dailyForecast
+                        delegate: ModuleButton {
+                            variant: "light"
+                            radius: Theme.moduleEdgeRadius / 2 + 10
+                            Layout.fillWidth: true
+                            implicitHeight: dayRow.implicitHeight + 16
+                            
+                            RowLayout {
+                                id: dayRow
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: 15
+                                anchors.rightMargin: 15
+                                spacing: 15
+                                
+                                Text {
+                                    text: modelData.day
+                                    color: Theme.textDark
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize
+                                    font.bold: modelData.day === "Today"
+                                    Layout.preferredWidth: 60
+                                }
+                                Text {
+                                    text: modelData.icon
+                                    color: Theme.textDark
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize + 4
+                                    Layout.alignment: Qt.AlignHCenter
+                                }
+                                Item { Layout.fillWidth: true }
+                                Text {
+                                    text: modelData.minTemp + "°"
+                                    color: Theme.textDark
+                                    opacity: 0.6
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize
+                                }
+                                Rectangle {
+                                    Layout.preferredWidth: 30
+                                    Layout.preferredHeight: 4
+                                    radius: 2
+                                    color: Theme.textDark
+                                    opacity: 0.2
+                                }
+                                Text {
+                                    text: modelData.maxTemp + "°"
+                                    color: Theme.textDark
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize
+                                    font.bold: true
+                                    horizontalAlignment: Text.AlignRight
+                                    Layout.preferredWidth: 30
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
