@@ -877,7 +877,7 @@ ModuleButton {
                             }
                         }
                     } else if (d.type === DeviceType.Wired || d.type === 2) {
-                        bestNet = d.network;
+                        bestNet = null;
                     }
                     if (bestNet) break;
                 }

@@ -36,8 +36,6 @@ PillBarButton {
 
     function setBrightness(newValue) {
         root.brightness = Math.max(0, Math.min(100, newValue))
-        writeCacheProc.command = ["bash", "-c", "echo " + root.brightness + " > " + cacheFile]
-        writeCacheProc.running = true
         debounceTimer.restart()
     }
 
@@ -59,19 +57,10 @@ PillBarButton {
         }
     }
 
-    // Write new brightness to cache
-    Process {
-        id: writeCacheProc
-        command: ["bash", "-c", ""]
-    }
-
     // Apply brightness to hardware (debounced)
     Process {
         id: applyBrightnessProc
-        command: ["bash", "-c",
-            "FINAL_VAL=$(cat " + cacheFile + "); " +
-            "ddcutil setvcp 10 $FINAL_VAL --display=" + displayNumber
-        ]
+        command: ["bash", "-c", "echo " + root.brightness + " > " + cacheFile + "; ddcutil setvcp 10 " + root.brightness + " --display=" + displayNumber]
     }
 
     Timer {

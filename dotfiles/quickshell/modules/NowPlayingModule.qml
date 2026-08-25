@@ -262,7 +262,7 @@ ModuleButton {
                         textFont: 18
                         
                         implicitHeight: Theme.moduleHeight - 10
-                        implicitWidth: (nowPlayingModule.expanded && currentPlayer.canGoNext) ? Theme.moduleHeight : 0
+                        implicitWidth: (nowPlayingModule.expanded && currentPlayer && currentPlayer.canGoNext) ? Theme.moduleHeight : 0
 
                         label: "󰒭"
 

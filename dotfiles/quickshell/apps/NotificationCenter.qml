@@ -359,7 +359,7 @@ Item {
 
                     Image {
                         anchors.fill: parent
-                        source: parent.hasImage ? toastRow.cachedImage : ("image://icon/" + toastRow.notif.appIcon)
+                        source: parent.hasImage ? toastRow.cachedImage : (toastRow.notif ? "image://icon/" + toastRow.notif.appIcon : "")
                         fillMode: Image.PreserveAspectFit
                         smooth: true
                         cache: true

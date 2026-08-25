@@ -15,6 +15,10 @@ ModuleButton {
     property int maxSinkBarLength: 270
     property int sinkNameMaxChars: 30
 
+    PwObjectTracker {
+        objects: [Pipewire.defaultAudioSink]
+    }
+
     HoverHandler {
         id: parentHover
         onHoveredChanged: {
@@ -94,18 +98,27 @@ ModuleButton {
 
             PillBarButton {
                 id: volumeButton
-                percent: 100
-                pillText: "100% "
+                
+                property var pwAudio: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
+                property bool isMuted: pwAudio ? pwAudio.muted : false
+                property real currentVolume: pwAudio ? pwAudio.volume : 0.0
+                
+                percent: Math.round(currentVolume * 100)
+                
+                pillText: {
+                    var v = percent
+                    if (isMuted) return v + "% 󰖁"
+                    if (v === 0) return v + "% "
+                    if (v > 0 && v < 50) return v + "% "
+                    return v + "% "
+                }
+
                 pillVariant: expanded ? "light" : "dark"
                 textAlign: "right"
                 
                 rightMargin: Theme.modulePaddingH
 
                 bottomRightRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
-
-                function refresh() {
-                    volProc.running = true
-                }
 
                 onClicked: expanded = !expanded
 
@@ -114,10 +127,13 @@ ModuleButton {
                     acceptedButtons: Qt.RightButton
                     cursorShape: Qt.PointingHandCursor
                     onWheel: wheel => {
-                        if (wheel.angleDelta.y > 0)
-                            volUpProc.running = true
-                        else
-                            volDownProc.running = true
+                        if (volumeButton.pwAudio) {
+                            if (wheel.angleDelta.y > 0) {
+                                volumeButton.pwAudio.volume = Math.min(1.0, volumeButton.currentVolume + 0.02)
+                            } else {
+                                volumeButton.pwAudio.volume = Math.max(0.0, volumeButton.currentVolume - 0.02)
+                            }
+                        }
                     }
                 }
             }
@@ -226,31 +242,6 @@ ModuleButton {
             }
         }
 
-    Process {
-            id: volProc
-            command: ["bash", "-c",
-                "wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -oP '[0-9]+\\.[0-9]+' | awk '{printf \"%d\", $1 * 100}'"
-            ]
-            running: true
-            stdout: StdioCollector {
-                onStreamFinished: {
-                    var s = text.trim()
-                    if (s.length === 0) return
-
-                    var v = parseInt(s, 10)
-                    if (isNaN(v)) return
-
-                    volumeButton.percent = v
-                    if (v === 0) {
-                        volumeButton.pillText = v + "% "
-                    } else if (v > 0 && v < 50) {
-                        volumeButton.pillText = v + "% "
-                    } else {
-                        volumeButton.pillText = v + "% "
-                    }
-                }
-            }
-        }
 
     Component.onCompleted: {
         audioModule.updateSinks()
@@ -268,28 +259,10 @@ ModuleButton {
         function onObjectRemovedPost() { audioModule.updateSinks() }
     }
 
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        onTriggered: volumeButton.refresh()
-    }
-
     Process {
         id: pavu
         command: ["bash", "-c", "pwvucontrol"]
     }
 
-    Process {
-        id: volUpProc
-        command: ["bash", "-c", "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 2%+"]
-        onRunningChanged: if (!running) volumeButton.refresh()
-    }
-
-    Process {
-        id: volDownProc
-        command: ["bash", "-c", "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 2%-"]
-        onRunningChanged: if (!running) volumeButton.refresh()
-    }
     }
 }
