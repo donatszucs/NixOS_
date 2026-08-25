@@ -12,6 +12,11 @@
   # Flatpak support
   services.flatpak.enable = true;
 
+  programs.thunar.enable = true;
+  programs.thunar.plugins = with pkgs; [
+    thunar-archive-plugin
+  ];
+
   programs.hyprlock.enable = true;
 
   programs.nix-ld.enable = true;
@@ -114,8 +119,6 @@
     hyprpaper # Wallpaper utility
 
     # -- File Management --
-    pkgs.thunar # File manager
-    pkgs.thunar-archive-plugin # Archive plugin for Thunar
     file-roller # Archive manager GUI
     zip # CLI zip tool
     unzip # CLI unzip tool

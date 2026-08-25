@@ -6,7 +6,7 @@ cd ~/nixos-config
 
 chmod +x setup.sh && ./setup.sh
 
-sudo nixos-rebuild switch
+sudo nixos-rebuild switch --flake ./nix_files#doni
 
 Notes:
 
@@ -17,4 +17,4 @@ list generations:
 
 Python scripts setup:
 
-    - In scripts folder: uv init scriptsEnv
+    - cd scripts/scriptsEnv && uv sync
