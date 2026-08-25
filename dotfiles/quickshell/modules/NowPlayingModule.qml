@@ -349,7 +349,8 @@ ModuleButton {
         var id = currentPlayer.identity.toLowerCase().trim()
         console.log("Focusing player with identity:", id)
         var cls = id.match(/mozilla zen/) ? "zen" : id
-        var cmd = "hl.dsp.focus({ window = 'class:(?i)" + cls + "' })"
+        var safeCls = cls.replace(/'/g, "\\'")
+        var cmd = "hl.dsp.focus({ window = 'class:(?i)" + safeCls + "' })"
         console.log("Dispatching:", cmd)
         Hyprland.dispatch(cmd)
     }

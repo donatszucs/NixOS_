@@ -16,7 +16,7 @@ Item {
     property int lightBrightness: 100
     property int lightHue: 30
     property int lightSaturation: 0
-    property string tapoScriptPath: "~/nixos-config/scripts/scriptsEnv/.venv/bin/python ~/nixos-config/scripts/TapoLight/tapo_control.py"
+    property string tapoScriptPath: "REPO=$(dirname $(dirname $(realpath ~/.config/quickshell))); \"$REPO/scripts/scriptsEnv/.venv/bin/python\" \"$REPO/scripts/TapoLight/tapo_control.py\""
 
     function refreshLightStatus() {
         if (!lightRefreshProc.running) {
@@ -131,7 +131,7 @@ Item {
 
     function playNotificationSound() {
         if (!root.muted){
-            Quickshell.execDetached(["pw-play", "--volume", root.notifVolume, "/home/doni/nixos-config/misc/ping.ogg"])
+            Quickshell.execDetached(["bash", "-c", "REPO=$(dirname $(dirname $(realpath ~/.config/quickshell))); pw-play --volume " + root.notifVolume + " \"$REPO/misc/ping.ogg\""])
         }
     }
 

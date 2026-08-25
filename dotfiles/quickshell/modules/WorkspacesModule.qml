@@ -269,7 +269,7 @@ ModuleButton {
                         "/home/doni/nixos-config/scripts/SteamIcon/SteamIconSearch.sh", 
                         "/home/doni/.steam/root/appcache/librarycache/" + steamId
                     ]);
-                    return steamImagePath !== "" ? steamImagePath : Quickshell.iconPath(steam);
+                    return steamImagePath !== "" ? steamImagePath : Quickshell.iconPath("steam");
                 }
                 
                 var entries = DesktopEntries.applications.values
