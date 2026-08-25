@@ -234,13 +234,19 @@ Rectangle {
     Process {
         id: applyProc
         property string targetFile: ""
-        command: ["bash", "-c", 
+        command: [
+            "bash",
+            "-c",
             "MONITOR=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name'); " +
             "CONF_DIR=\"$HOME/.config/hypr\"; " +
             "LINK_NAME=\"$CONF_DIR/temps/wallpaper_$MONITOR\"; " +
-            "ln -sf \"" + targetFile + "\" \"$LINK_NAME\"; " +
-            "pkill -x hyprpaper || true; " + 
-            "setsid -f hyprpaper >/dev/null 2>&1"
+            "mkdir -p \"$CONF_DIR/temps\"; " +
+            "ln -sf \"$1\" \"$LINK_NAME\"; " +
+            "hyprctl hyprpaper preload \"$1\"; " +
+            "hyprctl hyprpaper wallpaper \"$MONITOR,$1\"; " +
+            "hyprctl hyprpaper unload all",
+            "--",
+            targetFile
         ]
         onRunningChanged: {
             if (!running) {
