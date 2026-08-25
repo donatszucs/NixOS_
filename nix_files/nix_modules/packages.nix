@@ -66,6 +66,7 @@
     playerctl # Media key support for various apps
 
     # -- Essential Tools --
+    glib # Provides gsettings for GTK themes
     kitty # Terminal (default for Hyprland, needed to start debugging)
     brightnessctl # Screen brightness control
     ddcutil # Control monitor settings like brightness, contrast, etc.

@@ -9,7 +9,10 @@ PillBarButton {
     id: root
     
     required property string screenName
-    property int displayNumber: screenName === "DP-1" ? 1 : 2
+    property int displayNumber: {
+        var match = screenName.match(/\d+/);
+        return match ? parseInt(match[0]) : 1;
+    }
     property int brightness: 50
     property string cacheFile: "/tmp/ddc_brightness_disp" + displayNumber
     
