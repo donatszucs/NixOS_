@@ -26,9 +26,8 @@
     XCURSOR_THEME = "Bibata-Modern-Ice";
     XCURSOR_SIZE = 24;
 
-    # Make Qt apps use KDE integration and prefer Breeze style
-    QT_QPA_PLATFORMTHEME = "kde";
-    QT_STYLE_OVERRIDE = "Breeze";
+    # Make Qt apps use GTK integration to inherit the GTK dark theme
+    QT_QPA_PLATFORMTHEME = "gtk3";
 
     QSG_RHI_BACKEND = "vulkan";
     MOZ_ENABLE_WAYLAND = "1";
@@ -38,7 +37,7 @@
 
   # Ensure GTK apps (and browsers) report dark mode
   # Force GTK theme in the environment and write GTK settings files
-  home.sessionVariables.GTK_THEME = "catppuccin-mocha-mauve-standard+normal";
+  home.sessionVariables.GTK_THEME = "catppuccin-mocha-mauve-standard+normal:dark";
   # Cursor Theme
   home.pointerCursor = {
     enable = true;
@@ -104,10 +103,7 @@
 
   qt = {
     enable = true;
-    platformTheme.name = "kde";
-    style = {
-      name = "Breeze";
-    };
+    platformTheme.name = "gtk3";
   };
 
   # Write KDE config for the dark color scheme, which Qt/KDE apps (incl. KDE Connect) check for

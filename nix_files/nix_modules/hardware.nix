@@ -32,6 +32,7 @@
   };
 
   hardware.xpadneo.enable = true;
+  hardware.uinput.enable = true; # For virtual inputs (e.g. Sunshine)
 
   # 3. Force load the kernel module (Driver)
   boot.kernelModules = [

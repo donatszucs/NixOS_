@@ -31,13 +31,12 @@ hl.monitor({
 -- ==========================================
 -- ENVIRONMENT VARIABLES
 -- ==========================================
-hl.env("GTK_THEME", "catppuccin-mocha-mauve-standard+normal")
+hl.env("GTK_THEME", "catppuccin-mocha-mauve-standard+normal:dark")
 hl.env("COLOR_SCHEME", "prefer-dark")
 hl.env("QT_SCALE_FACTOR_ROUNDING_POLICY", "Round")
 
 -- Qt Theme Overrides
-hl.env("QT_QPA_PLATFORMTHEME", "kde")
-hl.env("QT_STYLE_OVERRIDE", "Breeze")
+hl.env("QT_QPA_PLATFORMTHEME", "gtk3")
 
 -- ==========================================
 -- AUTOSTART
@@ -48,6 +47,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("[workspace 1 silent] zen &")
     hl.exec_cmd("[workspace 3 silent] antigravity-ide &")
     hl.exec_cmd("discord --minimized &")
+    hl.exec_cmd("systemctl --user start sunshine")
 
     hl.exec_cmd("~/nixos-config/scripts/WallpaperSetup/init-hyprpaper.sh &")
     hl.exec_cmd("~/nixos-config/scripts/KeychronMouse/mouse-battery &")

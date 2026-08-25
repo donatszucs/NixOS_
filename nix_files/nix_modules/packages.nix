@@ -52,6 +52,14 @@
   programs.wireshark.enable = true;
   programs.wireshark.package = pkgs.wireshark;
 
+  # Sunshine for streaming
+  services.sunshine = {
+    enable = true;
+    autoStart = true;
+    capSysAdmin = true; # Required for Wayland screen capture
+    openFirewall = true; # Automatically opens the required streaming ports
+  };
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
