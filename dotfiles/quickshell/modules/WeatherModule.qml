@@ -54,6 +54,7 @@ ModuleButton {
         "&hourly=temperature_2m,weather_code,is_day" +
         "&daily=weather_code,temperature_2m_max,temperature_2m_min" +
         "&forecast_days=10" +
+        "&past_days=2" +
         "&timezone=Europe%2FBudapest"
 
     function fetchWeather() {
@@ -91,7 +92,7 @@ ModuleButton {
                             break
                         }
                     }
-                    for (var j = 0; j < 13; j++) {
+                    for (var j = 0; j < 25; j++) {
                         var idx = startIndex + j
                         if (idx < h.time.length) {
                             var t = new Date(h.time[idx])
@@ -113,7 +114,7 @@ ModuleButton {
                     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
                     for (var k = 0; k < d.time.length; k++) {
                         var date = new Date(d.time[k])
-                        var dayName = (k === 0) ? "Today" : days[date.getDay()]
+                        var dayName = (k === 2) ? "Today" : days[date.getDay()]
                         var dateStr = date.getDate() + " " + months[date.getMonth()]
                         dData.push({
                             day: dayName,
@@ -355,8 +356,40 @@ ModuleButton {
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
 
-                    Item {
-                        id: graphContainer
+                    Text {
+                        text: "Reset"
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize - 2
+                        opacity: graphFlickable.contentX > 10 ? 0.6 : 0
+                        anchors.right: parent.right
+                        anchors.rightMargin: 15
+                        anchors.top: parent.top
+                        anchors.topMargin: 12
+                        visible: opacity > 0
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            anchors.margins: -10
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                resetAnim.start();
+                            }
+                        }
+
+                        NumberAnimation {
+                            id: resetAnim
+                            target: graphFlickable
+                            property: "contentX"
+                            to: 0
+                            duration: 250
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
+                    Flickable {
+                        id: graphFlickable
                         anchors.top: hourlyTitle.bottom
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left
@@ -365,6 +398,27 @@ ModuleButton {
                         anchors.rightMargin: 10
                         anchors.topMargin: 10
                         anchors.bottomMargin: 25
+                        
+                        contentWidth: graphContainer.width
+                        contentHeight: height
+                        clip: true
+
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.NoButton
+                            onWheel: function(wheel) {
+                                if (wheel.angleDelta.y > 0 || wheel.angleDelta.x > 0) {
+                                    graphFlickable.contentX = Math.max(0, graphFlickable.contentX - 50)
+                                } else {
+                                    graphFlickable.contentX = Math.min(graphFlickable.contentWidth - graphFlickable.width, graphFlickable.contentX + 50)
+                                }
+                            }
+                        }
+
+                        Item {
+                            id: graphContainer
+                            height: parent.height
+                            width: Math.max(graphFlickable.width, root.hourlyForecast.length * 50)
 
                         property var model: root.hourlyForecast
                         property real minTemp: 0
@@ -491,7 +545,6 @@ ModuleButton {
                                         font.family: Theme.font
                                         font.pixelSize: Theme.fontSize + 2
                                         anchors.horizontalCenter: parent.horizontalCenter
-                                        visible: index % 2 === 0
                                     }
                                     Text {
                                         text: modelData.temp + "°"
@@ -500,7 +553,6 @@ ModuleButton {
                                         font.pixelSize: Theme.fontSize - 1
                                         font.bold: true
                                         anchors.horizontalCenter: parent.horizontalCenter
-                                        visible: index % 2 === 0
                                     }
                                 }
 
@@ -523,10 +575,10 @@ ModuleButton {
                                     anchors.bottom: parent.bottom
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     opacity: 0.6
-                                    visible: index % 2 === 0
                                 }
                             }
                         }
+                    }
                     }
                 }
 
@@ -548,6 +600,29 @@ ModuleButton {
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
 
+                    Text {
+                        text: "Reset"
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize - 2
+                        opacity: carousel.currentIndex > 2 ? 0.6 : 0
+                        anchors.right: parent.right
+                        anchors.rightMargin: 15
+                        anchors.top: parent.top
+                        anchors.topMargin: 12
+                        visible: opacity > 0
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            anchors.margins: -10
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                carousel.currentIndex = 2;
+                            }
+                        }
+                    }
+
                     ListView {
                         id: carousel
                         anchors.top: dailyTitle.bottom
@@ -558,6 +633,13 @@ ModuleButton {
                         anchors.bottomMargin: 10
                         model: root.dailyForecast
                         orientation: ListView.Horizontal
+                        currentIndex: 2
+                        
+                        onCurrentIndexChanged: {
+                            if (currentIndex < 2) {
+                                currentIndex = 2
+                            }
+                        }
                     
                     // Center the selected item without wrapping
                     preferredHighlightBegin: carousel.width / 2 - 37.5
@@ -570,9 +652,10 @@ ModuleButton {
                     MouseArea {
                         anchors.fill: parent
                         acceptedButtons: Qt.NoButton
-                        onWheel: (wheel) => {
+                        onWheel: function(wheel) {
                             if (wheel.angleDelta.y > 0 || wheel.angleDelta.x > 0) {
-                                carousel.decrementCurrentIndex()
+                                if (carousel.currentIndex > 2)
+                                    carousel.decrementCurrentIndex()
                             } else {
                                 carousel.incrementCurrentIndex()
                             }
@@ -675,7 +758,11 @@ ModuleButton {
                         MouseArea {
                             anchors.fill: parent
                             preventStealing: false
-                            onClicked: carousel.currentIndex = index
+                            onClicked: {
+                                if (index >= 2) {
+                                    carousel.currentIndex = index
+                                }
+                            }
                         }
                     }
                     }
