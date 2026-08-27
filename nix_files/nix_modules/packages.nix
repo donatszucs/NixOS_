@@ -23,6 +23,26 @@
 
   programs.direnv.enable = true;
 
+  programs.bash = {
+    enable = true;
+    historySize = 100000;
+    historyFileSize = 100000;
+  };
+
+  programs.zsh = {
+    enable = true;
+    history = {
+      size = 100000;
+      save = 100000;
+    };
+  };
+
+  programs.fzf = {
+    enable = true;
+    enableBashIntegration = true; # Toggle based on your shell
+    enableZshIntegration = true;  
+  };
+
   # KDE Connect for phone integration
   programs.kdeconnect.enable = true;
 
