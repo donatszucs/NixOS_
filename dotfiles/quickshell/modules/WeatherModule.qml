@@ -2,6 +2,7 @@
 // Updates every 10 minutes using XMLHttpRequest
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 
 import "../elements"
 
@@ -306,7 +307,7 @@ ModuleButton {
 
         MouseArea {
             visible: root.expanded
-            Layout.preferredWidth: 440
+            Layout.preferredWidth: 370
             Layout.preferredHeight: popupCol.implicitHeight
             Layout.leftMargin: 10
             Layout.rightMargin: 10
@@ -324,9 +325,10 @@ ModuleButton {
                         text: "Forecast"
                         color: Theme.textPrimary
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize + 2
+                        font.pixelSize: Theme.fontSize + 8
                         font.bold: true
                         Layout.fillWidth: true
+                        Layout.leftMargin: launcherModule.padding
                     }
                     ModuleButton {
                         variant: "light"
@@ -397,11 +399,20 @@ ModuleButton {
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
                         anchors.topMargin: 10
-                        anchors.bottomMargin: 25
+                        anchors.bottomMargin: 10
                         
                         contentWidth: graphContainer.width
                         contentHeight: height
                         clip: true
+                        
+                        ScrollBar.horizontal: ScrollBar {
+                            contentItem: Rectangle {
+                                implicitHeight: 4
+                                radius: 2
+                                color: Theme.textPrimary
+                                opacity: 0.5
+                            }
+                        }
 
                         MouseArea {
                             anchors.fill: parent
@@ -417,7 +428,8 @@ ModuleButton {
 
                         Item {
                             id: graphContainer
-                            height: parent.height
+                            height: parent.height - 15
+                            anchors.top: parent.top
                             width: Math.max(graphFlickable.width, root.hourlyForecast.length * 50)
 
                         property var model: root.hourlyForecast
@@ -649,6 +661,7 @@ ModuleButton {
                     
                     spacing: 15
                     
+
                     MouseArea {
                         anchors.fill: parent
                         acceptedButtons: Qt.NoButton
