@@ -14,7 +14,6 @@ ModuleButton {
     id: root
     property string screenName: ""
     property string displayMode: "all"
-    property bool alwaysShowApps: false
     property bool expanded: false
 
     clip: false
@@ -93,9 +92,7 @@ ModuleButton {
         property int activeDragCount: 0
         z: activeDragCount > 0 ? 99 : 0
         
-        HoverHandler { id: hoverHandler }
-        property bool isHovered: hoverHandler.hovered
-        property bool showApps: (!isOtherWorkspace || isHovered || root.alwaysShowApps) && !isEmptyWorkspace
+        property bool showApps: !isEmptyWorkspace
         property bool hasApps: !isEmptyWorkspace && modelData !== null && modelData.toplevels && modelData.toplevels.values.length > 0
 
         implicitHeight: root.implicitHeight - 2 * root.overlay

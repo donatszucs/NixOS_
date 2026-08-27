@@ -146,12 +146,12 @@ ModuleButton {
                     id: collapsedRow
                     Layout.fillWidth: true
                     implicitHeight: Theme.moduleHeight - 4
-                    implicitWidth: expanded ? menuText.implicitWidth + 40 : menuText.implicitWidth + 10
+                    implicitWidth: expanded ? menuText.implicitWidth + 40 : menuText.implicitWidth + 15
 
                     Text {
                         id: menuText
                         anchors.centerIn: parent
-                        text: " Menu"
+                        text: "MENU"
                         color: launcherModule.textColor
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize
@@ -183,7 +183,6 @@ ModuleButton {
                     Layout.alignment: Qt.AlignVCenter
                     screenName: launcherModule.screenName
                     displayMode: "other"
-                    alwaysShowApps: launcherModule.expanded
                     color: "transparent"
                     anchors.topMargin: 0
                     visible: otherWorkspaces.monitorWorkspaces.others.length > 0
@@ -205,7 +204,7 @@ ModuleButton {
                 ModuleButton {
                     variant: "neutral"
                     Layout.fillWidth: true
-                    implicitHeight: Theme.listHeight
+                    implicitHeight: Theme.moduleHeight
                     label: "󰸉 Wallpaper"
                     cursorShape: Qt.PointingHandCursor
 
@@ -221,7 +220,7 @@ ModuleButton {
                 ModuleButton {
                     variant: "neutral"
                     Layout.fillWidth: true
-                    implicitHeight: Theme.listHeight
+                    implicitHeight: Theme.moduleHeight
                     label: "󰌆 Bitwarden"
                     cursorShape: Qt.PointingHandCursor
 
@@ -237,7 +236,7 @@ ModuleButton {
                 ModuleButton {
                     variant: "neutral"
                     Layout.fillWidth: true
-                    implicitHeight: Theme.listHeight
+                    implicitHeight: Theme.moduleHeight
                     label: " Clipboard"
                     cursorShape: Qt.PointingHandCursor
 

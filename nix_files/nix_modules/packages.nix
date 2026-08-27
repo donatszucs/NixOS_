@@ -25,22 +25,20 @@
 
   programs.bash = {
     enable = true;
-    historySize = 100000;
-    historyFileSize = 100000;
+    interactiveShellInit = ''
+      export HISTSIZE=100000
+      export HISTFILESIZE=100000
+    '';
   };
 
   programs.zsh = {
     enable = true;
-    history = {
-      size = 100000;
-      save = 100000;
-    };
+    histSize = 100000;
   };
 
   programs.fzf = {
-    enable = true;
-    enableBashIntegration = true; # Toggle based on your shell
-    enableZshIntegration = true;  
+    keybindings = true;
+    fuzzyCompletion = true;
   };
 
   # KDE Connect for phone integration

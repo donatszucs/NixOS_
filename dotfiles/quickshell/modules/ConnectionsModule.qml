@@ -499,11 +499,13 @@ ModuleButton {
                                 required property var modelData
                                 
                                 visible: modelData.paired
+                                variant: "neutral"
                                 
                                 Layout.fillWidth: true
                                 implicitHeight: pairedDeviceRow.implicitHeight + 10
-                                radius: Theme.moduleEdgeRadius / 2
+                                radius: Theme.moduleEdgeRadius / 2 + 5
                                 opacity: 1.0
+                                border.width: 2
                                 cursorShape: Qt.PointingHandCursor
 
                                 onClicked: {
