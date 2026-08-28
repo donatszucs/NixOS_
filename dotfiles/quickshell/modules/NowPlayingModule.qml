@@ -152,7 +152,7 @@ ModuleButton {
                     text: "󰎆 "
                     color: Theme.textPrimary
                     font.family: Theme.font
-                    font.pixelSize: textFont
+                    font.pixelSize: textFont + 4
                     font.bold: true
                     Layout.alignment: Qt.AlignVCenter
                     Layout.leftMargin: 5

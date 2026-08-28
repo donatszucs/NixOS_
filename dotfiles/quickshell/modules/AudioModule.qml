@@ -138,16 +138,36 @@ ModuleButton {
                 }
             }
 
-            ModuleButton {
-                implicitWidth: maxSinkBarLength - volumeButton.implicitWidth + 20
+            PillBarButton {
+                id: testButton
+                implicitWidth: Theme.moduleHeight + 5
+                implicitHeight: Theme.moduleHeight
+                
+                pillText: "󰐊" // Play icon
+                cursorShape: Qt.PointingHandCursor
+                pillVariant: "dark"
+                percent: 0
+
+                onClicked: testSoundProcess.running = true
+
+                Process {
+                    id: testSoundProcess
+                    command: ["bash", "-c", "REPO=$(dirname $(dirname $(realpath ~/.config/quickshell))); pw-play \"$REPO/misc/ping.ogg\""]
+                }
+            }
+
+            PillBarButton {
+                id: audioMixerBtn
+                implicitWidth: maxSinkBarLength - volumeButton.implicitWidth + 20 - testButton.implicitWidth
                 implicitHeight: Theme.moduleHeight
                 bottomLeftRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
 
                 cursorShape: Qt.PointingHandCursor
                 onClicked: pavu.running = true
 
-                label: "Audio"
-
+                pillText: "Audio Mixer"
+                pillVariant: "dark"
+                percent: 100
             }
         }
         // Action buttons — revealed by clip as width expands leftward
