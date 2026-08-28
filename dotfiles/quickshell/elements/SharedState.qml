@@ -102,6 +102,18 @@ Item {
         onRunningChanged: if (!running) refreshLightStatus()
     }
 
+    function setLightWhite() {
+        root.lightHue = 0
+        root.lightSaturation = 0
+        lightSetWhiteProc.running = true
+    }
+
+    Process {
+        id: lightSetWhiteProc
+        command: ["bash", "-c", root.tapoScriptPath + " white"]
+        onRunningChanged: if (!running) refreshLightStatus()
+    }
+
     property bool muted: false
     property double notifVolume: 0.1
 

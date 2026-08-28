@@ -59,6 +59,12 @@ async def main():
                 await device.set_hue_saturation(h, s)
             except Exception:
                 pass
+    elif cmd == "white":
+        try:
+            device = await get_device()
+            await device.set_color_temperature(4000)
+        except Exception:
+            pass
     elif cmd == "get_color":
         try:
             device = await get_device()
@@ -70,7 +76,9 @@ async def main():
         try:
             device = await get_device()
             info = await device.get_device_info()
-            print(f"{'ON' if info.device_on else 'OFF'},{info.brightness},{info.hue},{info.saturation}")
+            h = 0 if info.color_temp > 0 else info.hue
+            s = 0 if info.color_temp > 0 else info.saturation
+            print(f"{'ON' if info.device_on else 'OFF'},{info.brightness},{h},{s}")
         except Exception:
             print("OFF,0,30,0") # Fallback if device is unreachable
     elif cmd == "status":

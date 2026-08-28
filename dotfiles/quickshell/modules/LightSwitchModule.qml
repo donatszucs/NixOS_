@@ -187,7 +187,9 @@ ModuleButton {
                         if (dist <= r) {
                             var hue = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360
                             var sat = Math.min(dist / r, 1.0) * 100
-                            SharedState.setLightColor(Math.round(hue), Math.round(sat))
+                            SharedState.lightHue = Math.round(hue)
+                            SharedState.lightSaturation = Math.round(sat)
+                            colorDebounceTimer.restart()
                         }
                     }
 
@@ -196,6 +198,39 @@ ModuleButton {
                 }
             }
         }
+
+        // ── Reset Button ───────────────────────────────────────────────
+        PillBarButton {
+            id: resetButton
+            visible: root.expanded
+            implicitHeight: root.expanded ? Theme.moduleHeight : 0
+            
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignCenter
+            Layout.topMargin: root.expanded ? 5 : 0
+            Layout.bottomMargin: root.expanded ? 10 : 0
+            
+            percent: 0
+            pillText: "Reset to White"
+            
+            bottomLeftRadius: Theme.moduleEdgeRadius
+            bottomRightRadius: Theme.moduleEdgeRadius
+            topLeftRadius: Theme.moduleEdgeRadius
+            topRightRadius: Theme.moduleEdgeRadius
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    colorDebounceTimer.stop()
+                    SharedState.setLightWhite()
+                }
+            }
+            
+            Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+            Behavior on Layout.topMargin { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+            Behavior on Layout.bottomMargin { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+        }
     }
     // ── Brightness scroll wheel ─────────────────────────────────────
     Timer {
@@ -203,6 +238,13 @@ ModuleButton {
         interval: 1000
         repeat: false
         onTriggered: SharedState.setLightBrightness(SharedState.lightBrightness)
+    }
+
+    Timer {
+        id: colorDebounceTimer
+        interval: 100
+        repeat: false
+        onTriggered: SharedState.setLightColor(SharedState.lightHue, SharedState.lightSaturation)
     }
 
     Component.onCompleted: SharedState.refreshLightStatus()
