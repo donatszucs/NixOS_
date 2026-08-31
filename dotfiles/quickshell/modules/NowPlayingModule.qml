@@ -62,7 +62,7 @@ ExpandableModule {
             Item {
                 id: titleBgClip
                 anchors.fill: parent
-                visible: currentPlayer && currentPlayer.trackArtUrl !== ""
+                visible: currentPlayer
                 
                 Item {
                     id: pictureContainer
