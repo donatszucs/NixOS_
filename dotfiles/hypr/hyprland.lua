@@ -159,6 +159,16 @@ hl.window_rule({
     workspace = "2 silent"
 })
 
+-- Messenger special workspace rules
+hl.window_rule({
+    match = { class = "^(Caprine)$" },
+    workspace = "special:messenger"
+})
+hl.workspace_rule({
+    workspace = "special:messenger",
+    on_created_empty = "caprine"
+})
+
 
 -- ==========================================
 -- ANIMATIONS (Lua API)
@@ -202,6 +212,7 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 -- Core Window Dispatchers
 hl.bind(mainMod .. " + F", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
+hl.bind(mainMod .. " + M", hl.dsp.workspace.toggle_special("messenger"))
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("pkill wlsunset || wlsunset -l 47.5 -L 19.0 -t 3500 -T 6500"))
 

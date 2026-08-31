@@ -27,16 +27,86 @@ ModuleButton {
     anchors.topMargin: 4
     implicitHeight: Theme.moduleHeight - 4
 
+    property var activeSpecialWorkspaces: ({})
+
+    Process {
+        id: monitorsInitProc
+        command: ["hyprctl", "monitors", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    var out = JSON.parse(text.trim());
+                    var newState = {};
+                    for (var i = 0; i < out.length; i++) {
+                        if (out[i].specialWorkspace && out[i].specialWorkspace.name !== "") {
+                            newState[out[i].name] = out[i].specialWorkspace.name;
+                        }
+                    }
+                    root.activeSpecialWorkspaces = newState;
+                } catch(e) {}
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        monitorsInitProc.running = true;
+    }
+
+    Connections {
+        target: Hyprland
+        function onRawEvent(event) {
+            if (event.name === "activespecial") {
+                var parts = event.data.split(",");
+                var ws = parts[0];
+                var mon = parts.length > 1 ? parts[1] : "";
+                var newState = Object.assign({}, root.activeSpecialWorkspaces);
+                if (ws === "") {
+                    delete newState[mon];
+                } else {
+                    newState[mon] = ws.indexOf("special:") === 0 ? ws : "special:" + ws;
+                }
+                root.activeSpecialWorkspaces = newState;
+            }
+        }
+    }
+
     // Only workspaces whose monitor name matches this bar's screen
     readonly property var monitorWorkspaces: {
         var all = Hyprland.workspaces.values
         var out = []
         var others = []
-        for (var i = 0; i < all.length; i++)
+        
+        for (var i = 0; i < all.length; i++) {
+            var isSpecial = all[i].name && all[i].name.indexOf("special:") === 0
+            
+            if (isSpecial) {
+                var isActiveSpecial = false;
+                var activeOnMon = "";
+                for (var monName in root.activeSpecialWorkspaces) {
+                    if (root.activeSpecialWorkspaces[monName] === all[i].name) {
+                        isActiveSpecial = true;
+                        activeOnMon = monName;
+                        break;
+                    }
+                }
+                
+                if (!isActiveSpecial) {
+                    continue;
+                }
+
+                if (activeOnMon === screenName)
+                    out.push(all[i])
+                else 
+                    others.push(all[i])
+                
+                continue;
+            }
+
             if (all[i].monitor && all[i].monitor.name === screenName)
                 out.push(all[i])
             else 
                 others.push(all[i])
+        }
         return { workspaces: out, others: others }
     }
 
@@ -105,11 +175,12 @@ ModuleButton {
         topRightRadius: isLastInGroup ? Theme.moduleEdgeRadius : 5
         bottomRightRadius: isLastInGroup ? Theme.moduleEdgeRadius : 5
 
+        readonly property bool isSpecial: modelData !== null && modelData.name && modelData.name.indexOf("special:") === 0
+
         readonly property bool active: !isEmptyWorkspace &&
             Hyprland.focusedMonitor !== null &&
-            Hyprland.focusedMonitor.activeWorkspace !== null &&
-            modelData !== null &&
-            Hyprland.focusedMonitor.activeWorkspace.id === modelData.id
+            ((Hyprland.focusedMonitor.activeWorkspace !== null && Hyprland.focusedMonitor.activeWorkspace.id === modelData.id) ||
+             (isSpecial && root.activeSpecialWorkspaces[Hyprland.focusedMonitor.name] === modelData.name))
 
         label: isEmptyWorkspace ? "" : ""
 
@@ -150,6 +221,7 @@ ModuleButton {
             visible: !isEmptyWorkspace
 
             Rectangle {
+                visible: !control.isSpecial
                 color: control.pal.base
                 topLeftRadius: control.topLeftRadius
                 bottomLeftRadius: control.bottomLeftRadius
@@ -157,7 +229,7 @@ ModuleButton {
 
                 topRightRadius: cutoutsActive ? 0 : control.topRightRadius
                 bottomRightRadius: cutoutsActive ? 0 : control.bottomRightRadius
-                implicitWidth: 24
+                implicitWidth: control.isSpecial ? 0 : 24
                 implicitHeight: control.height
 
                 InverseRadius {
@@ -191,7 +263,7 @@ ModuleButton {
             RowLayout {
                 visible: hasApps && showApps
                 spacing: 5
-                Layout.leftMargin: showApps ? 2 : 0
+                Layout.leftMargin: showApps ? (control.isSpecial ? 7 : 2) : 0
                 Layout.rightMargin: showApps ? 7 : 0
                 Repeater {
                     model: (hasApps && showApps) ? modelData.toplevels.values : null

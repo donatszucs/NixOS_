@@ -114,6 +114,7 @@
     nixfmt
 
     # -- Applications --
+    caprine-bin
     vscode
     antigravity-ide
     antigravity-cli
