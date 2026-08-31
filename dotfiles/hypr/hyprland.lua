@@ -162,7 +162,8 @@ hl.window_rule({
 -- Messenger special workspace rules
 hl.window_rule({
     match = { class = "^(Caprine)$" },
-    workspace = "special:messenger"
+    workspace = "special:messenger",
+    float = true
 })
 hl.workspace_rule({
     workspace = "special:messenger",
