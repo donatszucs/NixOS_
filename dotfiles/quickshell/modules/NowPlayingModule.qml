@@ -27,7 +27,7 @@ ExpandableModule {
     property real expandedHeight: albumArt.source.toString() !== "" ? 125 : (Theme.moduleHeight + 45)
 
     implicitHeight: expanded ? expandedHeight + 20 : Theme.moduleHeight
-    implicitWidth: expanded ? 270 : titleBtn.implicitWidth
+    implicitWidth: expanded ? 270 : titleBtn.implicitWidth + 10
 
     ColumnLayout {
         id: column
@@ -47,14 +47,14 @@ ExpandableModule {
             implicitHeight: Theme.moduleHeight - 10
             
             Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-            Layout.topMargin: nowPlayingModule.expanded ? 15 : 5
+            Layout.topMargin: nowPlayingModule.expanded ? 10 : 5
             cursorShape: isPlaying ? Qt.PointingHandCursor : Qt.ArrowCursor
 
             Behavior on Layout.topMargin {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
             
-            implicitWidth: scrollingText.implicitWidth + artistText.implicitWidth + 20
+            implicitWidth: scrollingText.implicitWidth + artistText.implicitWidth + 5
             onClicked: focusNow()
 
             radius: Theme.moduleEdgeRadius - 5
@@ -62,9 +62,7 @@ ExpandableModule {
             Item {
                 id: titleBgClip
                 anchors.fill: parent
-                anchors.leftMargin: 5
-                anchors.rightMargin: 5
-                visible: !nowPlayingModule.expanded && currentPlayer && currentPlayer.trackArtUrl !== ""
+                visible: currentPlayer && currentPlayer.trackArtUrl !== ""
                 
                 Item {
                     id: pictureContainer
@@ -119,7 +117,7 @@ ExpandableModule {
 
             RowLayout {
                 id: topRow
-                anchors.centerIn: parent
+                anchors.fill: parent
                 spacing: 0
                 layoutDirection: Qt.RightToLeft
 
@@ -127,24 +125,46 @@ ExpandableModule {
                     id: scrollingText
                     clip: true 
                     Layout.alignment: Qt.AlignVCenter
+                    Layout.rightMargin: 10
+                    Layout.leftMargin: 5
 
                     text: nowPlayingModule.titleText
-                    textMaxWidth: 200
+                    textMaxWidth: 190
                     fontFamily: Theme.font
                     pixelSize: Theme.fontSize
                     textColor: Theme.textPrimary
                     fontBold: true
                 }
 
-                Text {
+                ModuleButton {
                     id: artistText
-                    text: "󰎆 "
-                    color: Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: textFont + 4
-                    font.bold: true
-                    Layout.alignment: Qt.AlignVCenter
-                    Layout.leftMargin: 5
+                    variant: "light"
+                    clip: false
+                    Layout.fillHeight: true
+                    implicitWidth: 25
+                    
+                    topLeftRadius: titleBtn.radius
+                    bottomLeftRadius: titleBtn.radius
+                    topRightRadius: 0
+                    bottomRightRadius: 0
+
+                    label: "󰎆"
+
+                    InverseRadius {
+                        anchors.top: parent.top
+                        anchors.left: parent.right
+                        cornerPosition: "topLeft"
+                        color: artistText.color
+                        size: 7
+                    }
+
+                    InverseRadius {
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.right
+                        cornerPosition: "bottomLeft"
+                        color: artistText.color
+                        size: 7
+                    }
                 }
             }
         }
