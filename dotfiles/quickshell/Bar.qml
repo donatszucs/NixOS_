@@ -331,6 +331,8 @@ PanelWindow {
             implicitWidth: 0
             rightColor: connectionsModule.color
             rightExpanded: connectionsModule.expanded
+            leftColor: trayModule.color
+            leftExpanded: trayModule.expanded
         }
         TrayModule {
             Layout.alignment: Qt.AlignTop
@@ -342,6 +344,8 @@ PanelWindow {
             implicitWidth: 0
             leftColor: systemModule.color
             leftExpanded: systemModule.expanded
+            rightColor: trayModule.color
+            rightExpanded: trayModule.expanded
         }
         SystemModule {
             Layout.alignment: Qt.AlignTop

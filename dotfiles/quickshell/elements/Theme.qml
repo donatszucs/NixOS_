@@ -29,7 +29,7 @@ QtObject {
         readonly property color pressed:     Qt.darker(Theme.paletteInk, 1.4)
         readonly property color text:        Theme.palettePaper
 
-        readonly property color border:         Qt.lighter(paletteInk, 1.2)
+        readonly property color border:         Qt.rgba(1, 1, 1, 0.2)
         readonly property color borderHover:    Qt.lighter(border, 1.4)
         readonly property color borderPressed:  Qt.darker(border, 1.4)
         
@@ -64,7 +64,7 @@ QtObject {
         readonly property color pressed:    Qt.darker(Theme.palettePaper, 1.4)
         readonly property color text:       Theme.paletteInk
 
-        readonly property color border:         Theme.palettePaper
+        readonly property color border:         Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.8)
         readonly property color borderHover:    Qt.lighter(border, 1.4)
         readonly property color borderPressed:  Qt.darker(border, 1.4)
         
