@@ -52,9 +52,9 @@ ExpandableModule {
             layoutDirection: Qt.RightToLeft
 
             ModuleButton {
-                colorOverride: !expanded
-                noHoverColorChange: !expanded
-                noPressColorChange: !expanded
+                colorOverride: !root.expanded
+                noHoverColorChange: !root.expanded
+                noPressColorChange: !root.expanded
                 id: notificationButton
                 cursorShape: Qt.PointingHandCursor
                 implicitWidth: Theme.moduleHeight + 6
