@@ -22,6 +22,12 @@ ModuleButton {
         }
     }
 
+    onOpenMenusChanged: {
+        if (openMenus === 0 && !parentHover.hovered && expanded) {
+            expanded = false
+        }
+    }
+
     // This MUST be assigned when you create the component in your main file
     property var parentWindow: null 
 
