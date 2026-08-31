@@ -3,25 +3,28 @@ import QtQuick.Layouts
 
 Rectangle {
     id: root
-    // Pass the colors of the modules on either side
-    property color leftColor: "transparent"
-    property color rightColor: "transparent"
-    property color leftColorBottom: "transparent"
-    property color rightColorBottom: "transparent"
 
-    // Pass the expanded state if the corners need to move vertically
-    property bool leftExpanded: true
-    property bool rightExpanded: true
-    property bool leftExpandedBottom: true
-    property bool rightExpandedBottom: true
+    // ── Module references (preferred API) ────────────────────────
+    // Pass the module on each side and the gap auto-derives color
+    // and expanded state for its inverse-radius corners.
+    property var leftModule:  null   // module on the LEFT side of this gap
+    property var rightModule: null   // module on the RIGHT side of this gap
+
+    // ── Manual overrides (backward-compatible) ───────────────────
+    // These are auto-derived from the module refs above.  Set them
+    // explicitly only when you need to override the automatic value.
+    property color leftColor:  leftModule  ? leftModule.color  : "transparent"
+    property color rightColor: rightModule ? rightModule.color : "transparent"
+    property bool  leftExpanded:  leftModule  ? leftModule.expanded  : false
+    property bool  rightExpanded: rightModule ? rightModule.expanded : false
 
     // Aliases to expose the InverseRadius items for Quickshell's blurRegion mapping
     property alias rightRadius: rightRadius
-    property alias leftRadius: leftRadius
+    property alias leftRadius:  leftRadius
 
-    // Vertival and Horizontal sizes of the radius corvers.
-    property int sizeHleft: Theme.moduleEdgeRadius
-    property int sizeVleft: Theme.moduleEdgeRadius
+    // Vertical and Horizontal sizes of the radius corners.
+    property int sizeHleft:  Theme.moduleEdgeRadius
+    property int sizeVleft:  Theme.moduleEdgeRadius
     property int sizeHright: Theme.moduleEdgeRadius
     property int sizeVright: Theme.moduleEdgeRadius
 
@@ -34,10 +37,10 @@ Rectangle {
     implicitWidth: 0
     implicitHeight: Theme.moduleHeight
 
-    // 1. The Right-facing corner (attaches to the Left module)
+    // LEFT-side corner — concave curve for the LEFT module's expansion
     InverseRadius {
-        id: rightRadius
-        cornerPosition: "topRight"
+        id: leftRadius
+        cornerPosition: "topLeft"
         color: root.leftColor
         expandingV: root.leftExpanded
         sizeH: root.sizeHleft
@@ -45,18 +48,17 @@ Rectangle {
 
         smoothCurve: root.smoothCurve
         smoothTolerance: root.smoothTolerance
-        
+
         anchors {
-            // Anchor to the very right edge of this gap
-            right: parent.right  
-            top: parent.bottom 
+            left: parent.left
+            top: parent.bottom
         }
     }
 
-    // 2. The Left-facing corner (attaches to the Right module)
+    // RIGHT-side corner — concave curve for the RIGHT module's expansion
     InverseRadius {
-        id: leftRadius
-        cornerPosition: "topLeft"
+        id: rightRadius
+        cornerPosition: "topRight"
         color: root.rightColor
         expandingV: root.rightExpanded
         sizeH: root.sizeHright
@@ -64,12 +66,10 @@ Rectangle {
 
         smoothCurve: root.smoothCurve
         smoothTolerance: root.smoothTolerance
-        
-        anchors {
-            // Anchor to the very left edge of this gap
 
-            left: parent.left
-            top: parent.bottom // Or whatever vertical anchor you were using
+        anchors {
+            right: parent.right
+            top: parent.bottom
         }
     }
 }

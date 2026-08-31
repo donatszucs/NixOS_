@@ -4,42 +4,33 @@ import QtQuick.Layouts
 
 import "../elements"
 
-ModuleButton {
+ExpandableModule {
     id: root
-    noHoverColorChange: expanded
-    noPressColorChange: expanded
     // We manage our own content; keep the inherited label empty
     label: ""
-    
 
-    // ── Expand / collapse colour picker ────────────────────────────
-    property bool expanded: false
+    // ── Custom radii for this module's unique styling ────────────
+    expandedBottomLeftRadius:   Theme.moduleEdgeRadius + 5
+    expandedBottomRightRadius:  Theme.moduleEdgeRadius + 5
+    collapsedBottomLeftRadius:  Theme.moduleEdgeRadius
+    collapsedBottomRightRadius: 0
+
     property color buttonColor: labelText.color
-
-    HoverHandler {
-        id: parentHover
-        onHoveredChanged: {
-            if (!parentHover.hovered && expanded) expanded = false
-        }
-    }
-
-    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : 0
 
     implicitHeight: expanded
         ? contentColumn.implicitHeight
         : Theme.moduleHeight
     implicitWidth: expanded ? 180 : 80
-    Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic  } }
-    Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic  } }
 
     property int sideMargin: expanded ? 10 : 0
-    Behavior on sideMargin { NumberAnimation { duration: Theme.horizontalDuration } }
+    Behavior on sideMargin { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
     ColumnLayout {
         id: contentColumn
         anchors {
-            fill: parent
+            left: parent.left
+            right: parent.right
+            top: parent.top
             topMargin: 0
             // 2. Bind the layout margins to the animated property
             rightMargin: root.sideMargin
@@ -63,8 +54,8 @@ ModuleButton {
                 : "Off 󱩎"
             pillVariant: SharedState.lightVariant
             
-            bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
-            bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 5 : 0
+            bottomLeftRadius:  root.expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
+            bottomRightRadius: root.expanded ? Theme.moduleEdgeRadius + 5 : 0
 
             MouseArea {
                 anchors.fill: parent

@@ -8,19 +8,18 @@ import Quickshell.Hyprland
 
 import "../elements"
 
-ModuleButton {
+ExpandableModule {
     id: nowPlayingModule
+    collapseOnHoverExit: false   // managed via binding below
     noHoverColorChange: expanded || !isPlaying
     noPressColorChange: true
+    collapsedBottomRightRadius: Theme.moduleEdgeRadius   // row-end rounding
+
     property string titleText: "Nothing playing"
     property string authorText: "Unknown artist"
     property string playPauseIcon: "󰐊"
     property bool isPlaying: false
-    property bool expanded: isPlaying && parentHover.hovered
-
-    HoverHandler {
-        id: parentHover
-    }
+    expanded: isPlaying && expandHover.hovered
 
     // Using MPRIS; legacy playerctl state removed
     function refreshAll() { pickPlayer() }
@@ -29,16 +28,6 @@ ModuleButton {
 
     implicitHeight: expanded ? expandedHeight + 20 : Theme.moduleHeight
     implicitWidth: expanded ? 270 : titleBtn.implicitWidth
-    clip: true
-
-    Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-    }
-    Behavior on implicitHeight {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-    }
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : Theme.moduleEdgeRadius
 
     ColumnLayout {
         id: column
@@ -48,9 +37,9 @@ ModuleButton {
 
         // Title
         ModuleButton {
-            colorOverride: !expanded
-            noHoverColorChange: !expanded
-            noPressColorChange: !expanded
+            colorOverride: !nowPlayingModule.expanded
+            noHoverColorChange: !nowPlayingModule.expanded
+            noPressColorChange: !nowPlayingModule.expanded
             id: titleBtn
             
             variant: "dark"
@@ -95,7 +84,7 @@ ModuleButton {
                         anchors.fill: titleAlbumArt
                         maskEnabled: true
                         maskSource: titleMaskItem
-                        visible: !expanded
+                        visible: !nowPlayingModule.expanded
                     }
 
                     Rectangle {
@@ -237,7 +226,7 @@ ModuleButton {
                         topRightRadius: Theme.moduleEdgeRadius -5
                         visible: nowPlayingModule.authorText !== ""
 
-                        implicitWidth: expanded ? scrollingAuthorText.implicitWidth + 20 : 0
+                        implicitWidth: nowPlayingModule.expanded ? scrollingAuthorText.implicitWidth + 20 : 0
 
                         HoverMarqueeText {
                             id: scrollingAuthorText

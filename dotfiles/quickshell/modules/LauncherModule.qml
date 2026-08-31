@@ -12,8 +12,7 @@ import "../elements"
 ModuleButton {
     id: launcherModule
     label: ""
-    noHoverColorChange: expanded
-    property bool expanded: false
+    noHoverColorChange: launcherModule.expanded
     property string screenName: ""
     property int activeDragCount: (activeWorkspaces ? activeWorkspaces.activeDragCount : 0) + (otherWorkspaces ? otherWorkspaces.activeDragCount : 0)
     clip: activeDragCount === 0
@@ -30,14 +29,14 @@ ModuleButton {
     property var filteredApps: []
 
     radius: Theme.moduleEdgeRadius - 2
-    bottomLeftRadius:  expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
+    bottomLeftRadius:  launcherModule.expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
+    bottomRightRadius: launcherModule.expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
     
-    anchors.topMargin: expanded ? 100 : 4
+    anchors.topMargin: launcherModule.expanded ? 100 : 4
     cursorShape: Qt.PointingHandCursor
 
-    implicitWidth:  expanded ? Math.max(panelWidth, headerRow.implicitWidth) : headerRow.implicitWidth
-    implicitHeight: expanded ? dropPanel.implicitHeight : Theme.moduleHeight - 4
+    implicitWidth:  launcherModule.expanded ? Math.max(panelWidth, headerRow.implicitWidth) : headerRow.implicitWidth
+    implicitHeight: launcherModule.expanded ? dropPanel.implicitHeight : Theme.moduleHeight - 4
 
     Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
     Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration;   easing.type: Easing.OutCubic } }
@@ -50,7 +49,7 @@ ModuleButton {
         anchors.top: parent.top
         height: Theme.moduleHeight - 4
         color: Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.15) // Darkens the header area
-        visible: expanded
+        visible: launcherModule.expanded
         
         radius: launcherModule.radius
         topLeftRadius: launcherModule.radius
@@ -65,7 +64,7 @@ ModuleButton {
     InverseRadius {
         anchors.top: headerBg.bottom
         anchors.left: headerBg.left
-        visible: expanded
+        visible: launcherModule.expanded
         color: headerBg.color
     }
 
@@ -73,7 +72,7 @@ ModuleButton {
         cornerPosition: "topRight"
         anchors.top: headerBg.bottom
         anchors.right: headerBg.right
-        visible: expanded
+        visible: launcherModule.expanded
         color: headerBg.color
     }
 
@@ -119,7 +118,7 @@ ModuleButton {
         topMarginButton: 0 // Removes default margin from ModuleButton
         anchors { left: parent.left; right: parent.right; top: parent.top }
         implicitWidth:  launcherModule.expanded ? Math.max(launcherModule.panelWidth, headerRow.implicitWidth) : headerRow.implicitWidth
-        implicitHeight: expanded ? panelCol.implicitHeight + 10 : Theme.moduleHeight - 4
+        implicitHeight: launcherModule.expanded ? panelCol.implicitHeight + 10 : Theme.moduleHeight - 4
 
         ColumnLayout {
             id: panelCol
@@ -146,7 +145,7 @@ ModuleButton {
                     id: collapsedRow
                     Layout.fillWidth: true
                     implicitHeight: Theme.moduleHeight - 4
-                    implicitWidth: expanded ? menuText.implicitWidth + 40 : menuText.implicitWidth + 15
+                    implicitWidth: launcherModule.expanded ? menuText.implicitWidth + 40 : menuText.implicitWidth + 15
 
                     Text {
                         id: menuText

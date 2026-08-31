@@ -5,29 +5,15 @@ import Quickshell.Io
 
 import "../elements"
 
-ModuleButton {
+ExpandableModule {
     id: systemModule
-    noHoverColorChange: expanded
-    noPressColorChange: expanded
-    property bool expanded: false
+    expandedBottomRightRadius: 0   // right screen edge — no rounding
     property color buttonColor: mainButton.color
 
-    HoverHandler {
-        id: parentHover
-        onHoveredChanged: {
-            if (!parentHover.hovered && expanded) expanded = false
-        }
-    }
     onClicked: if (!expanded) expanded = true
-    
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
 
     implicitHeight: expanded ? actionColumn.implicitHeight + 10: Theme.moduleHeight
-    implicitWidth: mainButton.implicitWidth
-
-    Behavior on implicitHeight {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-    }
+    implicitWidth: expanded ? 200 : 50
 
     // Action buttons — revealed by clip as width expands leftward
     ColumnLayout {
@@ -40,9 +26,9 @@ ModuleButton {
 
         PillBarButton {
             id: mainButton
-            colorOverride: !expanded
-            noHoverColorChange: !expanded
-            noPressColorChange: !expanded
+            colorOverride: !systemModule.expanded
+            noHoverColorChange: !systemModule.expanded
+            noPressColorChange: !systemModule.expanded
 
             pillVariant: "neutral"
 
@@ -53,9 +39,13 @@ ModuleButton {
             Layout.alignment: Qt.AlignCenter
 
             pillText: systemModule.expanded ? "System" : ""
-            percent: expanded ? 100 : 0
+            percent: systemModule.expanded ? 100 : 0
 
             implicitWidth: systemModule.expanded ? 200 : 50
+
+            Behavior on implicitWidth {
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
 
             MouseArea {
                 anchors.fill: parent
@@ -75,13 +65,6 @@ ModuleButton {
                                     }
             }
 
-            Behavior on implicitWidth {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-            }
-
-            Behavior on radius {
-                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-            }
         }
 
         InverseRadius {

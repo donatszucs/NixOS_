@@ -6,12 +6,11 @@ import Quickshell.Services.Pipewire
 
 import "../elements"
 
-ModuleButton {
+ExpandableModule {
     id: audioModule
     colorOverride: implicitHeight === Theme.moduleHeight
     noHoverColorChange: true
     dontAnimateColor: true
-    property bool expanded: false
     property int maxSinkBarLength: 270
     property int sinkNameMaxChars: 30
 
@@ -19,20 +18,9 @@ ModuleButton {
         objects: [Pipewire.defaultAudioSink]
     }
 
-    HoverHandler {
-        id: parentHover
-        onHoveredChanged: {
-            if (!parentHover.hovered && expanded) expanded = false
-        }
-    }
-    
     ListModel {
         id: sinksListModel
     }
-
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10: 0
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
-    clip: true
 
     property alias sinksModel: sinksListModel
 
@@ -76,13 +64,7 @@ ModuleButton {
     implicitHeight: expanded ? baseColumn.implicitHeight : Theme.moduleHeight
     implicitWidth: expanded ? baseColumn.implicitWidth : volumeButton.implicitWidth
 
-    Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-    }
 
-    Behavior on implicitHeight {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-    }
     ColumnLayout {
         id: baseColumn
         spacing: 10
@@ -113,14 +95,14 @@ ModuleButton {
                     return v + "% "
                 }
 
-                pillVariant: expanded ? "light" : "dark"
+                pillVariant: audioModule.expanded ? "light" : "dark"
                 textAlign: "right"
                 
                 rightMargin: Theme.modulePaddingH
 
                 bottomRightRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
 
-                onClicked: expanded = !expanded
+                onClicked: audioModule.expanded = !audioModule.expanded
 
                 MouseArea {
                     anchors.fill: parent

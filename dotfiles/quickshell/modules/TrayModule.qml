@@ -6,13 +6,11 @@ import Quickshell.Services.SystemTray
 
 import "../elements"
 
-ModuleButton {
+ExpandableModule {
     id: root
-    noHoverColorChange: expanded
-    noPressColorChange: expanded
+    collapseOnHoverExit: false   // managed manually (menu-aware)
 
     property int openMenus: 0
-    property bool expanded: false
 
     HoverHandler {
         id: parentHover
@@ -29,18 +27,10 @@ ModuleButton {
     }
 
     // This MUST be assigned when you create the component in your main file
-    property var parentWindow: null 
-
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
-    clip: true
+    property var parentWindow: null
 
     implicitWidth: topRow.implicitWidth
     implicitHeight: expanded ? baseColumn.implicitHeight + 4 : Theme.moduleHeight
-
-    Behavior on implicitHeight {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-    }
 
     Process {
         id: missioncenterProcess

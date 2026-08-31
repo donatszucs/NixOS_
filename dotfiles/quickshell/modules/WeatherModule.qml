@@ -6,20 +6,8 @@ import QtQuick.Controls
 
 import "../elements"
 
-ModuleButton {
+ExpandableModule {
     id: root
-
-    noHoverColorChange: expanded ? true : false
-    noPressColorChange: expanded ? true : false
-
-    HoverHandler {
-        id: parentHover
-        onHoveredChanged: {
-            if (!parentHover.hovered && expanded) expanded = false
-        }
-    }
-    
-    clip: true
 
     // ── State ─────────────────────────────────────────────────────────
     property real temperature: 0
@@ -29,22 +17,11 @@ ModuleButton {
     property bool   loaded: false
     property bool   isUpdating: false
     property bool   fetchFinished: true
-    property bool   expanded: false
     property var    hourlyForecast: []
     property var    dailyForecast: []
 
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
-
     implicitWidth: expanded ? baseColumn.implicitWidth : pillContent.implicitWidth + 30
     implicitHeight: expanded ? baseColumn.implicitHeight : Theme.moduleHeight
-
-    Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-    }
-    Behavior on implicitHeight {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-    }
 
     // ── Open-Meteo fetch ──────────────────────────────────────────────
     // Budapest V district: lat 47.5049 lon 19.0495

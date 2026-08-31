@@ -357,7 +357,7 @@ ModuleButton {
                     background: Rectangle {
                         color: Theme.palette("dark").base
                         radius: 5
-                        border.color: Theme.palette("dark").border
+                        border.color: Theme.palette("light").base
                         border.width: 2
                     }
                 }

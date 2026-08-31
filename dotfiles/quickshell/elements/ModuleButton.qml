@@ -7,6 +7,7 @@ Rectangle {
 
     property string label: ""
     property bool hovered: rootHover.hovered
+    property bool expanded: false
 
     // horizontal text alignment: "left" | "center" | "right"
     property string textAlign: "center"

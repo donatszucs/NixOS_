@@ -163,8 +163,8 @@ PanelWindow {
         ModuleGap {
             id: leftCorner
             Layout.alignment: Qt.AlignTop
-            rightColor: clockModule.color
-            implicitWidth: 0
+            leftColor: clockModule.color
+            leftExpanded: true
         }
         ClockModule {
             Layout.alignment: Qt.AlignTop
@@ -172,9 +172,7 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-
-            leftColor: weatherModule.color
-            leftExpanded: weatherModule.expanded
+            rightModule: weatherModule
         }
         WeatherModule {
             Layout.alignment: Qt.AlignTop
@@ -182,23 +180,12 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-
-            rightColor: weatherModule.color
-            rightExpanded: weatherModule.expanded
-
-            leftColor: nowPlayingModule.color
-            leftExpanded: nowPlayingModule.expanded
-
-            implicitHeight: Theme.moduleHeight
-
-            Behavior on implicitHeight {
-                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-            }
+            leftModule: weatherModule
+            rightModule: nowPlayingModule
         }
         NowPlayingModule {
             Layout.alignment: Qt.AlignTop
             id: nowPlayingModule
-            bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
         }
         InverseRadius {
             Layout.alignment: Qt.AlignTop
@@ -288,13 +275,11 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            rightColor: virtualKeyboardModule.color
-            rightExpanded: lightSwitchModule.expanded
+            leftModule: lightSwitchModule
         }
         VirtualKeyboardModule {
             Layout.alignment: Qt.AlignTop
             id: virtualKeyboardModule
-
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
@@ -306,8 +291,7 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            leftColor: monitorBrightnessModule.color
-            leftExpanded: audioModule.expanded
+            rightModule: audioModule
         }
         AudioModule {
             Layout.alignment: Qt.AlignTop
@@ -315,12 +299,8 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-
-            leftColor: connectionsModule.color
-            leftExpanded: connectionsModule.expanded
-
-            rightColor: audioModule.color
-            rightExpanded: audioModule.expanded
+            leftModule: audioModule
+            rightModule: connectionsModule
         }
         ConnectionsModule {
             Layout.alignment: Qt.AlignTop
@@ -328,24 +308,18 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            implicitWidth: 0
-            rightColor: connectionsModule.color
-            rightExpanded: connectionsModule.expanded
-            leftColor: trayModule.color
-            leftExpanded: trayModule.expanded
+            leftModule: connectionsModule
+            rightModule: trayModule
         }
         TrayModule {
             Layout.alignment: Qt.AlignTop
             id: trayModule
-            parentWindow: topPanel 
+            parentWindow: topPanel
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
-            implicitWidth: 0
-            leftColor: systemModule.color
-            leftExpanded: systemModule.expanded
-            rightColor: trayModule.color
-            rightExpanded: trayModule.expanded
+            leftModule: trayModule
+            rightModule: systemModule
         }
         SystemModule {
             Layout.alignment: Qt.AlignTop
@@ -354,8 +328,8 @@ PanelWindow {
         ModuleGap {
             id: rightCorner
             Layout.alignment: Qt.AlignTop
-            implicitWidth: 0
-            leftColor: systemModule.color
+            rightColor: systemModule.color
+            rightExpanded: true
             implicitHeight: systemModule.implicitHeight
         }
     }

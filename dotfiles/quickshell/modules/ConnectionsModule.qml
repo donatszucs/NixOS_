@@ -10,22 +10,9 @@ import Quickshell.Bluetooth
 
 import "../elements"
 
-ModuleButton {
+ExpandableModule {
     id: connectionsModule
-    property bool expanded: false
     property int currentPage: 0
-    noHoverColorChange: expanded ? true : false
-
-
-
-    HoverHandler {
-        id: parentHover
-        onHoveredChanged: {
-            if (!parentHover.hovered && expanded) expanded = false
-        }
-    }
-    
-    clip: true
 
     property int cardWidth: textMaxWidth + 95
     property int textMaxWidth: 180
@@ -74,8 +61,7 @@ ModuleButton {
         btDevicesConnected = anyConnected;
     }
 
-    bottomLeftRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
-    bottomRightRadius: expanded ? Theme.moduleEdgeRadius + 10 : 0
+
     // 3. The exact same logic as your Repeater, but invisible
     Instantiator {
         id: deviceTracker
@@ -104,9 +90,7 @@ ModuleButton {
     implicitHeight: expanded ? baseColumn.implicitHeight : Theme.moduleHeight
     implicitWidth:  expanded ? baseColumn.implicitWidth : 65
 
-    Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-    }
+
     ColumnLayout {
         id: baseColumn
         anchors { 
