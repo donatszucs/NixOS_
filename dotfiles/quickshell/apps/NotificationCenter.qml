@@ -162,10 +162,10 @@ Item {
                             implicitWidth: hoverHandler.hovered ? Math.max(notifFlickable.contentWidth, root.notifWidth) : 0
                             height: 40
                             textFont: 20
-                            variant: "dark"
-                            color: Theme.divider
+                            variant: "neutral"
                             label: "󰎟 Notification Center"
                             radius: Theme.moduleEdgeRadius
+                            border.width: 2
                             
                             cursorShape: Qt.PointingHandCursor
                             onClicked: volumeSliderContainer.showing = !volumeSliderContainer.showing
@@ -186,19 +186,30 @@ Item {
 
                             RowLayout {
                                 anchors.fill: parent
-                                spacing: 10
+                                spacing: 5
 
                                 ModuleButton {
+                                    variant: "neutral"
                                     label: SharedState.muted ? "󰖁" : "󰕾"
                                     radius: Theme.moduleEdgeRadius
-                                    implicitWidth: 40
+                                    topRightRadius: 5
+                                    bottomRightRadius: 5
+                                    implicitWidth: 30
+                                    implicitHeight: 25
                                     textFont: 20
+                                    border.width: 2
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: SharedState.muted = !SharedState.muted
                                 }
 
                                 StyledSlider {
                                     Layout.fillWidth: true
+
+                                    sliderHeight: 25
+                                    radius: 5
+                                    topRightRadius: Theme.moduleEdgeRadius
+                                    bottomRightRadius: Theme.moduleEdgeRadius
+
                                     from: 0.0
                                     to: 1.0
                                     value: SharedState.notifVolume
@@ -293,10 +304,9 @@ Item {
         // ── Colors ────────────────────────────────────────────────────
         variant: isCritical ? "red" : "light"
 
-        opacity: shouldBeVisible ? 1 : 0.0
+        opacity: shouldBeVisible ? 0.95 : 0.0
 
-        border.color: "#f38ba8"
-        border.width: isCritical ? 2 : 0
+        border.width: 2
 
         Component.onCompleted: {
             if (toastRow.notif && toastRow.notif.image !== "")

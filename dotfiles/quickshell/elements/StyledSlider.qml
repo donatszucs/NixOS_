@@ -3,24 +3,48 @@ import QtQuick.Layouts
 import QtQuick.Controls
 
 Slider {
+    id: control
     Layout.fillWidth: true
 
+    property int sliderHeight: 30
+    property int radius: 7
+    property int topLeftRadius: radius
+    property int topRightRadius: radius
+    property int bottomLeftRadius: radius
+    property int bottomRightRadius: radius
+
     background: Rectangle {
-        x: parent.leftPadding
-        y: parent.topPadding + parent.availableHeight / 2 - height / 2
+        x: control.leftPadding
+        y: control.topPadding + control.availableHeight / 2 - height / 2
         implicitWidth: 200
-        implicitHeight: 14
-        width: parent.availableWidth
+        implicitHeight: control.sliderHeight
+        width: control.availableWidth
         height: implicitHeight
-        radius: 7
-        color: Theme.palette("dark").hover
+        radius: control.radius
+        topLeftRadius: control.topLeftRadius
+        topRightRadius: control.topRightRadius
+        bottomLeftRadius: control.bottomLeftRadius
+        bottomRightRadius: control.bottomRightRadius
+        color: Theme.palette("neutral").hover
+        border.width: 2
+        border.color: Theme.palette("neutral").border
 
         Rectangle {
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.margins: 2
+
             id: progressFill
-            width: parent.parent.visualPosition * parent.width
-            height: parent.height
-            color: parent.pressed ? Theme.palette("dark").hover : Theme.palette("light").base
-            radius: 7
+            width: control.visualPosition * parent.width - 4
+            height: parent.height - 4
+            color: control.pressed ? Theme.palette("light").pressed : Theme.palette("light").base
+            border.color: Theme.palette("light").border
+            radius: control.radius
+            topLeftRadius: control.topLeftRadius
+            topRightRadius: control.topRightRadius
+            bottomLeftRadius: control.bottomLeftRadius
+            bottomRightRadius: control.bottomRightRadius
         }
     }
 
