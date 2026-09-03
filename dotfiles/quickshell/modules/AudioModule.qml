@@ -95,7 +95,7 @@ ExpandableModule {
                     return v + "% "
                 }
 
-                pillVariant: audioModule.expanded ? "light" : "dark"
+                pillVariant: "dark"
                 textAlign: "right"
                 
                 rightMargin: Theme.modulePaddingH
@@ -122,10 +122,10 @@ ExpandableModule {
 
             PillBarButton {
                 id: testButton
-                implicitWidth: Theme.moduleHeight + 5
+                implicitWidth: Theme.moduleHeight
                 implicitHeight: Theme.moduleHeight
                 
-                pillText: "󰐊" // Play icon
+                pillText: ""
                 cursorShape: Qt.PointingHandCursor
                 pillVariant: "dark"
                 percent: 0
@@ -149,7 +149,7 @@ ExpandableModule {
 
                 pillText: "Audio Mixer"
                 pillVariant: "dark"
-                percent: 100
+                percent: 0
             }
         }
         // Action buttons — revealed by clip as width expands leftward

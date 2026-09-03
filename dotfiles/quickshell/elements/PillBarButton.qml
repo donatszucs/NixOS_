@@ -8,6 +8,7 @@ ModuleButton {
     property string pillText: ""
     property string pillVariant: root.variant
     property var pillPal: Theme.palette(pillVariant)
+    property int pillRadius: (Theme.moduleHeight - 10) / 2
 
     label: pillText
     textColor: "transparent"
@@ -17,7 +18,7 @@ ModuleButton {
         anchors.centerIn: parent
         width: parent.width - 10
         height: Theme.moduleHeight - 10
-        radius: height / 2
+        radius: pillRadius
         color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.colorOpacity)
         clip: true
 

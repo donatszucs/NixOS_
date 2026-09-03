@@ -128,6 +128,7 @@ ModuleButton {
             // Header row (same height as collapsed bar, keeps visual alignment)
             RowLayout {
                 id: headerRow
+                Layout.fillWidth: true
                 implicitHeight: Theme.moduleHeight - 4
                 spacing: 0
 
@@ -146,6 +147,10 @@ ModuleButton {
                     Layout.fillWidth: true
                     implicitHeight: Theme.moduleHeight - 4
                     implicitWidth: launcherModule.expanded ? menuText.implicitWidth + 40 : menuText.implicitWidth + 15
+
+                    Behavior on implicitWidth {
+                        NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutCubic }
+                    }
 
                     Text {
                         id: menuText
@@ -184,7 +189,7 @@ ModuleButton {
                     displayMode: "other"
                     color: "transparent"
                     anchors.topMargin: 0
-                    visible: otherWorkspaces.monitorWorkspaces.others.length > 0
+                    visible: otherWorkspaces.monitorWorkspaces.others.length > 0 || otherWorkspaces.implicitWidth > 0.5
                 }
             }
 

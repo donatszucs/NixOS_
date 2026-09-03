@@ -110,7 +110,11 @@ ModuleButton {
         return { workspaces: out, others: others }
     }
 
-    implicitWidth: workspacesRow.implicitWidth + 2 * overlay
+    implicitWidth: (displayMode === "other" && monitorWorkspaces.others.length === 0) ? 0 : (workspacesRow.implicitWidth + 2 * overlay)
+
+    Behavior on implicitWidth {
+        NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutCubic }
+    }
 
     RowLayout {
         id: workspacesRow
@@ -185,7 +189,7 @@ ModuleButton {
         label: isEmptyWorkspace ? "" : ""
 
         colorOverride: true
-        overrideColor: dropArea.containsDrag ? hoverColor : Qt.darker(control.pal.base, 1.4)
+        overrideColor: dropArea.containsDrag ? hoverColor : (control.isSpecial ? "transparent" : Qt.darker(control.pal.base, 1.4))
 
         DropArea {
             id: dropArea
@@ -275,7 +279,7 @@ ModuleButton {
         }
 
         Behavior on implicitWidth {
-            NumberAnimation { duration: Theme.horizontalDuration / 4; easing.type: Easing.Linear }
+            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
     }
 
