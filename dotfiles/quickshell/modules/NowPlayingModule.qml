@@ -138,7 +138,7 @@ ExpandableModule {
 
                 ModuleButton {
                     id: artistText
-                    variant: "light"
+                    variant: "neutral"
                     clip: false
                     Layout.fillHeight: true
                     implicitWidth: 25
@@ -149,13 +149,14 @@ ExpandableModule {
                     bottomRightRadius: 0
 
                     label: "󰎆"
+                    leftMargin: 3
 
                     InverseRadius {
                         anchors.top: parent.top
                         anchors.left: parent.right
                         cornerPosition: "topLeft"
                         color: artistText.color
-                        size: 7
+                        size: 10
                     }
 
                     InverseRadius {
@@ -163,7 +164,7 @@ ExpandableModule {
                         anchors.left: parent.right
                         cornerPosition: "bottomLeft"
                         color: artistText.color
-                        size: 7
+                        size: 10
                     }
                 }
             }
