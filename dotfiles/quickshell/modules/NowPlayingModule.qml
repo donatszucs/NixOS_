@@ -62,7 +62,7 @@ ExpandableModule {
             Item {
                 id: titleBgClip
                 anchors.fill: parent
-                visible: currentPlayer
+                visible: true
                 
                 Item {
                     id: pictureContainer
@@ -88,7 +88,7 @@ ExpandableModule {
                     Rectangle {
                         anchors.fill: parent
                         radius: titleBtn.radius - 2
-                        color: Qt.lighter(Theme.palette("dark").base, 1.7)
+                        color: Qt.lighter(Theme.palette("dark").base, 2.7)
                         opacity: 0.8
                     }
                     
