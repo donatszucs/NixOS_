@@ -25,7 +25,7 @@ Slider {
         topRightRadius: control.topRightRadius
         bottomLeftRadius: control.bottomLeftRadius
         bottomRightRadius: control.bottomRightRadius
-        color: Theme.palette("neutral").hover
+        color: Theme.palette("neutral").base
         border.width: 2
         border.color: Theme.palette("neutral").border
 

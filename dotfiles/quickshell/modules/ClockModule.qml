@@ -13,12 +13,16 @@ ModuleButton {
     noHoverColorChange: true
     noPressColorChange: true
 
-    property string time
+    property string hours
+    property string minutes
+    property string seconds
     property string date
 
     function updateTime() {
         var now = new Date()
-        time = Qt.formatDateTime(now, "HH:mm:ss")
+        hours = Qt.formatDateTime(now, "HH")
+        minutes = Qt.formatDateTime(now, "mm")
+        seconds = Qt.formatDateTime(now, "ss")
         date = Qt.formatDateTime(now, "MMM d")
     }
 
@@ -44,44 +48,64 @@ ModuleButton {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             height: parent.height
-            spacing: 15
+            spacing: 10
 
-            Text {
-                text: root.time
-                color: Theme.textPrimary
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize
-                font.bold: true
-                Layout.leftMargin: 15
+            RowLayout {
+                Layout.leftMargin: 10
+                spacing: 0
+
+                Text {
+                    text: root.hours
+                    color: Theme.textPrimary
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize
+                    font.bold: true
+                }
+
+                Text {
+                    text: ":"
+                    color: Theme.textPrimary
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize
+                    font.bold: true
+                }
+
+                Text {
+                    text: root.minutes
+                    color: Theme.textPrimary
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize
+                    font.bold: true
+                }
+
+
+                Text {
+                    text: ":"
+                    color: Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, Theme.textPrimary.a * 0.5)
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize
+                    font.bold: true
+                }
+
+                Text {
+                    text: root.seconds
+                    color: Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, Theme.textPrimary.a * 0.5)
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize
+                    font.bold: true
+                }
             }
 
             Rectangle {
-                color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 0.7)
-                topRightRadius: clockBtn.radius
-                bottomRightRadius: clockBtn.radius
+                color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 0.5)
+                radius: clockBtn.radius
                 implicitWidth: 60
                 implicitHeight: Theme.moduleHeight - 10
-
-                InverseRadius {
-                    anchors.top: parent.top
-                    anchors.right: parent.left
-                    cornerPosition: "topRight"
-                    color: parent.color
-                    size: clockBtn.radius
-                }
-
-                InverseRadius {
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.left
-                    cornerPosition: "bottomRight"
-                    color: parent.color
-                    size: clockBtn.radius
-                }
 
                 Text {
                     anchors.centerIn: parent
                     text: root.date
-                    color: "black"
+                    color: Theme.paletteInk
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize - 2
                     font.bold: false
