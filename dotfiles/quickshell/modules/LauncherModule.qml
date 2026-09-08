@@ -201,281 +201,279 @@ ModuleButton {
 
                 RowLayout {
                     Layout.fillWidth: true
-                spacing: launcherModule.padding
-                Layout.leftMargin: launcherModule.padding
-                Layout.rightMargin: launcherModule.padding
-            
-                ModuleButton {
-                    variant: "neutral"
-                    Layout.fillWidth: true
-                    implicitHeight: Theme.moduleHeight
-                    label: "󰸉 Wallpaper"
-                    cursorShape: Qt.PointingHandCursor
-
-                    radius: Theme.moduleEdgeRadius - 5
-                    border.width: 2
-
-                    onClicked: {
-                        launcherModule.expanded = false;
-                        launcherModule.toggleWallpaperPicker();
-                    }
-                }
-            
-                ModuleButton {
-                    variant: "neutral"
-                    Layout.fillWidth: true
-                    implicitHeight: Theme.moduleHeight
-                    label: "󰌆 Bitwarden"
-                    cursorShape: Qt.PointingHandCursor
-
-                    radius: Theme.moduleEdgeRadius - 5
-                    border.width: 2
-                    
-                    onClicked: {
-                        launcherModule.expanded = false;
-                        launcherModule.toggleBitwardenMenu();
-                    }
-                }
-
-                ModuleButton {
-                    variant: "neutral"
-                    Layout.fillWidth: true
-                    implicitHeight: Theme.moduleHeight
-                    label: " Clipboard"
-                    cursorShape: Qt.PointingHandCursor
-
-                    radius: Theme.moduleEdgeRadius - 5
-                    border.width: 2
-
-                    onClicked: {
-                        launcherModule.expanded = false;
-                        launcherModule.toggleClipboardHistory();
-                    }
-                }
-
-            }
-
-
-            // App list
-            Rectangle {
-                id: appListRect
-                Layout.fillWidth: true
-                Layout.leftMargin: launcherModule.padding
-                Layout.rightMargin: launcherModule.padding
-                property int visibleItems: launcherModule.filteredApps.length > 0
-                    ? Math.min(launcherModule.filteredApps.length, launcherModule.maxVisible)
-                    : 0
-                implicitHeight: visibleItems > 0
-                    ? (visibleItems * Theme.listHeight + (visibleItems - 1) * 5) // item height + spacing
-                    : 0
-                color: "transparent"
-                radius: Theme.moduleEdgeRadius
-                clip: true
-                layer.enabled: true
-                layer.smooth: true
-                layer.effect: MultiEffect {
-                    maskEnabled: true
-                    maskSource: appListMask
-                }
-
-                Item {
-                    id: appListMask
-                    anchors.fill: parent
-                    visible: false
-                    layer.enabled: true
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: appListRect.radius
-                        color: "black"
-                    }
-                }
-
-                ListView {
-                    id: appList
-                    anchors.fill: parent
-                    model: launcherModule.filteredApps
-                    clip: true
-                    spacing: 5
-                    focus: false
-                    delegate: ModuleButton {
-                        required property var modelData
-                        required property int index
-
-                        id: appButton
-                        variant: isCurrent ? "light" : "neutral"
-                        noHoverColorChange: true
+                    spacing: launcherModule.padding
+                    Layout.leftMargin: launcherModule.padding
+                    Layout.rightMargin: launcherModule.padding
+                
+                    ModuleButton {
+                        variant: "neutral"
+                        Layout.fillWidth: true
+                        implicitHeight: Theme.moduleHeight
+                        label: "󰸉 Wallpaper"
                         cursorShape: Qt.PointingHandCursor
-                        width: appList.width
-                        height: Theme.listHeight
-                        radius: Theme.moduleEdgeRadius
+
+                        radius: Theme.moduleEdgeRadius - 5
                         border.width: 2
+
                         onClicked: {
-                            modelData.execute()
-                            launcherModule.expanded = false
+                            launcherModule.expanded = false;
+                            launcherModule.toggleWallpaperPicker();
                         }
+                    }
+                
+                    ModuleButton {
+                        variant: "neutral"
+                        Layout.fillWidth: true
+                        implicitHeight: Theme.moduleHeight
+                        label: "󰌆 Bitwarden"
+                        cursorShape: Qt.PointingHandCursor
 
-                        // Visual highlight when keyboard-selected or mouse-hovered
-                        property bool isCurrent: index === appList.currentIndex
-
-                        HoverHandler {
-                            onHoveredChanged: if (hovered) appList.currentIndex = index
+                        radius: Theme.moduleEdgeRadius - 5
+                        border.width: 2
+                        
+                        onClicked: {
+                            launcherModule.expanded = false;
+                            launcherModule.toggleBitwardenMenu();
                         }
+                    }
 
-                        RowLayout {
-                            anchors { fill: parent; rightMargin: 10 }
-                            spacing: 10
+                    ModuleButton {
+                        variant: "neutral"
+                        Layout.fillWidth: true
+                        implicitHeight: Theme.moduleHeight
+                        label: " Clipboard"
+                        cursorShape: Qt.PointingHandCursor
 
-                            Rectangle {
-                                color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 1.7)
-                                topLeftRadius: Theme.moduleEdgeRadius
-                                bottomLeftRadius: Theme.moduleEdgeRadius
-                                implicitWidth: Theme.listHeight
-                                implicitHeight: Theme.listHeight
+                        radius: Theme.moduleEdgeRadius - 5
+                        border.width: 2
 
-                                InverseRadius {
-                                    anchors.top: parent.top
-                                    anchors.left: parent.right
-                                    cornerPosition: "topLeft"
-                                    color: parent.color
-                                    size: 10
-                                }
+                        onClicked: {
+                            launcherModule.expanded = false;
+                            launcherModule.toggleClipboardHistory();
+                        }
+                    }
+                }
 
-                                InverseRadius {
-                                    anchors.bottom: parent.bottom
-                                    anchors.left: parent.right
-                                    cornerPosition: "bottomLeft"
-                                    color: parent.color
-                                    size: 10
-                                }
+                // App list
+                Rectangle {
+                    id: appListRect
+                    Layout.fillWidth: true
+                    Layout.leftMargin: launcherModule.padding
+                    Layout.rightMargin: launcherModule.padding
+                    property int visibleItems: launcherModule.filteredApps.length > 0
+                        ? Math.min(launcherModule.filteredApps.length, launcherModule.maxVisible)
+                        : 0
+                    implicitHeight: visibleItems > 0
+                        ? (visibleItems * Theme.listHeight + (visibleItems - 1) * 5) // item height + spacing
+                        : 0
+                    color: "transparent"
+                    radius: Theme.moduleEdgeRadius
+                    clip: true
+                    layer.enabled: true
+                    layer.smooth: true
+                    layer.effect: MultiEffect {
+                        maskEnabled: true
+                        maskSource: appListMask
+                    }
 
-                                IconImage {
-                                    anchors.centerIn: parent
-                                    implicitSize: Theme.moduleHeight - 10
-                                    source: modelData.icon !== "" ? Quickshell.iconPath(modelData.icon) : ""
-                                    visible: modelData.icon !== ""
-                                }
+                    Item {
+                        id: appListMask
+                        anchors.fill: parent
+                        visible: false
+                        layer.enabled: true
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: appListRect.radius
+                            color: "black"
+                        }
+                    }
+
+                    ListView {
+                        id: appList
+                        anchors.fill: parent
+                        model: launcherModule.filteredApps
+                        clip: true
+                        spacing: 5
+                        focus: false
+                        delegate: ModuleButton {
+                            required property var modelData
+                            required property int index
+
+                            id: appButton
+                            variant: isCurrent ? "light" : "neutral"
+                            noHoverColorChange: true
+                            cursorShape: Qt.PointingHandCursor
+                            width: appList.width
+                            height: Theme.listHeight
+                            radius: Theme.moduleEdgeRadius
+                            border.width: 2
+                            onClicked: {
+                                modelData.execute()
+                                launcherModule.expanded = false
                             }
 
-                            Text {
-                                Layout.fillWidth: true
-                                text: modelData.name
-                                color: textColor
-                                font.family: Theme.font
-                                font.pixelSize: Theme.fontSize
-                                font.bold: true
-                                elide: Text.ElideRight
+                            // Visual highlight when keyboard-selected or mouse-hovered
+                            property bool isCurrent: index === appList.currentIndex
+
+                            HoverHandler {
+                                onHoveredChanged: if (hovered) appList.currentIndex = index
+                            }
+
+                            RowLayout {
+                                anchors { fill: parent; rightMargin: 10 }
+                                spacing: 10
+
+                                Rectangle {
+                                    color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 1.7)
+                                    topLeftRadius: Theme.moduleEdgeRadius
+                                    bottomLeftRadius: Theme.moduleEdgeRadius
+                                    implicitWidth: Theme.listHeight
+                                    implicitHeight: Theme.listHeight
+
+                                    InverseRadius {
+                                        anchors.top: parent.top
+                                        anchors.left: parent.right
+                                        cornerPosition: "topLeft"
+                                        color: parent.color
+                                        size: 10
+                                    }
+
+                                    InverseRadius {
+                                        anchors.bottom: parent.bottom
+                                        anchors.left: parent.right
+                                        cornerPosition: "bottomLeft"
+                                        color: parent.color
+                                        size: 10
+                                    }
+
+                                    IconImage {
+                                        anchors.centerIn: parent
+                                        implicitSize: Theme.moduleHeight - 10
+                                        source: modelData.icon !== "" ? Quickshell.iconPath(modelData.icon) : ""
+                                        visible: modelData.icon !== ""
+                                    }
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: modelData.name
+                                    color: textColor
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize
+                                    font.bold: true
+                                    elide: Text.ElideRight
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // Search bar
-            ModuleButton {
-                Layout.fillWidth: true
-                Layout.leftMargin: launcherModule.padding
-                Layout.rightMargin: launcherModule.padding
-                Layout.topMargin: - launcherModule.padding
-                implicitHeight: Theme.listHeight
-                color: "transparent"
-                radius: Theme.moduleEdgeRadius
-                cursorShape: Qt.PointingHandCursor
+                // Search bar
+                ModuleButton {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: launcherModule.padding
+                    Layout.rightMargin: launcherModule.padding
+                    Layout.topMargin: - launcherModule.padding
+                    implicitHeight: Theme.listHeight
+                    color: "transparent"
+                    radius: Theme.moduleEdgeRadius
+                    cursorShape: Qt.PointingHandCursor
 
-                TextInput {
-                    id: searchField
-                    anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
-                    color: Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize * 1.3
-                    font.bold: true
-                    
-                    verticalAlignment: TextInput.AlignVCenter
-                    horizontalAlignment: TextInput.AlignHCenter 
-                    focus: true
-
-                    // Completely hide the default cursor
-                    cursorDelegate: Item {}
-
-                    // Dynamic flashing underline bar
-                    Rectangle {
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 2
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        
-                        // Match text width. If empty, default to a 20px dash.
-                        width: searchField.text.length > 0 ? searchField.contentWidth + 8 : placeholder.contentWidth + 8
-                        height: 2
-                        color: Theme.textPrimary 
-                        radius: 1 
-
-                        // Smoothly animate the bar growing/shrinking as you type
-                        Behavior on width {
-                            NumberAnimation { duration: 100; easing.type: Easing.OutQuad }
-                        }
-
-                        // The breathing animation
-                        SequentialAnimation on opacity {
-                            loops: Animation.Infinite
-                            running: searchField.activeFocus // Only breathe when focused
-                            
-                            NumberAnimation { 
-                                to: 0.3
-                                duration: 2000 // 1 second to exhale
-                                easing.type: Easing.InOutSine 
-                            }
-                            NumberAnimation { 
-                                to: 1.0 // Fades back to full opacity
-                                duration: 1000 // 1 second to inhale
-                                easing.type: Easing.InOutSine 
-                            }
-                        }
-                    }
-
-                    Text {
-                        id: placeholder
-                        anchors.centerIn: parent
-                        text: "search apps" 
-                        
-                        color: launcherModule.textColor
-                        opacity: 0.5 
-                        font.family: parent.font.family
-                        font.pixelSize: parent.font.pixelSize
+                    TextInput {
+                        id: searchField
+                        anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize * 1.3
                         font.bold: true
                         
-                        visible: searchField.text.length === 0
-                    }
-                    onTextEdited: {
-                        launcherModule.filterApps(text)
-                        appList.currentIndex = 0
-                    }
-                    Keys.onEscapePressed: launcherModule.expanded = false
-                    Keys.onReturnPressed: {
-                        var idx = appList.currentIndex >= 0 ? appList.currentIndex : 0
-                        if (launcherModule.filteredApps.length > 0) {
-                            launcherModule.filteredApps[idx].execute()
-                            launcherModule.expanded = false
+                        verticalAlignment: TextInput.AlignVCenter
+                        horizontalAlignment: TextInput.AlignHCenter 
+                        focus: true
+
+                        // Completely hide the default cursor
+                        cursorDelegate: Item {}
+
+                        // Dynamic flashing underline bar
+                        Rectangle {
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 2
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            
+                            // Match text width. If empty, default to a 20px dash.
+                            width: searchField.text.length > 0 ? searchField.contentWidth + 8 : placeholder.contentWidth + 8
+                            height: 2
+                            color: Theme.textPrimary 
+                            radius: 1 
+
+                            // Smoothly animate the bar growing/shrinking as you type
+                            Behavior on width {
+                                NumberAnimation { duration: 100; easing.type: Easing.OutQuad }
+                            }
+
+                            // The breathing animation
+                            SequentialAnimation on opacity {
+                                loops: Animation.Infinite
+                                running: searchField.activeFocus // Only breathe when focused
+                                
+                                NumberAnimation { 
+                                    to: 0.3
+                                    duration: 2000 // 1 second to exhale
+                                    easing.type: Easing.InOutSine 
+                                }
+                                NumberAnimation { 
+                                    to: 1.0 // Fades back to full opacity
+                                    duration: 1000 // 1 second to inhale
+                                    easing.type: Easing.InOutSine 
+                                }
+                            }
                         }
-                    }
-                    Keys.onDownPressed: {
-                        if (launcherModule.filteredApps.length > 0) {
-                            appList.currentIndex = Math.min(
-                                launcherModule.filteredApps.length - 1,
-                                appList.currentIndex + 1
-                            )
-                            appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
+
+                        Text {
+                            id: placeholder
+                            anchors.centerIn: parent
+                            text: "search apps" 
+                            
+                            color: launcherModule.textColor
+                            opacity: 0.5 
+                            font.family: parent.font.family
+                            font.pixelSize: parent.font.pixelSize
+                            font.bold: true
+                            
+                            visible: searchField.text.length === 0
                         }
-                    }
-                    Keys.onUpPressed: {
-                        if (appList.currentIndex > 0) {
-                            appList.currentIndex = appList.currentIndex - 1
-                            appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
-                        } else {
+                        onTextEdited: {
+                            launcherModule.filterApps(text)
                             appList.currentIndex = 0
+                        }
+                        Keys.onEscapePressed: launcherModule.expanded = false
+                        Keys.onReturnPressed: {
+                            var idx = appList.currentIndex >= 0 ? appList.currentIndex : 0
+                            if (launcherModule.filteredApps.length > 0) {
+                                launcherModule.filteredApps[idx].execute()
+                                launcherModule.expanded = false
+                            }
+                        }
+                        Keys.onDownPressed: {
+                            if (launcherModule.filteredApps.length > 0) {
+                                appList.currentIndex = Math.min(
+                                    launcherModule.filteredApps.length - 1,
+                                    appList.currentIndex + 1
+                                )
+                                appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
+                            }
+                        }
+                        Keys.onUpPressed: {
+                            if (appList.currentIndex > 0) {
+                                appList.currentIndex = appList.currentIndex - 1
+                                appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
+                            } else {
+                                appList.currentIndex = 0
+                            }
                         }
                     }
                 }
-            }
             }
         }
     }

@@ -464,10 +464,14 @@ ExpandableModule {
                                         brightness: -delegateRoot.absDist * 0.3
                                         contrast: -delegateRoot.absDist * 0.7
                                         shadowEnabled: true
-                                        shadowColor: Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.2)
+                                        shadowColor: delegateRoot.absDist > 0 ? Qt.rgba(0, 0, 0, 0.6) : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.2)
                                         shadowBlur: 0.8
                                         shadowVerticalOffset: 0
                                         shadowHorizontalOffset: 0
+
+                                        Behavior on shadowColor {
+                                            ColorAnimation { duration: 150 }
+                                        }
                                     }
 
                                     Loader {
@@ -504,7 +508,7 @@ ExpandableModule {
 
                                         Rectangle {
                                             anchors.fill: parent
-                                            radius: 12
+                                            radius: 15
                                             color: "black"
                                             antialiasing: true
                                         }
