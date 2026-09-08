@@ -16,12 +16,15 @@ PillBarButton {
 
     Process {
         id: startProc
-        command: ["bash", "-c", "wvkbd-mobintl -R 10 -L 300 --fn \"RobotoMono Nerd Font 20\" --bg 604c6c98 --text 2a202f --fg d5bfe2 --fg-sp 2a202f --text-sp d5bfe2 --press a05dc6 --press-sp a05dc6"]
+        command: ["bash", "-c", "wvkbd-mobintl -R 10 -L 260 -W 960 --fn \"RobotoMono Nerd Font 14\" --bg 1f1f1ff0 --text 1f1f1f --fg e5c2f7 --fg-sp 2d2d2d --text-sp e5c2f7 --press b886d4 --press-sp a05dc6"]
+        onExited: {
+            virtualKbrd.active = false;
+        }
     }
 
     Process {
         id: killProc
-        command: ["bash", "-c", "pkill wvkbd-mobint"]
+        command: ["bash", "-c", "pkill -f wvkbd"]
     }
 
     onClicked: {

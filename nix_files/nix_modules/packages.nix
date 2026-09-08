@@ -142,7 +142,11 @@
     })
 
     # -- keyboard --
-    wvkbd # On-screen keyboard
+    (wvkbd.overrideAttrs (oldAttrs: {
+      patches = (oldAttrs.patches or [ ]) ++ [
+        ./patches/wvkbd-width.patch
+      ];
+    })) # On-screen keyboard with custom width support
 
     # -- Wallpapers & Screen Locking --
     hyprpaper # Wallpaper utility
