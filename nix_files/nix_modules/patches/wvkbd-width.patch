@@ -1,0 +1,250 @@
+diff --git a/drw.c b/drw.c
+index 89ec8d8..c83869a 100644
+--- a/drw.c
++++ b/drw.c
+@@ -233,6 +233,46 @@ drw_over_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+     drw_do_rectangle(d, color, x, y, w, h, true, rounding);
+ }
+ 
++void
++drw_draw_shadow(struct drwsurf *ds, uint32_t x, uint32_t y,
++                uint32_t w, uint32_t h, int rounding,
++                int blur, int offset_y, double max_alpha)
++{
++    drwsurf_flip(ds);
++    struct drwbuf *d = ds->back_buffer;
++    drwsurf_damage(ds, 0, 0, ds->width, ds->height);
++
++    cairo_save(d->cairo);
++    cairo_set_operator(d->cairo, CAIRO_OPERATOR_OVER);
++    cairo_set_antialias(d->cairo, CAIRO_ANTIALIAS_DEFAULT);
++
++    double degrees = M_PI / 180.0;
++    int steps = blur;
++    for (int i = steps; i >= 1; i--) {
++        double factor = (double)(steps - i + 1) / (double)steps;
++        double alpha = max_alpha * factor * factor / (double)steps * 2.2;
++        if (alpha > 1.0) alpha = 1.0;
++
++        double r = rounding + i;
++        double sx = (double)x - i;
++        double sy = (double)y - i + offset_y;
++        double sw = (double)w + 2 * i;
++        double sh = (double)h + 2 * i;
++
++        cairo_new_sub_path(d->cairo);
++        cairo_arc(d->cairo, sx + sw - r, sy + r, r, -90 * degrees, 0 * degrees);
++        cairo_arc(d->cairo, sx + sw - r, sy + sh - r, r, 0 * degrees, 90 * degrees);
++        cairo_arc(d->cairo, sx + r, sy + sh - r, r, 90 * degrees, 180 * degrees);
++        cairo_arc(d->cairo, sx + r, sy + r, r, 180 * degrees, 270 * degrees);
++        cairo_close_path(d->cairo);
++
++        cairo_set_source_rgba(d->cairo, 0.0, 0.0, 0.0, alpha);
++        cairo_fill(d->cairo);
++    }
++
++    cairo_restore(d->cairo);
++}
++
+ uint32_t
+ setup_buffer(struct drwsurf *drwsurf, struct drwbuf *drwbuf)
+ {
+diff --git a/drw.h b/drw.h
+index 060cb00..17c19e5 100644
+--- a/drw.h
++++ b/drw.h
+@@ -49,6 +49,9 @@ void drw_fill_rectangle(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
+                         uint32_t w, uint32_t h, int rounding);
+ void drw_over_rectangle(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
+                         uint32_t w, uint32_t h, int rounding);
++void drw_draw_shadow(struct drwsurf *ds, uint32_t x, uint32_t y,
++                     uint32_t w, uint32_t h, int rounding,
++                     int blur, int offset_y, double max_alpha);
+ 
+ void drw_draw_text(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
+                    uint32_t w, uint32_t h, uint32_t b, const char *label,
+diff --git a/keyboard.c b/keyboard.c
+index 8950fd0..0130d94 100644
+--- a/keyboard.c
++++ b/keyboard.c
+@@ -202,12 +202,35 @@ kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list,
+ }
+ 
+ void
+-kbd_init_layout(struct layout *l, uint32_t width, uint32_t height)
++kbd_init_layout(struct layout *l, struct kbd *kb)
+ {
+-    uint32_t x = 0, y = 0;
++    uint32_t pad = 8;
++    uint32_t card_x = 0;
++    uint32_t card_y = 0;
++    uint32_t card_w = kb->w;
++    uint32_t card_h = kb->h;
++
++    if (kb->shadow) {
++        card_x = 16;
++        card_y = 14;
++        card_w = (kb->w > 32) ? kb->w - 32 : kb->w;
++        card_h = (kb->h > 32) ? kb->h - 32 : kb->h;
++    }
++
++    kb->card_x = card_x;
++    kb->card_y = card_y;
++    kb->card_w = card_w;
++    kb->card_h = card_h;
++
++    uint32_t avail_w = (card_w > pad * 2) ? card_w - (pad * 2) : card_w;
++    uint32_t avail_h = (card_h > pad * 2) ? card_h - (pad * 2) : card_h;
++    uint32_t start_x = card_x + pad;
++    uint32_t start_y = card_y + pad;
++
++    uint32_t x = start_x, y = start_y;
+     uint8_t rows = kbd_get_rows(l);
+ 
+-    l->keyheight = height / rows;
++    l->keyheight = avail_h / rows;
+ 
+     struct key *k = l->keys;
+     double rowlength = kbd_get_row_length(k);
+@@ -215,16 +238,16 @@ kbd_init_layout(struct layout *l, uint32_t width, uint32_t height)
+     while (k->type != Last) {
+         if (k->type == EndRow) {
+             y += l->keyheight;
+-            x = 0;
++            x = start_x;
+             rowwidth = 0.0;
+             rowlength = kbd_get_row_length(k + 1);
+         } else if (k->width > 0) {
+             k->x = x;
+             k->y = y;
+-            k->w = ((double)width / rowlength) * k->width;
++            k->w = ((double)avail_w / rowlength) * k->width;
+             x += k->w;
+             rowwidth += k->width;
+-            if (x < (rowwidth / rowlength) * (double)width) {
++            if (x < start_x + (rowwidth / rowlength) * (double)avail_w) {
+                 k->w++;
+                 x++;
+             }
+@@ -694,7 +717,11 @@ kbd_draw_layout(struct kbd *kb)
+     if (kb->debug)
+         fprintf(stderr, "Draw layout\n");
+ 
+-    drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
++    drw_do_clear(d, 0, 0, kb->w, kb->h);
++    if (kb->shadow) {
++        drw_draw_shadow(d, kb->card_x, kb->card_y, kb->card_w, kb->card_h, 18, 16, 5, 0.55);
++    }
++    drw_fill_rectangle(d, kb->schemes[0].bg, kb->card_x, kb->card_y, kb->card_w, kb->card_h, kb->schemes[0].rounding > 0 ? 18 : 0);
+ 
+     while (next_key->type != Last) {
+         if ((next_key->type == Pad) || (next_key->type == EndRow)) {
+@@ -728,7 +755,7 @@ kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount)
+                 fprintf(stderr, "Initialising unnamed layout %d, keymap %s\n",
+                         i, layouts[i].keymap_name);
+         }
+-        kbd_init_layout(&layouts[i], kb->w, kb->h);
++        kbd_init_layout(&layouts[i], kb);
+     }
+     kbd_draw_layout(kb);
+ }
+diff --git a/keyboard.h b/keyboard.h
+index e39f6cf..5682d9d 100644
+--- a/keyboard.h
++++ b/keyboard.h
+@@ -101,6 +101,8 @@ struct kbd {
+ 
+ 	bool print;
+ 	bool print_intersect;
++	bool shadow;
++	uint32_t card_x, card_y, card_w, card_h;
+ 	uint32_t w, h;
+ 	double scale;
+ 	double preferred_scale, preferred_fractional_scale;
+@@ -135,7 +137,7 @@ void draw_over_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
+ 
+ void kbd_init(struct kbd *kb, struct layout *layouts,
+               char *layer_names_list, char *landscape_layer_names_list);
+-void kbd_init_layout(struct layout *l, uint32_t width, uint32_t height);
++void kbd_init_layout(struct layout *l, struct kbd *kb);
+ struct key *kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y);
+ size_t kbd_get_layer_index(struct kbd *kb, struct layout *l);
+ void kbd_unpress_key(struct kbd *kb, uint32_t time);
+diff --git a/main.c b/main.c
+index 765abda..2aa0e38 100644
+--- a/main.c
++++ b/main.c
+@@ -74,6 +74,7 @@ static uint32_t height, normal_height, landscape_height;
+ static int rounding = DEFAULT_ROUNDING;
+ static bool hidden = false;
+ static bool im_auto = false;
++static uint32_t custom_width = 0;
+ 
+ /* event handler prototypes */
+ static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
+@@ -565,8 +566,19 @@ redimension_keyboard()
+         height = normal_height;
+     }
+ 
+-    keyboard.w = available_width;
+-    keyboard.h = height;
++    if (custom_width > 0 && custom_width < available_width) {
++        keyboard.shadow = true;
++        keyboard.w = custom_width + 32;
++        keyboard.h = height + 32;
++        anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
++    } else {
++        keyboard.shadow = false;
++        keyboard.w = available_width;
++        keyboard.h = height;
++        anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
++                 ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
++                 ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
++    }
+     keyboard.layout = &keyboard.layouts[layer];
+     keyboard.layer_index = 0;
+     keyboard.prevlayout = keyboard.layout;
+@@ -663,6 +675,7 @@ usage(char *argv0)
+             "  -O          - Print intersected keys to standard output\n");
+     fprintf(stderr, "  -H [int]    - Height in pixels\n");
+     fprintf(stderr, "  -L [int]    - Landscape height in pixels\n");
++    fprintf(stderr, "  -W [int]    - Width in pixels\n");
+     fprintf(stderr, "  -R [int]    - Rounding radius in pixels\n");
+     fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
+     fprintf(stderr, "  --hidden    - Start hidden (send SIGUSR2 to show)\n");
+@@ -787,8 +800,12 @@ show()
+     layer_surface = zwlr_layer_shell_v1_get_layer_surface(
+         layer_shell, draw_surf.surf, current_output_data, layer, namespace);
+ 
+-    zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
++    uint32_t set_w = (custom_width > 0 && custom_width < available_width) ? keyboard.w : 0;
++    zwlr_layer_surface_v1_set_size(layer_surface, set_w, keyboard.h);
+     zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
++    if (custom_width > 0 && custom_width < available_width) {
++        zwlr_layer_surface_v1_set_margin(layer_surface, 0, 0, 10, 0);
++    }
+     if (keyboard.exclusive) {
+         zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
+     }
+@@ -870,6 +887,8 @@ main(int argc, char **argv)
+         normal_height = atoi(tmp);
+     if ((tmp = getenv("WVKBD_LANDSCAPE_HEIGHT")))
+         landscape_height = atoi(tmp);
++    if ((tmp = getenv("WVKBD_WIDTH")))
++        custom_width = atoi(tmp);
+ 
+     /* keyboard settings */
+     keyboard.layers = (enum layout_id *)&layers;
+@@ -1020,6 +1039,12 @@ main(int argc, char **argv)
+                 exit(1);
+             }
+             height = landscape_height = atoi(argv[++i]);
++        } else if (!strcmp(argv[i], "-W") || !strcmp(argv[i], "--width")) {
++            if (i >= argc - 1) {
++                usage(argv[0]);
++                exit(1);
++            }
++            custom_width = atoi(argv[++i]);
+         } else if (!strcmp(argv[i], "-R")) {
+             if (i >= argc - 1) {
+                 usage(argv[0]);
