@@ -26,6 +26,9 @@ Canvas {
     // Values closer to 0 make the corner "sharper" but perfectly smooth. 0.15 is roughly Apple's continuous corner. 0.4477 is roughly a perfect circle.
     property real smoothTolerance: 0.15
 
+    // Round the outer corner (the sharp vertex)
+    property real outerRadius: 0
+
     // Ensure smooth curved edges
     antialiasing: true
     smooth: true
@@ -34,6 +37,7 @@ Canvas {
     onCornerPositionChanged: requestPaint()
     onSmoothCurveChanged: requestPaint()
     onSmoothToleranceChanged: requestPaint()
+    onOuterRadiusChanged: requestPaint()
 
     onPaint: {
         var ctx = getContext("2d");
@@ -47,35 +51,78 @@ Canvas {
         ctx.scale(scaleX, scaleY);
         
         var c = smoothCurve ? smoothTolerance : 0.447715;
+        var rx = outerRadius > 0 ? Math.min(0.5, outerRadius / scaleX) : 0;
+        var ry = outerRadius > 0 ? Math.min(0.5, outerRadius / scaleY) : 0;
 
         if (cornerPosition === "topLeft") {
-            ctx.moveTo(0, 0);
-            ctx.lineTo(1, 0);
-            if (smoothCurve) ctx.bezierCurveTo(c, 0, 0, c, 0, 1);
-            else ctx.arc(1, 1, 1, 1.5 * Math.PI, Math.PI, true);
-            ctx.lineTo(0, 1);
-            ctx.closePath();
+            if (rx > 0) {
+                ctx.moveTo(rx, 0);
+                ctx.lineTo(1, 0);
+                if (smoothCurve) ctx.bezierCurveTo(c, 0, 0, c, 0, 1);
+                else ctx.arc(1, 1, 1, 1.5 * Math.PI, Math.PI, true);
+                ctx.lineTo(0, ry);
+                ctx.arc(rx, ry, rx, Math.PI, 1.5 * Math.PI, false);
+                ctx.closePath();
+            } else {
+                ctx.moveTo(0, 0);
+                ctx.lineTo(1, 0);
+                if (smoothCurve) ctx.bezierCurveTo(c, 0, 0, c, 0, 1);
+                else ctx.arc(1, 1, 1, 1.5 * Math.PI, Math.PI, true);
+                ctx.lineTo(0, 1);
+                ctx.closePath();
+            }
         } else if (cornerPosition === "topRight") {
-            ctx.moveTo(1, 0);
-            ctx.lineTo(0, 0);
-            if (smoothCurve) ctx.bezierCurveTo(1 - c, 0, 1, c, 1, 1);
-            else ctx.arc(0, 1, 1, 1.5 * Math.PI, 2.0 * Math.PI, false);
-            ctx.lineTo(1, 1);
-            ctx.closePath();
+            if (rx > 0) {
+                ctx.moveTo(1 - rx, 0);
+                ctx.lineTo(0, 0);
+                if (smoothCurve) ctx.bezierCurveTo(1 - c, 0, 1, c, 1, 1);
+                else ctx.arc(0, 1, 1, 1.5 * Math.PI, 2.0 * Math.PI, false);
+                ctx.lineTo(1, 1);
+                ctx.lineTo(1, ry);
+                ctx.arc(1 - rx, ry, rx, 0, 1.5 * Math.PI, true);
+                ctx.closePath();
+            } else {
+                ctx.moveTo(1, 0);
+                ctx.lineTo(0, 0);
+                if (smoothCurve) ctx.bezierCurveTo(1 - c, 0, 1, c, 1, 1);
+                else ctx.arc(0, 1, 1, 1.5 * Math.PI, 2.0 * Math.PI, false);
+                ctx.lineTo(1, 1);
+                ctx.closePath();
+            }
         } else if (cornerPosition === "bottomLeft") {
-            ctx.moveTo(0, 1);
-            ctx.lineTo(1, 1);
-            if (smoothCurve) ctx.bezierCurveTo(c, 1, 0, 1 - c, 0, 0);
-            else ctx.arc(1, 0, 1, 0.5 * Math.PI, Math.PI, false);
-            ctx.lineTo(0, 0);
-            ctx.closePath();
+            if (rx > 0) {
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, 1 - ry);
+                ctx.arc(rx, 1 - ry, rx, Math.PI, 0.5 * Math.PI, true);
+                ctx.lineTo(1, 1);
+                if (smoothCurve) ctx.bezierCurveTo(c, 1, 0, 1 - c, 0, 0);
+                else ctx.arc(1, 0, 1, 0.5 * Math.PI, Math.PI, false);
+                ctx.closePath();
+            } else {
+                ctx.moveTo(0, 1);
+                ctx.lineTo(1, 1);
+                if (smoothCurve) ctx.bezierCurveTo(c, 1, 0, 1 - c, 0, 0);
+                else ctx.arc(1, 0, 1, 0.5 * Math.PI, Math.PI, false);
+                ctx.lineTo(0, 0);
+                ctx.closePath();
+            }
         } else if (cornerPosition === "bottomRight") {
-            ctx.moveTo(1, 1);
-            ctx.lineTo(0, 1);
-            if (smoothCurve) ctx.bezierCurveTo(1 - c, 1, 1, 1 - c, 1, 0);
-            else ctx.arc(0, 0, 1, 0.5 * Math.PI, 0, true);
-            ctx.lineTo(1, 0);
-            ctx.closePath();
+            if (rx > 0) {
+                ctx.moveTo(1, 0);
+                ctx.lineTo(1, 1 - ry);
+                ctx.arc(1 - rx, 1 - ry, rx, 0, 0.5 * Math.PI, false);
+                ctx.lineTo(0, 1);
+                if (smoothCurve) ctx.bezierCurveTo(1 - c, 1, 1, 1 - c, 1, 0);
+                else ctx.arc(0, 0, 1, 0.5 * Math.PI, 0, true);
+                ctx.closePath();
+            } else {
+                ctx.moveTo(1, 1);
+                ctx.lineTo(0, 1);
+                if (smoothCurve) ctx.bezierCurveTo(1 - c, 1, 1, 1 - c, 1, 0);
+                else ctx.arc(0, 0, 1, 0.5 * Math.PI, 0, true);
+                ctx.lineTo(1, 0);
+                ctx.closePath();
+            }
         }
         ctx.restore();
         ctx.fill();

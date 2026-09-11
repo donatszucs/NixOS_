@@ -22,7 +22,7 @@ ModuleButton {
     signal toggleClipboardHistory()
 
     property int  panelWidth:  400
-    property int  maxVisible:  5
+    property int  maxVisible:  6
     property int  padding:    10
 
     // JS array of DesktopEntry objects matching the current search

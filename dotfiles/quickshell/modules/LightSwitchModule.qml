@@ -28,7 +28,6 @@ ExpandableModule {
     ColumnLayout {
         id: contentColumn
         anchors {
-            left: parent.left
             right: parent.right
             top: parent.top
             topMargin: 0
@@ -37,7 +36,7 @@ ExpandableModule {
             leftMargin: root.sideMargin
         }
 
-        spacing: 10
+        spacing: 0
 
         PillBarButton {
             id: labelText
@@ -48,7 +47,7 @@ ExpandableModule {
             variant: "neutral"
             
             Layout.fillWidth: true
-            Layout.alignment: Qt.AlignCenter
+            Layout.alignment: Qt.AlignRight
 
             percent: SharedState.lightActive ? SharedState.lightBrightness : 0
             pillText: SharedState.lightActive
@@ -100,6 +99,16 @@ ExpandableModule {
             Layout.bottomMargin: root.expanded ? 10 : 0
             spacing: 0
 
+            InverseRadius {
+                id: colorRowInverseRadius
+                cornerPosition: "topLeft"
+                Layout.alignment: Qt.AlignTop
+                Layout.rightMargin: -(130 / 2)
+
+                color: resetButton.baseColor
+                size: 130 / 2
+                outerRadius: Theme.moduleEdgeRadius
+            }
             // ── Colour wheel ────────────────────────────────────────────
             Item {
                 id: colorWheelArea
@@ -151,7 +160,7 @@ ExpandableModule {
                         }
 
                         // Outer border connecting flush to the reset button and fillets (radius 65)
-                        var btnC = resetButton.color
+                        var btnC = resetButton.baseColor
                         var strokeRgba = "rgba(" + Math.round(btnC.r * 255) + "," + Math.round(btnC.g * 255) + "," + Math.round(btnC.b * 255) + "," + btnC.a + ")"
 
                         ctx.beginPath()
@@ -224,7 +233,7 @@ ExpandableModule {
                 InverseRadius {
                     id: topRightRadius
                     cornerPosition: "topRight"
-                    color: resetButton.color
+                    color: resetButton.baseColor
                     size: 130 / 2
 
                     anchors.right: parent.left
@@ -233,7 +242,7 @@ ExpandableModule {
 
                 InverseRadius {
                     cornerPosition: "bottomRight"
-                    color: resetButton.color
+                    color: resetButton.baseColor
                     size: 130 / 2
 
                     anchors.right: parent.left
