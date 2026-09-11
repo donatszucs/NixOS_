@@ -17,6 +17,7 @@ QtObject {
     readonly property color statusDisabled:     Qt.rgba(palettePaper.r * 0.7, palettePaper.g * 0.7, palettePaper.b * 0.7, 0.7)
 
     readonly property color divider:        Qt.rgba(1,1,1,0.08)
+    readonly property color bgBlurColor:    Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.15)
 
     // ── Variant palettes ─────────────────────────────────────────────
     // Each palette exposes: top, bottom, hoverTop, hoverBottom, text

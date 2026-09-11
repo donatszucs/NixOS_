@@ -3,6 +3,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Effects
 
 import "../elements"
 
@@ -318,59 +319,83 @@ ExpandableModule {
                     }
                 }
 
-                ModuleButton {
-                    color: Qt.rgba(1, 1, 1, 0.04)
+                Rectangle {
+                    color: Qt.rgba(1, 1, 1, 0.1)
                     radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
                     implicitHeight: 200
 
-                    Text {
-                        id: hourlyTitle
-                        text: "Hourly"
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
-                        font.bold: true
-                        anchors.top: parent.top
-                        anchors.topMargin: 10
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-
-                    Text {
-                        text: "Reset"
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize - 2
-                        opacity: graphFlickable.contentX > 10 ? 0.6 : 0
+                    Rectangle {
+                        id: hourlyTopBar
+                        anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.rightMargin: 15
                         anchors.top: parent.top
-                        anchors.topMargin: 12
-                        visible: opacity > 0
-                        Behavior on opacity { NumberAnimation { duration: 200 } }
-                        
-                        MouseArea {
-                            anchors.fill: parent
-                            anchors.margins: -10
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                resetAnim.start();
+                        height: 35
+                        color: Theme.bgBlurColor
+
+                        topLeftRadius: parent.radius
+                        topRightRadius: parent.radius
+                        bottomLeftRadius: 0
+                        bottomRightRadius: 0
+
+                        Text {
+                            id: hourlyTitle
+                            text: "Hourly"
+                            color: Theme.textPrimary
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize
+                            font.bold: true
+                            anchors.centerIn: parent
+                        }
+
+                        Text {
+                            text: "Reset"
+                            color: Theme.textPrimary
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize - 2
+                            opacity: graphFlickable.contentX > 10 ? 0.6 : 0
+                            anchors.right: parent.right
+                            anchors.rightMargin: 15
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: 200 } }
+                            
+                            MouseArea {
+                                anchors.fill: parent
+                                anchors.margins: -10
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    resetAnim.start();
+                                }
+                            }
+
+                            NumberAnimation {
+                                id: resetAnim
+                                target: graphFlickable
+                                property: "contentX"
+                                to: 0
+                                duration: 250
+                                easing.type: Easing.OutCubic
                             }
                         }
+                    }
 
-                        NumberAnimation {
-                            id: resetAnim
-                            target: graphFlickable
-                            property: "contentX"
-                            to: 0
-                            duration: 250
-                            easing.type: Easing.OutCubic
-                        }
+                    InverseRadius {
+                        anchors.top: hourlyTopBar.bottom
+                        anchors.left: hourlyTopBar.left
+                        color: hourlyTopBar.color
+                    }
+
+                    InverseRadius {
+                        cornerPosition: "topRight"
+                        anchors.top: hourlyTopBar.bottom
+                        anchors.right: hourlyTopBar.right
+                        color: hourlyTopBar.color
                     }
 
                     Flickable {
                         id: graphFlickable
-                        anchors.top: hourlyTitle.bottom
+                        anchors.top: hourlyTopBar.bottom
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -573,49 +598,75 @@ ExpandableModule {
                 }
 
                 Rectangle {
-                    color: Qt.rgba(1, 1, 1, 0.04)
+                    color: Qt.rgba(1, 1, 1, 0.1)
                     radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
                     implicitHeight: 200
+                    clip: true
 
-                    Text {
-                        id: dailyTitle
-                        text: "10-Day"
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
-                        font.bold: true
-                        anchors.top: parent.top
-                        anchors.topMargin: 10
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-
-                    Text {
-                        text: "Reset"
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize - 2
-                        opacity: carousel.currentIndex > 2 ? 0.6 : 0
+                    Rectangle {
+                        id: dailyTopBar
+                        anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.rightMargin: 15
                         anchors.top: parent.top
-                        anchors.topMargin: 12
-                        visible: opacity > 0
-                        Behavior on opacity { NumberAnimation { duration: 200 } }
-                        
-                        MouseArea {
-                            anchors.fill: parent
-                            anchors.margins: -10
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                carousel.currentIndex = 2;
+                        height: 35
+                        color: Theme.bgBlurColor
+
+                        radius: parent.radius
+                        topLeftRadius: parent.radius
+                        topRightRadius: parent.radius
+                        bottomLeftRadius: 0
+                        bottomRightRadius: 0
+
+                        Text {
+                            id: dailyTitle
+                            text: "10-Day"
+                            color: Theme.textPrimary
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize
+                            font.bold: true
+                            anchors.centerIn: parent
+                        }
+
+                        Text {
+                            text: "Reset"
+                            color: Theme.textPrimary
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize - 2
+                            opacity: carousel.currentIndex > 2 ? 0.6 : 0
+                            anchors.right: parent.right
+                            anchors.rightMargin: 15
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: opacity > 0
+                            Behavior on opacity { NumberAnimation { duration: 200 } }
+                            
+                            MouseArea {
+                                anchors.fill: parent
+                                anchors.margins: -10
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    carousel.currentIndex = 2;
+                                }
                             }
                         }
                     }
 
+                    InverseRadius {
+                        anchors.top: dailyTopBar.bottom
+                        anchors.left: dailyTopBar.left
+                        color: dailyTopBar.color
+                    }
+
+                    InverseRadius {
+                        cornerPosition: "topRight"
+                        anchors.top: dailyTopBar.bottom
+                        anchors.right: dailyTopBar.right
+                        color: dailyTopBar.color
+                    }
+
                     ListView {
                         id: carousel
-                        anchors.top: dailyTitle.bottom
+                        anchors.top: dailyTopBar.bottom
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -687,6 +738,22 @@ ExpandableModule {
                                 anchors.fill: parent
                                 color: Theme.palettePaper
                                 radius: Theme.moduleEdgeRadius / 2
+
+                                layer.enabled: true
+                                layer.smooth: true
+                                layer.effect: MultiEffect {
+                                    brightness: -delegateRoot.absDist * 0.3
+                                    contrast: -delegateRoot.absDist * 0.7
+                                    shadowEnabled: true
+                                    shadowColor: Qt.rgba(0, 0, 0, 0.6)
+                                    shadowBlur: 0.8
+                                    shadowVerticalOffset: 0
+                                    shadowHorizontalOffset: 0
+
+                                    Behavior on shadowColor {
+                                        ColorAnimation { duration: 150 }
+                                    }
+                                }
                                 
                                 ColumnLayout {
                                     id: dailyCol
@@ -733,14 +800,6 @@ ExpandableModule {
                                         font.pixelSize: Theme.fontSize - 2
                                         Layout.alignment: Qt.AlignHCenter
                                     }
-                                }
-                                
-                                // Darkening shadow for distant cards
-                                Rectangle {
-                                    anchors.fill: parent
-                                    radius: Theme.moduleEdgeRadius / 2
-                                    color: "black"
-                                    opacity: 0.6 * delegateRoot.absDist
                                 }
                             }
                         

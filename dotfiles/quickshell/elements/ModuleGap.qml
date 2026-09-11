@@ -34,7 +34,7 @@ Rectangle {
     property bool smoothCurve: false
     property real smoothTolerance: 0.1
     // The physical gap size between modules
-    implicitWidth: 5
+    implicitWidth: 0
     implicitHeight: Theme.moduleHeight
 
     // LEFT-side corner — concave curve for the LEFT module's expansion
