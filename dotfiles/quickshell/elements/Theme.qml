@@ -34,7 +34,7 @@ QtObject {
         readonly property color borderHover:    Qt.lighter(border, 1.4)
         readonly property color borderPressed:  Qt.darker(border, 1.4)
         
-        readonly property color pillTrack:       Qt.rgba(0, 0, 0, 0.5)
+        readonly property color pillTrack:       Qt.rgba(0, 0, 0, 0.1)
         readonly property color pillFill:        Qt.darker(palettePaper, 2.3)
         readonly property color pillBorder:      Qt.rgba(1, 1, 1, 0.2)
         readonly property color pillText:        text

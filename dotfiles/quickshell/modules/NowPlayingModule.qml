@@ -1,4 +1,4 @@
-// Now Playing module — title + hover-to-reveal play/pause & skip controls
+// Now Playing module — title + hover-to-reveal controls, scrubber & multi-player carousel
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.Mpris
@@ -17,9 +17,22 @@ ExpandableModule {
 
     property string titleText: "Nothing playing"
     property string authorText: "Unknown artist"
-    property string playPauseIcon: "󰐊"
-    property bool isPlaying: false
-    expanded: isPlaying && expandHover.hovered
+    property string albumText: ""
+    property string playPauseIcon: ""
+
+    // hasPlayer reflects if a valid player exists
+    property bool hasPlayer: currentPlayer !== null
+    // isPlaying retained for compatibility with ExpandableModule & Bar
+    property bool isPlaying: hasPlayer
+
+    // Optimistic playback state for instant 0ms user feedback
+    property bool _optimisticPlaying: false
+    property bool _hasOptimisticPlaying: false
+    readonly property bool isMediaPlaying: _hasOptimisticPlaying
+        ? _optimisticPlaying
+        : (currentPlayer ? currentPlayer.isPlaying : false)
+
+    expanded: hasPlayer && expandHover.hovered
 
     property var currentPlayer: null
     property var manualPlayerOverride: null
@@ -29,10 +42,48 @@ ExpandableModule {
     // Guard flag to prevent carousel ↔ player feedback loops
     property bool _syncingCarousel: false
 
-    property real expandedHeight: 220
+    // Timeline / Scrubbing
+    property real currentPosition: 0
+    property real trackLength: 0
+    property bool scrubbing: false
+    property real _savedVolume: 0.5
 
-    implicitHeight: expanded ? expandedHeight + 20 : Theme.moduleHeight
-    implicitWidth: expanded ? 270 : titleBtn.implicitWidth + 10
+    property real expandedHeight: 290
+
+    implicitHeight: expanded ? expandedHeight : Theme.moduleHeight
+    implicitWidth: expanded ? 280 : titleBtn.implicitWidth + 10
+
+    // ── Helper: time formatter (seconds -> mm:ss) ────────────────
+    function formatTime(seconds) {
+        if (isNaN(seconds) || seconds === undefined || seconds === null || seconds < 0) return "0:00"
+        var totalSec = Math.floor(seconds)
+        var mins = Math.floor(totalSec / 60)
+        var secs = totalSec % 60
+        return mins + ":" + (secs < 10 ? "0" : "") + secs
+    }
+
+    // ── Helper: player icon resolver ────────────────────────────
+    function getPlayerIcon(player) {
+        if (!player) return "󰎆"
+        var id = ((player.identity || "") + " " + (player.desktopEntry || "")).toLowerCase()
+        if (id.indexOf("spotify") !== -1) return ""
+        if (id.indexOf("zen") !== -1) return "󰈹"
+        if (id.indexOf("firefox") !== -1) return "󰈹"
+        if (id.indexOf("chrome") !== -1 || id.indexOf("chromium") !== -1) return ""
+        if (id.indexOf("brave") !== -1) return "󰮊"
+        if (id.indexOf("mpv") !== -1 || id.indexOf("vlc") !== -1) return "󰕼"
+        return "󰎆"
+    }
+
+    // ── Helper: player display name ─────────────────────────────
+    function getPlayerName(player) {
+        if (!player) return ""
+        var id = player.identity || player.desktopEntry || "Media"
+        if (id.toLowerCase().indexOf("zen") !== -1) return "Zen"
+        if (id.toLowerCase().indexOf("spotify") !== -1) return "Spotify"
+        if (id.toLowerCase().indexOf("firefox") !== -1) return "Firefox"
+        return id
+    }
 
     // ── Helper: reset to idle state ──────────────────────────────
     function resetState() {
@@ -40,25 +91,30 @@ ExpandableModule {
         manualPlayerOverride = null
         playerCount = 0
         playersList = []
-        isPlaying = false
         titleText = "Nothing playing"
         authorText = "Unknown artist"
-        playPauseIcon = "󰐊"
+        albumText = ""
+        playPauseIcon = ""
+        currentPosition = 0
+        trackLength = 0
+        _hasOptimisticPlaying = false
     }
 
     // ── Helper: sync UI from currentPlayer ──────────────────────
     function updateFromPlayer() {
         if (!currentPlayer) {
-            isPlaying = false
-            titleText = "Nothing playing"
-            authorText = "Unknown artist"
-            playPauseIcon = "󰐊"
+            resetState()
             return
         }
-        playPauseIcon = currentPlayer.isPlaying ? "󰏤" : "󰐊"
-        isPlaying = true
-        titleText = currentPlayer.trackTitle || "Nothing playing"
-        authorText = currentPlayer.trackArtist || "Unknown artist"
+        _hasOptimisticPlaying = false
+        playPauseIcon = currentPlayer.isPlaying ? "" : ""
+        titleText = (currentPlayer.trackTitle || "").trim() || "Nothing playing"
+        authorText = (currentPlayer.trackArtist || "").trim() || "Unknown artist"
+        albumText = (currentPlayer.trackAlbum || "").trim()
+        trackLength = currentPlayer.length || 0
+        if (!scrubbing) {
+            currentPosition = currentPlayer.position || 0
+        }
     }
 
     // ── Core: pick & sync the active player ─────────────────────
@@ -73,10 +129,6 @@ ExpandableModule {
         }
 
         // Filter out phantom/ghost MPRIS instances.
-        // Browsers often emit a duplicate media session with no artwork and
-        // no artist (just a title, sometimes with notification counts).
-        // A player is a ghost if it lacks art/artist AND its title overlaps
-        // with the title of a real player.
         var realPlayers = []
         for (var ri = 0; ri < raw.length; ri++) {
             var rp = raw[ri]
@@ -104,9 +156,6 @@ ExpandableModule {
 
         if (players.length === 0) { resetState(); return }
 
-        // Only reassign playersList when the set of players actually changed.
-        // This prevents the ListView model from resetting every poll tick,
-        // which would destroy currentIndex / scroll position.
         if (!playersListEqual(playersList, players)) {
             playersList = players
         }
@@ -135,8 +184,7 @@ ExpandableModule {
         currentPlayer = pick
         updateFromPlayer()
 
-        // Sync carousel index to match the picked player (without triggering
-        // the onCurrentIndexChanged → pickPlayer feedback loop).
+        // Sync carousel index to match the picked player
         if (playerCount > 1) {
             _syncingCarousel = true
             for (var ci = 0; ci < playersList.length; ci++) {
@@ -161,22 +209,137 @@ ExpandableModule {
 
     // ── Actions ─────────────────────────────────────────────────
     function doTogglePlay() {
-        if (currentPlayer && currentPlayer.togglePlaying)
+        if (!currentPlayer) return
+        // Instant optimistic feedback (0ms latency)
+        var willPlay = !isMediaPlaying
+        _hasOptimisticPlaying = true
+        _optimisticPlaying = willPlay
+        playPauseIcon = willPlay ? "" : ""
+
+        if (currentPlayer.canTogglePlaying) {
             currentPlayer.togglePlaying()
+        } else if (currentPlayer.isPlaying && (currentPlayer.canPause || currentPlayer.pause)) {
+            currentPlayer.pause()
+        } else if (!currentPlayer.isPlaying && (currentPlayer.canPlay || currentPlayer.play)) {
+            currentPlayer.play()
+        } else if (currentPlayer.togglePlaying) {
+            currentPlayer.togglePlaying()
+        }
     }
+
+    function doPrevious() {
+        if (!currentPlayer) return
+        if (currentPlayer.canGoPrevious !== false && currentPlayer.previous) {
+            currentPlayer.previous()
+        }
+    }
+
     function doNext() {
-        if (currentPlayer && currentPlayer.next)
+        if (!currentPlayer) return
+        if (currentPlayer.canGoNext !== false && currentPlayer.next) {
             currentPlayer.next()
+        }
     }
+
+    function doStop() {
+        if (!currentPlayer) return
+        if (currentPlayer.stop) {
+            currentPlayer.stop()
+            _hasOptimisticPlaying = true
+            _optimisticPlaying = false
+            playPauseIcon = ""
+        }
+    }
+
+    function toggleShuffle() {
+        if (!currentPlayer || !currentPlayer.shuffleSupported) return
+        currentPlayer.shuffle = !currentPlayer.shuffle
+    }
+
+    function toggleLoop() {
+        if (!currentPlayer || !currentPlayer.loopSupported) return
+        var state = currentPlayer.loopState
+        if (state === MprisLoopState.None || state === 0) {
+            currentPlayer.loopState = MprisLoopState.Playlist
+        } else if (state === MprisLoopState.Playlist || state === 2) {
+            currentPlayer.loopState = MprisLoopState.Track
+        } else {
+            currentPlayer.loopState = MprisLoopState.None
+        }
+    }
+
+    function changeVolume(delta) {
+        if (!currentPlayer || !currentPlayer.volumeSupported) return
+        var currentVol = currentPlayer.volume !== undefined ? currentPlayer.volume : 1.0
+        var newVol = Math.max(0.0, Math.min(1.0, currentVol + delta))
+        currentPlayer.volume = Math.round(newVol * 100) / 100
+    }
+
+    function toggleMute() {
+        if (!currentPlayer || !currentPlayer.volumeSupported) return
+        if (currentPlayer.volume > 0.01) {
+            nowPlayingModule._savedVolume = currentPlayer.volume
+            currentPlayer.volume = 0.0
+        } else {
+            currentPlayer.volume = nowPlayingModule._savedVolume > 0.05 ? nowPlayingModule._savedVolume : 0.5
+        }
+    }
+
     function focusNow() {
         if (!currentPlayer) return
-        var id = currentPlayer.identity.toLowerCase().trim()
+        if (currentPlayer.canRaise && currentPlayer.raise) {
+            try { currentPlayer.raise() } catch(e) {}
+        }
+        var id = (currentPlayer.identity || "").toLowerCase().trim()
         var cls = id.match(/mozilla zen/) ? "zen" : id
         var safeCls = cls.replace(/'/g, "\\'")
         Hyprland.dispatch("hl.dsp.focus({ window = 'class:(?i)" + safeCls + "' })")
     }
 
-    // ── Polling ─────────────────────────────────────────────────
+    // ── Instant Reactive D-Bus Signals ──────────────────────────
+    // Detect player connect/disconnect immediately
+    Connections {
+        target: Mpris.players
+        function onValuesChanged() {
+            nowPlayingModule.pickPlayer()
+        }
+    }
+
+    // Detect currentPlayer state changes immediately
+    Connections {
+        target: nowPlayingModule.currentPlayer
+        function onIsPlayingChanged() { nowPlayingModule.updateFromPlayer() }
+        function onPlaybackStateChanged() { nowPlayingModule.updateFromPlayer() }
+        function onTrackTitleChanged() { nowPlayingModule.updateFromPlayer() }
+        function onTrackArtistChanged() { nowPlayingModule.updateFromPlayer() }
+        function onTrackAlbumChanged() { nowPlayingModule.updateFromPlayer() }
+        function onTrackArtUrlChanged() { nowPlayingModule.updateFromPlayer() }
+        function onLengthChanged() {
+            if (nowPlayingModule.currentPlayer) {
+                nowPlayingModule.trackLength = nowPlayingModule.currentPlayer.length || 0
+            }
+        }
+        function onPositionChanged() {
+            if (nowPlayingModule.currentPlayer && !nowPlayingModule.scrubbing) {
+                nowPlayingModule.currentPosition = nowPlayingModule.currentPlayer.position || 0
+            }
+        }
+    }
+
+    // Position updater: active ONLY when expanded and playing (zero idle overhead)
+    Timer {
+        id: positionTimer
+        interval: 350
+        running: nowPlayingModule.expanded && nowPlayingModule.currentPlayer !== null && nowPlayingModule.currentPlayer.isPlaying
+        repeat: true
+        onTriggered: {
+            if (!nowPlayingModule.scrubbing && nowPlayingModule.currentPlayer && nowPlayingModule.currentPlayer.positionSupported) {
+                nowPlayingModule.currentPosition = nowPlayingModule.currentPlayer.position || 0
+            }
+        }
+    }
+
+    // Fallback polling (1000ms) for external players that don't emit property signals
     Timer {
         interval: 1000
         running: true
@@ -213,7 +376,7 @@ ExpandableModule {
     ColumnLayout {
         id: column
         anchors.fill: parent
-        anchors.bottomMargin: 10
+        anchors.bottomMargin: nowPlayingModule.expanded ? 10 : 0
         spacing: 0
 
         // ── Title bar ───────────────────────────────────────────
@@ -245,7 +408,6 @@ ExpandableModule {
                     anchors.fill: parent
                     anchors.margins: 2
 
-                    // Show shared art cropped into the title bar shape
                     Item {
                         id: titleArtCropped
                         anchors.fill: parent
@@ -328,7 +490,7 @@ ExpandableModule {
                     topRightRadius: 0
                     bottomRightRadius: 0
 
-                    label: "󰎆"
+                    label: nowPlayingModule.getPlayerIcon(nowPlayingModule.currentPlayer)
                     leftMargin: 3
 
                     InverseRadius {
@@ -358,8 +520,8 @@ ExpandableModule {
             clip: false
             opacity: nowPlayingModule.expanded ? 1 : 0
             color: "transparent"
-            implicitWidth: nowPlayingModule.expanded ? 250 : titleBtn.implicitWidth
-            implicitHeight: nowPlayingModule.expanded ? nowPlayingModule.expandedHeight : 0
+            implicitWidth: nowPlayingModule.expanded ? 260 : titleBtn.implicitWidth
+            implicitHeight: nowPlayingModule.expanded ? (nowPlayingModule.expandedHeight - 5) : 0
 
             Behavior on opacity {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -373,26 +535,41 @@ ExpandableModule {
 
             Item {
                 id: albumArtClip
-                anchors.centerIn: parent
-                width: trackArt.implicitWidth
-                height: trackArt.implicitHeight
+                anchors.fill: parent
 
-                // Apply opacity via the layer effect
                 layer.enabled: true
                 layer.smooth: true
                 layer.effect: MultiEffect {
-                    opacity: 0.9
+                    opacity: 0.95
                 }
 
-                // Multi-player: carousel (also used for single player)
-                ListView {
-                    id: playerCarousel
-                    anchors.fill: parent
-                    anchors.topMargin: Theme.moduleHeight + 10
-                    anchors.bottomMargin: Theme.moduleHeight + 10
-                    visible: true
-                    model: nowPlayingModule.playersList
-                    orientation: ListView.Horizontal
+                // Carousel & Metadata Panel (translucent background card)
+                Rectangle {
+                    id: carouselPanel
+                    anchors.top: parent.top
+                    anchors.topMargin: Theme.moduleHeight + 15
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 0
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    color: Qt.rgba(1, 1, 1, 0.08)
+                    radius: Theme.moduleEdgeRadius
+                    clip: true
+                    border.width: 1
+                    border.color: Qt.rgba(1, 1, 1, 0.08)
+
+                    // Multi-player: carousel
+                    ListView {
+                        id: playerCarousel
+                        anchors.top: parent.top
+                        anchors.topMargin: 12
+                        anchors.bottom: middleControls.top
+                        anchors.bottomMargin: 8
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        visible: true
+                        model: nowPlayingModule.playersList
+                        orientation: ListView.Horizontal
 
                     onCurrentIndexChanged: {
                         if (nowPlayingModule._syncingCarousel) return
@@ -440,24 +617,21 @@ ExpandableModule {
                                 x: -Math.pow(delegateRoot.effectiveNormDist, 3) * 80
                             }
 
-                            // Wrapper item for the delegate
                             Item {
                                 id: delegateWrapper
                                 anchors.fill: parent
 
-                                // Calculate the fitted dimensions to perfectly wrap the image aspect ratio
-                                property real imgAspect: (delegateImg.implicitWidth > 0 && delegateImg.implicitHeight > 0) ? delegateImg.implicitWidth / delegateImg.implicitHeight : 1.0
+                                property real imgAspect: (delegateImg.implicitWidth > 0 && delegateImg.implicitHeight > 0)
+                                    ? delegateImg.implicitWidth / delegateImg.implicitHeight : 1.0
                                 property real targetW: Math.min(width, height * imgAspect)
                                 property real targetH: Math.min(height, width / imgAspect)
 
-                                // The actual image container, perfectly fitted to the image
                                 Item {
                                     id: delegateImgContainer
                                     anchors.centerIn: parent
                                     width: delegateRoot.hasArt ? delegateWrapper.targetW : Math.min(parent.width, parent.height)
                                     height: delegateRoot.hasArt ? delegateWrapper.targetH : Math.min(parent.width, parent.height)
 
-                                    // Apply shadow via the layer effect
                                     layer.enabled: true
                                     layer.smooth: true
                                     layer.effect: MultiEffect {
@@ -484,7 +658,6 @@ ExpandableModule {
                                     Image {
                                         id: delegateImg
                                         anchors.fill: parent
-                                        // Since the container is mathematically fitted, Crop behaves identically to Fit but fills the bounds
                                         fillMode: Image.PreserveAspectCrop
                                         source: delegateRoot.hasArt ? modelData.trackArtUrl : ""
                                         sourceSize.width: 250
@@ -513,99 +686,362 @@ ExpandableModule {
                                             antialiasing: true
                                         }
                                     }
+
+                                    // Clicking art selects carousel item or focuses player window
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            if (playerCarousel.currentIndex !== index) {
+                                                playerCarousel.currentIndex = index
+                                            } else {
+                                                nowPlayingModule.focusNow()
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-                    visible: nowPlayingModule.playerCount > 1
-                    acceptedButtons: Qt.NoButton
-                    onWheel: function(wheel) {
-                        if (wheel.angleDelta.y > 0 || wheel.angleDelta.x > 0) {
-                            if (playerCarousel.currentIndex > 0)
-                                playerCarousel.decrementCurrentIndex()
-                        } else {
-                            if (playerCarousel.currentIndex < playerCarousel.count - 1)
-                                playerCarousel.incrementCurrentIndex()
+                    // Wheel over art: multi-player switches player; single player adjusts volume
+                    MouseArea {
+                        anchors.fill: playerCarousel
+                        acceptedButtons: Qt.NoButton
+                        onWheel: function(wheel) {
+                            if (nowPlayingModule.playerCount > 1) {
+                                if (wheel.angleDelta.y > 0 || wheel.angleDelta.x > 0) {
+                                    if (playerCarousel.currentIndex > 0)
+                                        playerCarousel.decrementCurrentIndex()
+                                } else {
+                                    if (playerCarousel.currentIndex < playerCarousel.count - 1)
+                                        playerCarousel.incrementCurrentIndex()
+                                }
+                            } else {
+                                nowPlayingModule.changeVolume(wheel.angleDelta.y > 0 ? 0.05 : -0.05)
+                            }
                         }
                     }
-                }
 
-                // Bottom controls row
-                RowLayout {
-                    id: controlsRow
-                    spacing: 0
-                    layoutDirection: Qt.RightToLeft
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 0
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    // Middle Controls: Play/Pause (big) & Seeker Track + Timestamps
+                    RowLayout {
+                        id: middleControls
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: authorBar.top
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
+                        anchors.bottomMargin: 8
+                        spacing: 12
+                        height: 40
 
-                    ModuleButton {
-                        id: artHover
-                        variant: "neutral"
-                        implicitHeight: Theme.moduleHeight - 10
-                        bottomRightRadius: Theme.moduleEdgeRadius - 5
-                        topRightRadius: Theme.moduleEdgeRadius - 5
-                        visible: nowPlayingModule.authorText !== ""
-                        implicitWidth: nowPlayingModule.expanded
-                            ? scrollingAuthorText.implicitWidth + 20 : 0
-
-                        HoverMarqueeText {
-                            id: scrollingAuthorText
+                        // Large Play / Pause Button (Circle)
+                        ModuleButton {
+                            id: playPauseBtn
+                            variant: nowPlayingModule.isMediaPlaying ? "light" : "neutral"
+                            cursorShape: Qt.PointingHandCursor
+                            textFont: 22
+                            implicitHeight: 36
+                            implicitWidth: 36
+                            Layout.preferredWidth: 36
+                            Layout.preferredHeight: 36
+                            Layout.alignment: Qt.AlignVCenter
+                            Layout.fillWidth: false
+                            radius: 18
                             clip: true
+
+                            label: nowPlayingModule.playPauseIcon
+                            onClicked: nowPlayingModule.doTogglePlay()
+
+                            // Right-click to stop
+                            TapHandler {
+                                acceptedButtons: Qt.RightButton
+                                onTapped: nowPlayingModule.doStop()
+                            }
+                        }
+
+                        // Right Column: Seeker Track (top) and Timestamps (bottom)
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            spacing: 0
+
+                            // Seeker Track
+                            Item {
+                                id: seekTrack
+                                Layout.fillWidth: true
+                                implicitHeight: 20
+
+                                property real progressRatio: {
+                                    if (nowPlayingModule.trackLength > 0) {
+                                        return Math.max(0.0, Math.min(1.0, nowPlayingModule.currentPosition / nowPlayingModule.trackLength))
+                                    }
+                                    return 0.0
+                                }
+
+                                // Track groove
+                                Rectangle {
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    height: 6
+                                    radius: 3
+                                    color: Theme.palette("neutral").base
+                                    border.width: 1
+                                    border.color: Theme.palette("neutral").border
+
+                                    // Fill bar
+                                    Rectangle {
+                                        anchors.left: parent.left
+                                        anchors.top: parent.top
+                                        anchors.bottom: parent.bottom
+                                        width: parent.width * seekTrack.progressRatio
+                                        radius: 3
+                                        color: Theme.palette("light").base
+
+                                        Behavior on width {
+                                            enabled: !nowPlayingModule.scrubbing
+                                            NumberAnimation { duration: 150; easing.type: Easing.Linear }
+                                        }
+                                    }
+                                }
+
+                                // Scrubber knob
+                                Rectangle {
+                                    width: 12
+                                    height: 12
+                                    radius: 6
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    x: Math.max(0, Math.min(parent.width - width, (parent.width * seekTrack.progressRatio) - width / 2))
+                                    color: Theme.palette("light").text
+                                    border.width: 2
+                                    border.color: Theme.palette("light").border
+                                    visible: nowPlayingModule.trackLength > 0
+                                    opacity: (seekMouseArea.containsMouse || nowPlayingModule.scrubbing) ? 1.0 : 0.8
+                                    scale: (seekMouseArea.containsMouse || nowPlayingModule.scrubbing) ? 1.2 : 1.0
+
+                                    Behavior on scale {
+                                        NumberAnimation { duration: 120 }
+                                    }
+                                    Behavior on opacity {
+                                        NumberAnimation { duration: 120 }
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: seekMouseArea
+                                    anchors.fill: parent
+                                    anchors.topMargin: -6
+                                    anchors.bottomMargin: -6
+                                    hoverEnabled: true
+                                    cursorShape: (nowPlayingModule.currentPlayer && (nowPlayingModule.currentPlayer.canSeek || nowPlayingModule.currentPlayer.positionSupported) && nowPlayingModule.trackLength > 0)
+                                        ? Qt.PointingHandCursor : Qt.ArrowCursor
+
+                                    function updateSeek(mouseX) {
+                                        if (!nowPlayingModule.currentPlayer || nowPlayingModule.trackLength <= 0) return
+                                        var ratio = Math.max(0.0, Math.min(1.0, mouseX / width))
+                                        nowPlayingModule.currentPosition = ratio * nowPlayingModule.trackLength
+                                    }
+
+                                    onPressed: function(mouse) {
+                                        if (!nowPlayingModule.currentPlayer || nowPlayingModule.trackLength <= 0) return
+                                        nowPlayingModule.scrubbing = true
+                                        updateSeek(mouse.x)
+                                    }
+
+                                    onPositionChanged: function(mouse) {
+                                        if (nowPlayingModule.scrubbing) {
+                                            updateSeek(mouse.x)
+                                        }
+                                    }
+
+                                    onReleased: function(mouse) {
+                                        if (nowPlayingModule.scrubbing) {
+                                            updateSeek(mouse.x)
+                                            if (nowPlayingModule.currentPlayer && (nowPlayingModule.currentPlayer.canSeek || nowPlayingModule.currentPlayer.positionSupported)) {
+                                                nowPlayingModule.currentPlayer.position = nowPlayingModule.currentPosition
+                                            }
+                                            nowPlayingModule.scrubbing = false
+                                        }
+                                    }
+
+                                    onWheel: function(wheel) {
+                                        if (!nowPlayingModule.currentPlayer || nowPlayingModule.trackLength <= 0) return
+                                        var delta = wheel.angleDelta.y > 0 ? 5 : -5
+                                        var newPos = Math.max(0.0, Math.min(nowPlayingModule.trackLength, nowPlayingModule.currentPosition + delta))
+                                        nowPlayingModule.currentPosition = newPos
+                                        if (nowPlayingModule.currentPlayer.canSeek || nowPlayingModule.currentPlayer.positionSupported) {
+                                            nowPlayingModule.currentPlayer.position = newPos
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Timestamps below the beginning and end of the seeker track
+                            Item {
+                                Layout.fillWidth: true
+                                implicitHeight: 14
+
+                                Text {
+                                    id: posLabel
+                                    anchors.left: parent.left
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: nowPlayingModule.formatTime(nowPlayingModule.currentPosition)
+                                    font.family: Theme.font
+                                    font.pixelSize: 11
+                                    color: Theme.textPrimary
+                                    opacity: 0.65
+                                }
+
+                                Text {
+                                    id: lenLabel
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: nowPlayingModule.trackLength > 0 ? nowPlayingModule.formatTime(nowPlayingModule.trackLength) : "--:--"
+                                    font.family: Theme.font
+                                    font.pixelSize: 11
+                                    color: Theme.textPrimary
+                                    opacity: 0.65
+                                }
+                            }
+                        }
+                    }
+
+                    // Metadata footer bar: Previous/Next + Artist & Album + Mute Button
+                    Rectangle {
+                        id: authorBar
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        height: 28
+                        color: Theme.bgBlurColor
+                        bottomLeftRadius: carouselPanel.radius
+                        bottomRightRadius: carouselPanel.radius
+                        topLeftRadius: 0
+                        topRightRadius: 0
+
+                        InverseRadius {
+                            anchors.bottom: authorBar.top
+                            anchors.left: authorBar.left
+                            cornerPosition: "bottomLeft"
+                            color: authorBar.color
+                            size: 8
+                        }
+
+                        InverseRadius {
+                            cornerPosition: "bottomRight"
+                            anchors.bottom: authorBar.top
+                            anchors.right: authorBar.right
+                            color: authorBar.color
+                            size: 8
+                        }
+
+                        RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 10
-                            anchors.rightMargin: 10
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+                            spacing: 6
 
-                            text: nowPlayingModule.authorText
-                            textMaxWidth: albumArtClip.width - 30
-                                - nextButton.implicitWidth
-                                - playPauseButton.implicitWidth
-                            fontFamily: Theme.font
-                            pixelSize: Theme.fontSize
-                            textColor: Theme.textPrimary
-                            fontBold: false
+                            // Previous Button
+                            ModuleButton {
+                                id: prevBtn
+                                variant: "dark"
+                                cursorShape: (currentPlayer && currentPlayer.canGoPrevious !== false) ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                textFont: 13
+                                implicitHeight: 22
+                                implicitWidth: 22
+                                Layout.preferredWidth: 22
+                                Layout.preferredHeight: 22
+                                Layout.alignment: Qt.AlignVCenter
+                                bottomLeftRadius: 11
+                                topLeftRadius: 11
+
+                                label: "󰙣"
+                                textColor: (currentPlayer && currentPlayer.canGoPrevious !== false) ? Theme.textPrimary : Theme.statusDisabled
+                                opacity: (currentPlayer && currentPlayer.canGoPrevious !== false) ? 1.0 : 0.45
+
+                                onClicked: nowPlayingModule.doPrevious()
+                            }
+
+                            // Next Button
+                            ModuleButton {
+                                id: nextBtn
+                                variant: "dark"
+                                cursorShape: (currentPlayer && currentPlayer.canGoNext !== false) ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                textFont: 13
+                                implicitHeight: 22
+                                implicitWidth: 22
+                                Layout.preferredWidth: 22
+                                Layout.preferredHeight: 22
+                                Layout.alignment: Qt.AlignVCenter
+                                Layout.leftMargin: - 8
+                                bottomRightRadius: 11
+                                topRightRadius: 11
+
+                                label: "󰙡"
+                                textColor: (currentPlayer && currentPlayer.canGoNext !== false) ? Theme.textPrimary : Theme.statusDisabled
+                                opacity: (currentPlayer && currentPlayer.canGoNext !== false) ? 1.0 : 0.45
+
+                                onClicked: nowPlayingModule.doNext()
+                            }
+
+                            HoverMarqueeText {
+                                id: scrollingAuthorText
+                                clip: true
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+
+                                text: {
+                                    var art = nowPlayingModule.authorText
+                                    var alb = nowPlayingModule.albumText
+                                    if (art && alb && art !== alb) return art + " — " + alb
+                                    if (art) return art
+                                    if (alb) return alb
+                                    return nowPlayingModule.getPlayerName(nowPlayingModule.currentPlayer)
+                                }
+                                textMaxWidth: 150
+                                fontFamily: Theme.font
+                                pixelSize: Theme.fontSize - 2
+                                textColor: Theme.textPrimary
+                                opacity: 0.9
+                                fontBold: false
+                            }
+
+                            // Mute / Volume Button
+                            ModuleButton {
+                                id: volumeBtn
+                                variant: "dark"
+                                cursorShape: Qt.PointingHandCursor
+                                textFont: 13
+                                implicitHeight: 22
+                                implicitWidth: 22
+                                Layout.preferredWidth: 22
+                                Layout.preferredHeight: 22
+                                Layout.alignment: Qt.AlignVCenter
+                                radius: 11
+
+                                label: {
+                                    if (!currentPlayer || !currentPlayer.volumeSupported) return ""
+                                    var v = currentPlayer.volume !== undefined ? currentPlayer.volume : 1.0
+                                    if (v <= 0.01) return "󰖁"
+                                    if (v < 0.33) return ""
+                                    if (v < 0.66) return ""
+                                    return ""
+                                }
+                                textColor: (currentPlayer && currentPlayer.volumeSupported && currentPlayer.volume <= 0.01)
+                                    ? Theme.statusRed : Theme.textPrimary
+                                opacity: (currentPlayer && currentPlayer.volumeSupported) ? 1.0 : 0.6
+
+                                onClicked: nowPlayingModule.toggleMute()
+
+                                WheelHandler {
+                                    onWheel: function(event) {
+                                        nowPlayingModule.changeVolume(event.angleDelta.y > 0 ? 0.05 : -0.05)
+                                    }
+                                }
+                            }
                         }
-                    }
-
-                    ModuleButton {
-                        id: nextButton
-                        cursorShape: Qt.PointingHandCursor
-                        variant: "neutral"
-                        textFont: 18
-                        implicitHeight: Theme.moduleHeight - 10
-                        implicitWidth: (nowPlayingModule.expanded
-                            && currentPlayer && currentPlayer.canGoNext)
-                            ? Theme.moduleHeight : 0
-
-                        label: "󰒭"
-                        onClicked: nowPlayingModule.doNext()
-
-                        Behavior on implicitWidth {
-                            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-                        }
-                    }
-
-                    ModuleButton {
-                        id: playPauseButton
-                        cursorShape: Qt.PointingHandCursor
-                        variant: "neutral"
-                        textFont: 18
-                        implicitHeight: Theme.moduleHeight - 10
-                        implicitWidth: nowPlayingModule.expanded ? Theme.moduleHeight : 0
-
-                        label: nowPlayingModule.playPauseIcon
-                        topLeftRadius: Theme.moduleEdgeRadius - 5
-                        bottomLeftRadius: Theme.moduleEdgeRadius - 5
-                        onClicked: nowPlayingModule.doTogglePlay()
-
-                        Behavior on implicitWidth {
-                            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-                        }
-                        clip: true
                     }
                 }
             }
