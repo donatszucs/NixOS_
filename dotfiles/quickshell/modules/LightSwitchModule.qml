@@ -20,7 +20,7 @@ ExpandableModule {
     implicitHeight: expanded
         ? contentColumn.implicitHeight
         : Theme.moduleHeight
-    implicitWidth: expanded ? 185 : 80
+    implicitWidth: expanded ? 180 : 80
 
     property int sideMargin: expanded ? 10 : 0
     Behavior on sideMargin { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
@@ -95,7 +95,7 @@ ExpandableModule {
             id: colorRow
             visible: root.expanded
             Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+            Layout.alignment: Qt.AlignTop
             Layout.topMargin: root.expanded ? 5 : 0
             Layout.bottomMargin: root.expanded ? 10 : 0
             spacing: 0
@@ -116,6 +116,11 @@ ExpandableModule {
                         target: SharedState
                         function onLightHueChanged()        { colorWheel.requestPaint() }
                         function onLightSaturationChanged() { colorWheel.requestPaint() }
+                    }
+
+                    Connections {
+                        target: resetButton
+                        function onColorChanged() { colorWheel.requestPaint() }
                     }
 
                     Component.onCompleted: requestPaint()
@@ -145,9 +150,13 @@ ExpandableModule {
                             ctx.fill()
                         }
 
+                        // Outer border connecting flush to the reset button and fillets (radius 65)
+                        var btnC = resetButton.color
+                        var strokeRgba = "rgba(" + Math.round(btnC.r * 255) + "," + Math.round(btnC.g * 255) + "," + Math.round(btnC.b * 255) + "," + btnC.a + ")"
+
                         ctx.beginPath()
-                        ctx.arc(cx, cy, r, 0, Math.PI * 2)
-                        ctx.strokeStyle = "#2a202f"
+                        ctx.arc(cx, cy, cx - 1, 0, Math.PI * 2)
+                        ctx.strokeStyle = strokeRgba
                         ctx.lineWidth   = 2
                         ctx.stroke()
 
