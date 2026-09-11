@@ -20,18 +20,18 @@ ExpandableModule {
     implicitHeight: expanded
         ? contentColumn.implicitHeight
         : Theme.moduleHeight
-    implicitWidth: expanded ? 180 : 80
+    implicitWidth: expanded ? 180 : labelText.implicitWidth
 
     property int sideMargin: expanded ? 10 : 0
-    Behavior on sideMargin { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
+    Behavior on sideMargin { NumberAnimation { duration: Theme.horizontalDuration *2; easing.type: Easing.OutCubic } }
 
     ColumnLayout {
         id: contentColumn
         anchors {
+            left: parent.left
             right: parent.right
             top: parent.top
             topMargin: 0
-            // 2. Bind the layout margins to the animated property
             rightMargin: root.sideMargin
             leftMargin: root.sideMargin
         }
@@ -57,6 +57,10 @@ ExpandableModule {
             
             bottomLeftRadius:  root.expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
             bottomRightRadius: root.expanded ? Theme.moduleEdgeRadius + 5 : 0
+
+            Behavior on implicitWidth {
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
 
             MouseArea {
                 anchors.fill: parent
@@ -89,7 +93,7 @@ ExpandableModule {
                 }
             }
         }
-        // ── Colour wheel + Reset side by side ─────────────────────────────
+        // ── Colour wheel with surround ─────────────────────────────────────
         RowLayout {
             id: colorRow
             visible: root.expanded
@@ -105,7 +109,7 @@ ExpandableModule {
                 Layout.alignment: Qt.AlignTop
                 Layout.rightMargin: -(130 / 2)
 
-                color: resetButton.baseColor
+                color: wheelSurround.baseColor
                 size: 130 / 2
                 outerRadius: Theme.moduleEdgeRadius
             }
@@ -128,7 +132,7 @@ ExpandableModule {
                     }
 
                     Connections {
-                        target: resetButton
+                        target: wheelSurround
                         function onColorChanged() { colorWheel.requestPaint() }
                     }
 
@@ -159,8 +163,8 @@ ExpandableModule {
                             ctx.fill()
                         }
 
-                        // Outer border connecting flush to the reset button and fillets (radius 65)
-                        var btnC = resetButton.baseColor
+                        // Outer border
+                        var btnC = wheelSurround.baseColor
                         var strokeRgba = "rgba(" + Math.round(btnC.r * 255) + "," + Math.round(btnC.g * 255) + "," + Math.round(btnC.b * 255) + "," + btnC.a + ")"
 
                         ctx.beginPath()
@@ -212,18 +216,19 @@ ExpandableModule {
                 }
             }
 
-            // ── Reset to white button (square) ──────────────────────────
+            // ── Right-side surround panel (non-interactive) ─────────────
             ModuleButton {
-                id: resetButton
+                id: wheelSurround
                 clip: false
                 Layout.preferredWidth: 30
                 Layout.preferredHeight: 130
                 Layout.alignment: Qt.AlignVCenter
 
                 border.width: 0
-
-                label: "R\nE\nS\nE\nT"
+                label: ""
                 variant: "neutral"
+                noHoverColorChange: true
+                noPressColorChange: true
 
                 topLeftRadius: 0
                 topRightRadius: Theme.moduleEdgeRadius
@@ -231,9 +236,8 @@ ExpandableModule {
                 bottomRightRadius: Theme.moduleEdgeRadius
 
                 InverseRadius {
-                    id: topRightRadius
                     cornerPosition: "topRight"
-                    color: resetButton.baseColor
+                    color: wheelSurround.baseColor
                     size: 130 / 2
 
                     anchors.right: parent.left
@@ -242,16 +246,28 @@ ExpandableModule {
 
                 InverseRadius {
                     cornerPosition: "bottomRight"
-                    color: resetButton.baseColor
+                    color: wheelSurround.baseColor
                     size: 130 / 2
 
                     anchors.right: parent.left
                     anchors.bottom: parent.bottom
                 }
 
-                MouseArea {
+                // ── Reset button overlaid on the surround ──────────
+                ModuleButton {
+                    id: resetButton
                     anchors.fill: parent
+                    topMarginButton: 4
+                    bottomMarginButton: 4
+                    leftMarginButton: 3
+                    rightMarginButton: 4
+
+                    radius: width / 2
+                    variant: "neutral"
+                    border.width: 2
                     cursorShape: Qt.PointingHandCursor
+                    label: "R\nE\nS\nE\nT"
+
                     onClicked: {
                         colorDebounceTimer.stop()
                         SharedState.setLightWhite()

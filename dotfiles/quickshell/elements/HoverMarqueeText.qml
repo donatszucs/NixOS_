@@ -9,6 +9,7 @@ Item {
     property string fontFamily: Theme.font
     property int pixelSize: Theme.fontSize
     property bool fontBold: true
+    property int horizontalAlignment: Text.AlignLeft
 
     // Removed maxChars! We let text elide based on pixel width correctly.
 
@@ -30,9 +31,10 @@ Item {
         font.bold: root.fontBold
         x: 0
         anchors.verticalCenter: parent.verticalCenter
+        horizontalAlignment: root.horizontalAlignment
 
-        width: hover.hovered ? implicitWidth : root.width
-        elide: hover.hovered ? Text.ElideNone : Text.ElideRight
+        width: (hover.hovered && visibleText.implicitWidth > root.width) ? implicitWidth : root.width
+        elide: (hover.hovered && visibleText.implicitWidth > root.width) ? Text.ElideNone : Text.ElideRight
     }
     
     SequentialAnimation {

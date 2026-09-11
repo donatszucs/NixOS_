@@ -48,6 +48,12 @@ ExpandableModule {
     property bool scrubbing: false
     property real _savedVolume: 0.5
 
+    // ── Derived capability flags (avoid repeating long expressions) ──
+    readonly property bool canPrev: currentPlayer && currentPlayer.canGoPrevious !== false
+    readonly property bool canNext: currentPlayer && currentPlayer.canGoNext !== false
+    readonly property bool canSeek: currentPlayer && (currentPlayer.canSeek || currentPlayer.positionSupported) && trackLength > 0
+    readonly property bool hasVolume: currentPlayer && currentPlayer.volumeSupported
+
     property real expandedHeight: 290
 
     implicitHeight: expanded ? expandedHeight : Theme.moduleHeight
@@ -128,30 +134,34 @@ ExpandableModule {
             if (p) raw.push(p)
         }
 
-        // Filter out phantom/ghost MPRIS instances.
-        var realPlayers = []
+        // Filter out phantom/ghost MPRIS instances (bare duplicates of real players).
+        // First, collect titles from "real" players (those with art or artist metadata).
+        var realTitles = []
         for (var ri = 0; ri < raw.length; ri++) {
-            var rp = raw[ri]
-            if (rp.trackArtUrl || (rp.trackArtist || "").trim()) {
-                realPlayers.push(rp)
-            }
+            if (raw[ri].trackArtUrl || (raw[ri].trackArtist || "").trim())
+                realTitles.push((raw[ri].trackTitle || "").trim())
         }
 
         var players = []
         for (var fi = 0; fi < raw.length; fi++) {
             var fp = raw[fi]
-            var isPhantom = false
-            if (!fp.trackArtUrl && !(fp.trackArtist || "").trim()) {
-                var fTitle = (fp.trackTitle || "").trim()
-                for (var r = 0; r < realPlayers.length; r++) {
-                    var rTitle = (realPlayers[r].trackTitle || "").trim()
-                    if (fTitle && rTitle && (fTitle.indexOf(rTitle) !== -1 || rTitle.indexOf(fTitle) !== -1)) {
-                        isPhantom = true
+            // Keep players that have metadata (art or artist)
+            if (fp.trackArtUrl || (fp.trackArtist || "").trim()) {
+                players.push(fp)
+                continue
+            }
+            // For bare players, check if their title overlaps a real player's title
+            var fTitle = (fp.trackTitle || "").trim()
+            var dominated = false
+            if (fTitle) {
+                for (var r = 0; r < realTitles.length; r++) {
+                    if (realTitles[r] && (fTitle.indexOf(realTitles[r]) !== -1 || realTitles[r].indexOf(fTitle) !== -1)) {
+                        dominated = true
                         break
                     }
                 }
             }
-            if (!isPhantom) players.push(fp)
+            if (!dominated) players.push(fp)
         }
 
         if (players.length === 0) { resetState(); return }
@@ -216,14 +226,12 @@ ExpandableModule {
         _optimisticPlaying = willPlay
         playPauseIcon = willPlay ? "" : ""
 
-        if (currentPlayer.canTogglePlaying) {
+        if (currentPlayer.canTogglePlaying || currentPlayer.togglePlaying) {
             currentPlayer.togglePlaying()
         } else if (currentPlayer.isPlaying && (currentPlayer.canPause || currentPlayer.pause)) {
             currentPlayer.pause()
         } else if (!currentPlayer.isPlaying && (currentPlayer.canPlay || currentPlayer.play)) {
             currentPlayer.play()
-        } else if (currentPlayer.togglePlaying) {
-            currentPlayer.togglePlaying()
         }
     }
 
@@ -248,23 +256,6 @@ ExpandableModule {
             _hasOptimisticPlaying = true
             _optimisticPlaying = false
             playPauseIcon = ""
-        }
-    }
-
-    function toggleShuffle() {
-        if (!currentPlayer || !currentPlayer.shuffleSupported) return
-        currentPlayer.shuffle = !currentPlayer.shuffle
-    }
-
-    function toggleLoop() {
-        if (!currentPlayer || !currentPlayer.loopSupported) return
-        var state = currentPlayer.loopState
-        if (state === MprisLoopState.None || state === 0) {
-            currentPlayer.loopState = MprisLoopState.Playlist
-        } else if (state === MprisLoopState.Playlist || state === 2) {
-            currentPlayer.loopState = MprisLoopState.Track
-        } else {
-            currentPlayer.loopState = MprisLoopState.None
         }
     }
 
@@ -567,7 +558,7 @@ ExpandableModule {
                         anchors.bottomMargin: 8
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        visible: true
+
                         model: nowPlayingModule.playersList
                         orientation: ListView.Horizontal
 
@@ -606,6 +597,7 @@ ExpandableModule {
                         z: 100 - absDist * 100
 
                         Item {
+                            id: delegateWrapper
                             width: 200
                             height: playerCarousel.height
                             anchors.centerIn: parent
@@ -617,86 +609,81 @@ ExpandableModule {
                                 x: -Math.pow(delegateRoot.effectiveNormDist, 3) * 80
                             }
 
-                            Item {
-                                id: delegateWrapper
-                                anchors.fill: parent
+                            property real imgAspect: (delegateImg.implicitWidth > 0 && delegateImg.implicitHeight > 0)
+                                ? delegateImg.implicitWidth / delegateImg.implicitHeight : 1.0
+                            property real targetW: Math.min(width, height * imgAspect)
+                            property real targetH: Math.min(height, width / imgAspect)
 
-                                property real imgAspect: (delegateImg.implicitWidth > 0 && delegateImg.implicitHeight > 0)
-                                    ? delegateImg.implicitWidth / delegateImg.implicitHeight : 1.0
-                                property real targetW: Math.min(width, height * imgAspect)
-                                property real targetH: Math.min(height, width / imgAspect)
+                            Item {
+                                id: delegateImgContainer
+                                anchors.centerIn: parent
+                                width: delegateRoot.hasArt ? delegateWrapper.targetW : Math.min(parent.width, parent.height)
+                                height: delegateRoot.hasArt ? delegateWrapper.targetH : Math.min(parent.width, parent.height)
+
+                                layer.enabled: true
+                                layer.smooth: true
+                                layer.effect: MultiEffect {
+                                    brightness: -delegateRoot.absDist * 0.3
+                                    contrast: -delegateRoot.absDist * 0.7
+                                    shadowEnabled: true
+                                    shadowColor: delegateRoot.absDist > 0 ? Qt.rgba(0, 0, 0, 0.6) : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.2)
+                                    shadowBlur: 0.8
+                                    shadowVerticalOffset: 0
+                                    shadowHorizontalOffset: 0
+
+                                    Behavior on shadowColor {
+                                        ColorAnimation { duration: 150 }
+                                    }
+                                }
+
+                                Loader {
+                                    anchors.fill: parent
+                                    sourceComponent: artPlaceholder
+                                    active: !delegateRoot.hasArt
+                                    visible: active
+                                }
+
+                                Image {
+                                    id: delegateImg
+                                    anchors.fill: parent
+                                    fillMode: Image.PreserveAspectCrop
+                                    source: delegateRoot.hasArt ? modelData.trackArtUrl : ""
+                                    sourceSize.width: 250
+                                    visible: false
+                                }
+
+                                MultiEffect {
+                                    anchors.fill: parent
+                                    source: delegateImg
+                                    visible: delegateRoot.hasArt
+                                    maskEnabled: true
+                                    maskSource: imgMask
+                                }
 
                                 Item {
-                                    id: delegateImgContainer
-                                    anchors.centerIn: parent
-                                    width: delegateRoot.hasArt ? delegateWrapper.targetW : Math.min(parent.width, parent.height)
-                                    height: delegateRoot.hasArt ? delegateWrapper.targetH : Math.min(parent.width, parent.height)
-
+                                    id: imgMask
+                                    anchors.fill: parent
+                                    visible: false
                                     layer.enabled: true
                                     layer.smooth: true
-                                    layer.effect: MultiEffect {
-                                        brightness: -delegateRoot.absDist * 0.3
-                                        contrast: -delegateRoot.absDist * 0.7
-                                        shadowEnabled: true
-                                        shadowColor: delegateRoot.absDist > 0 ? Qt.rgba(0, 0, 0, 0.6) : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.2)
-                                        shadowBlur: 0.8
-                                        shadowVerticalOffset: 0
-                                        shadowHorizontalOffset: 0
 
-                                        Behavior on shadowColor {
-                                            ColorAnimation { duration: 150 }
-                                        }
-                                    }
-
-                                    Loader {
+                                    Rectangle {
                                         anchors.fill: parent
-                                        sourceComponent: artPlaceholder
-                                        active: !delegateRoot.hasArt
-                                        visible: active
+                                        radius: 15
+                                        color: "black"
+                                        antialiasing: true
                                     }
+                                }
 
-                                    Image {
-                                        id: delegateImg
-                                        anchors.fill: parent
-                                        fillMode: Image.PreserveAspectCrop
-                                        source: delegateRoot.hasArt ? modelData.trackArtUrl : ""
-                                        sourceSize.width: 250
-                                        visible: false
-                                    }
-
-                                    MultiEffect {
-                                        anchors.fill: parent
-                                        source: delegateImg
-                                        visible: delegateRoot.hasArt
-                                        maskEnabled: true
-                                        maskSource: imgMask
-                                    }
-
-                                    Item {
-                                        id: imgMask
-                                        anchors.fill: parent
-                                        visible: false
-                                        layer.enabled: true
-                                        layer.smooth: true
-
-                                        Rectangle {
-                                            anchors.fill: parent
-                                            radius: 15
-                                            color: "black"
-                                            antialiasing: true
-                                        }
-                                    }
-
-                                    // Clicking art selects carousel item or focuses player window
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            if (playerCarousel.currentIndex !== index) {
-                                                playerCarousel.currentIndex = index
-                                            } else {
-                                                nowPlayingModule.focusNow()
-                                            }
+                                // Clicking art selects carousel item or focuses player window
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (playerCarousel.currentIndex !== index) {
+                                            playerCarousel.currentIndex = index
+                                        } else {
+                                            nowPlayingModule.focusNow()
                                         }
                                     }
                                 }
@@ -742,8 +729,6 @@ ExpandableModule {
                             variant: nowPlayingModule.isMediaPlaying ? "light" : "neutral"
                             cursorShape: Qt.PointingHandCursor
                             textFont: 22
-                            implicitHeight: 36
-                            implicitWidth: 36
                             Layout.preferredWidth: 36
                             Layout.preferredHeight: 36
                             Layout.alignment: Qt.AlignVCenter
@@ -835,8 +820,7 @@ ExpandableModule {
                                     anchors.topMargin: -6
                                     anchors.bottomMargin: -6
                                     hoverEnabled: true
-                                    cursorShape: (nowPlayingModule.currentPlayer && (nowPlayingModule.currentPlayer.canSeek || nowPlayingModule.currentPlayer.positionSupported) && nowPlayingModule.trackLength > 0)
-                                        ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                    cursorShape: nowPlayingModule.canSeek ? Qt.PointingHandCursor : Qt.ArrowCursor
 
                                     function updateSeek(mouseX) {
                                         if (!nowPlayingModule.currentPlayer || nowPlayingModule.trackLength <= 0) return
@@ -946,11 +930,9 @@ ExpandableModule {
                             // Previous Button
                             ModuleButton {
                                 id: prevBtn
-                                variant: "dark"
-                                cursorShape: (currentPlayer && currentPlayer.canGoPrevious !== false) ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                variant: "neutral"
+                                cursorShape: nowPlayingModule.canPrev ? Qt.PointingHandCursor : Qt.ArrowCursor
                                 textFont: 13
-                                implicitHeight: 22
-                                implicitWidth: 22
                                 Layout.preferredWidth: 22
                                 Layout.preferredHeight: 22
                                 Layout.alignment: Qt.AlignVCenter
@@ -958,8 +940,8 @@ ExpandableModule {
                                 topLeftRadius: 11
 
                                 label: "󰙣"
-                                textColor: (currentPlayer && currentPlayer.canGoPrevious !== false) ? Theme.textPrimary : Theme.statusDisabled
-                                opacity: (currentPlayer && currentPlayer.canGoPrevious !== false) ? 1.0 : 0.45
+                                textColor: nowPlayingModule.canPrev ? Theme.textPrimary : Theme.statusDisabled
+                                opacity: nowPlayingModule.canPrev ? 1.0 : 0.45
 
                                 onClicked: nowPlayingModule.doPrevious()
                             }
@@ -967,21 +949,19 @@ ExpandableModule {
                             // Next Button
                             ModuleButton {
                                 id: nextBtn
-                                variant: "dark"
-                                cursorShape: (currentPlayer && currentPlayer.canGoNext !== false) ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                variant: "neutral"
+                                cursorShape: nowPlayingModule.canNext ? Qt.PointingHandCursor : Qt.ArrowCursor
                                 textFont: 13
-                                implicitHeight: 22
-                                implicitWidth: 22
                                 Layout.preferredWidth: 22
                                 Layout.preferredHeight: 22
                                 Layout.alignment: Qt.AlignVCenter
-                                Layout.leftMargin: - 8
+                                Layout.leftMargin: -6
                                 bottomRightRadius: 11
                                 topRightRadius: 11
 
                                 label: "󰙡"
-                                textColor: (currentPlayer && currentPlayer.canGoNext !== false) ? Theme.textPrimary : Theme.statusDisabled
-                                opacity: (currentPlayer && currentPlayer.canGoNext !== false) ? 1.0 : 0.45
+                                textColor: nowPlayingModule.canNext ? Theme.textPrimary : Theme.statusDisabled
+                                opacity: nowPlayingModule.canNext ? 1.0 : 0.45
 
                                 onClicked: nowPlayingModule.doNext()
                             }
@@ -991,6 +971,7 @@ ExpandableModule {
                                 clip: true
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignVCenter
+                                horizontalAlignment: Text.AlignHCenter
 
                                 text: {
                                     var art = nowPlayingModule.authorText
@@ -1000,7 +981,7 @@ ExpandableModule {
                                     if (alb) return alb
                                     return nowPlayingModule.getPlayerName(nowPlayingModule.currentPlayer)
                                 }
-                                textMaxWidth: 150
+                                textMaxWidth: 200
                                 fontFamily: Theme.font
                                 pixelSize: Theme.fontSize - 2
                                 textColor: Theme.textPrimary
@@ -1011,27 +992,25 @@ ExpandableModule {
                             // Mute / Volume Button
                             ModuleButton {
                                 id: volumeBtn
-                                variant: "dark"
+                                variant: "neutral"
                                 cursorShape: Qt.PointingHandCursor
                                 textFont: 13
-                                implicitHeight: 22
-                                implicitWidth: 22
-                                Layout.preferredWidth: 22
+                                Layout.preferredWidth: 44
                                 Layout.preferredHeight: 22
                                 Layout.alignment: Qt.AlignVCenter
                                 radius: 11
 
                                 label: {
-                                    if (!currentPlayer || !currentPlayer.volumeSupported) return ""
-                                    var v = currentPlayer.volume !== undefined ? currentPlayer.volume : 1.0
+                                    if (!nowPlayingModule.hasVolume) return ""
+                                    var v = nowPlayingModule.currentPlayer.volume !== undefined ? nowPlayingModule.currentPlayer.volume : 1.0
                                     if (v <= 0.01) return "󰖁"
                                     if (v < 0.33) return ""
                                     if (v < 0.66) return ""
                                     return ""
                                 }
-                                textColor: (currentPlayer && currentPlayer.volumeSupported && currentPlayer.volume <= 0.01)
+                                textColor: (nowPlayingModule.hasVolume && currentPlayer.volume <= 0.01)
                                     ? Theme.statusRed : Theme.textPrimary
-                                opacity: (currentPlayer && currentPlayer.volumeSupported) ? 1.0 : 0.6
+                                opacity: nowPlayingModule.hasVolume ? 1.0 : 0.6
 
                                 onClicked: nowPlayingModule.toggleMute()
 
