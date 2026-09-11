@@ -213,7 +213,7 @@ ExpandableModule {
 
                 border.width: 0
 
-                label: "R\ne\ns\ne\nt"
+                label: "R\nE\nS\nE\nT"
                 variant: "neutral"
 
                 topLeftRadius: 0
