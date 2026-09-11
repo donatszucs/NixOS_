@@ -306,7 +306,7 @@ ModuleButton {
             NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutBack }
         }
 
-        IconImage {
+        Image {
             id: windowIcon
             
             anchors.verticalCenter: dragArea.drag.active ? undefined : parent.verticalCenter
@@ -315,13 +315,15 @@ ModuleButton {
             property string address: String(modelData.address)
 
             height: Theme.moduleHeight - 20
-            width: {
-                var systemIcon = String(source).indexOf("image://icon/") === 0;
-                if (systemIcon) return height;
-                var w = Math.max(implicitWidth, 1);
-                var h = Math.max(implicitHeight, 1);
-                return (w / h) * height;
-            }
+            property real imgAspect: (implicitWidth > 0 && implicitHeight > 0) ? (implicitWidth / implicitHeight) : 1.0
+            width: height * imgAspect
+
+            fillMode: Image.PreserveAspectFit
+            asynchronous: true
+            mipmap: true
+
+            property bool isSystemIcon: String(source).indexOf("image://icon/") === 0
+            sourceSize: isSystemIcon ? Qt.size(128, 128) : Qt.size(0, 0)
 
             readonly property string appId: {
                 if (modelData.wayland && modelData.wayland.appId !== "") return modelData.wayland.appId;

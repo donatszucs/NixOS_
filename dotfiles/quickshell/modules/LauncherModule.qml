@@ -91,6 +91,31 @@ ModuleButton {
         filteredApps = result
     }
 
+    function launchApp(entry) {
+        if (!entry) return
+        var cmd = ""
+        if (entry.command && entry.command.length > 0) {
+            cmd = entry.command.map(function(arg) {
+                if (/[ \t\n\r"'$`\\]/.test(arg)) {
+                    return '"' + arg.replace(/(["\\$`])/g, "\\$1") + '"'
+                }
+                return arg
+            }).join(" ")
+        } else if (entry.execString) {
+            cmd = entry.execString.replace(/%[a-zA-Z]/g, "").trim()
+        }
+
+        if (entry.runInTerminal && cmd !== "") {
+            cmd = "kitty -e " + cmd
+        }
+
+        if (cmd !== "") {
+            Hyprland.dispatch("hl.dsp.exec_cmd([=[" + cmd + "]=])")
+        } else {
+            entry.execute()
+        }
+    }
+
     // ── IPC trigger (Super+R from hyprland) ──────────────────────
     IpcHandler {
         target: "launcher-" + launcherModule.screenName
@@ -309,7 +334,7 @@ ModuleButton {
                             radius: Theme.moduleEdgeRadius
                             border.width: 2
                             onClicked: {
-                                modelData.execute()
+                                launcherModule.launchApp(modelData)
                                 launcherModule.expanded = false
                             }
 
@@ -451,7 +476,7 @@ ModuleButton {
                         Keys.onReturnPressed: {
                             var idx = appList.currentIndex >= 0 ? appList.currentIndex : 0
                             if (launcherModule.filteredApps.length > 0) {
-                                launcherModule.filteredApps[idx].execute()
+                                launcherModule.launchApp(launcherModule.filteredApps[idx])
                                 launcherModule.expanded = false
                             }
                         }
@@ -468,7 +493,7 @@ ModuleButton {
                             if (appList.currentIndex > 0) {
                                 appList.currentIndex = appList.currentIndex - 1
                                 appList.positionViewAtIndex(appList.currentIndex, ListView.Visible)
-                            } else {
+                            } else {wd
                                 appList.currentIndex = 0
                             }
                         }
