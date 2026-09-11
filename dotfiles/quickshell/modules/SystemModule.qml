@@ -13,7 +13,7 @@ ExpandableModule {
     onClicked: if (!expanded) expanded = true
 
     implicitHeight: expanded ? actionColumn.implicitHeight + 10: Theme.moduleHeight
-    implicitWidth: expanded ? 200 : 50
+    implicitWidth: expanded ? 190 : 50
 
     // Action buttons — revealed by clip as width expands leftward
     ColumnLayout {
@@ -31,7 +31,7 @@ ExpandableModule {
             noPressColorChange: !systemModule.expanded
 
             pillVariant: "neutral"
-
+            variant: "neutral"
 
             bottomLeftRadius: systemModule.expanded ? Theme.moduleEdgeRadius : 0
 
@@ -41,7 +41,7 @@ ExpandableModule {
             pillText: systemModule.expanded ? "System" : ""
             percent: systemModule.expanded ? 100 : 0
 
-            implicitWidth: systemModule.expanded ? 200 : 50
+            implicitWidth: systemModule.expanded ? 190 : 50
 
             Behavior on implicitWidth {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
@@ -66,7 +66,7 @@ ExpandableModule {
             }
 
         }
-
+        
         InverseRadius {
             id: corner
             cornerPosition: "topRight"

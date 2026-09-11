@@ -165,6 +165,7 @@ PanelWindow {
             Layout.alignment: Qt.AlignTop
             leftColor: clockModule.color
             leftExpanded: true
+            implicitWidth: 0
         }
         ClockModule {
             Layout.alignment: Qt.AlignTop
@@ -331,6 +332,7 @@ PanelWindow {
             rightColor: systemModule.color
             rightExpanded: true
             implicitHeight: systemModule.implicitHeight
+            implicitWidth: 0
         }
     }
 

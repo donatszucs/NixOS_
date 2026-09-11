@@ -111,6 +111,7 @@ ExpandableModule {
             colorOverride: !connectionsModule.expanded
             
             pillVariant: "neutral"
+            variant: "neutral"
             percent: connectionsModule.expanded ? 100 : 0
 
             bottomLeftRadius: connectionsModule.expanded ? Theme.moduleEdgeRadius : 0

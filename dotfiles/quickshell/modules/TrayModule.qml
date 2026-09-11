@@ -52,6 +52,7 @@ ExpandableModule {
             layoutDirection: Qt.RightToLeft
 
             ModuleButton {
+                variant: "neutral"
                 colorOverride: !root.expanded
                 noHoverColorChange: !root.expanded
                 noPressColorChange: !root.expanded

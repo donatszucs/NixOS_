@@ -194,6 +194,7 @@ ExpandableModule {
             colorOverride: !root.expanded
             
             pillVariant: "neutral"
+            variant: "neutral"
             percent: root.expanded ? 100 : 0
 
             bottomLeftRadius: root.expanded ? Theme.moduleEdgeRadius : 0

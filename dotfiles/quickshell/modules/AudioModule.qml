@@ -8,9 +8,8 @@ import "../elements"
 
 ExpandableModule {
     id: audioModule
-    colorOverride: implicitHeight === Theme.moduleHeight
-    noHoverColorChange: true
-    dontAnimateColor: true
+    noHoverColorChange: expanded
+
     property int maxSinkBarLength: 270
     property int sinkNameMaxChars: 30
 
@@ -96,7 +95,10 @@ ExpandableModule {
                 }
 
                 pillVariant: "dark"
+                variant: "neutral"
                 textAlign: "right"
+                colorOverride: audioModule.expanded ? false : true
+                noHoverColorChange: !audioModule.expanded
                 
                 rightMargin: Theme.modulePaddingH
 
@@ -127,8 +129,9 @@ ExpandableModule {
                 
                 pillText: ""
                 cursorShape: Qt.PointingHandCursor
-                pillVariant: "dark"
-                percent: 0
+                variant: "neutral"
+                pillVariant: "neutral"
+                percent: 100
 
                 onClicked: testSoundProcess.running = true
 
@@ -148,8 +151,9 @@ ExpandableModule {
                 onClicked: pavu.running = true
 
                 pillText: "Audio Mixer"
-                pillVariant: "dark"
-                percent: 0
+                pillVariant: "neutral"
+                variant: "neutral"
+                percent: 100
             }
         }
         // Action buttons — revealed by clip as width expands leftward

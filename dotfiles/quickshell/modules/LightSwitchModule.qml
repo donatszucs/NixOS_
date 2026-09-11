@@ -44,6 +44,8 @@ ExpandableModule {
             colorOverride: !root.expanded
             noHoverColorChange: !root.expanded
             implicitHeight: Theme.moduleHeight
+
+            variant: "neutral"
             
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignCenter
