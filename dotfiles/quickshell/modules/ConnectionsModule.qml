@@ -252,8 +252,6 @@ ExpandableModule {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
-                border.width: 2
-                border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
 
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: netRow.implicitHeight
@@ -263,7 +261,7 @@ ExpandableModule {
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     width: 70
-                    color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+                    color: Theme.bgBlurColor
                     topLeftRadius: netModule.topLeftRadius
                     bottomLeftRadius: netModule.bottomLeftRadius
 
@@ -346,9 +344,6 @@ ExpandableModule {
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
 
-                border.width: 2
-                border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
-
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: btRow.implicitHeight
 
@@ -357,7 +352,7 @@ ExpandableModule {
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     width: 70
-                    color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+                    color: Theme.bgBlurColor
                     topLeftRadius: btModule.topLeftRadius
                     bottomLeftRadius: btModule.bottomLeftRadius
 
@@ -621,9 +616,6 @@ ExpandableModule {
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 1
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
-                
-                border.width: 2
-                border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
 
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: headsetRow.implicitHeight
@@ -633,7 +625,7 @@ ExpandableModule {
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     width: 70
-                    color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+                    color: Theme.bgBlurColor
                     topLeftRadius: headsetModule.topLeftRadius
                     bottomLeftRadius: headsetModule.bottomLeftRadius
 
@@ -728,9 +720,6 @@ ExpandableModule {
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 1
                 color: Theme.divider
                 radius: Theme.moduleEdgeRadius
-                
-                border.width: 2
-                border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
 
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: mouseRow.implicitHeight
@@ -740,7 +729,7 @@ ExpandableModule {
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     width: 70
-                    color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+                    color: Theme.bgBlurColor
                     topLeftRadius: mouseModule.topLeftRadius
                     bottomLeftRadius: mouseModule.bottomLeftRadius
 

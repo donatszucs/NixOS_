@@ -553,9 +553,9 @@ ExpandableModule {
                     ListView {
                         id: playerCarousel
                         anchors.top: parent.top
-                        anchors.topMargin: 12
+                        anchors.topMargin: 22
                         anchors.bottom: middleControls.top
-                        anchors.bottomMargin: 8
+                        anchors.bottomMargin: 18
                         anchors.left: parent.left
                         anchors.right: parent.right
 
@@ -623,11 +623,11 @@ ExpandableModule {
                                 layer.enabled: true
                                 layer.smooth: true
                                 layer.effect: MultiEffect {
-                                    brightness: -delegateRoot.absDist * 0.3
-                                    contrast: -delegateRoot.absDist * 0.7
+                                    brightness: -delegateRoot.absDist * 0.35
+                                    contrast: -delegateRoot.absDist * 0.8
                                     shadowEnabled: true
-                                    shadowColor: delegateRoot.absDist > 0 ? Qt.rgba(0, 0, 0, 0.6) : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.2)
-                                    shadowBlur: 0.8
+                                    shadowColor: "black"
+                                    shadowBlur: 1.0
                                     shadowVerticalOffset: 0
                                     shadowHorizontalOffset: 0
 
@@ -898,7 +898,7 @@ ExpandableModule {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        height: 28
+                        height: 30
                         color: Theme.bgBlurColor
                         bottomLeftRadius: carouselPanel.radius
                         bottomRightRadius: carouselPanel.radius
@@ -910,7 +910,7 @@ ExpandableModule {
                             anchors.left: authorBar.left
                             cornerPosition: "bottomLeft"
                             color: authorBar.color
-                            size: 8
+                            size: 13
                         }
 
                         InverseRadius {
@@ -918,7 +918,7 @@ ExpandableModule {
                             anchors.bottom: authorBar.top
                             anchors.right: authorBar.right
                             color: authorBar.color
-                            size: 8
+                            size: 13
                         }
 
                         RowLayout {
@@ -983,7 +983,7 @@ ExpandableModule {
                                 }
                                 textMaxWidth: 200
                                 fontFamily: Theme.font
-                                pixelSize: Theme.fontSize - 2
+                                pixelSize: Theme.fontSize - 1
                                 textColor: Theme.textPrimary
                                 opacity: 0.9
                                 fontBold: false

@@ -171,11 +171,7 @@ ModuleButton {
                     id: collapsedRow
                     Layout.fillWidth: true
                     implicitHeight: Theme.moduleHeight - 4
-                    implicitWidth: launcherModule.expanded ? menuText.implicitWidth + 40 : menuText.implicitWidth + 15
-
-                    Behavior on implicitWidth {
-                        NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutCubic }
-                    }
+                    implicitWidth: menuText.implicitWidth + 20
 
                     Text {
                         id: menuText
