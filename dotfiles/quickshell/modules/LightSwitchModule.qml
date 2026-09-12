@@ -20,7 +20,7 @@ ExpandableModule {
     implicitHeight: expanded
         ? contentColumn.implicitHeight
         : Theme.moduleHeight
-    implicitWidth: expanded ? 180 : labelText.implicitWidth
+    implicitWidth: expanded ? 190 : labelText.implicitWidth
 
 
     ColumnLayout {
@@ -42,7 +42,7 @@ ExpandableModule {
             variant: "neutral"
             
             Layout.alignment: Qt.AlignRight
-            Layout.preferredWidth: root.expanded ? 170 : labelText.implicitWidth
+            Layout.preferredWidth: root.expanded ? 180 : labelText.implicitWidth
             Behavior on Layout.preferredWidth {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
@@ -100,7 +100,7 @@ ExpandableModule {
             Layout.alignment: Qt.AlignTop
             Layout.topMargin: 5
             Layout.bottomMargin: 10
-            Layout.rightMargin: 10
+            Layout.rightMargin: 20
             spacing: 0
 
             InverseRadius {
@@ -109,7 +109,7 @@ ExpandableModule {
                 Layout.alignment: Qt.AlignTop
                 Layout.rightMargin: -(130 / 2)
 
-                color: wheelSurround.baseColor
+                color: Theme.palette("neutral").base
                 size: 130 / 2
                 outerRadius: Theme.moduleEdgeRadius
             }
@@ -164,7 +164,7 @@ ExpandableModule {
                         }
 
                         // Outer border
-                        var btnC = wheelSurround.baseColor
+                        var btnC = Theme.palette("neutral").base
                         var strokeRgba = "rgba(" + Math.round(btnC.r * 255) + "," + Math.round(btnC.g * 255) + "," + Math.round(btnC.b * 255) + "," + btnC.a + ")"
 
                         ctx.beginPath()
@@ -216,20 +216,10 @@ ExpandableModule {
                 }
             }
 
-            // ── Right-side surround panel (non-interactive) ─────────────
-            ModuleButton {
-                id: wheelSurround
-                clip: false
-                Layout.preferredWidth: 30
-                Layout.preferredHeight: 130
-                Layout.alignment: Qt.AlignVCenter
-
-                border.width: 0
-                label: ""
-                variant: "neutral"
-                noHoverColorChange: true
-                noPressColorChange: true
-
+            Rectangle {
+                width: 40
+                Layout.fillHeight: true
+                color: Theme.palette("neutral").base
                 topLeftRadius: 0
                 topRightRadius: Theme.moduleEdgeRadius
                 bottomLeftRadius: 0
@@ -237,7 +227,7 @@ ExpandableModule {
 
                 InverseRadius {
                     cornerPosition: "topRight"
-                    color: wheelSurround.baseColor
+                    color: Theme.palette("neutral").base
                     size: 130 / 2
 
                     anchors.right: parent.left
@@ -246,31 +236,69 @@ ExpandableModule {
 
                 InverseRadius {
                     cornerPosition: "bottomRight"
-                    color: wheelSurround.baseColor
+                    color: Theme.palette("neutral").base
                     size: 130 / 2
 
                     anchors.right: parent.left
                     anchors.bottom: parent.bottom
                 }
 
-                // ── Reset button overlaid on the surround ──────────
+                // ── Right-side surround panel (non-interactive) ─────────────
                 ModuleButton {
-                    id: resetButton
-                    anchors.fill: parent
-                    topMarginButton: 4
-                    bottomMarginButton: 4
-                    leftMarginButton: 3
-                    rightMarginButton: 4
+                    id: wheelSurround
+                    clip: false
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    
+                    implicitWidth: 30
 
-                    radius: width / 2
-                    variant: "neutral"
-                    border.width: 2
-                    cursorShape: Qt.PointingHandCursor
-                    label: "R\nE\nS\nE\nT"
+                    border.width: 0
+                    label: ""
+                    color: Theme.bgBlurColor
 
-                    onClicked: {
-                        colorDebounceTimer.stop()
-                        SharedState.setLightWhite()
+                    topLeftRadius: 0
+                    topRightRadius: Theme.moduleEdgeRadius
+                    bottomLeftRadius: 0
+                    bottomRightRadius: Theme.moduleEdgeRadius
+
+                    InverseRadius {
+                        cornerPosition: "topRight"
+                        color: Theme.bgBlurColor
+                        size: Theme.moduleEdgeRadius
+
+                        anchors.right: parent.left
+                        anchors.top: parent.top
+                    }
+
+                    InverseRadius {
+                        cornerPosition: "bottomRight"
+                        color: Theme.bgBlurColor
+                        size: Theme.moduleEdgeRadius
+
+                        anchors.right: parent.left
+                        anchors.bottom: parent.bottom
+                    }
+
+                    // ── Reset button overlaid on the surround ──────────
+                    ModuleButton {
+                        id: resetButton
+                        anchors.fill: parent
+                        topMarginButton: 4
+                        bottomMarginButton: 4
+                        leftMarginButton: 3
+                        rightMarginButton: 4
+
+                        radius: width / 2
+                        variant: "neutral"
+                        border.width: 2
+                        cursorShape: Qt.PointingHandCursor
+                        label: "R\nE\nS\nE\nT"
+
+                        onClicked: {
+                            colorDebounceTimer.stop()
+                            SharedState.setLightWhite()
+                        }
                     }
                 }
             }
