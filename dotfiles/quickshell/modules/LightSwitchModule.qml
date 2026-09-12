@@ -22,18 +22,13 @@ ExpandableModule {
         : Theme.moduleHeight
     implicitWidth: expanded ? 180 : labelText.implicitWidth
 
-    property int sideMargin: expanded ? 10 : 0
-    Behavior on sideMargin { NumberAnimation { duration: Theme.horizontalDuration *2; easing.type: Easing.OutCubic } }
 
     ColumnLayout {
         id: contentColumn
         anchors {
-            left: parent.left
-            right: parent.right
             top: parent.top
-            topMargin: 0
-            rightMargin: root.sideMargin
-            leftMargin: root.sideMargin
+            right: parent.right
+            rightMargin: 0
         }
 
         spacing: 0
@@ -46,8 +41,11 @@ ExpandableModule {
 
             variant: "neutral"
             
-            Layout.fillWidth: true
             Layout.alignment: Qt.AlignRight
+            Layout.preferredWidth: root.expanded ? 170 : labelText.implicitWidth
+            Behavior on Layout.preferredWidth {
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
 
             percent: SharedState.lightActive ? SharedState.lightBrightness : 0
             pillText: SharedState.lightActive
@@ -57,10 +55,6 @@ ExpandableModule {
             
             bottomLeftRadius:  root.expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
             bottomRightRadius: root.expanded ? Theme.moduleEdgeRadius + 5 : 0
-
-            Behavior on implicitWidth {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-            }
 
             MouseArea {
                 anchors.fill: parent
@@ -96,11 +90,17 @@ ExpandableModule {
         // ── Colour wheel with surround ─────────────────────────────────────
         RowLayout {
             id: colorRow
-            visible: root.expanded
-            Layout.fillWidth: true
+            opacity: root.expanded ? 1.0 : 0.0
+            visible: opacity > 0
+            Behavior on opacity {
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
+
+            Layout.preferredWidth: 160
             Layout.alignment: Qt.AlignTop
-            Layout.topMargin: root.expanded ? 5 : 0
-            Layout.bottomMargin: root.expanded ? 10 : 0
+            Layout.topMargin: 5
+            Layout.bottomMargin: 10
+            Layout.rightMargin: 10
             spacing: 0
 
             InverseRadius {
@@ -274,9 +274,6 @@ ExpandableModule {
                     }
                 }
             }
-
-            Behavior on Layout.topMargin { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-            Behavior on Layout.bottomMargin { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
         }
     }
     // ── Brightness scroll wheel ─────────────────────────────────────
