@@ -4,11 +4,19 @@ import QtQuick.Layouts
 ModuleButton {
     id: root
 
-    property int percent: 100
+    property real percent: 100
+    property bool animatePercent: true
     property string pillText: ""
     property string pillVariant: root.variant
     property var pillPal: Theme.palette(pillVariant)
     property int pillRadius: (Theme.moduleHeight - 10) / 2
+
+    // Smooth percentage animation
+    property real animatedPercent: percent
+    Behavior on animatedPercent {
+        enabled: root.animatePercent
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+    }
 
     label: pillText
     textColor: "transparent"
@@ -29,13 +37,8 @@ ModuleButton {
                 top: parent.top
                 bottom: parent.bottom
             }
-            width: parent.width * (Math.min(root.percent, 100) / 100)
+            width: parent.width * (Math.min(Math.max(root.animatedPercent, 0), 100) / 100)
             clip: true
-            
-            
-            Behavior on width {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-            }
 
             Rectangle {
                 width: parent.parent.width

@@ -8,7 +8,7 @@ ExpandableModule {
     id: root
     // We manage our own content; keep the inherited label empty
     label: ""
-
+    useDefaultPill: false
     // ── Custom radii for this module's unique styling ────────────
     expandedBottomLeftRadius:   130 / 2 + 10
     expandedBottomRightRadius:  Theme.moduleEdgeRadius + 5

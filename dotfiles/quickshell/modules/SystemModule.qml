@@ -8,11 +8,17 @@ import "../elements"
 ExpandableModule {
     id: systemModule
     expandedBottomRightRadius: 0   // right screen edge — no rounding
-    property color buttonColor: mainButton.color
+    property color buttonColor: headerPill.color
 
-    onClicked: if (!expanded) expanded = true
+    // ── Standard pill setup ──────────────────────────────────────
+    pillText: expanded ? "System" : ""
+    pillPercent: expanded ? 100 : 0
+    pillVariant: "neutral"
+    expandedBottomLeftRadius: Theme.moduleEdgeRadius + 10
 
-    implicitHeight: expanded ? actionColumn.implicitHeight + 10: Theme.moduleHeight
+    headerPill.bottomRightRadius: 0
+
+    implicitHeight: expanded ? actionColumn.implicitHeight + Theme.moduleHeight + 10 : Theme.moduleHeight
     implicitWidth: expanded ? 190 : 50
 
     // Action buttons — revealed by clip as width expands leftward
@@ -20,61 +26,19 @@ ExpandableModule {
         id: actionColumn
         spacing: 10
         anchors {
-            top: parent.top
+            top: headerPill.bottom
             right: parent.right
+            rightMargin: 10
         }
 
-        PillBarButton {
-            id: mainButton
-            colorOverride: true
-            noHoverColorChange: !systemModule.expanded
-            noPressColorChange: !systemModule.expanded
-
-            pillVariant: "neutral"
-            variant: "neutral"
-
-            bottomLeftRadius: systemModule.expanded ? Theme.moduleEdgeRadius : 0
-
-
-            Layout.alignment: Qt.AlignCenter
-
-            pillText: systemModule.expanded ? "System" : ""
-            percent: systemModule.expanded ? 100 : 0
-
-            implicitWidth: systemModule.expanded ? 190 : 50
-
-            Behavior on implicitWidth {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                acceptedButtons: Qt.LeftButton
-
-                onPressedChanged: {
-                        if(!systemModule.expanded) {
-                            systemModule.pressed = !systemModule.pressed
-                        }
-                        else {
-                            mainButton.pressed = !mainButton.pressed
-                        }
-                    }
-                onClicked: (mouse) => {
-                                        systemModule.expanded = !systemModule.expanded
-                                    }
-            }
-
-        }
-        
         InverseRadius {
             id: corner
             cornerPosition: "topRight"
-            color: mainButton.color
+            color: headerPill.color
             size: Theme.moduleEdgeRadius
 
             Layout.alignment: Qt.AlignTop | Qt.AlignRight
-            Layout.topMargin: -10
+            Layout.rightMargin: -10
 
         }
         
@@ -96,7 +60,7 @@ ExpandableModule {
                 implicitHeight: Theme.listHeight - 10
 
                 Layout.alignment: Qt.AlignCenter
-                Layout.preferredWidth: mainButton.implicitWidth - 20
+                Layout.preferredWidth: headerPill.implicitWidth - 20
                 Layout.topMargin: actionButton.modelData.index === 0 ? (- corner.size) : 0
 
                 radius: Theme.moduleEdgeRadius - 5
@@ -190,7 +154,7 @@ ExpandableModule {
         // ── System actions ─────────────────────────────
         Rectangle {
             Layout.alignment: Qt.AlignCenter
-            Layout.preferredWidth: mainButton.implicitWidth - 20
+            Layout.preferredWidth: headerPill.implicitWidth - 20
             implicitHeight: Theme.listHeight
             color: Theme.divider
             radius: Theme.moduleEdgeRadius

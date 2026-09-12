@@ -8,7 +8,7 @@ import "../elements"
 
 ExpandableModule {
     id: audioModule
-    noHoverColorChange: expanded
+    useDefaultPill: false
 
     property int maxSinkBarLength: 270
     property int sinkNameMaxChars: 30

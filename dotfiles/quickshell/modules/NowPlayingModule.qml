@@ -11,6 +11,7 @@ import "../elements"
 ExpandableModule {
     id: nowPlayingModule
     collapseOnHoverExit: false
+    useDefaultPill: false
     noHoverColorChange: expanded || !isPlaying
     noPressColorChange: true
     collapsedBottomRightRadius: Theme.moduleEdgeRadius

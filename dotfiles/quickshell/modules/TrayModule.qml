@@ -9,6 +9,7 @@ import "../elements"
 ExpandableModule {
     id: root
     collapseOnHoverExit: false   // managed manually (menu-aware)
+    useDefaultPill: false
 
     property int openMenus: 0
 

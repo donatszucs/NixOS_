@@ -86,98 +86,51 @@ ExpandableModule {
 
     // 4. Your icon logic
     property string btIcon: connectionsModule.btPowered ? (btDevicesConnected ? "󰂱" : "󰂯") : "󰂲"
+    // ── Standard pill setup ──────────────────────────────────────
+    pillPercent: expanded ? 100 : 0
+    pillVariant: "neutral"
+    expandedPillLabel: "Connections"
+
     // ── Sizing ─────────────────────────────────────────────────
-    implicitHeight: expanded ? baseColumn.implicitHeight : Theme.moduleHeight
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
     implicitWidth:  expanded ? baseColumn.implicitWidth : 65
 
+    // Collapsed content inside the base pill
+    Row {
+        id: labelRow
+        anchors.centerIn: headerPill
+        spacing: 12
+        z: 1
+
+        opacity: connectionsModule.expanded ? 0.0 : 1.0
+        visible: opacity > 0
+        Behavior on opacity { 
+            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
+        }
+
+        Text {
+            text: connectionsModule.netIcon
+            color: connectionsModule.netColor
+            font.family: Theme.font
+            font.pixelSize: Theme.fontSize + 1
+            anchors.verticalCenter: parent.verticalCenter
+        }
+        Text {
+            text: connectionsModule.btIcon
+            color: connectionsModule.btColor
+            font.family: Theme.font
+            font.pixelSize: Theme.fontSize + 1
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    }
 
     ColumnLayout {
         id: baseColumn
         anchors { 
-            top: parent.top
+            top: headerPill.bottom
             right: parent.right
          }
         spacing: 10
-
-        // ── Header / Collapsed State ───────────────────────────────
-        PillBarButton {
-            id: collapsedRow
-            Layout.alignment: Qt.AlignRight
-            implicitHeight: Theme.moduleHeight
-            implicitWidth: connectionsModule.implicitWidth
-
-            noHoverColorChange: !connectionsModule.expanded
-            noPressColorChange: !connectionsModule.expanded
-            colorOverride: true
-            
-            pillVariant: "neutral"
-            variant: "neutral"
-            percent: connectionsModule.expanded ? 100 : 0
-
-            bottomLeftRadius: connectionsModule.expanded ? Theme.moduleEdgeRadius : 0
-            bottomRightRadius: connectionsModule.expanded ? Theme.moduleEdgeRadius : 0
-
-            clip: true
-            
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                acceptedButtons: Qt.LeftButton
-
-                onPressedChanged: {
-                    if (!connectionsModule.expanded) {
-                        connectionsModule.pressed = !connectionsModule.pressed
-                    } else {
-                        collapsedRow.pressed = !collapsedRow.pressed
-                    }
-                }
-                onClicked: {
-                    connectionsModule.expanded = !connectionsModule.expanded
-                }
-            }
-
-            Text {
-                text: "Connections"
-                color: Theme.textPrimary
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize
-                font.bold: true
-                anchors.centerIn: parent
-                
-                opacity: connectionsModule.expanded ? 1.0 : 0.0
-                visible: opacity > 0
-                Behavior on opacity { 
-                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
-                }
-            }
-
-            Row {
-                id: labelRow
-                anchors.centerIn: parent
-                spacing: 12
-                
-                opacity: connectionsModule.expanded ? 0.0 : 1.0
-                visible: opacity > 0
-                Behavior on opacity { 
-                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
-                }
-
-                Text {
-                    text: connectionsModule.netIcon
-                    color: connectionsModule.netColor
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize + 1
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-                Text {
-                    text: connectionsModule.btIcon
-                    color: connectionsModule.btColor
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize + 1
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-            }
-        }
 
         // ── Popup dropdown ─────────────────────────────────────────
         MouseArea {
@@ -207,7 +160,6 @@ ExpandableModule {
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.margins: 10
-                Layout.topMargin: 0
                 spacing: 20
 
                 Text {

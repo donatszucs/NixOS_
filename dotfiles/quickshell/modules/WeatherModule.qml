@@ -22,7 +22,7 @@ ExpandableModule {
     property var    dailyForecast: []
 
     implicitWidth: expanded ? baseColumn.implicitWidth : pillContent.implicitWidth + 30
-    implicitHeight: expanded ? baseColumn.implicitHeight : Theme.moduleHeight
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
 
     // ── Open-Meteo fetch ──────────────────────────────────────────────
     // Budapest V district: lat 47.5049 lon 19.0495
@@ -177,120 +177,73 @@ ExpandableModule {
         return "Unknown"
     }
 
+    // ── Standard pill setup ──────────────────────────────────────
+    pillPercent: expanded ? 100 : 0
+    pillVariant: "neutral"
+    expandedPillLabel: "Weather"
+
     // ── Layout ──────────────────────────────────────────
+    // Collapsed content inside the base pill
+    RowLayout {
+        id: pillContent
+        anchors.centerIn: headerPill
+        spacing: 8
+        z: 1
+
+        opacity: root.expanded ? 0.0 : 1.0
+        visible: opacity > 0
+        Behavior on opacity { 
+            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
+        }
+
+        Text {
+            text: root.weatherIcon
+            color: Theme.textPrimary
+            font.family: Theme.font
+            font.pixelSize: Theme.fontSize + 2
+            verticalAlignment: Text.AlignVCenter
+        }
+
+        Text {
+            text: root.loaded ? root.temperature + "°C" : "—"
+            color: Theme.textPrimary
+            font.family: Theme.font
+            font.pixelSize: Theme.fontSize
+            font.bold: true
+            verticalAlignment: Text.AlignVCenter
+        }
+
+        Rectangle {
+            Layout.preferredWidth: 1
+            Layout.preferredHeight: 14
+            color: Theme.textPrimary
+            opacity: 0.2
+            visible: root.loaded
+        }
+
+        Text {
+            id: descText
+            text: root.isUpdating ? "Updating..." : (root.loaded ? root.weatherDesc : "Loading")
+            color: Theme.textPrimary
+            opacity: 0.7
+            font.family: Theme.font
+            font.pixelSize: Theme.fontSize - 1
+            font.bold: false
+            verticalAlignment: Text.AlignVCenter
+        }
+    }
+
     ColumnLayout {
         id: baseColumn
-        anchors.top: parent.top
+        anchors.top: headerPill.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 10
-
-        PillBarButton {
-            id: weatherPill
-            Layout.alignment: Qt.AlignHCenter
-            implicitHeight: Theme.moduleHeight
-            implicitWidth: root.implicitWidth
-
-            noHoverColorChange: !root.expanded
-            noPressColorChange: !root.expanded
-            colorOverride: true
-            
-            pillVariant: "neutral"
-            variant: "neutral"
-            percent: root.expanded ? 100 : 0
-
-            bottomLeftRadius: root.expanded ? Theme.moduleEdgeRadius : 0
-            bottomRightRadius: root.expanded ? Theme.moduleEdgeRadius : 0
-
-            clip: true
-            
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                acceptedButtons: Qt.LeftButton
-
-                onPressedChanged: {
-                    if (!root.expanded) {
-                        root.pressed = !root.pressed
-                    } else {
-                        weatherPill.pressed = !weatherPill.pressed
-                    }
-                }
-                onClicked: {
-                    root.expanded = !root.expanded
-                }
-            }
-
-            Text {
-                text: "Weather"
-                color: Theme.textPrimary
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize
-                font.bold: true
-                anchors.centerIn: parent
-                
-                opacity: root.expanded ? 1.0 : 0.0
-                visible: opacity > 0
-                Behavior on opacity { 
-                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
-                }
-            }
-
-            RowLayout {
-                id: pillContent
-                anchors.centerIn: parent
-                spacing: 8
-
-                opacity: root.expanded ? 0.0 : 1.0
-                visible: opacity > 0
-                Behavior on opacity { 
-                    NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
-                }
-
-                Text {
-                    text: root.weatherIcon
-                    color: Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize + 2
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                Text {
-                    text: root.loaded ? root.temperature + "°C" : "—"
-                    color: Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
-                    font.bold: true
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                Rectangle {
-                    Layout.preferredWidth: 1
-                    Layout.preferredHeight: 14
-                    color: Theme.textPrimary
-                    opacity: 0.2
-                    visible: root.loaded
-                }
-
-                Text {
-                    id: descText
-                    text: root.isUpdating ? "Updating..." : (root.loaded ? root.weatherDesc : "Loading")
-                    color: Theme.textPrimary
-                    opacity: 0.7
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 1
-                    font.bold: false
-                    verticalAlignment: Text.AlignVCenter
-                }
-            }
-        }
 
         MouseArea {
             visible: root.expanded
             Layout.preferredWidth: 370
             Layout.preferredHeight: popupCol.implicitHeight
-            Layout.leftMargin: 10
-            Layout.rightMargin: 10
-            Layout.bottomMargin: 10
+            Layout.margins: 10
             acceptedButtons: Qt.NoButton
 
             ColumnLayout {
