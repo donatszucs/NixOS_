@@ -26,7 +26,7 @@ ExpandableModule {
 
         PillBarButton {
             id: mainButton
-            colorOverride: !systemModule.expanded
+            colorOverride: true
             noHoverColorChange: !systemModule.expanded
             noPressColorChange: !systemModule.expanded
 

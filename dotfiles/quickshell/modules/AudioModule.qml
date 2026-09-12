@@ -97,7 +97,7 @@ ExpandableModule {
                 pillVariant: "dark"
                 variant: "neutral"
                 textAlign: "right"
-                colorOverride: audioModule.expanded ? false : true
+                colorOverride: true
                 noHoverColorChange: !audioModule.expanded
                 
                 rightMargin: Theme.modulePaddingH
@@ -129,6 +129,7 @@ ExpandableModule {
                 
                 pillText: ""
                 cursorShape: Qt.PointingHandCursor
+                colorOverride: true
                 variant: "neutral"
                 pillVariant: "neutral"
                 percent: 100
@@ -152,6 +153,7 @@ ExpandableModule {
 
                 pillText: "Audio Mixer"
                 pillVariant: "neutral"
+                colorOverride: true
                 variant: "neutral"
                 percent: 100
             }

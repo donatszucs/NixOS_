@@ -40,7 +40,7 @@ ExpandableModule {
 
         PillBarButton {
             id: labelText
-            colorOverride: !root.expanded
+            colorOverride: true
             noHoverColorChange: !root.expanded
             implicitHeight: Theme.moduleHeight
 

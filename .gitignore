@@ -1,5 +1,6 @@
 result
 /target
+**/target
 .env
 .DS_Store
 *.swp

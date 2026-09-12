@@ -192,7 +192,7 @@ ExpandableModule {
 
             noHoverColorChange: !root.expanded
             noPressColorChange: !root.expanded
-            colorOverride: !root.expanded
+            colorOverride: true
             
             pillVariant: "neutral"
             variant: "neutral"

@@ -41,7 +41,7 @@ Rectangle {
     property bool noPressColorChange: false
 
     property bool colorOverride: false
-    property color overrideColor: "transparent"
+    property color overrideColor: Qt.rgba(pal.base.r, pal.base.g, pal.base.b, 0.0)
 
     property bool dontAnimateColor: false
 

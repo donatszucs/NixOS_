@@ -53,7 +53,7 @@ ExpandableModule {
 
             ModuleButton {
                 variant: "neutral"
-                colorOverride: !root.expanded
+                colorOverride: true
                 noHoverColorChange: !root.expanded
                 noPressColorChange: !root.expanded
                 id: notificationButton

@@ -108,7 +108,7 @@ ExpandableModule {
 
             noHoverColorChange: !connectionsModule.expanded
             noPressColorChange: !connectionsModule.expanded
-            colorOverride: !connectionsModule.expanded
+            colorOverride: true
             
             pillVariant: "neutral"
             variant: "neutral"
@@ -666,13 +666,12 @@ ExpandableModule {
                             anchors.centerIn: parent
                             label: ""
                             textColor: connectionsModule.headsetBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
-                            cursorShape: Qt.PointingHandCursor
+                            cursorShape: Qt.ArrowCursor
                             colorOverride: true
                             textFont: 24
                             radius: 10
                             implicitWidth: 40
                             implicitHeight: 40
-                            onClicked: headsetProc.running = true
                         }
                     }
                     
@@ -776,7 +775,10 @@ ExpandableModule {
                             radius: 10
                             implicitWidth: 40
                             implicitHeight: 40
-                            onClicked: mouseProc.running = true
+                            onClicked: {
+                                peripheralsFile.reload()
+                                updatePeripherals()
+                            }
                         }
                     }
                     
@@ -891,94 +893,71 @@ ExpandableModule {
         command: ["bash", "-c", " overskride || blueman-manager || gnome-control-center bluetooth || true"]
     }
 
-    // Headset battery probe (calls wrapper script)
-    Process {
-        id: headsetProc
-        command: ["bash", "-c", "~/nixos-config/scripts/HyprHeadset/headset-battery 2>/dev/null || true"]
-        running: true
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var line = text.trim()
-                if (line === "") {
-                    connectionsModule.headsetBatteryAvailable = false 
-                    connectionsModule.headsetBatteryPercent = -1
-                    connectionsModule.headsetBatteryState = "not available"
-                    return
-                }
-                // Expected: "Battery: 45%  (Charging)"
-                var re = /Battery:\s*(\d+)%\s*\(([^)]+)\)/
-                var m = re.exec(line)
-                if (m) {
-                    connectionsModule.headsetBatteryAvailable = true
-                    connectionsModule.headsetBatteryPercent = parseInt(m[1])
-                    connectionsModule.headsetBatteryState = m[2]
-                } else {
-                    connectionsModule.headsetBatteryAvailable = false
-                    connectionsModule.headsetBatteryPercent = -1
-                    connectionsModule.headsetBatteryState = line
-                }
-            }
+    // Peripheral JSON reader (RAM-based, instantaneous via FileView)
+    FileView {
+        id: peripheralsFile
+        path: "/tmp/peripherals.json"
+        blockLoading: true
+        watchChanges: true
+        onLoaded: updatePeripherals()
+        onFileChanged: updatePeripherals()
+        onTextChanged: updatePeripherals()
+    }
+
+    function updatePeripherals() {
+        var txt = peripheralsFile.text()
+        if (!txt || txt.trim() === "") {
+            connectionsModule.mouseBatteryAvailable = false
+            connectionsModule.mouseBatteryPercent = -1
+            connectionsModule.mouseBatteryState = "not available"
+            return
         }
-    }
 
-    Timer {
-        id: headsetTimer
-        interval: 10000
-        running: true
-        repeat: true
-        onTriggered: headsetProc.running = true
-    }
+        try {
+            var data = JSON.parse(txt)
+            if (data.mouse !== undefined && data.mouse !== null && data.mouse >= 0) {
+                connectionsModule.mouseBatteryAvailable = true
+                connectionsModule.mouseBatteryPercent = data.mouse
 
-    // Mouse battery probe
-    Process {
-        id: mouseProc
-        command: ["bash", "-c", 'f="/tmp/keychron_battery.txt"; head -n 1 "$f" 2>/dev/null; stat -c %Y "$f" 2>/dev/null || echo ""']
-        running: true
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var lines = text.trim().split("\n")
-                if (lines.length < 2 || lines[0] === "" || lines[0] === "?") {
-                    connectionsModule.mouseBatteryAvailable = false 
-                    connectionsModule.mouseBatteryPercent = -1
-                    connectionsModule.mouseBatteryState = lines.length > 0 && lines[0] !== "?" && lines[0] !== "" ? lines[0] : "not available"
-                    return
-                }
-                
-                var status = lines[0].trim()
-                var modTime = parseInt(lines[1].trim())
                 var timeAgo = ""
-                
-                if (!isNaN(modTime)) {
-                    var diffMins = Math.floor((Date.now() - (modTime * 1000)) / 60000)
-                    if (diffMins < 0) diffMins = 0 // In case of minor clock desync
+                var updatedSec = data.mouse_updated
+                if (updatedSec && !isNaN(updatedSec)) {
+                    var diffMins = Math.floor((Date.now() - (updatedSec * 1000)) / 60000)
+                    if (diffMins < 0) diffMins = 0
                     var days = Math.floor(diffMins / 1440)
                     var hours = Math.floor((diffMins % 1440) / 60)
                     var mins = diffMins % 60
-                    
+
                     if (days > 0) timeAgo += days + "d "
                     if (hours > 0) timeAgo += hours + "h "
                     if (mins > 0 || (days === 0 && hours === 0)) timeAgo += mins + "m "
                     timeAgo += "ago"
-                }
-                
-                if (status.endsWith("%")) {
-                    connectionsModule.mouseBatteryAvailable = true
-                    connectionsModule.mouseBatteryPercent = parseInt(status)
-                    connectionsModule.mouseBatteryState = timeAgo
                 } else {
-                    connectionsModule.mouseBatteryAvailable = false
-                    connectionsModule.mouseBatteryPercent = -1
-                    connectionsModule.mouseBatteryState = status + (timeAgo ? " (" + timeAgo + ")" : "")
+                    timeAgo = "recently"
                 }
+                connectionsModule.mouseBatteryState = timeAgo
+            } else {
+                connectionsModule.mouseBatteryAvailable = false
+                connectionsModule.mouseBatteryPercent = -1
+                connectionsModule.mouseBatteryState = "Disconnected"
             }
+        } catch (e) {
+            connectionsModule.mouseBatteryAvailable = false
+            connectionsModule.mouseBatteryPercent = -1
+            connectionsModule.mouseBatteryState = "not available"
         }
     }
 
     Timer {
-        id: mouseTimer
-        interval: 5000
+        id: peripheralsTimer
+        interval: 10000
         running: true
         repeat: true
-        onTriggered: mouseProc.running = true
+        onTriggered: {
+            peripheralsFile.reload()
+            updatePeripherals()
+        }
     }
+
+    Component.onCompleted: updatePeripherals()
 }

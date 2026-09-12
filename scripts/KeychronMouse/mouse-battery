@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-# Keychron M6 Wireless battery checker wrapper
+# Keychron M6 Mouse Battery Monitor daemon wrapper
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV="$SCRIPT_DIR/../scriptsEnv/.venv/bin/python"
-
-HIDAPI_SYSTEM="/run/current-system/sw/lib"
-HIDAPI_LIB="$HIDAPI_SYSTEM"
-
-if ! ls "$HIDAPI_LIB"/libhidapi-hidraw.so* 1> /dev/null 2>&1; then
-    echo "Error: libhidapi not found in $HIDAPI_LIB" >&2
-    exit 1
+if pgrep -x "peripherial_mon" >/dev/null || pgrep -x "peripherial_monitor" >/dev/null; then
+    exit 0
 fi
 
-export LD_LIBRARY_PATH="$HIDAPI_LIB"
-exec "$VENV" "$SCRIPT_DIR/MouseBattery.py" "$@"
+if command -v peripherial_monitor >/dev/null 2>&1; then
+    exec peripherial_monitor "$@"
+fi
+
+DAEMON_BIN="/home/doni/nixos-config/nix_files/rust_daemons/peripherial_monitor/target/release/peripherial_monitor"
+if [[ -x "$DAEMON_BIN" ]]; then
+    exec "$DAEMON_BIN" "$@"
+fi
