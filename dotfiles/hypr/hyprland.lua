@@ -50,7 +50,6 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user start sunshine")
 
     hl.exec_cmd("~/nixos-config/scripts/WallpaperSetup/init-hyprpaper.sh &")
-    hl.exec_cmd("~/nixos-config/scripts/KeychronMouse/mouse-battery &")
     
     -- GTK, KDE and Cursor Theming
     hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'catppuccin-mocha-mauve-standard+normal'")
