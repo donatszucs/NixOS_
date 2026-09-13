@@ -97,6 +97,8 @@ ExpandableModule {
                 pillVariant: "dark"
                 variant: "neutral"
                 textAlign: "right"
+
+                colorOpacity: 0.5
                 colorOverride: true
                 noHoverColorChange: !audioModule.expanded
                 
@@ -133,6 +135,7 @@ ExpandableModule {
                 variant: "neutral"
                 pillVariant: "neutral"
                 percent: 100
+                colorOpacity: 0.5
 
                 onClicked: testSoundProcess.running = true
 
@@ -156,6 +159,7 @@ ExpandableModule {
                 colorOverride: true
                 variant: "neutral"
                 percent: 100
+                colorOpacity: 0.5
             }
         }
         // Action buttons — revealed by clip as width expands leftward

@@ -63,6 +63,8 @@ ExpandableModule {
                 implicitHeight: Theme.moduleHeight
                 label: "󱊖"
                 textFont: Theme.fontSize + 1
+
+                colorOpacity: 0.5
                 
                 bottomRightRadius: root.expanded ? Theme.moduleEdgeRadius : 0
                 bottomLeftRadius: root.expanded ? Theme.moduleEdgeRadius : 0

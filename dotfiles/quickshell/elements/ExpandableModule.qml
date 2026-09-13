@@ -73,6 +73,8 @@ ModuleButton {
         id: _headerPill
         visible: root.useDefaultPill
 
+        colorOpacity: 0.5
+
         // ── Pill content ─────────────────────────────────────────
         pillText:    root.pillText
         percent:     root.pillPercent

@@ -41,6 +41,8 @@ ExpandableModule {
             implicitHeight: Theme.moduleHeight
             clip: false
 
+            colorOpacity: 0.5
+
             variant: "neutral"
             
             Layout.alignment: Qt.AlignRight
