@@ -14,6 +14,7 @@ ExpandableModule {
     expandedBottomRightRadius:  Theme.moduleEdgeRadius + 5
     collapsedBottomLeftRadius:  Theme.moduleEdgeRadius
     collapsedBottomRightRadius: 0
+    clip: false
 
     property color buttonColor: labelText.color
 
@@ -38,11 +39,12 @@ ExpandableModule {
             colorOverride: true
             noHoverColorChange: !root.expanded
             implicitHeight: Theme.moduleHeight
+            clip: false
 
             variant: "neutral"
             
             Layout.alignment: Qt.AlignRight
-            Layout.preferredWidth: root.expanded ? 180 : labelText.implicitWidth
+            Layout.preferredWidth: root.expanded ? 190 : labelText.implicitWidth
             Behavior on Layout.preferredWidth {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
@@ -55,8 +57,24 @@ ExpandableModule {
                 : "Off 󱩎"
             pillVariant: SharedState.lightVariant
             
-            bottomLeftRadius:  root.expanded ? Theme.moduleEdgeRadius + 5 : Theme.moduleEdgeRadius
+            bottomLeftRadius:  0
             bottomRightRadius: root.expanded ? Theme.moduleEdgeRadius + 5 : 0
+
+            InverseRadius {
+                anchors.top: labelText.top
+                anchors.right: labelText.left
+                cornerPosition: "topRight"
+                size: Theme.moduleEdgeRadius
+                color: labelText.color
+            }
+
+            InverseRadius {
+                anchors.top: labelText.bottom
+                anchors.left: labelText.left
+                cornerPosition: "topLeft"
+                size: Theme.moduleEdgeRadius
+                color: labelText.color
+            }
 
             MouseArea {
                 anchors.fill: parent
@@ -98,10 +116,9 @@ ExpandableModule {
             }
 
             Layout.preferredWidth: 160
-            Layout.alignment: Qt.AlignTop
-            Layout.topMargin: 5
+            Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
+            Layout.topMargin: 10
             Layout.bottomMargin: 10
-            Layout.rightMargin: 20
             spacing: 0
 
             InverseRadius {
