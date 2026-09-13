@@ -42,6 +42,7 @@ ExpandableModule {
             clip: false
 
             colorOpacity: 0.5
+            pillColorOpacity: Theme.moduleOpacity
 
             variant: "neutral"
             

@@ -99,6 +99,7 @@ ExpandableModule {
                 textAlign: "right"
 
                 colorOpacity: 0.5
+                pillColorOpacity: Theme.moduleOpacity
                 colorOverride: true
                 noHoverColorChange: !audioModule.expanded
                 
@@ -136,6 +137,7 @@ ExpandableModule {
                 pillVariant: "neutral"
                 percent: 100
                 colorOpacity: 0.5
+                pillColorOpacity: Theme.moduleOpacity
 
                 onClicked: testSoundProcess.running = true
 
@@ -160,6 +162,7 @@ ExpandableModule {
                 variant: "neutral"
                 percent: 100
                 colorOpacity: 0.5
+                pillColorOpacity: Theme.moduleOpacity
             }
         }
         // Action buttons — revealed by clip as width expands leftward
