@@ -1,10 +1,10 @@
 // Now Playing module — title + hover-to-reveal controls, scrubber & multi-player carousel
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Services.Mpris
 import Quickshell.Io
 import QtQuick.Effects
-import Quickshell.Hyprland
 
 import "../elements"
 
@@ -69,17 +69,45 @@ ExpandableModule {
         return mins + ":" + (secs < 10 ? "0" : "") + secs
     }
 
-    // ── Helper: player icon resolver ────────────────────────────
+    // ── Helper: player icon resolver (dynamic from MPRIS API & theme) ──
+    function getPlayerIconSource(player) {
+        if (!player) return ""
+
+        var candidates = []
+
+        if (player.desktopEntry) {
+            candidates.push(player.desktopEntry)
+            candidates.push(player.desktopEntry.toLowerCase())
+        }
+
+        if (player.identity) {
+            var idLower = player.identity.toLowerCase()
+            candidates.push(idLower)
+            var firstWord = idLower.split(/\s+/)[0]
+            if (firstWord !== idLower) candidates.push(firstWord)
+        }
+
+        if (player.dbusName) {
+            var prefix = "org.mpris.MediaPlayer2."
+            if (player.dbusName.indexOf(prefix) === 0) {
+                var clean = player.dbusName.substring(prefix.length).split(".")[0].toLowerCase()
+                candidates.push(clean)
+            }
+        }
+
+        for (var i = 0; i < candidates.length; i++) {
+            var c = candidates[i]
+            if (c && Quickshell.hasThemeIcon(c)) {
+                return Quickshell.iconPath(c)
+            }
+        }
+
+        return ""
+    }
+
     function getPlayerIcon(player) {
-        if (!player) return "󰎆"
-        var id = ((player.identity || "") + " " + (player.desktopEntry || "")).toLowerCase()
-        if (id.indexOf("spotify") !== -1) return ""
-        if (id.indexOf("zen") !== -1) return "󰈹"
-        if (id.indexOf("firefox") !== -1) return "󰈹"
-        if (id.indexOf("chrome") !== -1 || id.indexOf("chromium") !== -1) return ""
-        if (id.indexOf("brave") !== -1) return "󰮊"
-        if (id.indexOf("mpv") !== -1 || id.indexOf("vlc") !== -1) return "󰕼"
-        return "󰎆"
+        if (!player) return ""
+        return getPlayerIconSource(player) !== "" ? "" : "󰎆"
     }
 
     // ── Helper: player display name ─────────────────────────────
@@ -277,17 +305,6 @@ ExpandableModule {
         }
     }
 
-    function focusNow() {
-        if (!currentPlayer) return
-        if (currentPlayer.canRaise && currentPlayer.raise) {
-            try { currentPlayer.raise() } catch(e) {}
-        }
-        var id = (currentPlayer.identity || "").toLowerCase().trim()
-        var cls = id.match(/mozilla zen/) ? "zen" : id
-        var safeCls = cls.replace(/'/g, "\\'")
-        Hyprland.dispatch("hl.dsp.focus({ window = 'class:(?i)" + safeCls + "' })")
-    }
-
     // ── Instant Reactive D-Bus Signals ──────────────────────────
     // Detect player connect/disconnect immediately
     Connections {
@@ -382,14 +399,13 @@ ExpandableModule {
             implicitHeight: Theme.moduleHeight - 10
             Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
             Layout.topMargin: nowPlayingModule.expanded ? 10 : 5
-            cursorShape: isPlaying ? Qt.PointingHandCursor : Qt.ArrowCursor
+            cursorShape: Qt.ArrowCursor
 
             Behavior on Layout.topMargin {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
 
             implicitWidth: scrollingText.implicitWidth + artistText.implicitWidth + 5
-            onClicked: focusNow()
             radius: Theme.moduleEdgeRadius - 5
 
             // Background album art (collapsed only)
@@ -484,6 +500,19 @@ ExpandableModule {
 
                     label: nowPlayingModule.getPlayerIcon(nowPlayingModule.currentPlayer)
                     leftMargin: 3
+
+                    Image {
+                        id: playerAppIcon
+                        anchors.centerIn: parent
+                        width: 16
+                        height: 16
+                        sourceSize.width: 32
+                        sourceSize.height: 32
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                        source: nowPlayingModule.getPlayerIconSource(nowPlayingModule.currentPlayer)
+                        visible: status === Image.Ready && source != ""
+                    }
 
                     InverseRadius {
                         anchors.top: parent.top
@@ -676,15 +705,13 @@ ExpandableModule {
                                     }
                                 }
 
-                                // Clicking art selects carousel item or focuses player window
+                                // Clicking art selects carousel item
                                 MouseArea {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
                                         if (playerCarousel.currentIndex !== index) {
                                             playerCarousel.currentIndex = index
-                                        } else {
-                                            nowPlayingModule.focusNow()
                                         }
                                     }
                                 }
