@@ -7,4 +7,5 @@ edition = "2024"
 hidapi = { version = "2.6", default-features = false, features = ["linux-static-hidraw"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+tapo = "0.9"
 tokio = { version = "1", features = ["full"] }

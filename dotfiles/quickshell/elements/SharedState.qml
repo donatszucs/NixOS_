@@ -11,84 +11,171 @@ Item {
     // ==========================================
     // Light Switch State
     // ==========================================
+    property bool lightAvailable: false
     property bool lightActive: true
     property string lightVariant: "light"
     property int lightBrightness: 100
     property int lightHue: 30
     property int lightSaturation: 0
-    property string tapoScriptPath: "REPO=$(dirname $(dirname $(realpath ~/.config/quickshell))); \"$REPO/scripts/scriptsEnv/.venv/bin/python\" \"$REPO/scripts/TapoLight/tapo_control.py\""
+    property string lightDaemonCommand: "peripherial_monitor"
+    property int targetBrightness: -1
+    property int inFlightBrightness: -1
 
-    function refreshLightStatus() {
-        if (!lightRefreshProc.running) {
-            lightRefreshProc.running = true
-        }
+    FileView {
+        id: peripheralStateFile
+        path: "/tmp/peripherals.json"
+        blockLoading: true
+        watchChanges: true
+        onLoaded: root.scheduleLightStateUpdate()
+        onFileChanged: root.scheduleLightStateUpdate()
+        onTextChanged: root.scheduleLightStateUpdate()
     }
 
-    Process {
-        id: lightRefreshProc
-        command: ["bash", "-c", root.tapoScriptPath + " state"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var parts = text.trim().split(",")
-                if (parts.length >= 4) {
-                    if (parts[0] === "ON") {
-                        root.lightVariant = "light"
-                        root.lightActive = true
-                    } else {
-                        root.lightVariant = "dark"
-                        root.lightActive = false
-                    }
-                    var b = parseInt(parts[1])
-                    var h = parseInt(parts[2])
-                    var s = parseInt(parts[3])
-                    if (!isNaN(b)) root.lightBrightness = b
-                    if (!isNaN(h)) root.lightHue = h
-                    if (!isNaN(s)) root.lightSaturation = s
-                }
+    Timer {
+        id: lightStateUpdateTimer
+        interval: 75
+        repeat: false
+        onTriggered: root.updateLightState()
+    }
+
+    Timer {
+        id: lightStateRefreshTimer
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: root.refreshLightStatus()
+    }
+
+    function scheduleLightStateUpdate() {
+        lightStateUpdateTimer.restart()
+    }
+
+    function refreshLightStatus() {
+        peripheralStateFile.reload()
+        root.scheduleLightStateUpdate()
+    }
+
+    function updateLightState() {
+        var text = peripheralStateFile.text()
+        if (!text || text.trim() === "") {
+            root.scheduleLightStateUpdate()
+            return
+        }
+
+        try {
+            var state = JSON.parse(text).light
+            if (!state) {
+                root.scheduleLightStateUpdate()
+                return
             }
+            root.lightAvailable = state.status === "connected"
+
+            var brightnessBusy = brightnessCommandTimer.running
+                || lightSetBrightnessProc.running
+                || (root.targetBrightness >= 0)
+                || (root.inFlightBrightness >= 0)
+
+            if (!brightnessBusy) {
+                root.lightActive = state.device_on === true
+                root.lightVariant = root.lightActive ? "light" : "dark"
+                if (state.brightness !== undefined) root.lightBrightness = state.brightness
+            }
+
+            if (state.hue !== undefined && !lightSetColorProc.running) root.lightHue = state.hue
+            if (state.saturation !== undefined && !lightSetColorProc.running) root.lightSaturation = state.saturation
+        } catch (error) {
+            root.scheduleLightStateUpdate()
         }
     }
 
     function toggleLight() {
         if (root.lightActive) {
-            root.lightVariant = "dark"
-            root.lightActive = false
             lightOffProc.running = true
         } else {
-            root.lightVariant = "light"
-            root.lightActive = true
             lightOnProc.running = true
         }
     }
 
     Process {
         id: lightOnProc
-        command: ["bash", "-c", root.tapoScriptPath + " on"]
-        onRunningChanged: if (!running) refreshLightStatus()
+        command: [root.lightDaemonCommand, "light", "on"]
+        onRunningChanged: if (!running) root.refreshLightStatus()
     }
 
     Process {
         id: lightOffProc
-        command: ["bash", "-c", root.tapoScriptPath + " off"]
-        onRunningChanged: if (!running) refreshLightStatus()
+        command: [root.lightDaemonCommand, "light", "off"]
+        onRunningChanged: if (!running) root.refreshLightStatus()
+    }
+
+    function adjustLightBrightness(delta) {
+        if (!root.lightAvailable) return
+
+        if (!root.lightActive) {
+            root.lightActive = true
+            root.lightVariant = "light"
+        }
+
+        var current = (root.targetBrightness >= 0) ? root.targetBrightness : root.lightBrightness
+        var next
+        if (delta > 0) {
+            if (current === 1) {
+                next = 5
+            } else {
+                next = Math.min(100, Math.round((current + delta) / 5) * 5)
+            }
+        } else {
+            next = Math.max(1, Math.min(100, Math.round((current + delta) / 5) * 5))
+        }
+
+        root.lightBrightness = next
+        root.targetBrightness = next
+        brightnessCommandTimer.restart()
     }
 
     function setLightBrightness(val) {
-        root.lightBrightness = val
-        lightSetBrightnessProc.targetBrightness = val
+        if (!root.lightAvailable) return
+        var next = Math.max(1, Math.min(100, val))
+        root.lightBrightness = next
+        root.targetBrightness = next
+        brightnessCommandTimer.restart()
+    }
+
+    function startBrightnessCommand() {
+        if (lightSetBrightnessProc.running || root.targetBrightness < 0) return
+        var target = root.targetBrightness
+        root.targetBrightness = -1
+        root.inFlightBrightness = target
+        lightSetBrightnessProc.targetBrightness = target
         lightSetBrightnessProc.running = true
+    }
+
+    Timer {
+        id: brightnessCommandTimer
+        interval: 180
+        repeat: false
+        onTriggered: root.startBrightnessCommand()
     }
 
     Process {
         id: lightSetBrightnessProc
         property int targetBrightness: 100
-        command: ["bash", "-c", root.tapoScriptPath + " set " + targetBrightness]
-        onRunningChanged: if (!running) refreshLightStatus()
+        command: [root.lightDaemonCommand, "light", "set", targetBrightness.toString()]
+        onRunningChanged: {
+            if (!running) {
+                root.inFlightBrightness = -1
+                if (root.targetBrightness >= 0 && root.targetBrightness !== targetBrightness) {
+                    if (!brightnessCommandTimer.running) {
+                        root.startBrightnessCommand()
+                    }
+                } else {
+                    root.refreshLightStatus()
+                }
+            }
+        }
     }
 
     function setLightColor(hue, sat) {
-        root.lightHue = hue
-        root.lightSaturation = sat
         lightSetColorProc.targetHue = hue
         lightSetColorProc.targetSat = sat
         lightSetColorProc.running = true
@@ -98,20 +185,18 @@ Item {
         id: lightSetColorProc
         property int targetHue: 30
         property int targetSat: 0
-        command: ["bash", "-c", root.tapoScriptPath + " color " + targetHue + " " + targetSat]
-        onRunningChanged: if (!running) refreshLightStatus()
+        command: [root.lightDaemonCommand, "light", "color", targetHue.toString(), targetSat.toString()]
+        onRunningChanged: if (!running) root.refreshLightStatus()
     }
 
     function setLightWhite() {
-        root.lightHue = 0
-        root.lightSaturation = 0
         lightSetWhiteProc.running = true
     }
 
     Process {
         id: lightSetWhiteProc
-        command: ["bash", "-c", root.tapoScriptPath + " white"]
-        onRunningChanged: if (!running) refreshLightStatus()
+        command: [root.lightDaemonCommand, "light", "white"]
+        onRunningChanged: if (!running) root.refreshLightStatus()
     }
 
     property bool muted: false

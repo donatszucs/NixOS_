@@ -47,8 +47,10 @@ ExpandableModule {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
 
-            percent: SharedState.lightActive ? SharedState.lightBrightness : 0
-            pillText: SharedState.lightActive
+            percent: SharedState.lightAvailable && SharedState.lightActive ? SharedState.lightBrightness : 0
+            pillText: !SharedState.lightAvailable
+                ? "Offline"
+                : SharedState.lightActive
                 ? SharedState.lightBrightness + "% 󱩒"
                 : "Off 󱩎"
             pillVariant: SharedState.lightVariant
@@ -63,11 +65,10 @@ ExpandableModule {
 
                 onWheel: wheel => {
                     if (wheel.angleDelta.y > 0) {
-                        SharedState.lightBrightness = Math.min(100, SharedState.lightBrightness + 5)
-                    } else {
-                        SharedState.lightBrightness = Math.max(1,   SharedState.lightBrightness - 5)
+                        SharedState.adjustLightBrightness(5)
+                    } else if (wheel.angleDelta.y < 0) {
+                        SharedState.adjustLightBrightness(-5)
                     }
-                    debounceTimer.restart()
                     wheel.accepted = true
                 }
 
@@ -304,14 +305,6 @@ ExpandableModule {
             }
         }
     }
-    // ── Brightness scroll wheel ─────────────────────────────────────
-    Timer {
-        id: debounceTimer
-        interval: 1000
-        repeat: false
-        onTriggered: SharedState.setLightBrightness(SharedState.lightBrightness)
-    }
-
     Timer {
         id: colorDebounceTimer
         interval: 100
@@ -319,5 +312,5 @@ ExpandableModule {
         onTriggered: SharedState.setLightColor(SharedState.lightHue, SharedState.lightSaturation)
     }
 
-    Component.onCompleted: SharedState.refreshLightStatus()
+    Component.onCompleted: SharedState.updateLightState()
 }

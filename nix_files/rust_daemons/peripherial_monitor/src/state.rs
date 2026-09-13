@@ -20,6 +20,38 @@ pub struct PeripheralState {
     pub mouse: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mouse_updated: Option<u64>,
+    #[serde(default)]
+    pub light: LightState,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LightState {
+    pub status: LightStatus,
+    pub device_on: bool,
+    pub brightness: u8,
+    pub hue: u16,
+    pub saturation: u8,
+    pub updated: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum LightStatus {
+    Connected,
+    Disconnected,
+}
+
+impl Default for LightState {
+    fn default() -> Self {
+        Self {
+            status: LightStatus::Disconnected,
+            device_on: false,
+            brightness: 0,
+            hue: 30,
+            saturation: 0,
+            updated: current_unix_time(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -57,10 +89,11 @@ impl StateCache {
 
     pub fn new() -> Self {
         let last_known = Self::load_persisted();
-        let initial_state = PeripheralState {
+        let initial_state = Self::load_state_file().unwrap_or_else(|| PeripheralState {
             mouse: last_known.mouse,
             mouse_updated: last_known.mouse_updated,
-        };
+            light: LightState::default(),
+        });
         let cache = Self {
             json_path: PathBuf::from(PERIPHERALS_JSON_PATH),
             current_state: initial_state,
@@ -68,6 +101,11 @@ impl StateCache {
         };
         cache.save_persisted();
         cache
+    }
+
+    fn load_state_file() -> Option<PeripheralState> {
+        let file = File::open(PERIPHERALS_JSON_PATH).ok()?;
+        serde_json::from_reader(file).ok()
     }
 
     pub fn load_persisted() -> PersistentBatteryCache {

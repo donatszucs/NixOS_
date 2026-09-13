@@ -28,7 +28,10 @@
       peripheral-monitor = pkgs.rustPlatform.buildRustPackage {
         pname = "peripherial_monitor";
         version = "0.1.0";
-        src = ./rust_daemons/peripherial_monitor;
+        src = builtins.path {
+          path = ./rust_daemons/peripherial_monitor;
+          name = "peripherial_monitor-source";
+        };
         cargoLock = {
           lockFile = ./rust_daemons/peripherial_monitor/Cargo.lock;
         };
@@ -57,6 +60,7 @@
               after = [ "graphical-session.target" ];
               serviceConfig = {
                 ExecStart = "${peripheral-monitor}/bin/peripherial_monitor";
+                EnvironmentFile = "-%h/.config/peripheral-monitor/tapo.env";
                 Restart = "always";
                 RestartSec = 3;
               };

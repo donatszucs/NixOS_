@@ -6,6 +6,4 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "hid>=1.0.9",
-    "python-dotenv>=1.2.2",
-    "tapo>=0.8.11",
 ]
