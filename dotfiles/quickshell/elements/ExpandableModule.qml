@@ -74,6 +74,7 @@ ModuleButton {
         visible: root.useDefaultPill
 
         colorOpacity: 0.5
+        pillColorOpacity: Theme.moduleOpacity
 
         // ── Pill content ─────────────────────────────────────────
         pillText:    root.pillText
