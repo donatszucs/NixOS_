@@ -197,7 +197,7 @@ ExpandableModule {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        height: 40
+                        height: 35
                         color: Theme.bgBlurColor
 
                         topLeftRadius: 0
@@ -239,11 +239,11 @@ ExpandableModule {
 
                             ModuleButton {
                                 variant: "light"
-                                label: "󱄅"
+                                label: "󰚰"
                                 textFont: 16
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: rebuildProc.running = true
-                                implicitHeight: 28
+                                onClicked: updateProc.running = true
+                                implicitHeight: 23
                                 implicitWidth: 28
                                 radius: Theme.moduleEdgeRadius / 2
                                 border.width: 1
@@ -252,11 +252,11 @@ ExpandableModule {
 
                             ModuleButton {
                                 variant: "light"
-                                label: "󰚰"
+                                label: "󱄅"
                                 textFont: 16
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: updateProc.running = true
-                                implicitHeight: 28
+                                onClicked: rebuildProc.running = true
+                                implicitHeight: 23
                                 implicitWidth: 28
                                 radius: Theme.moduleEdgeRadius / 2
                                 border.width: 1

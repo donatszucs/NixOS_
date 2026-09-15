@@ -294,8 +294,9 @@ ExpandableModule {
         Rectangle {
             color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 0.5)
             radius: (Theme.moduleHeight - 10) / 2
-            implicitWidth: 60
-            implicitHeight: Theme.moduleHeight - 10
+            Layout.topMargin: 2
+            implicitWidth: 58
+            implicitHeight: Theme.moduleHeight - 14
 
             Text {
                 anchors.centerIn: parent

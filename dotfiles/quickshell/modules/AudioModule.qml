@@ -14,264 +14,533 @@ ExpandableModule {
     property int sinkNameMaxChars: 30
 
     PwObjectTracker {
-        objects: [Pipewire.defaultAudioSink]
+        objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource]
     }
 
     ListModel {
         id: sinksListModel
     }
 
-    property alias sinksModel: sinksListModel
+    ListModel {
+        id: sourcesListModel
+    }
 
-    function updateSinks() {
+    property alias sinksModel: sinksListModel
+    property alias sourcesModel: sourcesListModel
+
+    function updateDevices() {
         sinksListModel.clear()
+        sourcesListModel.clear()
 
         var defaultSink = (Pipewire && Pipewire.defaultAudioSink) ? Pipewire.defaultAudioSink : null
+        var defaultSource = (Pipewire && Pipewire.defaultAudioSource) ? Pipewire.defaultAudioSource : null
 
         if (Pipewire && Pipewire.nodes && Pipewire.nodes.values) {
             var vals = Pipewire.nodes.values
             for (var i = 0; i < vals.length; ++i) {
                 var n = vals[i]
                 if (!n || n.isStream) continue
-                if (n.isSink) {
-                    var desc = (n.description && n.description.length) ? n.description : ((n.nickname && n.nickname.length) ? n.nickname : n.name)
+
+                var p = n.properties || {}
+                var mediaClass = p["media.class"] || ""
+                var desc = (n.description && n.description.length) ? n.description : ((n.nickname && n.nickname.length) ? n.nickname : n.name)
+
+                // Skip monitor sources
+                if (n.name && n.name.indexOf(".monitor") !== -1) continue
+
+                if (n.isSink || mediaClass === "Audio/Sink") {
                     if (!desc) desc = "sink:" + (n.id !== undefined ? n.id : i)
 
-                    var iconStr = "";
-                    var p = n.properties || {};
-                    var typeInfo = ((p["device.form_factor"] || "") + " " + (p["device.icon_name"] || "") + " " + (p["device.bus"] || "") + " " + desc).toLowerCase();
-                    console.log(typeInfo)
+                    var sinkIconStr = "";
+                    var sinkTypeInfo = ((p["device.form_factor"] || "") + " " + (p["device.icon_name"] || "") + " " + (p["device.bus"] || "") + " " + desc).toLowerCase();
 
-                    if (typeInfo.includes("headset") || typeInfo.includes("headphone") || typeInfo.includes("hyperx cloud ii")) iconStr = "";
-                    else if (typeInfo.includes("bluetooth") || typeInfo.includes("bluez")) iconStr = "";
-                    else if (typeInfo.includes("hdmi") || typeInfo.includes("displayport")) iconStr = "󰽟";
-                    else if (typeInfo.includes("iec958") || typeInfo.includes("speaker")) iconStr = "󰓃";
-                    else if (typeInfo.includes("usb")) iconStr = "󰟀";
+                    if (sinkTypeInfo.includes("headset") || sinkTypeInfo.includes("headphone") || sinkTypeInfo.includes("hyperx")) sinkIconStr = "";
+                    else if (sinkTypeInfo.includes("bluetooth") || sinkTypeInfo.includes("bluez")) sinkIconStr = "";
+                    else if (sinkTypeInfo.includes("hdmi") || sinkTypeInfo.includes("displayport")) sinkIconStr = "󰽟";
+                    else if (sinkTypeInfo.includes("iec958") || sinkTypeInfo.includes("speaker")) sinkIconStr = "󰓃";
+                    else if (sinkTypeInfo.includes("usb")) sinkIconStr = "󰟀";
 
-                    var active = false
+                    var sinkActive = false
                     if (defaultSink) {
                         if ((defaultSink.name && n.name && defaultSink.name === n.name) || (defaultSink.id !== undefined && n.id !== undefined && defaultSink.id === n.id)) {
-                            active = true
+                            sinkActive = true
                         }
                     }
-                    sinksListModel.append({ "name": desc, "active": active, "id": n.id, "icon": iconStr })
+                    sinksListModel.append({ "name": desc, "active": sinkActive, "id": n.id, "icon": sinkIconStr })
+                } else if (mediaClass === "Audio/Source" || mediaClass.indexOf("Source") !== -1 || (!n.isSink && n.audio !== null)) {
+                    if (!desc) desc = "source:" + (n.id !== undefined ? n.id : i)
+
+                    var srcIconStr = "";
+                    var srcTypeInfo = ((p["device.form_factor"] || "") + " " + (p["device.icon_name"] || "") + " " + (p["device.bus"] || "") + " " + desc).toLowerCase();
+
+                    if (srcTypeInfo.includes("headset") || srcTypeInfo.includes("headphone") || srcTypeInfo.includes("hyperx")) srcIconStr = "󰋎";
+                    else if (srcTypeInfo.includes("bluetooth") || srcTypeInfo.includes("bluez")) srcIconStr = "";
+                    else if (srcTypeInfo.includes("usb")) srcIconStr = "󰍬";
+
+                    var srcActive = false
+                    if (defaultSource) {
+                        if ((defaultSource.name && n.name && defaultSource.name === n.name) || (defaultSource.id !== undefined && n.id !== undefined && defaultSource.id === n.id)) {
+                            srcActive = true
+                        }
+                    }
+                    sourcesListModel.append({ "name": desc, "active": srcActive, "id": n.id, "icon": srcIconStr })
                 }
             }
         }
     }
 
-    implicitHeight: expanded ? baseColumn.implicitHeight : Theme.moduleHeight
+    function updateSinks() {
+        updateDevices()
+    }
+
+    property int cardWidth: 280
+
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
     implicitWidth: expanded ? baseColumn.implicitWidth : volumeButton.implicitWidth
 
+    PillBarButton {
+        id: volumeButton
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+        height: Theme.moduleHeight
+        implicitHeight: Theme.moduleHeight
+
+        property var pwAudio: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
+        property bool isMuted: pwAudio ? pwAudio.muted : false
+        property real currentVolume: pwAudio ? pwAudio.volume : 0.0
+
+        percent: Math.round(currentVolume * 100)
+
+        pillText: {
+            var v = percent
+            if (isMuted) return v + "% 󰖁"
+            if (v === 0) return v + "% "
+            if (v > 0 && v < 50) return v + "% "
+            return v + "% "
+        }
+
+        pillVariant: "dark"
+        variant: "neutral"
+        textAlign: "right"
+
+        colorOpacity: 0.5
+        pillColorOpacity: Theme.moduleOpacity
+        colorOverride: true
+        noHoverColorChange: !audioModule.expanded
+
+        rightMargin: Theme.modulePaddingH
+
+        bottomLeftRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
+        bottomRightRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
+
+        MouseArea {
+            id: volMouseArea
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            hoverEnabled: true
+
+            property real startX: 0
+            property bool isDragging: false
+
+            onPressed: (mouse) => {
+                startX = mouse.x
+                isDragging = false
+            }
+
+            onPositionChanged: (mouse) => {
+                if (mouse.buttons & Qt.LeftButton) {
+                    if (Math.abs(mouse.x - startX) > 4) {
+                        isDragging = true
+                    }
+                    if (isDragging && volumeButton.pwAudio) {
+                        var trackWidth = volumeButton.width - 10
+                        var frac = Math.max(0.0, Math.min(1.0, (mouse.x - 5) / trackWidth))
+                        volumeButton.pwAudio.volume = frac
+                    }
+                }
+            }
+
+            onReleased: (mouse) => {
+                if (!isDragging) {
+                    audioModule.expanded = !audioModule.expanded
+                }
+                isDragging = false
+            }
+
+            onWheel: (wheel) => {
+                if (volumeButton.pwAudio) {
+                    if (wheel.angleDelta.y > 0) {
+                        volumeButton.pwAudio.volume = Math.min(1.0, volumeButton.currentVolume + 0.02)
+                    } else {
+                        volumeButton.pwAudio.volume = Math.max(0.0, volumeButton.currentVolume - 0.02)
+                    }
+                }
+                wheel.accepted = true
+            }
+        }
+    }
 
     ColumnLayout {
         id: baseColumn
         spacing: 10
 
         anchors {
+            top: volumeButton.bottom
             right: parent.right
-            top: parent.top
         }
-        
-        RowLayout {
-            spacing: 0
-            layoutDirection: Qt.RightToLeft
 
-            PillBarButton {
-                id: volumeButton
-                
-                property var pwAudio: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
-                property bool isMuted: pwAudio ? pwAudio.muted : false
-                property real currentVolume: pwAudio ? pwAudio.volume : 0.0
-                
-                percent: Math.round(currentVolume * 100)
-                
-                pillText: {
-                    var v = percent
-                    if (isMuted) return v + "% 󰖁"
-                    if (v === 0) return v + "% "
-                    if (v > 0 && v < 50) return v + "% "
-                    return v + "% "
+        MouseArea {
+            visible: audioModule.expanded
+            implicitWidth: audioModule.cardWidth
+            Layout.preferredHeight: popupCol.implicitHeight
+            Layout.margins: 10
+            acceptedButtons: Qt.NoButton
+
+            ColumnLayout {
+                id: popupCol
+                width: parent.width
+                spacing: 10
+
+                Rectangle {
+                    color: Qt.rgba(1, 1, 1, 0.1)
+                    radius: Theme.moduleEdgeRadius / 2 + 10
+                    Layout.fillWidth: true
+                    implicitHeight: audioTopBar.height + sinkCol.implicitHeight + 20
+                    clip: true
+
+                    Rectangle {
+                        id: audioTopBar
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        height: 35
+                        color: Theme.bgBlurColor
+
+                        topLeftRadius: parent.radius
+                        topRightRadius: parent.radius
+                        bottomLeftRadius: 0
+                        bottomRightRadius: 0
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 12
+                            spacing: 8
+
+                            Text {
+                                text: "Audio Sources"
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize + 1
+                                font.bold: true
+                                Layout.alignment: Qt.AlignVCenter
+                            }
+
+                            Item { Layout.fillWidth: true } // spacer
+
+                            ModuleButton {
+                                variant: "light"
+                                label: ""
+                                textFont: 14
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: testSoundProcess.running = true
+                                implicitHeight: 24
+                                implicitWidth: 24
+                                radius: Theme.moduleEdgeRadius / 2
+                                border.width: 1
+                                Layout.alignment: Qt.AlignVCenter
+                            }
+
+                            ModuleButton {
+                                variant: "light"
+                                label: "󰓃"
+                                textFont: 14
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: pavu.running = true
+                                implicitHeight: 24
+                                implicitWidth: 24
+                                radius: Theme.moduleEdgeRadius / 2
+                                border.width: 1
+                                Layout.alignment: Qt.AlignVCenter
+                            }
+                        }
+                    }
+
+                    InverseRadius {
+                        anchors.top: audioTopBar.bottom
+                        anchors.left: audioTopBar.left
+                        color: audioTopBar.color
+                    }
+
+                    InverseRadius {
+                        cornerPosition: "topRight"
+                        anchors.top: audioTopBar.bottom
+                        anchors.right: audioTopBar.right
+                        color: audioTopBar.color
+                    }
+
+                    ColumnLayout {
+                        id: sinkCol
+                        anchors {
+                            top: audioTopBar.bottom
+                            left: parent.left
+                            right: parent.right
+                            margins: 10
+                            topMargin: 8
+                        }
+                        spacing: 5
+
+                        Repeater {
+                            model: sinksListModel
+                            delegate: ModuleButton {
+                                id: sinkBtn
+                                required property var modelData
+                                required property int index
+
+                                variant: "neutral"
+                                cursorShape: Qt.PointingHandCursor
+                                Layout.fillWidth: true
+                                implicitHeight: sinkRow.implicitHeight + 14
+                                radius: Theme.moduleEdgeRadius / 2 + 5
+                                opacity: 1.0
+                                border.width: modelData.active ? 1.5 : 1
+                                border.color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.4) : Theme.divider
+
+                                RowLayout {
+                                    id: sinkRow
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        top: parent.top
+                                        margins: 6
+                                    }
+                                    spacing: 10
+
+                                    Text {
+                                        id: devIconText
+                                        text: modelData.icon
+                                        color: modelData.active ? Theme.statusBlue : Theme.textPrimary
+                                        opacity: modelData.active ? 1.0 : 0.6
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize + 2
+                                        Layout.alignment: Qt.AlignVCenter
+                                        Layout.leftMargin: 6
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        Layout.alignment: Qt.AlignVCenter
+                                        spacing: 2
+
+                                        HoverMarqueeText {
+                                            text: modelData.name
+                                            textMaxWidth: audioModule.cardWidth - 65
+                                            Layout.fillWidth: true
+                                            fontFamily: Theme.font
+                                            pixelSize: Theme.fontSize
+                                            fontBold: modelData.active
+                                            textColor: Theme.textPrimary
+                                        }
+
+                                        Text {
+                                            text: modelData.active ? "Active" : "Output"
+                                            color: modelData.active ? Theme.statusGreen : Theme.statusDisabled
+                                            font.family: Theme.font
+                                            font.pixelSize: Theme.fontSize * 0.75
+                                            font.bold: modelData.active
+                                        }
+                                    }
+                                }
+
+                                Process {
+                                    id: actionProc
+                                    command: ["bash", "-c", "wpctl set-default " + modelData.id]
+                                }
+
+                                onClicked: actionProc.running = true
+                            }
+                        }
+                    }
                 }
 
-                pillVariant: "dark"
-                variant: "neutral"
-                textAlign: "right"
+                Rectangle {
+                    color: Qt.rgba(1, 1, 1, 0.1)
+                    radius: Theme.moduleEdgeRadius / 2 + 10
+                    Layout.fillWidth: true
+                    implicitHeight: inputTopBar.height + sourceCol.implicitHeight + 20
+                    clip: true
 
-                colorOpacity: 0.5
-                pillColorOpacity: Theme.moduleOpacity
-                colorOverride: true
-                noHoverColorChange: !audioModule.expanded
-                
-                rightMargin: Theme.modulePaddingH
+                    Rectangle {
+                        id: inputTopBar
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        height: 35
+                        color: Theme.bgBlurColor
 
-                bottomRightRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
+                        topLeftRadius: parent.radius
+                        topRightRadius: parent.radius
+                        bottomLeftRadius: 0
+                        bottomRightRadius: 0
 
-                onClicked: audioModule.expanded = !audioModule.expanded
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 12
+                            spacing: 8
 
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.RightButton
-                    cursorShape: Qt.PointingHandCursor
-                    onWheel: wheel => {
-                        if (volumeButton.pwAudio) {
-                            if (wheel.angleDelta.y > 0) {
-                                volumeButton.pwAudio.volume = Math.min(1.0, volumeButton.currentVolume + 0.02)
-                            } else {
-                                volumeButton.pwAudio.volume = Math.max(0.0, volumeButton.currentVolume - 0.02)
+                            Text {
+                                text: "Input Devices"
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize + 1
+                                font.bold: true
+                                Layout.alignment: Qt.AlignVCenter
+                            }
+
+                            Item { Layout.fillWidth: true } // spacer
+
+                            ModuleButton {
+                                property var pwSourceAudio: Pipewire.defaultAudioSource ? Pipewire.defaultAudioSource.audio : null
+                                property bool isMuted: pwSourceAudio ? pwSourceAudio.muted : false
+
+                                variant: isMuted ? "red" : "light"
+                                label: isMuted ? "" : ""
+                                textFont: 14
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (pwSourceAudio) {
+                                        pwSourceAudio.muted = !pwSourceAudio.muted
+                                    }
+                                }
+                                implicitHeight: 24
+                                implicitWidth: 24
+                                radius: Theme.moduleEdgeRadius / 2
+                                border.width: 1
+                                Layout.alignment: Qt.AlignVCenter
+                            } 
+                        }
+                    }
+
+                    InverseRadius {
+                        anchors.top: inputTopBar.bottom
+                        anchors.left: inputTopBar.left
+                        color: inputTopBar.color
+                    }
+
+                    InverseRadius {
+                        cornerPosition: "topRight"
+                        anchors.top: inputTopBar.bottom
+                        anchors.right: inputTopBar.right
+                        color: inputTopBar.color
+                    }
+
+                    ColumnLayout {
+                        id: sourceCol
+                        anchors {
+                            top: inputTopBar.bottom
+                            left: parent.left
+                            right: parent.right
+                            margins: 10
+                            topMargin: 8
+                        }
+                        spacing: 5
+
+                        Repeater {
+                            model: sourcesListModel
+                            delegate: ModuleButton {
+                                id: sourceBtn
+                                required property var modelData
+                                required property int index
+
+                                variant: "neutral"
+                                cursorShape: Qt.PointingHandCursor
+                                Layout.fillWidth: true
+                                implicitHeight: sourceRow.implicitHeight + 14
+                                radius: Theme.moduleEdgeRadius / 2 + 5
+                                opacity: 1.0
+                                border.width: modelData.active ? 1.5 : 1
+                                border.color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.4) : Theme.divider
+
+                                RowLayout {
+                                    id: sourceRow
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        top: parent.top
+                                        margins: 6
+                                    }
+                                    spacing: 10
+
+                                    Text {
+                                        id: srcIconText
+                                        text: modelData.icon
+                                        color: modelData.active ? Theme.statusBlue : Theme.textPrimary
+                                        opacity: modelData.active ? 1.0 : 0.6
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize + 2
+                                        Layout.alignment: Qt.AlignVCenter
+                                        Layout.leftMargin: 6
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        Layout.alignment: Qt.AlignVCenter
+                                        spacing: 2
+
+                                        HoverMarqueeText {
+                                            text: modelData.name
+                                            textMaxWidth: audioModule.cardWidth - 65
+                                            Layout.fillWidth: true
+                                            fontFamily: Theme.font
+                                            pixelSize: Theme.fontSize
+                                            fontBold: modelData.active
+                                            textColor: Theme.textPrimary
+                                        }
+
+                                        Text {
+                                            text: modelData.active ? "Active" : "Input"
+                                            color: modelData.active ? Theme.statusGreen : Theme.statusDisabled
+                                            font.family: Theme.font
+                                            font.pixelSize: Theme.fontSize * 0.75
+                                            font.bold: modelData.active
+                                        }
+                                    }
+                                }
+
+                                Process {
+                                    id: actionSourceProc
+                                    command: ["bash", "-c", "wpctl set-default " + modelData.id]
+                                }
+
+                                onClicked: actionSourceProc.running = true
                             }
                         }
                     }
                 }
             }
-
-            PillBarButton {
-                id: testButton
-                implicitWidth: Theme.moduleHeight
-                implicitHeight: Theme.moduleHeight
-                
-                pillText: ""
-                cursorShape: Qt.PointingHandCursor
-                colorOverride: true
-                variant: "neutral"
-                pillVariant: "neutral"
-                percent: 100
-                colorOpacity: 0.5
-                pillColorOpacity: Theme.moduleOpacity
-
-                onClicked: testSoundProcess.running = true
-
-                Process {
-                    id: testSoundProcess
-                    command: ["bash", "-c", "REPO=$(dirname $(dirname $(realpath ~/.config/quickshell))); pw-play \"$REPO/misc/ping.ogg\""]
-                }
-            }
-
-            PillBarButton {
-                id: audioMixerBtn
-                implicitWidth: maxSinkBarLength - volumeButton.implicitWidth + 20 - testButton.implicitWidth
-                implicitHeight: Theme.moduleHeight
-                bottomLeftRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
-
-                cursorShape: Qt.PointingHandCursor
-                onClicked: pavu.running = true
-
-                pillText: "Audio Mixer"
-                pillVariant: "neutral"
-                colorOverride: true
-                variant: "neutral"
-                percent: 100
-                colorOpacity: 0.5
-                pillColorOpacity: Theme.moduleOpacity
-            }
         }
-        // Action buttons — revealed by clip as width expands leftward
-        ListView {
-            id: actionColumn
-            model: sinksListModel
-            clip: true
-            spacing: 5
-            focus: false
-            Layout.fillWidth: true
-            Layout.leftMargin: 10
-            Layout.rightMargin: 10
-            Layout.bottomMargin: 10
-            implicitHeight: contentHeight
-            delegate: ModuleButton {
-                id: parentButton
-                required property var modelData
-                required property int index
-
-                variant: modelData.active ? "light" : "neutral"
-                cursorShape: Qt.PointingHandCursor
-                implicitWidth: maxSinkBarLength
-                implicitHeight: Theme.listHeight
-                
-                topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
-                bottomLeftRadius: index === sinksModel.count - 1 ? Theme.moduleEdgeRadius : 5
-                bottomRightRadius: index === sinksModel.count - 1 ? Theme.moduleEdgeRadius : 5
-                topRightRadius: index === 0 ? Theme.moduleEdgeRadius : 5
-
-                label: ""
-                
-                border.width: 2
-
-                RowLayout {
-                    anchors { fill: parent; rightMargin: 10 }
-                    spacing: 10
-
-                    Rectangle {
-                        color: parentButton.pal.base
-                        topLeftRadius: parentButton.topLeftRadius
-                        bottomLeftRadius: parentButton.bottomLeftRadius
-                        implicitWidth: Theme.listHeight
-                        implicitHeight: Theme.listHeight
-
-                        InverseRadius {
-                            anchors.top: parent.top
-                            anchors.left: parent.right
-                            cornerPosition: "topLeft"
-                            color: parent.color
-                            size: 10
-                        }
-
-                        InverseRadius {
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.right
-                            cornerPosition: "bottomLeft"
-                            color: parent.color
-                            size: 10
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: modelData.icon
-                            color: Theme.paletteInk
-                            font.family: Theme.font
-                            font.pixelSize: 20
-                            font.bold: true
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                    }
-
-                    HoverMarqueeText {
-                        Layout.fillWidth: true
-                        text: modelData.name
-                        textMaxWidth: 200 
-                        fontFamily: Theme.font
-                        pixelSize: parentButton.textFont
-                        fontBold: true
-                        textColor: parentButton.textColor
-                        clip: true
-                    }
-                }
-
-                Process {
-                    id: actionProc
-                    command: ["bash", "-c", "wpctl set-default " + modelData.id]
-                }
-
-                onClicked: actionProc.running = true
-
-            }
-        }
-
+    }
 
     Component.onCompleted: {
-        audioModule.updateSinks()
+        audioModule.updateDevices()
     }
 
     Connections {
         target: Pipewire
-        function onReadyChanged() { audioModule.updateSinks() }
-        function onDefaultAudioSinkChanged() { audioModule.updateSinks() }
+        function onReadyChanged() { audioModule.updateDevices() }
+        function onDefaultAudioSinkChanged() { audioModule.updateDevices() }
+        function onDefaultAudioSourceChanged() { audioModule.updateDevices() }
     }
 
     Connections {
         target: Pipewire.nodes
-        function onObjectInsertedPost() { audioModule.updateSinks() }
-        function onObjectRemovedPost() { audioModule.updateSinks() }
+        function onObjectInsertedPost() { audioModule.updateDevices() }
+        function onObjectRemovedPost() { audioModule.updateDevices() }
     }
 
     Process {
@@ -279,5 +548,8 @@ ExpandableModule {
         command: ["bash", "-c", "pwvucontrol"]
     }
 
+    Process {
+        id: testSoundProcess
+        command: ["bash", "-c", "REPO=$(dirname $(dirname $(realpath ~/.config/quickshell))); pw-play \"$REPO/misc/ping.ogg\""]
     }
 }
