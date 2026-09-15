@@ -445,12 +445,6 @@ Item {
                             }
                         }
 
-                        ScrollBar.vertical: ScrollBar {
-                            id: vScroll
-                            active: notifFlickable.moving || notifFlickable.flicking
-                            policy: notifFlickable.contentHeight > notifFlickable.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
-                        }
-
                         Column {
                             id: notifColumn
                             anchors.horizontalCenter: parent.horizontalCenter
