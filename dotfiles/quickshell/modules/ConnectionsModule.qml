@@ -14,8 +14,8 @@ ExpandableModule {
     id: connectionsModule
     property int currentPage: 0
 
-    property int cardWidth: textMaxWidth + 95
-    property int textMaxWidth: 180
+    property int cardWidth: 280
+    property int textMaxWidth: cardWidth - 40
 
     // ── State ──────────────────────────────────────────────────
     property string netIcon:     "󰈀"
@@ -31,6 +31,71 @@ ExpandableModule {
     // 1. The master boolean that controls your icon
     property bool btDevicesConnected: false
     property bool showUnpairedDevices: false
+    onBtPoweredChanged: {
+        if (!btPowered) showUnpairedDevices = false;
+        if (btPowered && btAdapter) {
+            try { btAdapter.pairable = true; } catch (e) {}
+        }
+    }
+
+    // Bluetooth device icon helper
+    function getBtDeviceIcon(iconName, isConnected, isBusy) {
+        if (isBusy) return "󰑐";
+        var ic = (iconName || "").toLowerCase();
+        if (ic.indexOf("headset") !== -1 || ic.indexOf("headphone") !== -1 || ic.indexOf("audio") !== -1) return "󰋋";
+        if (ic.indexOf("mouse") !== -1) return "󰍽";
+        if (ic.indexOf("keyboard") !== -1) return "󰌌";
+        if (ic.indexOf("gaming") !== -1 || ic.indexOf("gamepad") !== -1 || ic.indexOf("joystick") !== -1) return "󰊴";
+        if (ic.indexOf("phone") !== -1) return "󰏲";
+        if (ic.indexOf("computer") !== -1 || ic.indexOf("laptop") !== -1) return "󰌢";
+        return isConnected ? "󰂱" : "󰂯";
+    }
+
+    // Bluetooth device helpers
+    function pairBtDevice(addr) {
+        if (!addr) return;
+        if (btAdapter) {
+            try { btAdapter.pairable = true; } catch (e) {}
+        }
+        Quickshell.execDetached(["bash", "-c", "bluetoothctl pair " + addr + " && bluetoothctl trust " + addr + " && bluetoothctl connect " + addr]);
+    }
+
+    function cancelPairBtDevice(addr) {
+        if (!addr) return;
+        Quickshell.execDetached(["bash", "-c", "pkill -f 'bluetoothctl.*" + addr + "' || true"]);
+    }
+
+    function trustBtDevice(dev) {
+        if (!dev) return;
+        var addr = "";
+        if (typeof dev === "string") {
+            addr = dev;
+        } else {
+            try {
+                dev.trusted = true;
+            } catch (e) {}
+            addr = dev.address || "";
+        }
+        if (addr && addr.length > 0) {
+            Quickshell.execDetached(["bluetoothctl", "trust", addr]);
+        }
+    }
+
+    function untrustBtDevice(dev) {
+        if (!dev) return;
+        var addr = "";
+        if (typeof dev === "string") {
+            addr = dev;
+        } else {
+            try {
+                dev.trusted = false;
+            } catch (e) {}
+            addr = dev.address || "";
+        }
+        if (addr && addr.length > 0) {
+            Quickshell.execDetached(["bluetoothctl", "untrust", addr]);
+        }
+    }
 
     // Headset battery
     property bool headsetBatteryAvailable: false
@@ -198,279 +263,369 @@ ExpandableModule {
             }
 
             // ── Network ──────────────────────────────────
-            ModuleButton {
+            Rectangle {
                 id: netModule
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 0
-                color: Theme.divider
-                radius: Theme.moduleEdgeRadius
+                color: Qt.rgba(1, 1, 1, 0.1)
+                radius: Theme.moduleEdgeRadius / 2 + 10
+                clip: true
 
-
+                Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: netRow.implicitHeight
+                implicitHeight: netTopBar.height + netContentCol.implicitHeight + 20
 
                 Rectangle {
+                    id: netTopBar
                     anchors.left: parent.left
+                    anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    width: 70
+                    height: 35
                     color: Theme.bgBlurColor
-                    topLeftRadius: netModule.topLeftRadius
-                    bottomLeftRadius: netModule.bottomLeftRadius
 
-                    InverseRadius {
-                        anchors.top: parent.top
-                        anchors.left: parent.right
-                        cornerPosition: "topLeft"
-                        color: parent.color
-                        size: 10
-                    }
+                    topLeftRadius: parent.radius
+                    topRightRadius: parent.radius
+                    bottomLeftRadius: 0
+                    bottomRightRadius: 0
 
-                    InverseRadius {
-                        anchors.bottom: parent.bottom
-                        anchors.left: parent.right
-                        cornerPosition: "bottomLeft"
-                        color: parent.color
-                        size: 10
-                    }
-                }
+                    Text {
+                        id: netStatusIcon
+                        text: connectionsModule.netIcon
+                        color: connectionsModule.netColor
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize + 2
+                        anchors.left: parent.left
+                        anchors.leftMargin: 15
+                        anchors.verticalCenter: parent.verticalCenter
 
-                RowLayout {
-                    id: netRow
-
-                    anchors {
-                        left:    parent.left
-                        top:     parent.top
-                        right:   parent.right
-                    }
-
-                    spacing: 15
-
-                    Item {
-                        implicitWidth: 70
-                        implicitHeight: 70
-                        Layout.fillHeight: true
-
-                        ModuleButton {
-                            id: netStatusIcon
-                            anchors.centerIn: parent
-                            label: connectionsModule.netIcon
+                        MouseArea {
+                            anchors.fill: parent
+                            anchors.margins: -5
                             cursorShape: Qt.PointingHandCursor
-                            colorOverride: true
-                            textColor: connectionsModule.netColor
-                            textFont: 24
-                            radius: 10
-                            implicitWidth: 40
-                            implicitHeight: 40
                             onClicked: netOpen.running = true
                         }
                     }
 
-                    ColumnLayout {
-                        id: netInfoCol
+                    Text {
+                        id: netTitle
+                        text: "Network"
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: true
+                        anchors.centerIn: parent
+                    }
+
+                }
+
+                InverseRadius {
+                    anchors.top: netTopBar.bottom
+                    anchors.left: netTopBar.left
+                    color: netTopBar.color
+                }
+
+                InverseRadius {
+                    cornerPosition: "topRight"
+                    anchors.top: netTopBar.bottom
+                    anchors.right: netTopBar.right
+                    color: netTopBar.color
+                }
+
+                ColumnLayout {
+                    id: netContentCol
+                    anchors {
+                        top: netTopBar.bottom
+                        left: parent.left
+                        right: parent.right
+                        margins: 15
+                        topMargin: 10
+                    }
+                    spacing: 4
+
+                    HoverMarqueeText {
+                        text: connectionsModule.netName
+                        textMaxWidth: connectionsModule.cardWidth - 30
                         Layout.fillWidth: true
-                        Layout.topMargin: 15
-                        Layout.bottomMargin: 15
-                        Layout.rightMargin: 15
-                        spacing: 5
-                        
-                        HoverMarqueeText {
-                            text: connectionsModule.netName
-                            textMaxWidth: connectionsModule.textMaxWidth
-                            Layout.fillWidth: true
-                        }
-                        
-                        Text {
-                            text: connectionsModule.netState
-                            color: Theme.textPrimary
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize * 0.9
-                        }
+                    }
+
+                    Text {
+                        text: connectionsModule.netState
+                        color: Theme.textPrimary
+                        opacity: 0.7
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize * 0.9
                     }
                 }
             }
                             
             // ── Bluetooth ──────────────────────────────────
-            ModuleButton {
+            Rectangle {
                 id: btModule
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 0
-                color: Theme.divider
-                radius: Theme.moduleEdgeRadius
+                color: Qt.rgba(1, 1, 1, 0.1)
+                radius: Theme.moduleEdgeRadius / 2 + 10
+                clip: true
 
+                Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: btRow.implicitHeight
+                implicitHeight: btTopBar.height + btInfoCol.implicitHeight + 20
 
                 Rectangle {
+                    id: btTopBar
                     anchors.left: parent.left
+                    anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    width: 70
+                    height: 35
                     color: Theme.bgBlurColor
-                    topLeftRadius: btModule.topLeftRadius
-                    bottomLeftRadius: btModule.bottomLeftRadius
 
-                    InverseRadius {
-                        anchors.top: parent.top
-                        anchors.left: parent.right
-                        cornerPosition: "topLeft"
-                        color: parent.color
-                        size: 10
+                    topLeftRadius: parent.radius
+                    topRightRadius: parent.radius
+                    bottomLeftRadius: 0
+                    bottomRightRadius: 0
+
+                    Text {
+                        id: btStatusIcon
+                        text: connectionsModule.btIcon
+                        color: connectionsModule.btColor
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize + 2
+                        anchors.left: parent.left
+                        anchors.leftMargin: 15
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        MouseArea {
+                            anchors.fill: parent
+                            anchors.margins: -5
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: btOpen.running = true
+                        }
                     }
 
-                    InverseRadius {
-                        anchors.bottom: parent.bottom
-                        anchors.left: parent.right
-                        cornerPosition: "bottomLeft"
-                        color: parent.color
-                        size: 10
+                    Text {
+                        id: btTitle
+                        text: "Bluetooth"
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: true
+                        anchors.centerIn: parent
+                    }
+
+                    // Custom-styled switch (smaller, themed)
+                    Rectangle {
+                        id: btSwitch
+                        width: 32
+                        height: 20
+                        radius: height / 2
+                        color: connectionsModule.btColor
+                        border.color: connectionsModule.btColor
+                        border.width: 1
+                        anchors.right: parent.right
+                        anchors.rightMargin: 15
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        property bool on: connectionsModule.btPowered
+
+                        Rectangle {
+                            id: handle
+                            width: parent.height - 6
+                            height: parent.height - 6
+                            y: 3
+                            x: btSwitch.on ? parent.width - width - 3 : 3
+                            radius: height / 2
+                            color: "white"
+                            smooth: true
+                            Behavior on x { NumberAnimation { duration: 160; easing.type: Easing.InOutCubic } }
+                            Behavior on color { ColorAnimation { duration: 120 } }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                if (connectionsModule.btAdapter) connectionsModule.btAdapter.enabled = !connectionsModule.btAdapter.enabled
+                            }
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                        }
                     }
                 }
 
-                RowLayout {
-                    id: btRow
-                    
+                InverseRadius {
+                    anchors.top: btTopBar.bottom
+                    anchors.left: btTopBar.left
+                    color: btTopBar.color
+                }
+
+                InverseRadius {
+                    cornerPosition: "topRight"
+                    anchors.top: btTopBar.bottom
+                    anchors.right: btTopBar.right
+                    color: btTopBar.color
+                }
+
+                ColumnLayout {
+                    id: btInfoCol
                     anchors {
-                        left:    parent.left
-                        top:     parent.top
-                        right:   parent.right
+                        top: btTopBar.bottom
+                        left: parent.left
+                        right: parent.right
+                        margins: 12
+                        topMargin: 10
                     }
+                    spacing: 5
 
-                    spacing: 15
-
-                    Item {
-                        implicitWidth: 70
-                        implicitHeight: 90
-                        Layout.fillHeight: true
-
-                        ColumnLayout {
-                            id: btStatusCol
-                            anchors.top: parent.top
-                            anchors.topMargin: 15
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            spacing: 5
-
-                            ModuleButton {
-                                id: btStatusIcon
-                                label: connectionsModule.btIcon
-                                Layout.alignment: Qt.AlignHCenter
-                                cursorShape: Qt.PointingHandCursor
-                                textColor: connectionsModule.btColor
-                                colorOverride: true
-                                radius: 10
-                                textFont: 24
-                                implicitWidth: 40
-                                implicitHeight: 40
-
-                                onClicked: btOpen.running = true
-                            }
-
-                        // Custom-styled switch (smaller, themed)
-                        Rectangle {
-                            id: btSwitch
-                            width: 32
-                            height: 20
-                            radius: height / 2
-                            color: connectionsModule.btColor
-                            border.color: connectionsModule.btColor
-                            border.width: 1
-                            Layout.alignment: Qt.AlignHCenter
-
-                            property bool on: connectionsModule.btPowered
-
-                            Rectangle {
-                                id: handle
-                                width: parent.height - 6
-                                height: parent.height - 6
-                                y: 3
-                                x: btSwitch.on ? parent.width - width - 3 : 3
-                                radius: height / 2
-                                color: "white"
-                                smooth: true
-                                Behavior on x { NumberAnimation { duration: 160; easing.type: Easing.InOutCubic } }
-                                Behavior on color { ColorAnimation { duration: 120 } }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    if (connectionsModule.btAdapter) connectionsModule.btAdapter.enabled = !connectionsModule.btAdapter.enabled
+                    ModuleButton {
+                        id: toggleUnpairedBtn
+                        variant: "light"
+                        visible: connectionsModule.btPowered
+                        label: connectionsModule.showUnpairedDevices 
+                            ? (connectionsModule.btAdapter && connectionsModule.btAdapter.discovering ? "󰑐 Scanning..." : " Hide Unpaired") 
+                            : " Scan & Pair Devices"
+                        implicitHeight: 26
+                        textFont: Theme.fontSize * 0.8
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.bottomMargin: 5
+                        radius: Theme.moduleEdgeRadius / 2
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            connectionsModule.showUnpairedDevices = !connectionsModule.showUnpairedDevices;
+                            if (connectionsModule.btAdapter) {
+                                connectionsModule.btAdapter.discovering = connectionsModule.showUnpairedDevices;
+                                if (connectionsModule.showUnpairedDevices) {
+                                    try { connectionsModule.btAdapter.pairable = true; } catch (e) {}
                                 }
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
                             }
                         }
                     }
-                    }
 
-                    ColumnLayout {
-                        id: btInfoCol
-                        Layout.fillWidth: true
-                        Layout.topMargin: 15
-                        Layout.bottomMargin: 15
-                        Layout.rightMargin: 15
-                        spacing: 5
+                    Repeater {
+                        id: pairedDeviceRepeater
+                        model: connectionsModule.btPowered && connectionsModule.btDevices ? connectionsModule.btDevices : []
+                        delegate: ModuleButton {
+                            id: pairedDeviceBtn
+                            required property var modelData
 
-                        ModuleButton {
-                            id: toggleUnpairedBtn
-                            variant: "light"
-                            visible: connectionsModule.btPowered && pairedDeviceRepeater.count > 0
-                            label: connectionsModule.showUnpairedDevices ? " Hide Unpaired" : " Show Unpaired"
-                            implicitHeight: 25
-                            textFont: Theme.fontSize * 0.8
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.bottomMargin: 5
-                            radius: Theme.moduleEdgeRadius / 2
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: connectionsModule.showUnpairedDevices = !connectionsModule.showUnpairedDevices
-                        }
+                            visible: modelData && modelData.paired
+                            variant: "neutral"
 
-                        Repeater {
-                            id: pairedDeviceRepeater
-                            model: connectionsModule.btPowered && connectionsModule.btDevices ? connectionsModule.btDevices : []
-                            delegate: ModuleButton {
-                                id: pairedDeviceBtn
-                                required property var modelData
-                                
-                                visible: modelData.paired
-                                variant: "neutral"
-                                
-                                Layout.fillWidth: true
-                                implicitHeight: pairedDeviceRow.implicitHeight + 10
-                                radius: Theme.moduleEdgeRadius / 2 + 5
-                                opacity: 1.0
-                                border.width: 2
-                                cursorShape: Qt.PointingHandCursor
+                            readonly property bool isConnected: modelData && (modelData.connected === true || modelData.state === 1)
+                            readonly property bool isConnecting: modelData && (modelData.state === 3)
+                            readonly property bool isDisconnecting: modelData && (modelData.state === 2)
+                            readonly property bool isBusy: isConnecting || isDisconnecting
 
-                                onClicked: {
-                                    if (modelData.connected) {
-                                        modelData.connected = false;
-                                    } else {
-                                        modelData.connected = true;
+                            readonly property string statusText: {
+                                if (!modelData) return "";
+                                if (isConnecting) return "Connecting...";
+                                if (isDisconnecting) return "Disconnecting...";
+                                if (isConnected) return "Connected";
+                                return "Paired";
+                            }
+
+                            readonly property color statusColor: {
+                                if (isConnecting) return Theme.statusBlue;
+                                if (isDisconnecting) return Theme.statusDisabled;
+                                if (isConnected) return Theme.statusGreen;
+                                return Theme.statusDisabled;
+                            }
+
+                            Layout.fillWidth: true
+                            implicitHeight: pairedDeviceRow.implicitHeight + 14
+                            radius: Theme.moduleEdgeRadius / 2 + 5
+                            opacity: 1.0
+                            border.width: isConnected ? 1.5 : 1
+                            border.color: isConnected ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.4) : Theme.divider
+                            cursorShape: isBusy ? Qt.WaitCursor : Qt.PointingHandCursor
+
+                            function doConnect() {
+                                connectionsModule.trustBtDevice(modelData);
+                                if (typeof modelData.connect === "function") modelData.connect();
+                                else modelData.connected = true;
+                            }
+
+                            function doDisconnect() {
+                                if (typeof modelData.disconnect === "function") modelData.disconnect();
+                                else modelData.connected = false;
+                            }
+
+                            function doForget() {
+                                connectionsModule.untrustBtDevice(modelData);
+                                if (typeof modelData.forget === "function") modelData.forget();
+                            }
+
+                            Component.onCompleted: {
+                                if (modelData && modelData.paired && !modelData.trusted) {
+                                    connectionsModule.trustBtDevice(modelData);
+                                }
+                            }
+
+                            Connections {
+                                target: modelData
+                                function onPairedChanged() {
+                                    if (modelData && modelData.paired && !modelData.trusted) {
+                                        connectionsModule.trustBtDevice(modelData);
+                                    }
+                                }
+                            }
+
+                            onClicked: {
+                                if (isBusy) return;
+                                if (isConnected) doDisconnect();
+                                else doConnect();
+                            }
+
+                            RowLayout {
+                                id: pairedDeviceRow
+                                anchors {
+                                    left: parent.left
+                                    right: parent.right
+                                    top: parent.top
+                                    margins: 6
+                                }
+                                spacing: 10
+
+                                Text {
+                                    id: devIconText
+                                    text: connectionsModule.getBtDeviceIcon(modelData.icon, isConnected, isBusy)
+                                    color: isConnected ? Theme.statusBlue : (isBusy ? Theme.statusBlue : Theme.textPrimary)
+                                    opacity: isConnected || isBusy ? 1.0 : 0.6
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize + 2
+                                    Layout.alignment: Qt.AlignVCenter
+                                    Layout.leftMargin: 6
+
+                                    RotationAnimation on rotation {
+                                        from: 0
+                                        to: 360
+                                        duration: 900
+                                        loops: Animation.Infinite
+                                        running: isBusy
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    spacing: 2
+
+                                    HoverMarqueeText {
+                                        text: modelData.name || modelData.deviceName || "Unknown Device"
+                                        textMaxWidth: connectionsModule.cardWidth - rightActionsRow.implicitWidth - 65
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text {
+                                        text: statusText
+                                        color: statusColor
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize * 0.75
+                                        font.bold: isConnected || isBusy
                                     }
                                 }
 
                                 RowLayout {
-                                    id: pairedDeviceRow
-                                    anchors {
-                                        left: parent.left
-                                        right: parent.right
-                                        top: parent.top
-                                        margins: 5
-                                    }
-                                    spacing: 10
-
-                                    Text {
-                                        text: modelData.connected ? "󰂱" : "󰂯"
-                                        color: modelData.connected ? Theme.statusBlue : Theme.textPrimary
-                                        font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize
-                                        Layout.leftMargin: 5
-                                    }
-
-                                    HoverMarqueeText {
-                                        text: modelData.name || "Unknown Device"
-                                        textMaxWidth: modelData.batteryAvailable ? connectionsModule.textMaxWidth - pairedDeviceBatteryBtn.implicitWidth - 40 : connectionsModule.textMaxWidth - 20
-                                        Layout.fillWidth: true
-                                    }
+                                    id: rightActionsRow
+                                    spacing: 6
+                                    Layout.alignment: Qt.AlignVCenter
+                                    Layout.rightMargin: 6
 
                                     ModuleButton {
                                         id: pairedDeviceBatteryBtn
@@ -478,297 +633,445 @@ ExpandableModule {
                                         visible: modelData.batteryAvailable
                                         label: Math.round(modelData.battery * 100) + "%"
                                         radius: Theme.moduleEdgeRadius / 2
-                                        implicitHeight: Theme.fontSize + 10
-                                        implicitWidth: label.length * (Theme.fontSize * 0.6) + 10
+                                        implicitHeight: 20
+                                        implicitWidth: label.length * (Theme.fontSize * 0.6) + 12
                                         color: modelData.battery > 0.2 ? Theme.statusGreen : Theme.statusRed
+                                    }
+
+                                    // Forget / Unpair button on hover
+                                    Rectangle {
+                                        width: 22
+                                        height: 22
+                                        radius: 11
+                                        color: forgetHover.hovered ? Qt.rgba(1, 0.3, 0.3, 0.3) : Qt.rgba(1, 1, 1, 0.1)
+                                        visible: pairedDeviceBtn.hovered && !isBusy
+
+                                        HoverHandler { id: forgetHover }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: ""
+                                            color: forgetHover.hovered ? Theme.statusRed : Theme.textPrimary
+                                            font.family: Theme.font
+                                            font.pixelSize: 11
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: doForget()
+                                        }
                                     }
                                 }
                             }
                         }
+                    }
 
-                        Repeater {
-                            id: unpairedDeviceRepeater
-                            model: connectionsModule.btPowered && connectionsModule.btDevices ? connectionsModule.btDevices : []
-                            delegate: ModuleButton {
-                                id: unpairedDeviceBtn
-                                required property var modelData
-                                
-                                visible: connectionsModule.showUnpairedDevices && !modelData.paired
-                                
-                                Layout.fillWidth: true
-                                implicitHeight: unpairedDeviceRow.implicitHeight + 10
-                                radius: Theme.moduleEdgeRadius / 2
-                                opacity: 0.6
-                                cursorShape: Qt.PointingHandCursor
+                    Text {
+                        visible: connectionsModule.btPowered && connectionsModule.showUnpairedDevices
+                        text: "Available Devices"
+                        color: Theme.textPrimary
+                        opacity: 0.5
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize * 0.75
+                        font.bold: true
+                        Layout.fillWidth: true
+                        Layout.topMargin: 8
+                        Layout.leftMargin: 4
+                    }
 
-                                onClicked: {
-                                    if (modelData.connected) {
-                                        modelData.connected = false;
-                                    } else {
-                                        modelData.connected = true;
+                    Repeater {
+                        id: unpairedDeviceRepeater
+                        model: connectionsModule.btPowered && connectionsModule.btDevices ? connectionsModule.btDevices : []
+                        delegate: ModuleButton {
+                            id: unpairedDeviceBtn
+                            required property var modelData
+
+                            visible: connectionsModule.showUnpairedDevices && modelData && !modelData.paired
+                            variant: "neutral"
+
+                            readonly property bool isPairing: modelData && (modelData.pairing === true)
+                            readonly property bool isConnecting: modelData && (modelData.state === 3)
+                            readonly property bool isBusy: isPairing || isConnecting
+
+                            readonly property string statusText: {
+                                if (!modelData) return "";
+                                if (isPairing) return "Pairing...";
+                                if (isConnecting) return "Connecting...";
+                                return "Ready to pair";
+                            }
+
+                            Layout.fillWidth: true
+                            implicitHeight: unpairedDeviceRow.implicitHeight + 14
+                            radius: Theme.moduleEdgeRadius / 2 + 5
+                            opacity: isBusy ? 1.0 : 0.8
+                            border.width: isBusy ? 1.5 : 1
+                            border.color: isBusy ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.4) : Theme.divider
+                            cursorShape: isBusy ? Qt.WaitCursor : Qt.PointingHandCursor
+
+                            function doPair() {
+                                if (isBusy) return;
+                                if (connectionsModule.btAdapter) {
+                                    try { connectionsModule.btAdapter.pairable = true; } catch (e) {}
+                                }
+                                if (typeof modelData.pair === "function") {
+                                    try { modelData.pair(); } catch (e) {}
+                                }
+                                if (modelData && modelData.address) {
+                                    connectionsModule.pairBtDevice(modelData.address);
+                                }
+                            }
+
+                            function doCancelPair() {
+                                if (typeof modelData.cancelPair === "function") {
+                                    try { modelData.cancelPair(); } catch (e) {}
+                                }
+                                if (modelData && modelData.address) {
+                                    connectionsModule.cancelPairBtDevice(modelData.address);
+                                }
+                            }
+
+                            function doConnect() {
+                                if (typeof modelData.connect === "function") modelData.connect();
+                                else modelData.connected = true;
+                            }
+
+                            // Auto-trust and auto-connect once pairing completes successfully
+                            Connections {
+                                target: modelData
+                                function onPairedChanged() {
+                                    if (modelData && modelData.paired) {
+                                        connectionsModule.trustBtDevice(modelData);
+                                        if (!modelData.connected) {
+                                            doConnect();
+                                        }
+                                    }
+                                }
+                            }
+
+                            onClicked: {
+                                if (!isBusy) doPair();
+                            }
+
+                            RowLayout {
+                                id: unpairedDeviceRow
+                                anchors {
+                                    left: parent.left
+                                    right: parent.right
+                                    top: parent.top
+                                    margins: 6
+                                }
+                                spacing: 10
+
+                                Text {
+                                    id: unpairedIconText
+                                    text: connectionsModule.getBtDeviceIcon(modelData.icon, false, isBusy)
+                                    color: isBusy ? Theme.statusBlue : Theme.textPrimary
+                                    opacity: isBusy ? 1.0 : 0.6
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize + 2
+                                    Layout.alignment: Qt.AlignVCenter
+                                    Layout.leftMargin: 6
+
+                                    RotationAnimation on rotation {
+                                        from: 0
+                                        to: 360
+                                        duration: 900
+                                        loops: Animation.Infinite
+                                        running: isBusy
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    spacing: 2
+
+                                    HoverMarqueeText {
+                                        text: modelData.name || modelData.deviceName || modelData.address || "Unknown Device"
+                                        textMaxWidth: connectionsModule.cardWidth - unpairedRightActions.implicitWidth - 65
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text {
+                                        text: statusText
+                                        color: isBusy ? Theme.statusBlue : Theme.statusDisabled
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize * 0.75
+                                        font.bold: isBusy
                                     }
                                 }
 
                                 RowLayout {
-                                    id: unpairedDeviceRow
-                                    anchors {
-                                        left: parent.left
-                                        right: parent.right
-                                        top: parent.top
-                                        margins: 5
-                                    }
-                                    spacing: 10
+                                    id: unpairedRightActions
+                                    spacing: 6
+                                    Layout.alignment: Qt.AlignVCenter
+                                    Layout.rightMargin: 6
 
-                                    Text {
-                                        text: modelData.connected ? "󰂱" : "󰂲"
-                                        color: modelData.connected ? Theme.statusBlue : Theme.textPrimary
-                                        font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize
-                                        Layout.leftMargin: 5
-                                    }
-
-                                    HoverMarqueeText {
-                                        text: modelData.name || "Unknown Device"
-                                        textMaxWidth: modelData.batteryAvailable ? connectionsModule.textMaxWidth - unpairedDeviceBatteryBtn.implicitWidth - 40 : connectionsModule.textMaxWidth - 20
-                                        Layout.fillWidth: true
-                                    }
-
-                                    ModuleButton {
-                                        id: unpairedDeviceBatteryBtn
-                                        variant: "light"
-                                        visible: modelData.batteryAvailable
-                                        label: Math.round(modelData.battery * 100) + "%"
+                                    Rectangle {
+                                        id: pairActionBtn
+                                        implicitHeight: 22
+                                        implicitWidth: isPairing ? 56 : 48
                                         radius: Theme.moduleEdgeRadius / 2
-                                        implicitHeight: Theme.fontSize + 10
-                                        implicitWidth: label.length * (Theme.fontSize * 0.6) + 10
-                                        color: modelData.battery > 0.2 ? Theme.statusGreen : Theme.statusRed
+                                        color: isPairing ? Qt.rgba(Theme.statusRed.r, Theme.statusRed.g, Theme.statusRed.b, 0.25)
+                                                         : (pairActionHover.hovered ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.25) : Qt.rgba(1, 1, 1, 0.12))
+                                        border.width: 1
+                                        border.color: isPairing ? Theme.statusRed : (pairActionHover.hovered ? Theme.statusBlue : Theme.divider)
+
+                                        HoverHandler { id: pairActionHover }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: isPairing ? "Cancel" : "Pair"
+                                            color: isPairing ? Theme.statusRed : (pairActionHover.hovered ? Theme.statusBlue : Theme.textPrimary)
+                                            font.family: Theme.font
+                                            font.pixelSize: Theme.fontSize * 0.75
+                                            font.bold: true
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                mouse.accepted = true;
+                                                if (isPairing) doCancelPair();
+                                                else doPair();
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
+                    }
 
-                        Text {
-                            visible: !connectionsModule.btPowered || pairedDeviceRepeater.count === 0
-                            text: connectionsModule.btPowered ? "No devices" : "disabled"
-                            color: !connectionsModule.btPowered ? Theme.statusDisabled : Theme.textPrimary
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
-                            font.bold: connectionsModule.btPowered
-                            font.italic: !connectionsModule.btPowered
-                            Layout.fillWidth: true
-                            horizontalAlignment: Text.AlignLeft
-                        }
+                    Text {
+                        visible: !connectionsModule.btPowered || pairedDeviceRepeater.count === 0
+                        text: connectionsModule.btPowered ? "No devices" : "disabled"
+                        color: !connectionsModule.btPowered ? Theme.statusDisabled : Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: connectionsModule.btPowered
+                        font.italic: !connectionsModule.btPowered
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        Layout.topMargin: 5
+                        Layout.bottomMargin: 5
                     }
                 }
             }
 
             // ── Headset ──────────────────────────────────
-            ModuleButton {
+            Rectangle {
                 id: headsetModule
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 1
-                color: Theme.divider
-                radius: Theme.moduleEdgeRadius
+                color: Qt.rgba(1, 1, 1, 0.1)
+                radius: Theme.moduleEdgeRadius / 2 + 10
+                clip: true
 
+                Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: headsetRow.implicitHeight
+                implicitHeight: headsetTopBar.height + headsetContentCol.implicitHeight + 20
 
                 Rectangle {
+                    id: headsetTopBar
                     anchors.left: parent.left
+                    anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    width: 70
+                    height: 35
                     color: Theme.bgBlurColor
-                    topLeftRadius: headsetModule.topLeftRadius
-                    bottomLeftRadius: headsetModule.bottomLeftRadius
 
-                    InverseRadius {
-                        anchors.top: parent.top
-                        anchors.left: parent.right
-                        cornerPosition: "topLeft"
-                        color: parent.color
-                        size: 10
+                    topLeftRadius: parent.radius
+                    topRightRadius: parent.radius
+                    bottomLeftRadius: 0
+                    bottomRightRadius: 0
+
+                    Text {
+                        id: headsetIcon
+                        text: ""
+                        color: connectionsModule.headsetBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize + 2
+                        anchors.left: parent.left
+                        anchors.leftMargin: 15
+                        anchors.verticalCenter: parent.verticalCenter
                     }
 
-                    InverseRadius {
-                        anchors.bottom: parent.bottom
-                        anchors.left: parent.right
-                        cornerPosition: "bottomLeft"
-                        color: parent.color
-                        size: 10
+                    Text {
+                        id: headsetTitle
+                        text: "Headset"
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: true
+                        anchors.centerIn: parent
+                    }
+
+                    ModuleButton {
+                        id: headsetBatteryBtn
+                        variant: "light"
+                        visible: connectionsModule.headsetBatteryAvailable
+                        label: connectionsModule.headsetBatteryPercentLabel
+                        implicitHeight: 22
+                        implicitWidth: label.length * (Theme.fontSize * 0.6) + 14
+                        radius: 11
+                        color: connectionsModule.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed
+                        anchors.right: parent.right
+                        anchors.rightMargin: 15
+                        anchors.verticalCenter: parent.verticalCenter
                     }
                 }
-                
-                RowLayout {
-                    id: headsetRow
 
+                InverseRadius {
+                    anchors.top: headsetTopBar.bottom
+                    anchors.left: headsetTopBar.left
+                    color: headsetTopBar.color
+                }
+
+                InverseRadius {
+                    cornerPosition: "topRight"
+                    anchors.top: headsetTopBar.bottom
+                    anchors.right: headsetTopBar.right
+                    color: headsetTopBar.color
+                }
+
+                ColumnLayout {
+                    id: headsetContentCol
                     anchors {
-                        left:    parent.left
-                        top:     parent.top
-                        right:   parent.right
+                        top: headsetTopBar.bottom
+                        left: parent.left
+                        right: parent.right
+                        margins: 15
+                        topMargin: 10
                     }
-                     
-                    spacing: 15
+                    spacing: 4
 
-                    Item {
-                        implicitWidth: 70
-                        implicitHeight: 70
-                        Layout.fillHeight: true
-
-                        ModuleButton {
-                            anchors.centerIn: parent
-                            label: ""
-                            textColor: connectionsModule.headsetBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
-                            cursorShape: Qt.ArrowCursor
-                            colorOverride: true
-                            textFont: 24
-                            radius: 10
-                            implicitWidth: 40
-                            implicitHeight: 40
-                        }
-                    }
-                    
-                    ColumnLayout {
-                        id: headsetInfoCol
+                    HoverMarqueeText {
+                        text: connectionsModule.headsetBatteryLabel
+                        textMaxWidth: connectionsModule.cardWidth - 30
                         Layout.fillWidth: true
-                        Layout.topMargin: 15
-                        Layout.bottomMargin: 15
-                        Layout.rightMargin: 15
-                        spacing: 5
-                        RowLayout {
-                            spacing: 10
+                    }
 
-                            HoverMarqueeText {
-                                text: connectionsModule.headsetBatteryLabel
-                                textMaxWidth: connectionsModule.headsetBatteryAvailable ? connectionsModule.textMaxWidth - headsetBatteryBtn.width - 20 : connectionsModule.textMaxWidth
-                            }
-                            ModuleButton {
-                                id: headsetBatteryBtn
-                                variant: "light"
-                                visible: connectionsModule.headsetBatteryAvailable
-                                label: connectionsModule.headsetBatteryPercentLabel
-                                implicitHeight: Theme.fontSize + 10
-                                implicitWidth: label.length * (Theme.fontSize * 0.6) + 10
-                                radius: Theme.moduleEdgeRadius / 2
-                                color: connectionsModule.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed
-                            }
-
-                        }
-                        Text {
-                            color: Theme.textPrimary
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize * 0.9
-                            text: connectionsModule.headsetBatteryState
-                            Layout.fillWidth: true
-                            horizontalAlignment: Text.AlignLeft
-                        }
+                    Text {
+                        color: Theme.textPrimary
+                        opacity: 0.7
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize * 0.9
+                        text: connectionsModule.headsetBatteryState
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignLeft
                     }
                 }
             }
 
             // ── Mouse ──────────────────────────────────
-            ModuleButton {
+            Rectangle {
                 id: mouseModule
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 1
-                color: Theme.divider
-                radius: Theme.moduleEdgeRadius
+                color: Qt.rgba(1, 1, 1, 0.1)
+                radius: Theme.moduleEdgeRadius / 2 + 10
+                clip: true
 
+                Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: mouseRow.implicitHeight
+                implicitHeight: mouseTopBar.height + mouseContentCol.implicitHeight + 20
 
                 Rectangle {
+                    id: mouseTopBar
                     anchors.left: parent.left
+                    anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    width: 70
+                    height: 35
                     color: Theme.bgBlurColor
-                    topLeftRadius: mouseModule.topLeftRadius
-                    bottomLeftRadius: mouseModule.bottomLeftRadius
 
-                    InverseRadius {
-                        anchors.top: parent.top
-                        anchors.left: parent.right
-                        cornerPosition: "topLeft"
-                        color: parent.color
-                        size: 10
-                    }
+                    topLeftRadius: parent.radius
+                    topRightRadius: parent.radius
+                    bottomLeftRadius: 0
+                    bottomRightRadius: 0
 
-                    InverseRadius {
-                        anchors.bottom: parent.bottom
-                        anchors.left: parent.right
-                        cornerPosition: "bottomLeft"
-                        color: parent.color
-                        size: 10
-                    }
-                }
-                
-                RowLayout {
-                    id: mouseRow
+                    Text {
+                        id: mouseIcon
+                        text: "󰍽"
+                        color: connectionsModule.mouseBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize + 2
+                        anchors.left: parent.left
+                        anchors.leftMargin: 15
+                        anchors.verticalCenter: parent.verticalCenter
 
-                    anchors {
-                        left:    parent.left
-                        top:     parent.top
-                        right:   parent.right
-                    }
-                     
-                    spacing: 15
-
-                    Item {
-                        implicitWidth: 70
-                        implicitHeight: 70
-                        Layout.fillHeight: true
-
-                        ModuleButton {
-                            anchors.centerIn: parent
-                            label: "󰍽"
-                            textColor: connectionsModule.mouseBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
+                        MouseArea {
+                            anchors.fill: parent
+                            anchors.margins: -5
                             cursorShape: Qt.PointingHandCursor
-                            colorOverride: true
-                            textFont: 24
-                            radius: 10
-                            implicitWidth: 40
-                            implicitHeight: 40
                             onClicked: {
                                 peripheralsFile.reload()
                                 updatePeripherals()
                             }
                         }
                     }
-                    
-                    ColumnLayout {
-                        id: mouseInfoCol
+
+                    Text {
+                        id: mouseTitle
+                        text: "Mouse"
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: true
+                        anchors.centerIn: parent
+                    }
+
+                    ModuleButton {
+                        id: mouseBatteryBtn
+                        variant: "light"
+                        visible: connectionsModule.mouseBatteryAvailable
+                        label: connectionsModule.mouseBatteryPercentLabel
+                        implicitHeight: 22
+                        implicitWidth: label.length * (Theme.fontSize * 0.6) + 14
+                        radius: 11
+                        color: connectionsModule.mouseBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed
+                        anchors.right: parent.right
+                        anchors.rightMargin: 15
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+
+                InverseRadius {
+                    anchors.top: mouseTopBar.bottom
+                    anchors.left: mouseTopBar.left
+                    color: mouseTopBar.color
+                }
+
+                InverseRadius {
+                    cornerPosition: "topRight"
+                    anchors.top: mouseTopBar.bottom
+                    anchors.right: mouseTopBar.right
+                    color: mouseTopBar.color
+                }
+
+                ColumnLayout {
+                    id: mouseContentCol
+                    anchors {
+                        top: mouseTopBar.bottom
+                        left: parent.left
+                        right: parent.right
+                        margins: 15
+                        topMargin: 10
+                    }
+                    spacing: 4
+
+                    HoverMarqueeText {
+                        text: connectionsModule.mouseBatteryLabel
+                        textMaxWidth: connectionsModule.cardWidth - 30
                         Layout.fillWidth: true
-                        Layout.topMargin: 15
-                        Layout.bottomMargin: 15
-                        Layout.rightMargin: 15
-                        spacing: 5
-                        RowLayout {
-                            spacing: 10
+                    }
 
-                            HoverMarqueeText {
-                                text: connectionsModule.mouseBatteryLabel
-                                textMaxWidth: connectionsModule.mouseBatteryAvailable ? connectionsModule.textMaxWidth - mouseBatteryBtn.width - 20 : connectionsModule.textMaxWidth
-                            }
-                            ModuleButton {
-                                id: mouseBatteryBtn
-                                variant: "light"
-                                visible: connectionsModule.mouseBatteryAvailable
-                                label: connectionsModule.mouseBatteryPercentLabel
-                                implicitHeight: Theme.fontSize + 10
-                                implicitWidth: label.length * (Theme.fontSize * 0.6) + 10
-                                radius: Theme.moduleEdgeRadius / 2
-                                color: connectionsModule.mouseBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed
-                            }
-
-                        }
-                        Text {
-                            color: Theme.textPrimary
-                            opacity: 0.8
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize * 0.9
-                            text: connectionsModule.mouseBatteryState
-                            Layout.fillWidth: true
-                            horizontalAlignment: Text.AlignLeft
-                        }
+                    Text {
+                        color: Theme.textPrimary
+                        opacity: 0.7
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize * 0.9
+                        text: connectionsModule.mouseBatteryState
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignLeft
                     }
                 }
             }
@@ -814,7 +1117,7 @@ ExpandableModule {
             }
             
             if (bestDev) {
-                connectionsModule.netName  = bestNet ? (bestNet.name || bestDev.name) : bestDev.name;
+                connectionsModule.netName  = bestNet ? bestNet.name : ((bestDev.type === DeviceType.Wired || bestDev.type === 2) ? "Ethernet" : bestDev.name);
                 connectionsModule.netState = "connected";
                 connectionsModule.netColor = Theme.statusGreen;
                 if (bestDev.type === DeviceType.Wifi || bestDev.type === 1) {
@@ -911,5 +1214,10 @@ ExpandableModule {
         }
     }
 
-    Component.onCompleted: updatePeripherals()
+    Component.onCompleted: {
+        updatePeripherals();
+        if (btAdapter && btPowered) {
+            try { btAdapter.pairable = true; } catch (e) {}
+        }
+    }
 }

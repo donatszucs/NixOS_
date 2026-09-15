@@ -43,6 +43,7 @@ hl.env("QT_QPA_PLATFORMTHEME", "gtk3")
 -- ==========================================
 hl.on("hyprland.start", function()
     hl.exec_cmd("kdeconnect-indicator &")
+    hl.exec_cmd("blueman-applet &")
     hl.exec_cmd("quickshell &")
     hl.exec_cmd("[workspace 1 silent] zen &")
     hl.exec_cmd("[workspace 3 silent] antigravity-ide &")

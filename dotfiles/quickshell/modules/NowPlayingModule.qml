@@ -503,7 +503,10 @@ ExpandableModule {
 
                     Image {
                         id: playerAppIcon
-                        anchors.centerIn: parent
+                        anchors.leftMargin: 6
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.topMargin: 5
                         width: 16
                         height: 16
                         sourceSize.width: 32
