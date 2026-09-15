@@ -11,3 +11,4 @@ scripts/HyprHeadset/hyprx.pcapng
 scripts/scriptsEnv/.venv
 .gitignore
 AUDIT2.md
+dotfiles/quickshell/calendar_url.txt

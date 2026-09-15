@@ -166,6 +166,7 @@ PanelWindow {
             leftColor: clockModule.color
             leftExpanded: true
             implicitWidth: 0
+            implicitHeight: clockModule.implicitHeight
         }
         ClockModule {
             Layout.alignment: Qt.AlignTop
@@ -173,6 +174,7 @@ PanelWindow {
         }
         ModuleGap {
             Layout.alignment: Qt.AlignTop
+            leftModule: clockModule
             rightModule: weatherModule
         }
         WeatherModule {

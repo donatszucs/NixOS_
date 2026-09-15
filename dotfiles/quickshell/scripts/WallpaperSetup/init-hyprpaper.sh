@@ -2,7 +2,8 @@
 
 CONF_FILE="$HOME/nixos-config/dotfiles/hypr/hyprpaper.conf"
 TEMPS_DIR="$HOME/nixos-config/dotfiles/hypr/temps"
-DEFAULT="$HOME/nixos-config/scripts/WallpaperSetup/default.jpg"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT="$DIR/default.jpg"
 
 # Create temps directory if it doesn't exist
 mkdir -p "$TEMPS_DIR"

@@ -29,11 +29,11 @@
         pname = "peripherial_monitor";
         version = "0.1.0";
         src = builtins.path {
-          path = ./rust_daemons/peripherial_monitor;
+          path = ../dotfiles/quickshell/scripts/peripherial_monitor;
           name = "peripherial_monitor-source";
         };
         cargoLock = {
-          lockFile = ./rust_daemons/peripherial_monitor/Cargo.lock;
+          lockFile = ../dotfiles/quickshell/scripts/peripherial_monitor/Cargo.lock;
         };
         nativeBuildInputs = [ pkgs.pkg-config ];
         buildInputs = [ pkgs.udev ];
