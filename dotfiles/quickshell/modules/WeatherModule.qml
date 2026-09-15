@@ -273,10 +273,12 @@ ExpandableModule {
                 }
 
                 Rectangle {
-                    color: Qt.rgba(1, 1, 1, 0.1)
+                    color: Theme.bgBlurColor
                     radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
                     implicitHeight: 200
+                    border.width: 2
+                    border.color: Theme.cardBorder
 
                     Rectangle {
                         id: hourlyTopBar
@@ -551,10 +553,12 @@ ExpandableModule {
                 }
 
                 Rectangle {
-                    color: Qt.rgba(1, 1, 1, 0.1)
+                    color: Theme.bgBlurColor
                     radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
                     implicitHeight: 200
+                    border.width: 2
+                    border.color: Theme.cardBorder
                     clip: true
 
                     Rectangle {

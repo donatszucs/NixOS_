@@ -206,11 +206,13 @@ ExpandableModule {
                 spacing: 10
 
                 Rectangle {
-                    color: Qt.rgba(1, 1, 1, 0.1)
+                    color: Theme.bgBlurColor
                     radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
                     implicitHeight: audioTopBar.height + sinkCol.implicitHeight + 20
                     clip: true
+                    border.width: 2
+                    border.color: Theme.cardBorder
 
                     Rectangle {
                         id: audioTopBar
@@ -232,7 +234,7 @@ ExpandableModule {
                             spacing: 8
 
                             Text {
-                                text: "Audio Sources"
+                                text: "Output Devices"
                                 color: Theme.textPrimary
                                 font.family: Theme.font
                                 font.pixelSize: Theme.fontSize + 1
@@ -290,7 +292,6 @@ ExpandableModule {
                             left: parent.left
                             right: parent.right
                             margins: 10
-                            topMargin: 8
                         }
                         spacing: 5
 
@@ -368,11 +369,13 @@ ExpandableModule {
                 }
 
                 Rectangle {
-                    color: Qt.rgba(1, 1, 1, 0.1)
+                    color: Theme.bgBlurColor
                     radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
                     implicitHeight: inputTopBar.height + sourceCol.implicitHeight + 20
                     clip: true
+                    border.width: 2
+                    border.color: Theme.cardBorder
 
                     Rectangle {
                         id: inputTopBar
@@ -446,7 +449,6 @@ ExpandableModule {
                             left: parent.left
                             right: parent.right
                             margins: 10
-                            topMargin: 8
                         }
                         spacing: 5
 

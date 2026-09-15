@@ -318,9 +318,7 @@ ExpandableModule {
             top: headerPill.bottom
             left: parent.left
             right: parent.right
-            topMargin: 10
-            leftMargin: 12
-            rightMargin: 12
+            margins: 10
         }
         spacing: 10
 
@@ -338,8 +336,8 @@ ExpandableModule {
             implicitHeight: calTopBar.height + calGridContent.implicitHeight + 16
             radius: Theme.moduleEdgeRadius / 2 + 5
             color: Theme.bgBlurColor
-            border.width: 1
-            border.color: Theme.divider
+            border.width: 2
+            border.color: Theme.cardBorder
             clip: true
 
             // Top Header Bar
@@ -358,39 +356,48 @@ ExpandableModule {
                 bottomRightRadius: 0
 
                 // Prev Month Button
-                Rectangle {
+                ModuleButton {
                     id: prevBtn
                     width: 26
-                    height: 26
+                    height: 20
                     radius: 13
+                    topRightRadius: 0
+                    bottomRightRadius: 0
                     anchors {
                         left: parent.left
                         leftMargin: 8
                         verticalCenter: parent.verticalCenter
                     }
-                    color: prevHover.hovered ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
-                    HoverHandler { id: prevHover }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "󰅁"
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                    variant: "neutral"
+                    label: "󰅁"
+                    onClicked: root.prevMonth()
+                    cursorShape: Qt.PointingHandCursor
+                }
+                
+                // Next Month Button
+                ModuleButton {
+                    id: nextBtn
+                    width: 26
+                    height: 20
+                    radius: 13
+                    topLeftRadius: 0
+                    bottomLeftRadius: 0
+                    anchors {
+                        left: prevBtn.right
+                        verticalCenter: parent.verticalCenter
                     }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.prevMonth()
-                    }
+                    variant: "neutral"
+                    label: "󰅂"
+                    onClicked: root.nextMonth()
+                    cursorShape: Qt.PointingHandCursor
                 }
 
                 // Month & Year Title
                 Text {
                     id: monthTitleText
                     anchors {
-                        left: prevBtn.right
+                        left: nextBtn.right
                         leftMargin: 6
                         verticalCenter: parent.verticalCenter
                     }
@@ -399,35 +406,6 @@ ExpandableModule {
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize
                     font.bold: true
-                }
-
-                // Next Month Button
-                Rectangle {
-                    id: nextBtn
-                    width: 26
-                    height: 26
-                    radius: 13
-                    anchors {
-                        left: monthTitleText.right
-                        leftMargin: 6
-                        verticalCenter: parent.verticalCenter
-                    }
-                    color: nextHover.hovered ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
-                    HoverHandler { id: nextHover }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "󰅂"
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.nextMonth()
-                    }
                 }
 
                 // Right action buttons (Today, Refresh, Google Calendar Web)
@@ -543,10 +521,9 @@ ExpandableModule {
                     top: calTopBar.bottom
                     left: parent.left
                     right: parent.right
-                    margins: 8
-                    topMargin: 8
+                    margins: 10
                 }
-                spacing: 4
+                spacing: 5
 
                 // Calendar Legend (showing active calendars and their colors)
                 Flow {
@@ -692,11 +669,11 @@ ExpandableModule {
         Rectangle {
             id: agendaCard
             Layout.fillWidth: true
-            implicitHeight: agendaContentCol.implicitHeight + 16
+            implicitHeight: agendaContentCol.implicitHeight + 20
             radius: Theme.moduleEdgeRadius / 2 + 5
             color: Theme.bgBlurColor
-            border.width: 1
-            border.color: Theme.divider
+            border.width: 2
+            border.color: Theme.cardBorder
             clip: true
 
             ColumnLayout {
@@ -707,7 +684,7 @@ ExpandableModule {
                     top: parent.top
                     margins: 10
                 }
-                spacing: 8
+                spacing: 10
 
                 // Selected Date Header
                 RowLayout {
@@ -751,7 +728,7 @@ ExpandableModule {
                         readonly property color eventColor: (modelData && modelData.calendar_color) ? modelData.calendar_color : Theme.statusBlue
 
                         Layout.fillWidth: true
-                        implicitHeight: eventItemRow.implicitHeight + 12
+                        implicitHeight: eventItemRow.implicitHeight + 15
                         radius: 8
                         color: Qt.rgba(1, 1, 1, 0.06)
                         border.width: 1

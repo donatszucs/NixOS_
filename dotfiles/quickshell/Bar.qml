@@ -132,12 +132,13 @@ PanelWindow {
         id: bgMouseArea
         anchors.fill: parent
         visible: enabled
-        enabled: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded
+        enabled: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded || notificationCenter.isManuallyOpen
         onClicked: {
             launcherModule.expanded = false
             wallpaperPicker.expanded = false
             clipboardHistory.expanded = false
             rbwMenu.closeMenu()
+            notificationCenter.isManuallyOpen = false
         }
         z: -1
     }
@@ -395,6 +396,7 @@ PanelWindow {
 
     NotificationCenter {
         id: notificationCenter 
+        screenName: modelData.name
 
         anchors {
             bottom: parent.bottom

@@ -576,12 +576,11 @@ ExpandableModule {
                     anchors.bottomMargin: 0
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    color: Qt.rgba(1, 1, 1, 0.08)
+                    color: Theme.bgBlurColor
                     radius: Theme.moduleEdgeRadius
                     clip: true
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
-
+                    border.width: 2
+                    border.color: Theme.cardBorder
                     // Multi-player: carousel
                     ListView {
                         id: playerCarousel
@@ -611,7 +610,7 @@ ExpandableModule {
                     preferredHighlightEnd: width / 2 + 100
                     highlightRangeMode: ListView.StrictlyEnforceRange
                     snapMode: ListView.SnapToItem
-                    spacing: -50
+                    spacing: -60
 
                     delegate: Item {
                         id: delegateRoot

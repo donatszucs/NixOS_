@@ -130,7 +130,7 @@ ExpandableModule {
                 Layout.alignment: Qt.AlignTop
                 Layout.rightMargin: -(130 / 2)
 
-                color: Theme.palette("neutral").base
+                color: Theme.bgBlurColor
                 size: 130 / 2
                 outerRadius: Theme.moduleEdgeRadius
             }
@@ -185,7 +185,7 @@ ExpandableModule {
                         }
 
                         // Outer border
-                        var btnC = Theme.palette("neutral").base
+                        var btnC = Theme.bgBlurColor
                         var strokeRgba = "rgba(" + Math.round(btnC.r * 255) + "," + Math.round(btnC.g * 255) + "," + Math.round(btnC.b * 255) + "," + btnC.a + ")"
 
                         ctx.beginPath()
@@ -240,7 +240,7 @@ ExpandableModule {
             Rectangle {
                 width: 40
                 Layout.fillHeight: true
-                color: Theme.palette("neutral").base
+                color: Theme.bgBlurColor
                 topLeftRadius: 0
                 topRightRadius: Theme.moduleEdgeRadius
                 bottomLeftRadius: 0
@@ -248,7 +248,7 @@ ExpandableModule {
 
                 InverseRadius {
                     cornerPosition: "topRight"
-                    color: Theme.palette("neutral").base
+                    color: Theme.bgBlurColor
                     size: 130 / 2
 
                     anchors.right: parent.left
@@ -257,7 +257,7 @@ ExpandableModule {
 
                 InverseRadius {
                     cornerPosition: "bottomRight"
-                    color: Theme.palette("neutral").base
+                    color: Theme.bgBlurColor
                     size: 130 / 2
 
                     anchors.right: parent.left

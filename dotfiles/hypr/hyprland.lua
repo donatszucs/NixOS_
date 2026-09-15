@@ -115,7 +115,7 @@ hl.config({
         force_default_wallpaper = -1,
         disable_hyprland_logo = true,
         focus_on_activate = true,
-        initial_workspace_tracking = 2
+        initial_workspace_tracking = 1
     },
     input = {
         kb_layout = "hu",

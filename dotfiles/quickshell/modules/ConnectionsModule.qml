@@ -220,7 +220,7 @@ ExpandableModule {
             ColumnLayout {
                 id: popupCol
                 width: parent.width
-                spacing: 5
+                spacing: 10
 
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
@@ -266,10 +266,12 @@ ExpandableModule {
             Rectangle {
                 id: netModule
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 0
-                color: Qt.rgba(1, 1, 1, 0.1)
+                color: Theme.bgBlurColor
                 radius: Theme.moduleEdgeRadius / 2 + 10
                 clip: true
-
+                border.width: 2
+                border.color: Theme.cardBorder
+                
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: netTopBar.height + netContentCol.implicitHeight + 20
@@ -361,10 +363,12 @@ ExpandableModule {
             Rectangle {
                 id: btModule
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 0
-                color: Qt.rgba(1, 1, 1, 0.1)
+                color: Theme.bgBlurColor
                 radius: Theme.moduleEdgeRadius / 2 + 10
                 clip: true
-
+                border.width: 2
+                border.color: Theme.cardBorder
+                
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: btTopBar.height + btInfoCol.implicitHeight + 20
@@ -864,9 +868,11 @@ ExpandableModule {
             Rectangle {
                 id: headsetModule
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 1
-                color: Qt.rgba(1, 1, 1, 0.1)
+                color: Theme.bgBlurColor
                 radius: Theme.moduleEdgeRadius / 2 + 10
                 clip: true
+                border.width: 2
+                border.color: Theme.cardBorder
 
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
@@ -967,9 +973,11 @@ ExpandableModule {
             Rectangle {
                 id: mouseModule
                 visible: connectionsModule.expanded && connectionsModule.currentPage === 1
-                color: Qt.rgba(1, 1, 1, 0.1)
+                color: Theme.bgBlurColor
                 radius: Theme.moduleEdgeRadius / 2 + 10
                 clip: true
+                border.width: 2
+                border.color: Theme.cardBorder
 
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth

@@ -234,6 +234,55 @@ Item {
 
     property alias trackedNotifications: server.trackedNotifications
 
+    ListModel {
+        id: orderedNotifications
+    }
+
+    property alias notificationsModel: orderedNotifications
+
+    function addNotification(notification) {
+        if (!notification) return
+        for (var i = 0; i < orderedNotifications.count; ++i) {
+            var entry = orderedNotifications.get(i)
+            if (entry && entry.notifData && (entry.notifData === notification || (entry.notifData.id !== undefined && entry.notifData.id === notification.id))) {
+                if (i !== 0) {
+                    orderedNotifications.move(i, 0, 1)
+                }
+                return
+            }
+        }
+        orderedNotifications.insert(0, { "notifData": notification })
+    }
+
+    function removeNotification(notification) {
+        if (!notification) return
+        for (var i = 0; i < orderedNotifications.count; ++i) {
+            var entry = orderedNotifications.get(i)
+            if (entry && entry.notifData && (entry.notifData === notification || (entry.notifData.id !== undefined && entry.notifData.id === notification.id))) {
+                orderedNotifications.remove(i)
+                break
+            }
+        }
+    }
+
+    function dismissAllNotifications() {
+        if (server.trackedNotifications && server.trackedNotifications.values) {
+            var list = server.trackedNotifications.values
+            for (var i = list.length - 1; i >= 0; --i) {
+                var n = list[i]
+                if (n && n.dismiss) n.dismiss()
+            }
+        }
+        orderedNotifications.clear()
+    }
+
+    Connections {
+        target: server.trackedNotifications
+        function onObjectRemovedPost(object, index) {
+            root.removeNotification(object)
+        }
+    }
+
     Notif.NotificationServer {
         id: server
         keepOnReload: false
@@ -241,7 +290,17 @@ Item {
         inlineReplySupported: true
         onNotification: notification => {
             notification.tracked = true
+            root.addNotification(notification)
             root.playNotificationSound()
+
+            notification.closed.connect(() => {
+                root.removeNotification(notification)
+            })
+            notification.trackedChanged.connect(() => {
+                if (!notification.tracked) {
+                    root.removeNotification(notification)
+                }
+            })
         }
     }
 }

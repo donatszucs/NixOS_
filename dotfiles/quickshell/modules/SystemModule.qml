@@ -54,11 +54,13 @@ ExpandableModule {
 
                 // ── System Actions ─────────────────────────────────────────
                 Rectangle {
-                    color: Qt.rgba(1, 1, 1, 0.1)
+                    color: Theme.bgBlurColor
                     radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
                     implicitHeight: sysBottomBar.height + sysContentCol.implicitHeight + 20
                     clip: true
+                    border.width: 2
+                    border.color: Theme.cardBorder
 
                     ColumnLayout {
                         id: sysContentCol
