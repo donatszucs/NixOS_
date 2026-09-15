@@ -929,7 +929,7 @@ ExpandableModule {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        height: 30
+                        height: 35
                         color: Theme.bgBlurColor
                         bottomLeftRadius: carouselPanel.radius
                         bottomRightRadius: carouselPanel.radius
@@ -963,9 +963,9 @@ ExpandableModule {
                                 id: prevBtn
                                 variant: "neutral"
                                 cursorShape: nowPlayingModule.canPrev ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                textFont: 13
-                                Layout.preferredWidth: 22
-                                Layout.preferredHeight: 22
+                                textFont: 15
+                                Layout.preferredWidth: 25
+                                Layout.preferredHeight: 25
                                 Layout.alignment: Qt.AlignVCenter
                                 bottomLeftRadius: 11
                                 topLeftRadius: 11
@@ -982,9 +982,9 @@ ExpandableModule {
                                 id: nextBtn
                                 variant: "neutral"
                                 cursorShape: nowPlayingModule.canNext ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                textFont: 13
-                                Layout.preferredWidth: 22
-                                Layout.preferredHeight: 22
+                                textFont: 15
+                                Layout.preferredWidth: 25
+                                Layout.preferredHeight: 25
                                 Layout.alignment: Qt.AlignVCenter
                                 Layout.leftMargin: -6
                                 bottomRightRadius: 11
@@ -1025,9 +1025,9 @@ ExpandableModule {
                                 id: volumeBtn
                                 variant: "neutral"
                                 cursorShape: Qt.PointingHandCursor
-                                textFont: 13
+                                textFont: 15
                                 Layout.preferredWidth: 44
-                                Layout.preferredHeight: 22
+                                Layout.preferredHeight: 25
                                 Layout.alignment: Qt.AlignVCenter
                                 radius: 11
 

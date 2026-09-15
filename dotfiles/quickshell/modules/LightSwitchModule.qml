@@ -272,7 +272,7 @@ ExpandableModule {
                     anchors.bottom: parent.bottom
                     anchors.right: parent.right
                     
-                    implicitWidth: 30
+                    implicitWidth: 35
 
                     border.width: 0
                     label: ""
@@ -305,10 +305,10 @@ ExpandableModule {
                     ModuleButton {
                         id: resetButton
                         anchors.fill: parent
-                        topMarginButton: 4
-                        bottomMarginButton: 4
-                        leftMarginButton: 3
-                        rightMarginButton: 4
+                        topMarginButton: 5
+                        bottomMarginButton: 5
+                        leftMarginButton: 5
+                        rightMarginButton: 5
 
                         radius: width / 2
                         variant: "neutral"
