@@ -369,10 +369,7 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         color: "black"
-                        topLeftRadius: 0
-                        topRightRadius: 0
-                        bottomLeftRadius: Math.max(0, card.radius - 2)
-                        bottomRightRadius: Math.max(0, card.radius - 2)
+                        radius: Theme.moduleEdgeRadius - 5
                     }
                 }
 
@@ -383,9 +380,9 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    anchors.leftMargin: 2
-                    anchors.rightMargin: 2
-                    anchors.bottomMargin: 2
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    anchors.bottomMargin: 10
                     anchors.topMargin: 10
 
                     layer.enabled: true
