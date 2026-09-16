@@ -19,7 +19,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    quickflow = {
+    quickflux = {
       url = "path:../dotfiles/quickshell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -33,9 +33,9 @@
     in
     {
       packages.${system} = {
-        default = inputs.quickflow.packages.${system}.default;
-        quickflow = inputs.quickflow.packages.${system}.quickflow;
-        peripheral-monitor = inputs.quickflow.packages.${system}.peripheral-monitor;
+        default = inputs.quickflux.packages.${system}.default;
+        quickflux = inputs.quickflux.packages.${system}.quickflux;
+        peripheral-monitor = inputs.quickflux.packages.${system}.peripheral-monitor;
       };
 
       nixosConfigurations.doni = inputs.nixpkgs.lib.nixosSystem {
@@ -44,7 +44,7 @@
         };
         modules = [
           inputs.playit-nixos-module.nixosModules.default
-          inputs.quickflow.nixosModules.default
+          inputs.quickflux.nixosModules.default
           ./configuration.nix
         ];
       };

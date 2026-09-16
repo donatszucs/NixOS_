@@ -44,7 +44,7 @@ hl.env("QT_QPA_PLATFORMTHEME", "gtk3")
 hl.on("hyprland.start", function()
     hl.exec_cmd("kdeconnect-indicator &")
     hl.exec_cmd("blueman-applet &")
-    hl.exec_cmd("quickflow &")
+    hl.exec_cmd("quickflux &")
     hl.exec_cmd("[workspace 1 silent] zen &")
     hl.exec_cmd("[workspace 3 silent] antigravity-ide &")
     hl.exec_cmd("discord --minimized &")
@@ -207,7 +207,7 @@ hl.animation({ leaf = "workspacesOut", enabled = true, speed = 1.94, bezier = "l
 
 -- Core Execution Binds
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("bash -c 'pkill -fx /run/current-system/sw/bin/quickflow; sleep 0.2; quickflow'"))
+hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("bash -c 'pkill -fx /run/current-system/sw/bin/quickflux; sleep 0.2; quickflux'"))
 hl.bind(mainMod .. " + K", hl.dsp.window.close()) -- Replaces killactive
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("[workspace 2] discord"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))

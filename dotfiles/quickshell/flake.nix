@@ -62,53 +62,53 @@
             bash
           ];
 
-          quickflow-wrapped = pkgs.symlinkJoin {
-            name = "quickflow";
+          quickflux-wrapped = pkgs.symlinkJoin {
+            name = "quickflux";
             paths = [ pkgs.quickshell ];
             buildInputs = [ pkgs.makeWrapper ];
             postBuild = ''
               wrapProgram $out/bin/quickshell \
                 --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps} \
                 --prefix QT_PLUGIN_PATH : "${pkgs.kdePackages.qtimageformats}/${pkgs.qt6.qtbase.qtPluginPrefix}"
-              ln -s $out/bin/quickshell $out/bin/quickflow
+              ln -s $out/bin/quickshell $out/bin/quickflux
             '';
           };
 
           # Standalone runner that runs local directory if present, otherwise default config
-          quickflow-runner = pkgs.writeShellScriptBin "quickflow-runner" ''
+          quickflux-runner = pkgs.writeShellScriptBin "quickflux-runner" ''
             if [ $# -gt 0 ]; then
-              exec ${quickflow-wrapped}/bin/quickshell "$@"
+              exec ${quickflux-wrapped}/bin/quickshell "$@"
             elif [ -f "./shell.qml" ]; then
-              exec ${quickflow-wrapped}/bin/quickshell --path .
+              exec ${quickflux-wrapped}/bin/quickshell --path .
             else
-              exec ${quickflow-wrapped}/bin/quickshell
+              exec ${quickflux-wrapped}/bin/quickshell
             fi
           '';
 
           # Immutable store package with QML assets bundled
-          quickflow-bundle = pkgs.stdenv.mkDerivation {
-            pname = "quickflow-bundle";
+          quickflux-bundle = pkgs.stdenv.mkDerivation {
+            pname = "quickflux-bundle";
             version = "0.1.0";
             src = ./.;
 
             nativeBuildInputs = [ pkgs.makeWrapper ];
 
             installPhase = ''
-              mkdir -p $out/share/quickflow
-              cp -r . $out/share/quickflow/
+              mkdir -p $out/share/quickflux
+              cp -r . $out/share/quickflux/
 
               mkdir -p $out/bin
-              makeWrapper ${quickflow-wrapped}/bin/quickshell $out/bin/quickflow-desktop \
-                --add-flags "--path $out/share/quickflow"
+              makeWrapper ${quickflux-wrapped}/bin/quickshell $out/bin/quickflux-desktop \
+                --add-flags "--path $out/share/quickflux"
             '';
           };
         in
         {
-          default = quickflow-wrapped;
-          quickflow = quickflow-wrapped;
-          quickshell = quickflow-wrapped; # backward compatibility alias
-          quickflow-runner = quickflow-runner;
-          quickflow-bundle = quickflow-bundle;
+          default = quickflux-wrapped;
+          quickflux = quickflux-wrapped;
+          quickshell = quickflux-wrapped; # backward compatibility alias
+          quickflux-runner = quickflux-runner;
+          quickflux-bundle = quickflux-bundle;
           peripheral-monitor = peripheral-monitor;
         }
       );
@@ -120,12 +120,12 @@
         {
           default = {
             type = "app";
-            program = "${pkgs_system.quickflow-runner}/bin/quickflow-runner";
+            program = "${pkgs_system.quickflux-runner}/bin/quickflux-runner";
             meta.description = "Launch Quickflow desktop shell";
           };
-          quickflow = {
+          quickflux = {
             type = "app";
-            program = "${pkgs_system.quickflow}/bin/quickflow";
+            program = "${pkgs_system.quickflux}/bin/quickflux";
             meta.description = "Run wrapped Quickflow binary";
           };
           quickshell = {
@@ -153,7 +153,7 @@
               rustc
               udev
               nodejs
-              pkgs_system.quickflow
+              pkgs_system.quickflux
             ];
           };
         }
@@ -163,7 +163,7 @@
       nixosModules.default = { config, lib, pkgs, ... }:
         let
           system = pkgs.stdenv.hostPlatform.system;
-          qfPkg = self.packages.${system}.quickflow;
+          qfPkg = self.packages.${system}.quickflux;
           pmPkg = self.packages.${system}.peripheral-monitor;
         in
         {
@@ -192,13 +192,13 @@
           };
         };
 
-      nixosModules.quickflow = self.nixosModules.default;
+      nixosModules.quickflux = self.nixosModules.default;
 
       # Home Manager module for standalone user environment management
       homeManagerModules.default = { config, lib, pkgs, ... }:
         let
           system = pkgs.stdenv.hostPlatform.system;
-          qfPkg = self.packages.${system}.quickflow;
+          qfPkg = self.packages.${system}.quickflux;
           pmPkg = self.packages.${system}.peripheral-monitor;
         in
         {
@@ -224,6 +224,6 @@
           };
         };
 
-      homeManagerModules.quickflow = self.homeManagerModules.default;
+      homeManagerModules.quickflux = self.homeManagerModules.default;
     };
 }
