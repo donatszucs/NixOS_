@@ -91,11 +91,28 @@
         "type": "github"
       }
     },
+    "quickflow": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../dotfiles/quickshell",
+        "type": "path"
+      },
+      "original": {
+        "path": "../dotfiles/quickshell",
+        "type": "path"
+      },
+      "parent": []
+    },
     "root": {
       "inputs": {
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
         "playit-nixos-module": "playit-nixos-module",
+        "quickflow": "quickflow",
         "zen-browser": "zen-browser"
       }
     },

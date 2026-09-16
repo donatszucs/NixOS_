@@ -18,6 +18,11 @@
       url = "github:pedorich-n/playit-nixos-module";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    quickflow = {
+      url = "path:../dotfiles/quickshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -25,24 +30,12 @@
     let
       system = "x86_64-linux";
       pkgs = inputs.nixpkgs.legacyPackages.${system};
-      peripheral-monitor = pkgs.rustPlatform.buildRustPackage {
-        pname = "peripherial_monitor";
-        version = "0.1.0";
-        src = builtins.path {
-          path = ../dotfiles/quickshell/scripts/peripherial_monitor;
-          name = "peripherial_monitor-source";
-        };
-        cargoLock = {
-          lockFile = ../dotfiles/quickshell/scripts/peripherial_monitor/Cargo.lock;
-        };
-        nativeBuildInputs = [ pkgs.pkg-config ];
-        buildInputs = [ pkgs.udev ];
-      };
     in
     {
       packages.${system} = {
-        default = peripheral-monitor;
-        peripheral-monitor = peripheral-monitor;
+        default = inputs.quickflow.packages.${system}.default;
+        quickflow = inputs.quickflow.packages.${system}.quickflow;
+        peripheral-monitor = inputs.quickflow.packages.${system}.peripheral-monitor;
       };
 
       nixosConfigurations.doni = inputs.nixpkgs.lib.nixosSystem {
@@ -51,21 +44,8 @@
         };
         modules = [
           inputs.playit-nixos-module.nixosModules.default
+          inputs.quickflow.nixosModules.default
           ./configuration.nix
-          {
-            environment.systemPackages = [ peripheral-monitor ];
-            systemd.user.services.peripheral-monitor = {
-              description = "Keychron M6 Peripheral Monitor Daemon";
-              wantedBy = [ "graphical-session.target" ];
-              after = [ "graphical-session.target" ];
-              serviceConfig = {
-                ExecStart = "${peripheral-monitor}/bin/peripherial_monitor";
-                EnvironmentFile = "-%h/.config/peripheral-monitor/tapo.env";
-                Restart = "always";
-                RestartSec = 3;
-              };
-            };
-          }
         ];
       };
 
