@@ -305,31 +305,55 @@ ExpandableModule {
                                 variant: "neutral"
                                 cursorShape: Qt.PointingHandCursor
                                 Layout.fillWidth: true
-                                implicitHeight: sinkRow.implicitHeight + 14
+                                implicitHeight: 46
                                 radius: Theme.moduleEdgeRadius / 2 + 5
                                 opacity: 1.0
-                                border.width: modelData.active ? 1.5 : 1
-                                border.color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.4) : Theme.divider
-
+                                border.width: 2
+                                border.color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
                                 RowLayout {
                                     id: sinkRow
-                                    anchors {
-                                        left: parent.left
-                                        right: parent.right
-                                        top: parent.top
-                                        margins: 6
-                                    }
-                                    spacing: 10
+                                    anchors.fill: parent
+                                    anchors.rightMargin: 10
+                                    spacing: 12
 
-                                    Text {
-                                        id: devIconText
-                                        text: modelData.icon
-                                        color: modelData.active ? Theme.statusBlue : Theme.textPrimary
-                                        opacity: modelData.active ? 1.0 : 0.6
-                                        font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize + 2
-                                        Layout.alignment: Qt.AlignVCenter
-                                        Layout.leftMargin: 6
+                                    Rectangle {
+                                        id: devIconBox
+                                        Layout.fillHeight: true
+                                        Layout.preferredWidth: sinkBtn.implicitHeight
+                                        implicitWidth: sinkBtn.implicitHeight
+                                        implicitHeight: sinkBtn.implicitHeight
+                                        color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.bgBlurColor
+                                        topLeftRadius: sinkBtn.radius
+                                        bottomLeftRadius: sinkBtn.radius
+
+                                        InverseRadius {
+                                            anchors.top: parent.top
+                                            anchors.left: parent.right
+                                            cornerPosition: "topLeft"
+                                            color: parent.color
+                                            size: 10
+                                        }
+
+                                        InverseRadius {
+                                            anchors.bottom: parent.bottom
+                                            anchors.left: parent.right
+                                            cornerPosition: "bottomLeft"
+                                            color: parent.color
+                                            size: 10
+                                        }
+
+                                        Text {
+                                            id: devIconText
+                                            anchors.centerIn: parent
+                                            text: modelData.icon
+                                            color: modelData.active ? Theme.statusBlue : Theme.textPrimary
+                                            opacity: modelData.active ? 1.0 : 0.7
+                                            font.family: Theme.font
+                                            font.pixelSize: Theme.fontSize + 3
+                                            font.bold: true
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
+                                        }
                                     }
 
                                     ColumnLayout {
@@ -339,7 +363,7 @@ ExpandableModule {
 
                                         HoverMarqueeText {
                                             text: modelData.name
-                                            textMaxWidth: audioModule.cardWidth - 65
+                                            textMaxWidth: audioModule.cardWidth - 85
                                             Layout.fillWidth: true
                                             fontFamily: Theme.font
                                             pixelSize: Theme.fontSize
@@ -462,31 +486,56 @@ ExpandableModule {
                                 variant: "neutral"
                                 cursorShape: Qt.PointingHandCursor
                                 Layout.fillWidth: true
-                                implicitHeight: sourceRow.implicitHeight + 14
+                                implicitHeight: 46
                                 radius: Theme.moduleEdgeRadius / 2 + 5
                                 opacity: 1.0
-                                border.width: modelData.active ? 1.5 : 1
-                                border.color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.4) : Theme.divider
+                                border.width: 2
+                                border.color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
 
                                 RowLayout {
                                     id: sourceRow
-                                    anchors {
-                                        left: parent.left
-                                        right: parent.right
-                                        top: parent.top
-                                        margins: 6
-                                    }
-                                    spacing: 10
+                                    anchors.fill: parent
+                                    anchors.rightMargin: 10
+                                    spacing: 12
 
-                                    Text {
-                                        id: srcIconText
-                                        text: modelData.icon
-                                        color: modelData.active ? Theme.statusBlue : Theme.textPrimary
-                                        opacity: modelData.active ? 1.0 : 0.6
-                                        font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize + 2
-                                        Layout.alignment: Qt.AlignVCenter
-                                        Layout.leftMargin: 6
+                                    Rectangle {
+                                        id: srcIconBox
+                                        Layout.fillHeight: true
+                                        Layout.preferredWidth: sourceBtn.implicitHeight
+                                        implicitWidth: sourceBtn.implicitHeight
+                                        implicitHeight: sourceBtn.implicitHeight
+                                        color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.bgBlurColor
+                                        topLeftRadius: sourceBtn.radius
+                                        bottomLeftRadius: sourceBtn.radius
+
+                                        InverseRadius {
+                                            anchors.top: parent.top
+                                            anchors.left: parent.right
+                                            cornerPosition: "topLeft"
+                                            color: parent.color
+                                            size: 10
+                                        }
+
+                                        InverseRadius {
+                                            anchors.bottom: parent.bottom
+                                            anchors.left: parent.right
+                                            cornerPosition: "bottomLeft"
+                                            color: parent.color
+                                            size: 10
+                                        }
+
+                                        Text {
+                                            id: srcIconText
+                                            anchors.centerIn: parent
+                                            text: modelData.icon
+                                            color: modelData.active ? Theme.statusBlue : Theme.textPrimary
+                                            opacity: modelData.active ? 1.0 : 0.7
+                                            font.family: Theme.font
+                                            font.pixelSize: Theme.fontSize + 3
+                                            font.bold: true
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
+                                        }
                                     }
 
                                     ColumnLayout {
@@ -496,7 +545,7 @@ ExpandableModule {
 
                                         HoverMarqueeText {
                                             text: modelData.name
-                                            textMaxWidth: audioModule.cardWidth - 65
+                                            textMaxWidth: audioModule.cardWidth - 85
                                             Layout.fillWidth: true
                                             fontFamily: Theme.font
                                             pixelSize: Theme.fontSize

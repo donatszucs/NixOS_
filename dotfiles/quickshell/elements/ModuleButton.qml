@@ -56,6 +56,9 @@ Rectangle {
     property color hoverColor: Qt.rgba(pal.hover.r, pal.hover.g, pal.hover.b, pal.hover.a * colorOpacity)
     property color pressedColor: Qt.rgba(pal.pressed.r, pal.pressed.g, pal.pressed.b, pal.pressed.a * colorOpacity)
 
+    property color colorAdaptive: (root.pressed && !root.noPressColorChange) ? root.pressedColor : ((root.hovered && !root.noHoverColorChange) ? root.hoverColor : colorOverride ? root.overrideColor : root.baseColor)
+    property color borderColorAdaptive: (root.pressed && !root.noPressColorChange) ? pal.borderPressed : ((root.hovered && !root.noHoverColorChange) ? pal.borderHover : pal.border)
+
     HoverHandler {
         id: rootHover
     }
@@ -69,10 +72,9 @@ Rectangle {
     implicitWidth: labelText.implicitWidth + 30
     radius: 0
 
-    color: (root.pressed && !root.noPressColorChange) ? root.pressedColor : ((root.hovered && !root.noHoverColorChange) ? root.hoverColor : colorOverride ? root.overrideColor : root.baseColor)
-
+    color: colorAdaptive
     border.width: 0
-    border.color: (root.pressed && !root.noPressColorChange) ? pal.borderPressed : ((root.hovered && !root.noHoverColorChange) ? pal.borderHover : pal.border)
+    border.color: borderColorAdaptive
     clip: true
 
     // Simpler: let Text fill the parent and use horizontalAlignment/verticalAlignment

@@ -532,11 +532,11 @@ ExpandableModule {
                             }
 
                             Layout.fillWidth: true
-                            implicitHeight: pairedDeviceRow.implicitHeight + 14
+                            implicitHeight: 46
                             radius: Theme.moduleEdgeRadius / 2 + 5
                             opacity: 1.0
-                            border.width: isConnected ? 1.5 : 1
-                            border.color: isConnected ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.4) : Theme.divider
+                            border.width: 2
+                            border.color: (isConnected || isBusy) ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
                             cursorShape: isBusy ? Qt.WaitCursor : Qt.PointingHandCursor
 
                             function doConnect() {
@@ -578,30 +578,62 @@ ExpandableModule {
 
                             RowLayout {
                                 id: pairedDeviceRow
-                                anchors {
-                                    left: parent.left
-                                    right: parent.right
-                                    top: parent.top
-                                    margins: 6
-                                }
-                                spacing: 10
+                                anchors.fill: parent
+                                anchors.rightMargin: 6
+                                spacing: 12
 
-                                Text {
-                                    id: devIconText
-                                    text: connectionsModule.getBtDeviceIcon(modelData.icon, isConnected, isBusy)
-                                    color: isConnected ? Theme.statusBlue : (isBusy ? Theme.statusBlue : Theme.textPrimary)
-                                    opacity: isConnected || isBusy ? 1.0 : 0.6
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize + 2
-                                    Layout.alignment: Qt.AlignVCenter
-                                    Layout.leftMargin: 6
+                                Rectangle {
+                                    id: pairedIconBox
+                                    Layout.fillHeight: true
+                                    Layout.preferredWidth: pairedDeviceBtn.implicitHeight
+                                    implicitWidth: pairedDeviceBtn.implicitHeight
+                                    implicitHeight: pairedDeviceBtn.implicitHeight
+                                    color: (isConnected || isBusy) ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.bgBlurColor
+                                    topLeftRadius: pairedDeviceBtn.radius
+                                    bottomLeftRadius: pairedDeviceBtn.radius
 
-                                    RotationAnimation on rotation {
-                                        from: 0
-                                        to: 360
-                                        duration: 900
-                                        loops: Animation.Infinite
-                                        running: isBusy
+                                    InverseRadius {
+                                        anchors.top: parent.top
+                                        anchors.left: parent.right
+                                        cornerPosition: "topLeft"
+                                        color: parent.color
+                                        size: 10
+                                    }
+
+                                    InverseRadius {
+                                        anchors.bottom: parent.bottom
+                                        anchors.left: parent.right
+                                        cornerPosition: "bottomLeft"
+                                        color: parent.color
+                                        size: 10
+                                    }
+
+                                    Text {
+                                        id: devIconText
+                                        anchors.centerIn: parent
+                                        text: connectionsModule.getBtDeviceIcon(modelData.icon, isConnected, isBusy)
+                                        color: isConnected ? Theme.statusBlue : (isBusy ? Theme.statusBlue : Theme.textPrimary)
+                                        opacity: isConnected || isBusy ? 1.0 : 0.7
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize + 3
+                                        font.bold: true
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+
+                                        rotation: isBusy ? spinAnim.angle : 0
+
+                                        NumberAnimation {
+                                            id: spinAnim
+                                            property real angle: 0
+                                            target: spinAnim
+                                            property: "angle"
+                                            from: 0
+                                            to: 360
+                                            duration: 900
+                                            loops: Animation.Infinite
+                                            running: isBusy
+                                            onStopped: angle = 0
+                                        }
                                     }
                                 }
 
@@ -612,7 +644,7 @@ ExpandableModule {
 
                                     HoverMarqueeText {
                                         text: modelData.name || modelData.deviceName || "Unknown Device"
-                                        textMaxWidth: connectionsModule.cardWidth - rightActionsRow.implicitWidth - 65
+                                        textMaxWidth: connectionsModule.cardWidth - rightActionsRow.implicitWidth - 85
                                         Layout.fillWidth: true
                                     }
 
@@ -706,11 +738,11 @@ ExpandableModule {
                             }
 
                             Layout.fillWidth: true
-                            implicitHeight: unpairedDeviceRow.implicitHeight + 14
+                            implicitHeight: 46
                             radius: Theme.moduleEdgeRadius / 2 + 5
                             opacity: isBusy ? 1.0 : 0.8
-                            border.width: isBusy ? 1.5 : 1
-                            border.color: isBusy ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.4) : Theme.divider
+                            border.width: 2
+                            border.color: isBusy ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
                             cursorShape: isBusy ? Qt.WaitCursor : Qt.PointingHandCursor
 
                             function doPair() {
@@ -759,30 +791,62 @@ ExpandableModule {
 
                             RowLayout {
                                 id: unpairedDeviceRow
-                                anchors {
-                                    left: parent.left
-                                    right: parent.right
-                                    top: parent.top
-                                    margins: 6
-                                }
-                                spacing: 10
+                                anchors.fill: parent
+                                anchors.rightMargin: 6
+                                spacing: 12
 
-                                Text {
-                                    id: unpairedIconText
-                                    text: connectionsModule.getBtDeviceIcon(modelData.icon, false, isBusy)
-                                    color: isBusy ? Theme.statusBlue : Theme.textPrimary
-                                    opacity: isBusy ? 1.0 : 0.6
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize + 2
-                                    Layout.alignment: Qt.AlignVCenter
-                                    Layout.leftMargin: 6
+                                Rectangle {
+                                    id: unpairedIconBox
+                                    Layout.fillHeight: true
+                                    Layout.preferredWidth: unpairedDeviceBtn.implicitHeight
+                                    implicitWidth: unpairedDeviceBtn.implicitHeight
+                                    implicitHeight: unpairedDeviceBtn.implicitHeight
+                                    color: isBusy ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.bgBlurColor
+                                    topLeftRadius: unpairedDeviceBtn.radius
+                                    bottomLeftRadius: unpairedDeviceBtn.radius
 
-                                    RotationAnimation on rotation {
-                                        from: 0
-                                        to: 360
-                                        duration: 900
-                                        loops: Animation.Infinite
-                                        running: isBusy
+                                    InverseRadius {
+                                        anchors.top: parent.top
+                                        anchors.left: parent.right
+                                        cornerPosition: "topLeft"
+                                        color: parent.color
+                                        size: 10
+                                    }
+
+                                    InverseRadius {
+                                        anchors.bottom: parent.bottom
+                                        anchors.left: parent.right
+                                        cornerPosition: "bottomLeft"
+                                        color: parent.color
+                                        size: 10
+                                    }
+
+                                    Text {
+                                        id: unpairedIconText
+                                        anchors.centerIn: parent
+                                        text: connectionsModule.getBtDeviceIcon(modelData.icon, false, isBusy)
+                                        color: isBusy ? Theme.statusBlue : Theme.textPrimary
+                                        opacity: isBusy ? 1.0 : 0.6
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize + 3
+                                        font.bold: true
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+
+                                        rotation: isBusy ? unpairedSpinAnim.angle : 0
+
+                                        NumberAnimation {
+                                            id: unpairedSpinAnim
+                                            property real angle: 0
+                                            target: unpairedSpinAnim
+                                            property: "angle"
+                                            from: 0
+                                            to: 360
+                                            duration: 900
+                                            loops: Animation.Infinite
+                                            running: isBusy
+                                            onStopped: angle = 0
+                                        }
                                     }
                                 }
 
@@ -793,7 +857,7 @@ ExpandableModule {
 
                                     HoverMarqueeText {
                                         text: modelData.name || modelData.deviceName || modelData.address || "Unknown Device"
-                                        textMaxWidth: connectionsModule.cardWidth - unpairedRightActions.implicitWidth - 65
+                                        textMaxWidth: connectionsModule.cardWidth - unpairedRightActions.implicitWidth - 85
                                         Layout.fillWidth: true
                                     }
 
@@ -836,7 +900,7 @@ ExpandableModule {
                                         MouseArea {
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
+                                            onClicked: (mouse) => {
                                                 mouse.accepted = true;
                                                 if (isPairing) doCancelPair();
                                                 else doPair();

@@ -329,6 +329,7 @@ ModuleButton {
                             height: Theme.listHeight
                             radius: Theme.moduleEdgeRadius
                             border.width: 2
+                            colorOpacity: 0.7
                             onClicked: {
                                 launcherModule.launchApp(modelData)
                                 launcherModule.expanded = false
@@ -346,7 +347,7 @@ ModuleButton {
                                 spacing: 10
 
                                 Rectangle {
-                                    color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 1.7)
+                                    color: borderColorAdaptive
                                     topLeftRadius: Theme.moduleEdgeRadius
                                     bottomLeftRadius: Theme.moduleEdgeRadius
                                     implicitWidth: Theme.listHeight
