@@ -110,35 +110,35 @@ ExpandableModule {
             }
         }
         // ── Colour wheel with surround ─────────────────────────────────────
-        RowLayout {
-            id: colorRow
+        Rectangle {
+            id: colorCard
             opacity: root.expanded ? 1.0 : 0.0
             visible: opacity > 0
             Behavior on opacity {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
 
-            Layout.preferredWidth: 160
-            Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-            Layout.topMargin: 10
-            Layout.bottomMargin: 10
-            spacing: 0
+            Layout.preferredWidth: 170
+            Layout.preferredHeight: 130
+            Layout.alignment: Qt.AlignTop | Qt.AlignRight
+            Layout.margins: 10
 
-            InverseRadius {
-                id: colorRowInverseRadius
-                cornerPosition: "topLeft"
-                Layout.alignment: Qt.AlignTop
-                Layout.rightMargin: -(130 / 2)
+            color: Theme.bgBlurColor
+            topLeftRadius: Theme.moduleEdgeRadius
+            topRightRadius: Theme.moduleEdgeRadius
+            bottomRightRadius: Theme.moduleEdgeRadius
+            bottomLeftRadius: 130 / 2
+            border.width: 2
+            border.color: Theme.cardBorder
 
-                color: Theme.bgBlurColor
-                size: 130 / 2
-                outerRadius: Theme.moduleEdgeRadius
-            }
             // ── Colour wheel ────────────────────────────────────────────
             Item {
                 id: colorWheelArea
-                Layout.preferredWidth: 130
-                Layout.preferredHeight: 130
+                width: 130
+                height: 130
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
 
                 Canvas {
                     id: colorWheel
@@ -150,11 +150,6 @@ ExpandableModule {
                         target: SharedState
                         function onLightHueChanged()        { colorWheel.requestPaint() }
                         function onLightSaturationChanged() { colorWheel.requestPaint() }
-                    }
-
-                    Connections {
-                        target: wheelSurround
-                        function onColorChanged() { colorWheel.requestPaint() }
                     }
 
                     Component.onCompleted: requestPaint()
@@ -183,16 +178,6 @@ ExpandableModule {
                             ctx.fillStyle = grad
                             ctx.fill()
                         }
-
-                        // Outer border
-                        var btnC = Theme.bgBlurColor
-                        var strokeRgba = "rgba(" + Math.round(btnC.r * 255) + "," + Math.round(btnC.g * 255) + "," + Math.round(btnC.b * 255) + "," + btnC.a + ")"
-
-                        ctx.beginPath()
-                        ctx.arc(cx, cy, cx - 1, 0, Math.PI * 2)
-                        ctx.strokeStyle = strokeRgba
-                        ctx.lineWidth   = 2
-                        ctx.stroke()
 
                         var selAngle = SharedState.lightHue * Math.PI / 180
                         var selDist  = (SharedState.lightSaturation / 100) * r
@@ -237,90 +222,24 @@ ExpandableModule {
                 }
             }
 
-            Rectangle {
-                width: 40
-                Layout.fillHeight: true
-                color: Theme.bgBlurColor
-                topLeftRadius: 0
-                topRightRadius: Theme.moduleEdgeRadius
-                bottomLeftRadius: 0
-                bottomRightRadius: Theme.moduleEdgeRadius
+            // ── Reset button overlaid on the right ──────────
+            ModuleButton {
+                id: resetButton
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.margins: 5
+                width: 30
 
-                InverseRadius {
-                    cornerPosition: "topRight"
-                    color: Theme.bgBlurColor
-                    size: 130 / 2
+                radius: width / 2
+                variant: "neutral"
+                border.width: 2
+                cursorShape: Qt.PointingHandCursor
+                label: "R\nE\nS\nE\nT"
 
-                    anchors.right: parent.left
-                    anchors.top: parent.top
-                }
-
-                InverseRadius {
-                    cornerPosition: "bottomRight"
-                    color: Theme.bgBlurColor
-                    size: 130 / 2
-
-                    anchors.right: parent.left
-                    anchors.bottom: parent.bottom
-                }
-
-                // ── Right-side surround panel (non-interactive) ─────────────
-                ModuleButton {
-                    id: wheelSurround
-                    clip: false
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.right
-                    
-                    implicitWidth: 35
-
-                    border.width: 0
-                    label: ""
-                    color: Theme.bgBlurColor
-
-                    topLeftRadius: 0
-                    topRightRadius: Theme.moduleEdgeRadius
-                    bottomLeftRadius: 0
-                    bottomRightRadius: Theme.moduleEdgeRadius
-
-                    InverseRadius {
-                        cornerPosition: "topRight"
-                        color: Theme.bgBlurColor
-                        size: Theme.moduleEdgeRadius
-
-                        anchors.right: parent.left
-                        anchors.top: parent.top
-                    }
-
-                    InverseRadius {
-                        cornerPosition: "bottomRight"
-                        color: Theme.bgBlurColor
-                        size: Theme.moduleEdgeRadius
-
-                        anchors.right: parent.left
-                        anchors.bottom: parent.bottom
-                    }
-
-                    // ── Reset button overlaid on the surround ──────────
-                    ModuleButton {
-                        id: resetButton
-                        anchors.fill: parent
-                        topMarginButton: 5
-                        bottomMarginButton: 5
-                        leftMarginButton: 5
-                        rightMarginButton: 5
-
-                        radius: width / 2
-                        variant: "neutral"
-                        border.width: 2
-                        cursorShape: Qt.PointingHandCursor
-                        label: "R\nE\nS\nE\nT"
-
-                        onClicked: {
-                            colorDebounceTimer.stop()
-                            SharedState.setLightWhite()
-                        }
-                    }
+                onClicked: {
+                    colorDebounceTimer.stop()
+                    SharedState.setLightWhite()
                 }
             }
         }

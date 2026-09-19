@@ -22,6 +22,8 @@ Item {
     property bool hasActiveToasts: false
     property string screenName: ""
 
+    property int contentUpdateTrigger: 0
+
     function updateActiveToasts() {
         var active = false
         for (var i = 0; i < notificationRepeater.count; ++i) {
@@ -32,6 +34,7 @@ Item {
             }
         }
         root.hasActiveToasts = active
+        root.contentUpdateTrigger++
     }
 
     // Hover management
@@ -128,7 +131,7 @@ Item {
             clip: true
             topLeftRadius: Theme.moduleEdgeRadius + 10
 
-            implicitWidth: root.isCardOpen ? (root.cardWidth + 20) : 0
+            implicitWidth: root.isCardOpen ? (root.showAllNotifications ? (root.cardWidth + 20) : root.cardWidth) : 0
             implicitHeight: root.isCardOpen ? Math.min(root.maxCardHeight, cardContentHeight + 20) : 0
 
             Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
@@ -151,13 +154,14 @@ Item {
             }
 
             readonly property int cardContentHeight: {
-                var h = notifTopBar.height + 10
-                if (notificationRepeater.count === 0) {
-                    h += emptyState.implicitHeight + 10
-                } else {
-                    h += calculateNotifColumnHeight()
+                var _ = root.contentUpdateTrigger + root.showAllNotifications + notificationRepeater.count
+                if (!root.showAllNotifications) {
+                    return calculateNotifColumnHeight()
                 }
-                return h
+                if (notificationRepeater.count === 0) {
+                    return 55 + emptyState.implicitHeight
+                }
+                return 55 + calculateNotifColumnHeight()
             }
 
             property bool isHovered: (containerHoverHandler ? containerHoverHandler.hovered : false) || (cardHoverHandler ? cardHoverHandler.hovered : false)
@@ -174,20 +178,17 @@ Item {
             // ── The Unified Card Inside Base Container ──────────────────
             Rectangle {
                 id: card
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
+                anchors.fill: parent
                 anchors.margins: 10
-                anchors.top: parent.top
-                width: root.cardWidth
-                height: Math.min(root.maxCardHeight, containerRect.cardContentHeight)
 
-                Behavior on height { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-
-                color: Theme.bgBlurColor
+                color: root.showAllNotifications ? Theme.bgBlurColor : "transparent"
                 radius: Theme.moduleEdgeRadius / 2 + 10
-                border.width: 2
-                border.color: Theme.cardBorder
+                border.width: root.showAllNotifications ? 2 : 0
+                border.color: root.showAllNotifications ? Theme.cardBorder : "transparent"
                 clip: true
+
+                Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+                Behavior on border.color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
                 opacity: root.isCardOpen ? 1.0 : 0.0
                 visible: opacity > 0
@@ -204,7 +205,11 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    height: 35
+                    height: root.showAllNotifications ? 35 : 0
+                    opacity: root.showAllNotifications ? 1.0 : 0.0
+                    visible: opacity > 0
+                    clip: true
+                    Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
                     color: Theme.bgBlurColor
                     z: 10
 
@@ -339,6 +344,7 @@ Item {
                     anchors.top: notifTopBar.bottom
                     anchors.left: notifTopBar.left
                     color: notifTopBar.color
+                    visible: root.showAllNotifications && notifTopBar.height > 0
                     z: 10
                 }
 
@@ -347,6 +353,7 @@ Item {
                     anchors.top: notifTopBar.bottom
                     anchors.right: notifTopBar.right
                     color: notifTopBar.color
+                    visible: root.showAllNotifications && notifTopBar.height > 0
                     z: 10
                 }
 
@@ -354,7 +361,8 @@ Item {
                     anchors.top: notifTopBar.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    height: 10
+                    height: root.showAllNotifications ? 10 : 0
+                    visible: height > 0
                     z: 10
                     MouseArea {
                         anchors.fill: parent
@@ -377,24 +385,22 @@ Item {
                 Item {
                     id: mainContentArea
                     anchors.top: notifTopBar.bottom
-                    anchors.left: parent.left
-                    anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    anchors.bottomMargin: 10
-                    anchors.topMargin: 10
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: root.cardWidth - 20
+                    anchors.bottomMargin: root.showAllNotifications ? 10 : 0
+                    anchors.topMargin: root.showAllNotifications ? 10 : 0
 
                     layer.enabled: true
                     layer.effect: MultiEffect {
-                        maskEnabled: true
+                        maskEnabled: root.showAllNotifications
                         maskSource: contentMask
                     }
 
                     // ── Empty State ─────────────────────────────────────
                     Item {
                         id: emptyState
-                        visible: notificationRepeater.count === 0
+                        visible: root.showAllNotifications && notificationRepeater.count === 0
                         anchors.fill: parent
                         implicitHeight: 110
 
@@ -439,16 +445,23 @@ Item {
                                 if (first === 0 && notifFlickable.contentY !== 0) {
                                     notifFlickable.contentY = 0
                                 }
+                                root.contentUpdateTrigger++
+                            }
+                            function onRowsRemoved() {
+                                root.contentUpdateTrigger++
+                            }
+                            function onModelReset() {
+                                root.contentUpdateTrigger++
                             }
                         }
 
                         Column {
                             id: notifColumn
                             anchors.horizontalCenter: parent.horizontalCenter
-                            width: card.width - 20
+                            width: root.cardWidth - 20
                             spacing: 8
                             topPadding: 0
-                            bottomPadding: 8
+                            bottomPadding: 0
 
                             move: Transition {
                                 NumberAnimation { properties: "y"; duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -510,7 +523,7 @@ Item {
         readonly property bool hasInlineReply: notif && notif.hasInlineReply
         readonly property bool isCritical: notif && notif.urgency === Notif.NotificationUrgency.Critical
         readonly property bool isLow: notif && notif.urgency === Notif.NotificationUrgency.Low
-        readonly property int effectiveTimeout: isCritical ? 0 : (notif && notif.expireTimeout > 0 ? notif.expireTimeout : 5000)
+        readonly property int effectiveTimeout: isCritical ? 0 : (notif && notif.expireTimeout > 0 ? notif.expireTimeout : 15000)
 
         variant: isCritical ? "red" : "neutral"
         radius: Theme.moduleEdgeRadius / 2 + 5
