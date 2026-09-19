@@ -36,6 +36,7 @@
       "uinput"
       "wireshark"
       "plugdev"
+      "docker"
     ];
     packages = with pkgs; [
       git

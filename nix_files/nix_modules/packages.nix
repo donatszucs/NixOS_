@@ -78,6 +78,8 @@
     openFirewall = true; # Automatically opens the required streaming ports
   };
 
+  services.tailscale.enable = true;
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [

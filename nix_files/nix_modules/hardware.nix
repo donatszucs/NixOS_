@@ -62,6 +62,13 @@
     package = config.boot.kernelPackages.nvidiaPackages.latest;
   };
 
+  # Docker and NVIDIA Container Toolkit (for GPU passthrough in Docker)
+  virtualisation.docker = {
+    enable = true;
+    enableOnBoot = true;
+  };
+  hardware.nvidia-container-toolkit.enable = true;
+
   # Enable sound with pipewire.
   services.pulseaudio.enable = false; # Disable the old backend
   security.rtkit.enable = true; # Recommended for audio scheduling

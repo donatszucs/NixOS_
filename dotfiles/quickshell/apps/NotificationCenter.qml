@@ -242,7 +242,7 @@ Item {
                         ModuleButton {
                             id: clearAllBtn
                             visible: notificationRepeater.count > 0
-                            variant: "light"
+                            variant: "neutral"
                             label: "󰅖"
                             textFont: 14
                             cursorShape: Qt.PointingHandCursor
