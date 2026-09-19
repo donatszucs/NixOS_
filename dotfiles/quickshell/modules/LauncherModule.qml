@@ -32,7 +32,7 @@ ModuleButton {
     bottomLeftRadius:  launcherModule.expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
     bottomRightRadius: launcherModule.expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
     
-    anchors.topMargin: launcherModule.expanded ? 100 : 4
+    anchors.topMargin: 4
     cursorShape: Qt.PointingHandCursor
 
     implicitWidth:  launcherModule.expanded ? Math.max(panelWidth, headerRow.implicitWidth) : headerRow.implicitWidth
@@ -40,7 +40,46 @@ ModuleButton {
 
     Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
     Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration;   easing.type: Easing.OutCubic } }
-    Behavior on anchors.topMargin { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+
+    states: [
+        State {
+            name: "expanded"
+            when: launcherModule.expanded
+            PropertyChanges {
+                target: launcherModule
+                anchors.topMargin: 300
+            }
+        },
+        State {
+            name: "collapsed"
+            when: !launcherModule.expanded
+            PropertyChanges {
+                target: launcherModule
+                anchors.topMargin: 4
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            to: "expanded"
+            NumberAnimation {
+                properties: "anchors.topMargin"
+                duration: Theme.verticalDuration * 1.5
+                easing.type: Easing.OutBack
+                easing.overshoot: 1.3
+            }
+        },
+        Transition {
+            to: "collapsed"
+            NumberAnimation {
+                properties: "anchors.topMargin"
+                duration: Theme.verticalDuration * 1.5
+                easing.type: Easing.OutBack
+                easing.overshoot: 1.3
+            }
+        }
+    ]
 
     Rectangle {
         id: headerBg
@@ -121,16 +160,22 @@ ModuleButton {
         target: "launcher-" + launcherModule.screenName
         function toggle(): void {
             if (launcherModule.expanded) {
-                launcherModule.expanded = false
+                close()
             } else {
-                launcherModule.expanded = true
-                searchField.text = ""
-                launcherModule.filterApps("")
-                Qt.callLater(function() {
-                    searchField.forceActiveFocus()
-                    searchField.selectAll()
-                })
+                open()
             }
+        }
+        function open(): void {
+            launcherModule.expanded = true
+            searchField.text = ""
+            launcherModule.filterApps("")
+            Qt.callLater(function() {
+                searchField.forceActiveFocus()
+                searchField.selectAll()
+            })
+        }
+        function close(): void {
+            launcherModule.expanded = false
         }
     }
 

@@ -16,7 +16,7 @@ local mainMod = "SUPER"
 hl.monitor({
     output = "DP-2",
     mode = "1920x1080@75",
-    position = "0x0",
+    position = "0x400",
     scale = 1
 })
 

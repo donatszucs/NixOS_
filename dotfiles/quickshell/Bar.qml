@@ -236,12 +236,12 @@ PanelWindow {
                     
                     NumberAnimation { 
                         to: 0.3
-                        duration: 2000
+                        duration: 1000
                         easing.type: Easing.InOutSine 
                     }
                     NumberAnimation { 
                         to: 1.0
-                        duration: 1000
+                        duration: 1500
                         easing.type: Easing.InOutSine 
                     }
                 }
