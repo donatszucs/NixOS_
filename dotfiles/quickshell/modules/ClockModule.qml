@@ -349,7 +349,7 @@ ExpandableModule {
                     right: parent.right
                 }
                 height: 35
-                color: Theme.bgBlurColor
+                color: Theme.topBarBlurColor
                 topLeftRadius: parent.radius
                 topRightRadius: parent.radius
                 bottomLeftRadius: 0

@@ -210,7 +210,7 @@ Item {
                     visible: opacity > 0
                     clip: true
                     Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-                    color: Theme.bgBlurColor
+                    color: Theme.topBarBlurColor
                     z: 10
 
                     topLeftRadius: parent.radius
@@ -262,7 +262,7 @@ Item {
                         // Button to reveal the volume control / toggle mute
                         ModuleButton {
                             id: volToggleBtn
-                            variant: SharedState.muted ? "red" : (notifTopBar.volExpanded ? "neutral" : "light")
+                            variant: SharedState.muted ? "red" : "neutral"
                             label: SharedState.muted ? "󰖁" : "󰕾"
                             textFont: 14
                             cursorShape: Qt.PointingHandCursor

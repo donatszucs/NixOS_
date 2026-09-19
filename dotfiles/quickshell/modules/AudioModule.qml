@@ -220,7 +220,7 @@ ExpandableModule {
                         anchors.right: parent.right
                         anchors.top: parent.top
                         height: 35
-                        color: Theme.bgBlurColor
+                        color: Theme.topBarBlurColor
 
                         topLeftRadius: parent.radius
                         topRightRadius: parent.radius
@@ -322,7 +322,7 @@ ExpandableModule {
                                         Layout.preferredWidth: sinkBtn.implicitHeight
                                         implicitWidth: sinkBtn.implicitHeight
                                         implicitHeight: sinkBtn.implicitHeight
-                                        color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.bgBlurColor
+                                        color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
                                         topLeftRadius: sinkBtn.radius
                                         bottomLeftRadius: sinkBtn.radius
 
@@ -407,7 +407,7 @@ ExpandableModule {
                         anchors.right: parent.right
                         anchors.top: parent.top
                         height: 35
-                        color: Theme.bgBlurColor
+                        color: Theme.topBarBlurColor
 
                         topLeftRadius: parent.radius
                         topRightRadius: parent.radius
@@ -504,7 +504,7 @@ ExpandableModule {
                                         Layout.preferredWidth: sourceBtn.implicitHeight
                                         implicitWidth: sourceBtn.implicitHeight
                                         implicitHeight: sourceBtn.implicitHeight
-                                        color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.bgBlurColor
+                                        color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
                                         topLeftRadius: sourceBtn.radius
                                         bottomLeftRadius: sourceBtn.radius
 

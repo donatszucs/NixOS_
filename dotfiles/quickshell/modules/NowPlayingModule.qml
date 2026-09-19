@@ -929,7 +929,7 @@ ExpandableModule {
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
                         height: 35
-                        color: Theme.bgBlurColor
+                        color: Theme.topBarBlurColor
                         bottomLeftRadius: carouselPanel.radius
                         bottomRightRadius: carouselPanel.radius
                         topLeftRadius: 0

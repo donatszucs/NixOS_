@@ -282,7 +282,7 @@ ExpandableModule {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     height: 35
-                    color: Theme.bgBlurColor
+                    color: Theme.topBarBlurColor
 
                     topLeftRadius: parent.radius
                     topRightRadius: parent.radius
@@ -379,7 +379,7 @@ ExpandableModule {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     height: 35
-                    color: Theme.bgBlurColor
+                    color: Theme.topBarBlurColor
 
                     topLeftRadius: parent.radius
                     topRightRadius: parent.radius
@@ -588,7 +588,7 @@ ExpandableModule {
                                     Layout.preferredWidth: pairedDeviceBtn.implicitHeight
                                     implicitWidth: pairedDeviceBtn.implicitHeight
                                     implicitHeight: pairedDeviceBtn.implicitHeight
-                                    color: (isConnected || isBusy) ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.bgBlurColor
+                                    color: (isConnected || isBusy) ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
                                     topLeftRadius: pairedDeviceBtn.radius
                                     bottomLeftRadius: pairedDeviceBtn.radius
 
@@ -801,7 +801,7 @@ ExpandableModule {
                                     Layout.preferredWidth: unpairedDeviceBtn.implicitHeight
                                     implicitWidth: unpairedDeviceBtn.implicitHeight
                                     implicitHeight: unpairedDeviceBtn.implicitHeight
-                                    color: isBusy ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.bgBlurColor
+                                    color: isBusy ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
                                     topLeftRadius: unpairedDeviceBtn.radius
                                     bottomLeftRadius: unpairedDeviceBtn.radius
 
@@ -948,7 +948,7 @@ ExpandableModule {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     height: 35
-                    color: Theme.bgBlurColor
+                    color: Theme.topBarBlurColor
 
                     topLeftRadius: parent.radius
                     topRightRadius: parent.radius
@@ -1053,7 +1053,7 @@ ExpandableModule {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     height: 35
-                    color: Theme.bgBlurColor
+                    color: Theme.topBarBlurColor
 
                     topLeftRadius: parent.radius
                     topRightRadius: parent.radius

@@ -200,7 +200,7 @@ ExpandableModule {
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
                         height: 35
-                        color: Theme.bgBlurColor
+                        color: Theme.topBarBlurColor
 
                         topLeftRadius: 0
                         topRightRadius: 0
@@ -218,10 +218,9 @@ ExpandableModule {
                                 text: "User 󰚭"
                                 textMaxWidth: 100
                                 fontFamily: Theme.font
-                                pixelSize: Theme.fontSize + 4
+                                pixelSize: Theme.fontSize + 8
                                 fontBold: true
                                 textColor: Theme.textPrimary
-                                Layout.alignment: Qt.AlignVCenter
 
                                 Process {
                                     command: ["whoami"]

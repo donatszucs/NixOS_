@@ -286,7 +286,7 @@ ExpandableModule {
                         anchors.right: parent.right
                         anchors.top: parent.top
                         height: 35
-                        color: Theme.bgBlurColor
+                        color: Theme.topBarBlurColor
 
                         topLeftRadius: parent.radius
                         topRightRadius: parent.radius
@@ -567,7 +567,7 @@ ExpandableModule {
                         anchors.right: parent.right
                         anchors.top: parent.top
                         height: 35
-                        color: Theme.bgBlurColor
+                        color: Theme.topBarBlurColor
 
                         radius: parent.radius
                         topLeftRadius: parent.radius
