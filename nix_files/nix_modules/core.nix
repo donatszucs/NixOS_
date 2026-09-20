@@ -13,14 +13,22 @@
 
   # Networking
   networking.hostName = "nixos"; # Define your hostname.
-  networking.networkmanager.enable = true;
+  networking.networkmanager = {
+    enable = true;
+    settings.connection."ethernet.wake-on-lan" = "magic";
+  };
+  networking.interfaces.enp7s0.wakeOnLan.enable = true;
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [
       25565
       25575
     ]; # 25565 for players, 25575 for RCON
-    allowedUDPPorts = [ 25565 ]; # Minecraft uses both
+    allowedUDPPorts = [
+      25565
+      7
+      9
+    ]; # Minecraft, 7 & 9 for Wake-on-LAN
   };
 
   # Time zone

@@ -274,3 +274,6 @@ hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("[float; size 800 600] qalculate-gtk"
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("bash -c 'quickshell ipc call cliphist-$(hyprctl activeworkspace -j | jq -r \".monitor\") toggle'"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("bash -c 'quickshell ipc call rbw-$(hyprctl activeworkspace -j | jq -r \".monitor\") toggle'"))
 hl.bind(mainMod .. " + H", hl.dsp.exec_cmd("bash -c 'quickshell ipc call sysmon-$(hyprctl activeworkspace -j | jq -r \".monitor\") toggle'"))
+
+-- Sunshine Remote Streaming Emergency Restore
+hl.bind(mainMod .. " + SHIFT + F12", hl.dsp.exec_cmd("/home/doni/nixos-config/scripts/sunshine-virtual-display.sh disconnect"))
