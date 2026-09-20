@@ -87,8 +87,9 @@ ExpandableModule {
             implicitWidth: trayColumn.implicitWidth + 10
             implicitHeight: trayColumn.implicitHeight + 10
 
-            // Only visible when expanded
-            visible: root.expanded && trayColumn.implicitHeight > 0
+            // Visible when expanded or animating close (clipped)
+            visible: root.contentVisible && trayColumn.implicitHeight > 0
+            opacity: root.contentOpacity
             
             // disable default interactions
             noHoverColorChange: true

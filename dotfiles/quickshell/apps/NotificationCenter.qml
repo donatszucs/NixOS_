@@ -523,7 +523,7 @@ Item {
         readonly property bool hasInlineReply: notif && notif.hasInlineReply
         readonly property bool isCritical: notif && notif.urgency === Notif.NotificationUrgency.Critical
         readonly property bool isLow: notif && notif.urgency === Notif.NotificationUrgency.Low
-        readonly property int effectiveTimeout: isCritical ? 0 : (notif && notif.expireTimeout > 0 ? notif.expireTimeout : 15000)
+        readonly property int effectiveTimeout: isCritical ? 0 : (notif && notif.expireTimeout > 0 ? notif.expireTimeout : 5000)
 
         variant: isCritical ? "red" : "neutral"
         radius: Theme.moduleEdgeRadius / 2 + 5

@@ -199,6 +199,8 @@ ExpandableModule {
 
         // ── Popup dropdown ─────────────────────────────────────────
         MouseArea {
+            visible: connectionsModule.contentVisible
+            opacity: connectionsModule.contentOpacity
             implicitWidth: connectionsModule.cardWidth
             Layout.preferredHeight: popupCol.implicitHeight
             Layout.leftMargin: 10
@@ -265,7 +267,7 @@ ExpandableModule {
             // ── Network ──────────────────────────────────
             Rectangle {
                 id: netModule
-                visible: connectionsModule.expanded && connectionsModule.currentPage === 0
+                visible: connectionsModule.contentVisible && connectionsModule.currentPage === 0
                 color: Theme.bgBlurColor
                 radius: Theme.moduleEdgeRadius / 2 + 10
                 clip: true
@@ -362,7 +364,7 @@ ExpandableModule {
             // ── Bluetooth ──────────────────────────────────
             Rectangle {
                 id: btModule
-                visible: connectionsModule.expanded && connectionsModule.currentPage === 0
+                visible: connectionsModule.contentVisible && connectionsModule.currentPage === 0
                 color: Theme.bgBlurColor
                 radius: Theme.moduleEdgeRadius / 2 + 10
                 clip: true
@@ -931,7 +933,7 @@ ExpandableModule {
             // ── Headset ──────────────────────────────────
             Rectangle {
                 id: headsetModule
-                visible: connectionsModule.expanded && connectionsModule.currentPage === 1
+                visible: connectionsModule.contentVisible && connectionsModule.currentPage === 1
                 color: Theme.bgBlurColor
                 radius: Theme.moduleEdgeRadius / 2 + 10
                 clip: true
@@ -1036,7 +1038,7 @@ ExpandableModule {
             // ── Mouse ──────────────────────────────────
             Rectangle {
                 id: mouseModule
-                visible: connectionsModule.expanded && connectionsModule.currentPage === 1
+                visible: connectionsModule.contentVisible && connectionsModule.currentPage === 1
                 color: Theme.bgBlurColor
                 radius: Theme.moduleEdgeRadius / 2 + 10
                 clip: true
@@ -1152,9 +1154,6 @@ ExpandableModule {
         }
     }
 
-    Behavior on implicitHeight {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-    }
 
     // ── Data refresh ───────────────────────────────────────────
     Timer {

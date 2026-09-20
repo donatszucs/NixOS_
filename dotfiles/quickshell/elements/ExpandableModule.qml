@@ -47,12 +47,33 @@ ModuleButton {
 
     // ── Size animations ──────────────────────────────────────────
     Behavior on implicitHeight {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation {
+            id: _heightAnim
+            duration: Theme.verticalDuration
+            easing.type: Easing.OutCubic
+        }
     }
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation {
+            id: _widthAnim
+            duration: Theme.horizontalDuration
+            easing.type: Easing.OutCubic
+        }
     }
+
+    // ── Opacity animations ───────────────────────────────────────
+    property real contentOpacity: expanded ? 1.0 : 0.0
+    Behavior on contentOpacity {
+        NumberAnimation {
+            id: _opacityAnim
+            duration: Theme.verticalDuration
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    readonly property bool contentVisible: expanded || _heightAnim.running || _widthAnim.running || _opacityAnim.running || contentOpacity > 0.01 || implicitHeight > Theme.moduleHeight + 1
+
 
     // ── Standard header pill ─────────────────────────────────────
     // Set useDefaultPill to false if the module provides its own

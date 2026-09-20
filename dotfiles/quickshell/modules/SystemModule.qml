@@ -12,7 +12,8 @@ ExpandableModule {
     property int cardWidth: 200
 
     // ── Standard pill setup ──────────────────────────────────────
-    pillText: expanded ? "System" : ""
+    pillText: expanded ? "":""
+    expandedPillLabel: "System"
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
     expandedBottomLeftRadius: Theme.moduleEdgeRadius + 10
@@ -42,6 +43,8 @@ ExpandableModule {
         }
 
         MouseArea {
+            visible: systemModule.contentVisible
+            opacity: systemModule.contentOpacity
             implicitWidth: systemModule.cardWidth - 10
             Layout.preferredHeight: popupCol.implicitHeight
             Layout.margins: 10

@@ -194,7 +194,8 @@ ExpandableModule {
         }
 
         MouseArea {
-            visible: audioModule.expanded
+            visible: audioModule.contentVisible
+            opacity: audioModule.contentOpacity
             implicitWidth: audioModule.cardWidth
             Layout.preferredHeight: popupCol.implicitHeight
             Layout.margins: 10

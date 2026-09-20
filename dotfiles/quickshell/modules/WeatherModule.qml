@@ -240,7 +240,8 @@ ExpandableModule {
         spacing: 10
 
         MouseArea {
-            visible: root.expanded
+            visible: root.contentVisible
+            opacity: root.contentOpacity
             Layout.preferredWidth: 370
             Layout.preferredHeight: popupCol.implicitHeight
             Layout.margins: 10
