@@ -20,6 +20,8 @@ ExpandableModule {
     property string authorText: "Unknown artist"
     property string albumText: ""
     property string playPauseIcon: ""
+    property string defaultPlayerIcon: "󰎆"
+    property string defaultPlayerIconSource: ""
 
     // hasPlayer reflects if a valid player exists
     property bool hasPlayer: currentPlayer !== null
@@ -71,7 +73,7 @@ ExpandableModule {
 
     // ── Helper: player icon resolver (dynamic from MPRIS API & theme) ──
     function getPlayerIconSource(player) {
-        if (!player) return ""
+        if (!player) return defaultPlayerIconSource
 
         var candidates = []
 
@@ -106,8 +108,7 @@ ExpandableModule {
     }
 
     function getPlayerIcon(player) {
-        if (!player) return ""
-        return getPlayerIconSource(player) !== "" ? "" : "󰎆"
+        return getPlayerIconSource(player) !== "" ? "" : defaultPlayerIcon
     }
 
     // ── Helper: player display name ─────────────────────────────
