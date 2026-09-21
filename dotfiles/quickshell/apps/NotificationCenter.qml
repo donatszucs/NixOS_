@@ -96,8 +96,6 @@ Item {
             sizeH: Math.max(containerRect.implicitWidth, Theme.moduleEdgeRadius)
             sizeV: Math.max(containerRect.implicitWidth / 8, Theme.moduleEdgeRadius)
             color: containerRect.color
-            expandingH: root.isCardOpen
-            expandingV: root.isCardOpen
             animated: false
         }
 
@@ -110,12 +108,12 @@ Item {
 
             cornerPosition: "bottomRight"
             smoothCurve: true
-            smoothTolerance: 0.4477 * Theme.moduleEdgeRadius / sizeV
+            smoothTolerance: 0.4477 * Theme.moduleEdgeRadius / Math.max(sizeV, 1)
             sizeH: Math.max(containerRect.implicitHeight / 8, Theme.moduleEdgeRadius)
-            sizeV: Math.max(containerRect.implicitHeight, Theme.moduleEdgeRadius)
+            sizeV: containerRect.implicitHeight
             color: containerRect.color
-            expandingH: root.isCardOpen
-            expandingV: root.isCardOpen
+            expandingH: root.isCardOpen || containerRect.implicitHeight > 1
+            expandingV: root.isCardOpen || containerRect.implicitHeight > 1
             animated: false
         }
 
@@ -131,7 +129,7 @@ Item {
             clip: true
             topLeftRadius: Theme.moduleEdgeRadius + 10
 
-            implicitWidth: root.isCardOpen ? (root.showAllNotifications ? (root.cardWidth + 20) : root.cardWidth) : 0
+            implicitWidth: root.isCardOpen ? (root.showAllNotifications ? (root.cardWidth + 20) : root.cardWidth) : Theme.moduleEdgeRadius
             implicitHeight: root.isCardOpen ? Math.min(root.maxCardHeight, cardContentHeight + 20) : 0
 
             Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
@@ -345,6 +343,8 @@ Item {
                     anchors.left: notifTopBar.left
                     color: notifTopBar.color
                     visible: root.showAllNotifications && notifTopBar.height > 0
+                    opacity: root.showAllNotifications ? 1.0 : 0.0
+                    Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
                     z: 10
                 }
 
@@ -354,6 +354,8 @@ Item {
                     anchors.right: notifTopBar.right
                     color: notifTopBar.color
                     visible: root.showAllNotifications && notifTopBar.height > 0
+                    opacity: root.showAllNotifications ? 1.0 : 0.0
+                    Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
                     z: 10
                 }
 
@@ -496,8 +498,8 @@ Item {
         id: cornerTrigger
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        width: 24
-        height: 24
+        width: Theme.moduleEdgeRadius
+        height: Theme.moduleEdgeRadius
         z: 10
 
         HoverHandler {
