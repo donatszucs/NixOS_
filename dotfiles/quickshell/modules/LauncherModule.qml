@@ -284,7 +284,7 @@ ModuleButton {
                     Layout.rightMargin: launcherModule.padding
                 
                     ModuleButton {
-                        variant: "neutral"
+                        variant: "light"
                         Layout.fillWidth: true
                         implicitHeight: Theme.moduleHeight
                         label: "󰸉 Wallpaper"
@@ -300,7 +300,7 @@ ModuleButton {
                     }
                 
                     ModuleButton {
-                        variant: "neutral"
+                        variant: "light"
                         Layout.fillWidth: true
                         implicitHeight: Theme.moduleHeight
                         label: "󰌆 Bitwarden"
@@ -316,7 +316,7 @@ ModuleButton {
                     }
 
                     ModuleButton {
-                        variant: "neutral"
+                        variant: "light"
                         Layout.fillWidth: true
                         implicitHeight: Theme.moduleHeight
                         label: " Clipboard"

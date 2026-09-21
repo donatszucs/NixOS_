@@ -389,7 +389,7 @@ ExpandableModule {
                                             }
                                             implicitHeight: 24
                                             implicitWidth: 24
-                                            radius: 6
+                                            radius: 5
                                             border.width: 1
                                             Layout.alignment: Qt.AlignVCenter
                                         }
@@ -399,7 +399,7 @@ ExpandableModule {
                                         id: devSlider
                                         Layout.fillWidth: true
                                         sliderHeight: 18
-                                        radius: Theme.moduleEdgeRadius / 2
+                                        radius: 5
                                         from: 0.0
                                         to: 1.0
                                         value: devVolume

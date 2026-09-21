@@ -70,137 +70,265 @@ Rectangle {
                     Layout.fillWidth: true
                 }
                 
-                ListView {
-                    id: grid
+                Item {
+                    id: carouselContainer
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
-                    spacing: 10
-                    focus: true
 
-                    Connections {
-                        target: wallpaperPanel
-                        function onExpandedChanged() {
-                            if (wallpaperPanel.expanded) {
-                                grid.forceActiveFocus()
-                            }
-                        }
-                    }
-
-                    property bool keyboardMode: false
-                    
-                    highlightRangeMode: keyboardMode ? ListView.ApplyRange : ListView.NoHighlightRange
-                    preferredHighlightBegin: height / 2 - 125
-                    preferredHighlightEnd: height / 2 + 125
-                    highlightMoveDuration: Theme.verticalDuration
-
-                    Timer {
-                        id: kbdTimer
-                        interval: Theme.verticalDuration + 100
-                        onTriggered: grid.keyboardMode = false
-                    }
-
-                    Keys.onEscapePressed: wallpaperPanel.expanded = false
-                    Keys.onReturnPressed: {
-                        if (currentItem) {
-                            currentItem.applyWallpaper()
-                        }
-                    }
-                    Keys.onUpPressed: event => {
-                        grid.keyboardMode = true;
-                        kbdTimer.restart();
-                        if (grid.currentIndex > 0) {
-                            grid.currentIndex--;
-                        }
-                        event.accepted = true;
-                    }
-                    Keys.onDownPressed: event => {
-                        grid.keyboardMode = true;
-                        kbdTimer.restart();
-                        if (grid.currentIndex < grid.count - 1) {
-                            grid.currentIndex++;
-                        }
-                        event.accepted = true;
-                    }
-                    
-                    ScrollBar.vertical: ScrollBar {
-                        active: true 
-                        rightPadding: 5
-                    }
-
-                    model: FolderListModel {
+                    FolderListModel {
+                        id: folderModel
                         folder: "file://" + Quickshell.env("HOME") + "/Pictures/wallpapers"
-                        nameFilters: ["*.png", "*.jpg", "*.jpeg"]
+                        nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
+                        showDirs: false
+                        onCountChanged: {
+                            if (count > 0 && !grid.initialized) {
+                                grid.initialized = true;
+                                var centerIdx = Math.floor(grid.loopMultiplier / 2) * count;
+                                grid.currentIndex = centerIdx;
+                                grid.positionViewAtIndex(centerIdx, ListView.Center);
+                            }
+                        }
                     }
-                    
-                    delegate: ModuleButton {
-                        id: previewButton
-                        implicitWidth: wallpaperPanel.targetWidth - 40
-                        implicitHeight: previewButton.ListView.isCurrentItem ? 250 : 150
-                        variant: previewButton.ListView.isCurrentItem ? "light" : "dark"
-                        
-                        onHoveredChanged: {
-                            if (hovered && !grid.keyboardMode) {
-                                grid.currentIndex = index
-                            }
-                        }
-                        
-                        function applyWallpaper() {
-                            var rawPath = String(fileUrl).replace("file://", "");
-                            applyProc.targetFile = rawPath;
-                            applyProc.running = true;
-                        }
-                        
-                        Behavior on implicitHeight { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
-                        radius: Theme.moduleEdgeRadius / 2
-                        cursorShape: Qt.PointingHandCursor
+                    ListView {
+                        id: grid
+                        anchors.fill: parent
+                        clip: true
+                        focus: true
+                        orientation: ListView.Vertical
+                        spacing: 16
+                        cacheBuffer: 800
 
-                        Image {
-                            id: preview
-                            anchors.fill: parent
-                            
-                            sourceSize.width: width
-                            asynchronous: true
-                            
-                            source: fileUrl
-                            fillMode: Image.PreserveAspectCrop
-                            visible: false // Hidden, as the MultiEffect handles the drawing
-                        }
+                        property int loopMultiplier: 400
+                        property bool initialized: false
+                        model: folderModel.count > 0 ? folderModel.count * loopMultiplier : 0
 
-                        MultiEffect {
-                            // Point this to the ID of the Image component, NOT the fileUrl
-                            source: preview 
-                            anchors.fill: previewButton
-                            maskEnabled: true
-                            maskSource: maskItem
-                            opacity: previewButton.ListView.isCurrentItem ? 1.0 : 0.6
-                            Behavior on opacity { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
-                        }
-
-                        Rectangle {
-                            anchors.fill: parent
-                            color: "transparent"
-                            border.width: 3
-                            border.color: previewButton.ListView.isCurrentItem ? Qt.rgba(1, 1, 1, 0.8) : Qt.rgba(1, 1, 1, 0.2)
-                            radius: Theme.moduleEdgeRadius / 2
-                        }
-
-                        Item {
-                            id: maskItem
-                            anchors.fill: parent
-                            visible: false
-                            layer.enabled: true
-                            
-                            Rectangle {
-                                anchors.fill: parent
-                                // Matched perfectly to the button's radius
-                                radius: Theme.moduleEdgeRadius / 2 
-                                color: "black" 
+                        onCurrentIndexChanged: {
+                            if (folderModel.count > 0) {
+                                var half = Math.floor(loopMultiplier / 2) * folderModel.count;
+                                if (currentIndex <= folderModel.count * 2) {
+                                    currentIndex += half;
+                                    positionViewAtIndex(currentIndex, ListView.Center);
+                                } else if (currentIndex >= (loopMultiplier - 2) * folderModel.count) {
+                                    currentIndex -= half;
+                                    positionViewAtIndex(currentIndex, ListView.Center);
+                                }
                             }
                         }
 
-                        onClicked: applyWallpaper()
+                        Connections {
+                            target: wallpaperPanel
+                            function onExpandedChanged() {
+                                if (wallpaperPanel.expanded) {
+                                    grid.forceActiveFocus();
+                                    if (folderModel.count > 0) {
+                                        grid.positionViewAtIndex(grid.currentIndex, ListView.Center);
+                                    }
+                                } else {
+                                    if (folderModel.count > 0) {
+                                        var real = grid.currentIndex % folderModel.count;
+                                        var centerIdx = Math.floor(grid.loopMultiplier / 2) * folderModel.count + real;
+                                        grid.currentIndex = centerIdx;
+                                        grid.positionViewAtIndex(centerIdx, ListView.Center);
+                                    }
+                                }
+                            }
+                        }
+
+                        property real slotHeight: 230
+
+                        preferredHighlightBegin: height / 2 - slotHeight / 2
+                        preferredHighlightEnd: height / 2 + slotHeight / 2
+                        highlightRangeMode: ListView.StrictlyEnforceRange
+                        snapMode: ListView.SnapToItem
+                        highlightMoveDuration: Theme.verticalDuration
+
+                        Keys.onEscapePressed: wallpaperPanel.expanded = false
+                        Keys.onReturnPressed: {
+                            if (currentItem && typeof currentItem.applyWallpaper === "function") {
+                                currentItem.applyWallpaper();
+                            }
+                        }
+                        Keys.onUpPressed: event => {
+                            grid.decrementCurrentIndex();
+                            event.accepted = true;
+                        }
+                        Keys.onDownPressed: event => {
+                            grid.incrementCurrentIndex();
+                            event.accepted = true;
+                        }
+                        Keys.onPressed: event => {
+                            if (event.key === Qt.Key_PageUp) {
+                                grid.currentIndex -= 3;
+                                event.accepted = true;
+                            } else if (event.key === Qt.Key_PageDown) {
+                                grid.currentIndex += 3;
+                                event.accepted = true;
+                            }
+                        }
+
+                        delegate: Item {
+                            id: delegateRoot
+                            width: grid.width
+                            height: grid.slotHeight
+
+                            readonly property int realIndex: folderModel.count > 0 ? (((index % folderModel.count) + folderModel.count) % folderModel.count) : 0
+                            readonly property var fileUrl: folderModel.get(realIndex, "fileUrl") || ""
+                            readonly property string fileName: folderModel.get(realIndex, "fileName") || ""
+
+                            property real itemCenter: y + height / 2
+                            property real viewCenter: grid.contentY + grid.height / 2
+                            property real centerDist: itemCenter - viewCenter
+                            property real absCenterDist: Math.abs(centerDist)
+                            property real outOfFocusDist: Math.max(0, absCenterDist - 25)
+                            property real absDist: Math.min(1.0, outOfFocusDist / (height + grid.spacing))
+                            property real effectiveNormDist: (centerDist < 0 ? -1 : 1) * absDist
+                            readonly property bool isCurrent: index === grid.currentIndex
+
+                            z: 100 - Math.round(absDist * 50)
+
+                            function applyWallpaper() {
+                                var rawPath = String(delegateRoot.fileUrl).replace("file://", "");
+                                applyProc.targetFile = rawPath;
+                                applyProc.running = true;
+                            }
+
+                            Item {
+                                id: delegateWrapper
+                                width: Math.min(grid.width - 24, 430)
+                                height: 215
+                                anchors.centerIn: parent
+
+                                scale: 1.0 - 0.16 * delegateRoot.absDist
+                                    + Math.max(0, 1.0 - delegateRoot.absCenterDist / 70) * 0.04
+
+                                transform: Translate {
+                                    y: -Math.pow(delegateRoot.effectiveNormDist, 3) * 52
+                                }
+
+                                Item {
+                                    id: cardContainer
+                                    anchors.fill: parent
+
+                                    layer.enabled: true
+                                    layer.smooth: true
+                                    layer.effect: MultiEffect {
+                                        brightness: -delegateRoot.absDist * 0.35 + (mouseArea.containsMouse ? 0.04 : 0.0)
+                                        contrast: -delegateRoot.absDist * 0.4
+                                        shadowEnabled: true
+                                        shadowColor: delegateRoot.isCurrent ? Qt.rgba(0, 0, 0, 0.75) : Qt.rgba(0, 0, 0, 0.35)
+                                        shadowBlur: delegateRoot.isCurrent ? 0.9 : 0.4
+                                        shadowVerticalOffset: delegateRoot.isCurrent ? 5 : 2
+                                        shadowHorizontalOffset: 0
+                                    }
+
+                                    Image {
+                                        id: preview
+                                        anchors.fill: parent
+                                        sourceSize.width: 500
+                                        asynchronous: true
+                                        source: delegateRoot.fileUrl
+                                        fillMode: Image.PreserveAspectCrop
+                                        visible: false
+                                    }
+
+                                    MultiEffect {
+                                        id: previewMasked
+                                        source: preview
+                                        anchors.fill: parent
+                                        maskEnabled: true
+                                        maskSource: maskItem
+                                        opacity: 1.0 - 0.35 * delegateRoot.absDist
+                                    }
+
+                                    Item {
+                                        id: maskItem
+                                        anchors.fill: parent
+                                        visible: false
+                                        layer.enabled: true
+                                        layer.smooth: true
+
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            radius: Theme.moduleEdgeRadius / 2
+                                            color: "black"
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        color: "transparent"
+                                        radius: Theme.moduleEdgeRadius / 2
+                                        border.width: delegateRoot.isCurrent ? 3 : 1.5
+                                        border.color: delegateRoot.isCurrent
+                                            ? (mouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.95) : Qt.rgba(1, 1, 1, 0.75))
+                                            : (mouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.4) : Qt.rgba(1, 1, 1, 0.15))
+
+                                        Behavior on border.color { ColorAnimation { duration: Theme.horizontalDuration } }
+                                        Behavior on border.width { NumberAnimation { duration: Theme.horizontalDuration } }
+                                    }
+
+                                    Item {
+                                        id: labelPill
+                                        anchors.bottom: parent.bottom
+                                        anchors.bottomMargin: 10
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        height: 28
+                                        width: Math.min(parent.width - 32, fileNameText.implicitWidth + 24)
+                                        opacity: Math.max(0.0, 1.0 - delegateRoot.absCenterDist / 50)
+                                        visible: opacity > 0
+
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            radius: height / 2
+                                            color: Qt.rgba(0, 0, 0, 0.65)
+                                            border.width: 1
+                                            border.color: Qt.rgba(1, 1, 1, 0.2)
+                                        }
+
+                                        Text {
+                                            id: fileNameText
+                                            anchors.centerIn: parent
+                                            width: parent.width - 20
+                                            text: delegateRoot.fileName
+                                            color: Theme.palettePaper
+                                            font.family: Theme.font
+                                            font.pixelSize: 12
+                                            font.bold: true
+                                            elide: Text.ElideMiddle
+                                            horizontalAlignment: Text.AlignHCenter
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: mouseArea
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            if (grid.currentIndex !== index) {
+                                                grid.currentIndex = index;
+                                            } else {
+                                                delegateRoot.applyWallpaper();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.NoButton
+                        onWheel: function(wheel) {
+                            if (wheel.angleDelta.y > 0) {
+                                grid.decrementCurrentIndex();
+                            } else if (wheel.angleDelta.y < 0) {
+                                grid.incrementCurrentIndex();
+                            }
+                        }
                     }
                 }
                 
