@@ -264,9 +264,8 @@ PanelWindow {
                 shadowBlur: launcherModule.expanded ? (0.5 + shadowPulse * 1.5) : 1.0
                 shadowVerticalOffset: launcherModule.expanded ? (2 + shadowPulse * 2) : 4
 
-                shadowColor: launcherModule.expanded 
-                    ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.8 * shadowPulse) 
-                    : moduleShadowColor
+                shadowColor: Qt.rgba(moduleShadowColor.r, moduleShadowColor.g, moduleShadowColor.b, 0.8 * shadowPulse)
+
             }
         }
     }

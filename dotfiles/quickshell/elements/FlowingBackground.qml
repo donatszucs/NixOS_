@@ -40,8 +40,8 @@ Item {
     }
 
     readonly property bool isExpanded: contentVisible
-    readonly property bool hasLeftSideCorner: isExpanded && (leftCornerStyle === "side") && (overlayX < 0) && !touchesLeftEdge
-    readonly property bool hasRightSideCorner: isExpanded && (rightCornerStyle === "side") && ((overlayX + overlayWidth) > headerWidth) && !touchesRightEdge
+    readonly property bool hasLeftSideCorner: isExpanded && (overlayHeight > 0.1) && (leftCornerStyle === "side") && (overlayX < 0) && !touchesLeftEdge
+    readonly property bool hasRightSideCorner: isExpanded && (overlayHeight > 0.1) && (rightCornerStyle === "side") && ((overlayX + overlayWidth) > headerWidth) && !touchesRightEdge
     readonly property bool hasLeftBottomCorner: (leftCornerStyle === "bottom")
     readonly property bool hasRightBottomCorner: (rightCornerStyle === "bottom")
     readonly property bool hasLeftTopCorner: (leftCornerStyle === "top")
@@ -51,19 +51,17 @@ Item {
     readonly property real sideR: Math.min(cornerRadius, (isExpanded ? overlayHeight : 0) / 2)
     readonly property real minX: Math.min(
         hasLeftTopCorner ? -cornerRadius : 0,
-        hasLeftSideCorner ? (overlayX - sideR) : (isExpanded ? overlayX : 0)
+        (hasLeftSideCorner && overlayHeight > 0.1) ? (overlayX - sideR) : 0
     )
     readonly property real maxX: Math.max(
         hasRightTopCorner ? (headerWidth + cornerRadius) : headerWidth,
-        hasRightSideCorner ? (overlayX + overlayWidth + sideR) : (isExpanded ? (overlayX + overlayWidth) : headerWidth)
+        (hasRightSideCorner && overlayHeight > 0.1) ? (overlayX + overlayWidth + sideR) : headerWidth
     )
     readonly property real maxY: (isExpanded ? (headerHeight + overlayHeight) : headerHeight) + ((hasLeftBottomCorner || hasRightBottomCorner) ? cornerRadius : 0)
 
-    // Position and size permanently anchored to ExpandableModule origin (0, 0)
-    // to prevent any 1-frame transform / coordinate desync during dynamic resize.
-    x: 0
+    x: minX
     y: 0
-    width: Math.max(headerWidth, maxX)
+    width: Math.max(1, maxX - minX)
     height: Math.max(headerHeight, maxY)
     z: 0
 
@@ -79,8 +77,8 @@ Item {
         var totalY = hh + dh;
 
         // Overlay left edge: clamp to <= 0 when using side corner so it never cuts into header pill
-        var ox = isExpanded ? (leftCornerStyle === "side" ? Math.min(0, overlayX) : overlayX) : 0;
-        var rWallX = isExpanded ? (overlayX + ow) : hw;
+        var ox = (isExpanded && dh > 0.1) ? (leftCornerStyle === "side" ? Math.min(0, overlayX) : overlayX) : 0;
+        var rWallX = (isExpanded && dh > 0.1) ? (overlayX + ow) : hw;
 
         var topL = hasLeftTopCorner ? 0 : topLeftRadius;
         var topR = hasRightTopCorner ? 0 : topRightRadius;
@@ -154,14 +152,14 @@ Item {
             p += "L " + f(rWallX + sR) + " " + f(hh) + " ";
             p += "C " + f(rWallX + sR * ik) + " " + f(hh) + ", " + f(rWallX) + " " + f(hh + sR * ik) + ", " + f(rWallX) + " " + f(hh + sR) + " ";
             p += "L " + f(rWallX) + " " + f(totalY - botR) + " ";
-        } else if (hasRightSideCorner || (isExpanded && rWallX > hw + 0.1)) {
+        } else if (hasRightSideCorner || (isExpanded && dh > 0.1 && rWallX > hw + 0.1)) {
             p += "L " + f(hw) + " " + f(hh) + " ";
             p += "L " + f(rWallX) + " " + f(hh) + " ";
             p += "L " + f(rWallX) + " " + f(totalY - botR) + " ";
         } else if (hasRightBottomCorner) {
             p += "L " + f(hw) + " " + f(totalY) + " ";
         } else {
-            p += "L " + f(rWallX) + " " + f(totalY - botR) + " ";
+            p += "L " + f(hw) + " " + f(totalY - botR) + " ";
         }
 
         // 4. Bottom-Right Corner
@@ -197,7 +195,7 @@ Item {
             p += "C " + f(ox) + " " + f(hh + sR * ik) + ", " + f(ox - sR * ik) + " " + f(hh) + ", " + f(ox - sR) + " " + f(hh) + " ";
             p += "L 0 " + f(hh) + " ";
             p += "L 0 " + f(topL) + " ";
-        } else if (hasLeftSideCorner || (isExpanded && ox < -0.1)) {
+        } else if (hasLeftSideCorner || (isExpanded && dh > 0.1 && ox < -0.1)) {
             p += "L " + f(ox) + " " + f(hh) + " ";
             p += "L 0 " + f(hh) + " ";
             p += "L 0 " + f(topL) + " ";
@@ -211,14 +209,12 @@ Item {
         return p;
     }
 
-    // GPU-accelerated Shape: permanently anchored at (0, 0) matching
-    // ExpandableModule's coordinate system directly.
+    // GPU-accelerated Shape: placed at -minX so its internal coordinate space
+    // exactly matches ExpandableModule's coordinate system (0, 0 is header top-left).
     Shape {
         id: _shape
-        x: 0
+        x: -root.minX
         y: 0
-        width: root.width
-        height: root.height
         antialiasing: true
         smooth: true
         asynchronous: false
