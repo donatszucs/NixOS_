@@ -274,13 +274,24 @@ ExpandableModule {
                                 property real devVolume: devAudio ? devAudio.volume : 0.0
                                 property bool devMuted: devAudio ? devAudio.muted : false
 
+                                readonly property bool isSinkActive: {
+                                    var def = Pipewire.defaultAudioSink
+                                    if (!def) return false
+                                    if (def.id !== undefined && modelData.id !== undefined && def.id === modelData.id) return true
+                                    if (def.name && devNode && devNode.name && def.name === devNode.name) return true
+                                    return false
+                                }
+
                                 Layout.fillWidth: true
-                                implicitHeight: 74
+                                implicitHeight: 75
                                 radius: Theme.moduleEdgeRadius / 2 + 5
-                                color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.15) : Theme.neutral.base
+                                color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.15) : Theme.divider
                                 border.width: 2
-                                border.color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.45) : Theme.cardBorder
+                                border.color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.45) : Theme.cardBorder
                                 clip: true
+
+                                Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+                                Behavior on border.color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
                                 Process {
                                     id: actionProc
@@ -314,13 +325,14 @@ ExpandableModule {
                                                     width: 28
                                                     height: 28
                                                     radius: 6
-                                                    color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
+                                                    color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
+                                                    Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
                                                     Text {
                                                         anchors.centerIn: parent
                                                         text: modelData.icon
-                                                        color: modelData.active ? Theme.statusBlue : Theme.textPrimary
-                                                        opacity: modelData.active ? 1.0 : 0.7
+                                                        color: isSinkActive ? Theme.statusBlue : Theme.textPrimary
+                                                        opacity: isSinkActive ? 1.0 : 0.7
                                                         font.family: Theme.font
                                                         font.pixelSize: Theme.fontSize + 2
                                                         font.bold: true
@@ -337,16 +349,16 @@ ExpandableModule {
                                                         Layout.fillWidth: true
                                                         fontFamily: Theme.font
                                                         pixelSize: Theme.fontSize
-                                                        fontBold: modelData.active
+                                                        fontBold: isSinkActive
                                                         textColor: Theme.textPrimary
                                                     }
 
                                                     Text {
-                                                        text: modelData.active ? "Active" : "Output"
-                                                        color: modelData.active ? Theme.statusGreen : Theme.statusDisabled
+                                                        text: isSinkActive ? "Active" : "Output"
+                                                        color: isSinkActive ? Theme.statusGreen : Theme.statusDisabled
                                                         font.family: Theme.font
                                                         font.pixelSize: Theme.fontSize * 0.72
-                                                        font.bold: modelData.active
+                                                        font.bold: isSinkActive
                                                     }
                                                 }
                                             }
@@ -354,7 +366,7 @@ ExpandableModule {
 
                                         Text {
                                             text: devMuted ? "Muted" : Math.round(devVolume * 100) + "%"
-                                            color: devMuted ? Theme.statusRed : (modelData.active ? Theme.textPrimary : Theme.statusDisabled)
+                                            color: devMuted ? Theme.statusRed : (isSinkActive ? Theme.textPrimary : Theme.statusDisabled)
                                             font.family: Theme.font
                                             font.pixelSize: Theme.fontSize - 1
                                             font.bold: true
@@ -362,7 +374,7 @@ ExpandableModule {
                                         }
 
                                         ModuleButton {
-                                            variant: devMuted ? "red" : (modelData.active ? "light" : "neutral")
+                                            variant: devMuted ? "red" : (isSinkActive ? "light" : "neutral")
                                             label: devMuted ? "󰖁" : ""
                                             textFont: 12
                                             cursorShape: Qt.PointingHandCursor
@@ -495,6 +507,13 @@ ExpandableModule {
                                 required property var modelData
                                 required property int index
 
+                                readonly property bool isSourceActive: {
+                                    var def = Pipewire.defaultAudioSource
+                                    if (!def) return false
+                                    if (def.id !== undefined && modelData.id !== undefined && def.id === modelData.id) return true
+                                    return false
+                                }
+
                                 variant: "neutral"
                                 cursorShape: Qt.PointingHandCursor
                                 Layout.fillWidth: true
@@ -502,7 +521,8 @@ ExpandableModule {
                                 radius: Theme.moduleEdgeRadius / 2 + 5
                                 opacity: 1.0
                                 border.width: 2
-                                border.color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
+                                border.color: isSourceActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
+                                Behavior on border.color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
                                 RowLayout {
                                     id: sourceRow
@@ -516,7 +536,8 @@ ExpandableModule {
                                         Layout.preferredWidth: sourceBtn.implicitHeight
                                         implicitWidth: sourceBtn.implicitHeight
                                         implicitHeight: sourceBtn.implicitHeight
-                                        color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
+                                        color: isSourceActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
+                                        Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
                                         topLeftRadius: sourceBtn.radius
                                         bottomLeftRadius: sourceBtn.radius
 
@@ -540,8 +561,8 @@ ExpandableModule {
                                             id: srcIconText
                                             anchors.centerIn: parent
                                             text: modelData.icon
-                                            color: modelData.active ? Theme.statusBlue : Theme.textPrimary
-                                            opacity: modelData.active ? 1.0 : 0.7
+                                            color: isSourceActive ? Theme.statusBlue : Theme.textPrimary
+                                            opacity: isSourceActive ? 1.0 : 0.7
                                             font.family: Theme.font
                                             font.pixelSize: Theme.fontSize + 3
                                             font.bold: true
@@ -561,16 +582,16 @@ ExpandableModule {
                                             Layout.fillWidth: true
                                             fontFamily: Theme.font
                                             pixelSize: Theme.fontSize
-                                            fontBold: modelData.active
+                                            fontBold: isSourceActive
                                             textColor: Theme.textPrimary
                                         }
 
                                         Text {
-                                            text: modelData.active ? "Active" : "Input"
-                                            color: modelData.active ? Theme.statusGreen : Theme.statusDisabled
+                                            text: isSourceActive ? "Active" : "Input"
+                                            color: isSourceActive ? Theme.statusGreen : Theme.statusDisabled
                                             font.family: Theme.font
                                             font.pixelSize: Theme.fontSize * 0.75
-                                            font.bold: modelData.active
+                                            font.bold: isSourceActive
                                         }
                                     }
                                 }
@@ -596,8 +617,6 @@ ExpandableModule {
     Connections {
         target: Pipewire
         function onReadyChanged() { audioModule.updateDevices() }
-        function onDefaultAudioSinkChanged() { audioModule.updateDevices() }
-        function onDefaultAudioSourceChanged() { audioModule.updateDevices() }
     }
 
     Connections {

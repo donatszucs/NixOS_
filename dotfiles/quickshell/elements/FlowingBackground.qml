@@ -47,22 +47,24 @@ Item {
     readonly property bool hasLeftTopCorner: (leftCornerStyle === "top")
     readonly property bool hasRightTopCorner: (rightCornerStyle === "top")
 
-    // Dynamic bounding box covering the entire outer silhouette (used by Quickshell Regions)
+    // Dynamic bounding box covering the entire outer silhouette (used for outer bounds query)
+    readonly property real sideR: Math.min(cornerRadius, (isExpanded ? overlayHeight : 0) / 2)
     readonly property real minX: Math.min(
         hasLeftTopCorner ? -cornerRadius : 0,
-        hasLeftSideCorner ? (overlayX - cornerRadius) : (isExpanded ? overlayX : 0)
+        hasLeftSideCorner ? (overlayX - sideR) : (isExpanded ? overlayX : 0)
     )
     readonly property real maxX: Math.max(
         hasRightTopCorner ? (headerWidth + cornerRadius) : headerWidth,
-        hasRightSideCorner ? (overlayX + overlayWidth + cornerRadius) : (isExpanded ? (overlayX + overlayWidth) : headerWidth)
+        hasRightSideCorner ? (overlayX + overlayWidth + sideR) : (isExpanded ? (overlayX + overlayWidth) : headerWidth)
     )
     readonly property real maxY: (isExpanded ? (headerHeight + overlayHeight) : headerHeight) + ((hasLeftBottomCorner || hasRightBottomCorner) ? cornerRadius : 0)
 
-    // Position and size relative to ExpandableModule
-    x: minX
+    // Position and size permanently anchored to ExpandableModule origin (0, 0)
+    // to prevent any 1-frame transform / coordinate desync during dynamic resize.
+    x: 0
     y: 0
-    width: Math.max(1, maxX - minX)
-    height: Math.max(1, maxY)
+    width: Math.max(headerWidth, maxX)
+    height: Math.max(headerHeight, maxY)
     z: 0
 
     function requestPaint() {}
@@ -76,19 +78,9 @@ Item {
         var dh = isExpanded ? overlayHeight : 0;
         var totalY = hh + dh;
 
-        // ── Anti-spike interpolation ──────────────────────────────────────
-        // When dh is small the height animation has nearly finished but the width
-        // animation may still be running (ox is still negative / rWallX still past hw).
-        // If we let ox remain negative while sideR drops below 0.1 and the path switches
-        // branches, the shape draws a diagonal spike from (ox, hh) to (0, topL).
-        // Fix: linearly interpolate ox → 0 and the right-wall → hw as dh → 0 over a
-        // transition zone of 2*R pixels so the shape collapses cleanly.
-        var _fadeZone = R * 2;
-        var _fadeFactor = (_fadeZone > 0) ? Math.min(1.0, dh / _fadeZone) : 1.0;
-        // ox: effective overlay left edge, faded toward 0 as dh → 0
-        var ox = overlayX * _fadeFactor;
-        // rWallExtentFaded: effective overlay right edge, faded toward hw as dh → 0
-        var rWallExtentFaded = hw + (overlayX + ow - hw) * _fadeFactor;
+        // Overlay left edge: clamp to <= 0 when using side corner so it never cuts into header pill
+        var ox = isExpanded ? (leftCornerStyle === "side" ? Math.min(0, overlayX) : overlayX) : 0;
+        var rWallX = isExpanded ? (overlayX + ow) : hw;
 
         var topL = hasLeftTopCorner ? 0 : topLeftRadius;
         var topR = hasRightTopCorner ? 0 : topRightRadius;
@@ -99,8 +91,8 @@ Item {
         var eBotL = expandedBottomLeftRadius > 0 ? expandedBottomLeftRadius : bottomLeftRadius;
         var eBotR = expandedBottomRightRadius > 0 ? expandedBottomRightRadius : bottomRightRadius;
 
-        // Side inverse fillet size (maximum R, limited by dh / 2 so it doesn't collide with bottom corner)
-        var sideR = Math.min(R, dh / 2);
+        // Side inverse fillet size (maximum R, smoothly limited by dh / 2 as height collapses)
+        var sR = Math.min(R, dh / 2);
 
         // Interpolate bottom corner radius smoothly with dh
         function calcBot(cR, eR, isExp, currentDh) {
@@ -117,10 +109,10 @@ Item {
 
         // When a side inverse fillet exists, ensure bottom corner and side fillet do not exceed available height dh
         if (hasLeftSideCorner) {
-            botL = Math.min(botL, Math.max(0, dh - sideR));
+            botL = Math.min(botL, Math.max(0, dh - sR));
         }
         if (hasRightSideCorner) {
-            botR = Math.min(botR, Math.max(0, dh - sideR));
+            botR = Math.min(botR, Math.max(0, dh - sR));
         }
         if (hasLeftTopCorner) {
             botL = Math.min(botL, Math.max(0, totalY - R));
@@ -129,109 +121,108 @@ Item {
             botR = Math.min(botR, Math.max(0, totalY - R));
         }
 
+        var k = 0.55228475;
+        var ik = 1 - k;
+        function f(v) { return Number(v).toFixed(2); }
+
         var p = "";
 
         // 1. Header Top-Left
         if (hasLeftTopCorner && R > 0.1) {
-            // Start at the left-most tip of the top inverse fillet
-            p += "M " + (-R) + " 0 ";
+            p += "M " + f(-R) + " 0 ";
         } else if (topL > 0.1) {
-            p += "M 0 " + topL + " ";
-            p += "A " + topL + " " + topL + " 0 0 1 " + topL + " 0 ";
+            p += "M 0 " + f(topL) + " ";
+            p += "C 0 " + f(topL * ik) + ", " + f(topL * ik) + " 0, " + f(topL) + " 0 ";
         } else {
             p += "M 0 0 ";
         }
 
         // 2. Header Top Edge & Top-Right
         if (hasRightTopCorner && R > 0.1) {
-            // Extend top edge along bar to right tip, then curve down to header right edge
-            p += "L " + (hw + R) + " 0 ";
-            p += "A " + R + " " + R + " 0 0 0 " + hw + " " + R + " ";
+            p += "L " + f(hw + R) + " 0 ";
+            p += "C " + f(hw + R * ik) + " 0, " + f(hw) + " " + f(R * ik) + ", " + f(hw) + " " + f(R) + " ";
         } else if (topR > 0.1) {
-            p += "L " + (hw - topR) + " 0 ";
-            p += "A " + topR + " " + topR + " 0 0 1 " + hw + " " + topR + " ";
+            p += "L " + f(hw - topR) + " 0 ";
+            p += "C " + f(hw - topR * ik) + " 0, " + f(hw) + " " + f(topR * ik) + ", " + f(hw) + " " + f(topR) + " ";
         } else {
-            p += "L " + hw + " 0 ";
+            p += "L " + f(hw) + " 0 ";
         }
 
         // 3. Right Side Wall & Transition
-        var rWallX = isExpanded ? rWallExtentFaded : hw;
-
-        if (hasRightSideCorner && sideR > 0.1) {
-            // Header button right wall down to bar line, then step outward along bar bottom to inverse fillet
-            p += "L " + hw + " " + hh + " ";
-            p += "L " + (rWallX + sideR) + " " + hh + " ";
-            p += "A " + sideR + " " + sideR + " 0 0 0 " + rWallX + " " + (hh + sideR) + " ";
-            p += "L " + rWallX + " " + (totalY - botR) + " ";
+        if (hasRightSideCorner && sR > 0.1) {
+            p += "L " + f(hw) + " " + f(hh) + " ";
+            p += "L " + f(rWallX + sR) + " " + f(hh) + " ";
+            p += "C " + f(rWallX + sR * ik) + " " + f(hh) + ", " + f(rWallX) + " " + f(hh + sR * ik) + ", " + f(rWallX) + " " + f(hh + sR) + " ";
+            p += "L " + f(rWallX) + " " + f(totalY - botR) + " ";
+        } else if (hasRightSideCorner || (isExpanded && rWallX > hw + 0.1)) {
+            p += "L " + f(hw) + " " + f(hh) + " ";
+            p += "L " + f(rWallX) + " " + f(hh) + " ";
+            p += "L " + f(rWallX) + " " + f(totalY - botR) + " ";
         } else if (hasRightBottomCorner) {
-            // Screen right bezel wall straight down to totalY
-            p += "L " + hw + " " + totalY + " ";
+            p += "L " + f(hw) + " " + f(totalY) + " ";
         } else {
-            // Flush right wall (NowPlayingModule, top corner, or collapsed pill):
-            // Straight vertical wall from top right directly to (totalY - botR).
-            // No stop at hh, no spike, no backtracking!
-            p += "L " + rWallX + " " + (totalY - botR) + " ";
+            p += "L " + f(rWallX) + " " + f(totalY - botR) + " ";
         }
 
         // 4. Bottom-Right Corner
         if (hasRightBottomCorner && R > 0.1) {
-            p += "L " + hw + " " + (totalY + R) + " ";
-            p += "A " + R + " " + R + " 0 0 0 " + (hw - R) + " " + totalY + " ";
+            p += "L " + f(hw) + " " + f(totalY + R) + " ";
+            p += "C " + f(hw) + " " + f(totalY + R * ik) + ", " + f(hw - R * ik) + " " + f(totalY) + ", " + f(hw - R) + " " + f(totalY) + " ";
         } else if (botR > 0.1) {
-            p += "A " + botR + " " + botR + " 0 0 1 " + (rWallX - botR) + " " + totalY + " ";
+            p += "C " + f(rWallX) + " " + f(totalY - botR * ik) + ", " + f(rWallX - botR * ik) + " " + f(totalY) + ", " + f(rWallX - botR) + " " + f(totalY) + " ";
         } else {
-            p += "L " + rWallX + " " + totalY + " ";
+            p += "L " + f(rWallX) + " " + f(totalY) + " ";
         }
 
         // 5. Bottom Edge
         var lBotCornerX = hasLeftBottomCorner ? R : (ox + botL);
-        p += "L " + lBotCornerX + " " + totalY + " ";
+        p += "L " + f(lBotCornerX) + " " + f(totalY) + " ";
 
         // 6. Bottom-Left Corner
         if (hasLeftBottomCorner && R > 0.1) {
-            p += "A " + R + " " + R + " 0 0 0 0 " + (totalY + R) + " ";
-            p += "L 0 " + totalY + " ";
+            p += "C " + f(R * ik) + " " + f(totalY) + ", 0 " + f(totalY + R * ik) + ", 0 " + f(totalY + R) + " ";
+            p += "L 0 " + f(totalY) + " ";
         } else if (botL > 0.1) {
-            p += "A " + botL + " " + botL + " 0 0 1 " + ox + " " + (totalY - botL) + " ";
+            p += "C " + f(ox + botL * ik) + " " + f(totalY) + ", " + f(ox) + " " + f(totalY - botL * ik) + ", " + f(ox) + " " + f(totalY - botL) + " ";
         } else {
-            p += "L " + ox + " " + totalY + " ";
+            p += "L " + f(ox) + " " + f(totalY) + " ";
         }
 
         // 7. Left Side Wall & Transition
         if (hasLeftTopCorner && R > 0.1) {
-            // Left wall straight up to R, then inverse fillet curving outward to the top edge
-            p += "L 0 " + R + " ";
-            p += "A " + R + " " + R + " 0 0 0 " + (-R) + " 0 ";
-        } else if (hasLeftSideCorner && sideR > 0.1) {
-            // Dropdown left wall up to inverse fillet, curve along bar bottom to header left edge
-            p += "L " + ox + " " + (hh + sideR) + " ";
-            p += "A " + sideR + " " + sideR + " 0 0 0 " + (ox - sideR) + " " + hh + " ";
-            p += "L 0 " + hh + " ";
-            p += "L 0 " + topL + " ";
+            p += "L 0 " + f(R) + " ";
+            p += "C 0 " + f(R * ik) + ", " + f(-R * ik) + " 0, " + f(-R) + " 0 ";
+        } else if (hasLeftSideCorner && sR > 0.1) {
+            p += "L " + f(ox) + " " + f(hh + sR) + " ";
+            p += "C " + f(ox) + " " + f(hh + sR * ik) + ", " + f(ox - sR * ik) + " " + f(hh) + ", " + f(ox - sR) + " " + f(hh) + " ";
+            p += "L 0 " + f(hh) + " ";
+            p += "L 0 " + f(topL) + " ";
+        } else if (hasLeftSideCorner || (isExpanded && ox < -0.1)) {
+            p += "L " + f(ox) + " " + f(hh) + " ";
+            p += "L 0 " + f(hh) + " ";
+            p += "L 0 " + f(topL) + " ";
         } else if (hasLeftBottomCorner) {
-            // Screen left bezel wall straight up to topL
-            p += "L 0 " + topL + " ";
+            p += "L 0 " + f(topL) + " ";
         } else {
-            // Flush left wall (LightSwitchModule or collapsed pill):
-            // Straight vertical wall from (ox, totalY - botL) directly up to (0, topL).
-            // No stop at hh, no spike, no backtracking!
-            p += "L 0 " + topL + " ";
+            p += "L 0 " + f(topL) + " ";
         }
 
         p += "Z";
         return p;
     }
 
-    // GPU-accelerated Shape: placed at -minX so its internal coordinate space
-    // exactly matches ExpandableModule's coordinate system (0, 0 is header top-left).
+    // GPU-accelerated Shape: permanently anchored at (0, 0) matching
+    // ExpandableModule's coordinate system directly.
     Shape {
         id: _shape
-        x: -root.minX
+        x: 0
         y: 0
+        width: root.width
+        height: root.height
         antialiasing: true
         smooth: true
         asynchronous: false
-        preferredRendererType: Shape.GeometryRenderer
+        preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
             fillColor: root.animatedColor

@@ -55,7 +55,7 @@ QtObject {
         readonly property color borderPressed:  Qt.darker(border, 2.4)
         
         readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.1)
-        readonly property color pillFill:        Qt.rgba(0, 0, 0, 0.6)
+        readonly property color pillFill:        Qt.rgba(0.5, 0.5, 0.5, 0.5)
         readonly property color pillBorder:      Qt.rgba(1, 1, 1, 0.2)
         readonly property color pillText:        text
     }

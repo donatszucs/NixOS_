@@ -201,6 +201,7 @@ PanelWindow {
             Layout.alignment: Qt.AlignTop
             implicitHeight: Theme.moduleHeight
             implicitWidth: _leftSpacerWidth
+            visible: implicitWidth > 0.1
             Behavior on implicitWidth {
                 NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
