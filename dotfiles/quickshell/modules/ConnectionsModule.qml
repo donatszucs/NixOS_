@@ -208,6 +208,11 @@ ExpandableModule {
          }
         spacing: 10
 
+
+        scale: expanded ? 1 : 0
+        transformOrigin: Item.Top
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+
         // ── Popup dropdown ─────────────────────────────────────────
         MouseArea {
             visible: connectionsModule.contentVisible

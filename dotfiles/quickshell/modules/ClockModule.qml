@@ -307,6 +307,10 @@ ExpandableModule {
         visible: opacity > 0
         opacity: root.expanded ? 1.0 : 0.0
 
+        scale: expanded ? 1 : 0
+        transformOrigin: Item.TopLeft
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+
         Behavior on opacity {
             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
         }

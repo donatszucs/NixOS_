@@ -104,6 +104,10 @@ ExpandableModule {
         anchors.right: parent.right
         spacing: 10
 
+        scale: expanded ? 1 : 0
+        transformOrigin: Item.Top
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+
         MouseArea {
             visible: root.contentVisible
             opacity: root.contentOpacity

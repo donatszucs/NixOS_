@@ -159,6 +159,10 @@ ExpandableModule {
             right: parent.right
         }
 
+        scale: expanded ? 1 : 0
+        transformOrigin: Item.Top
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+
         MouseArea {
             visible: audioModule.contentVisible
             opacity: audioModule.contentOpacity
