@@ -35,7 +35,7 @@ ExpandableModule {
         ? _optimisticPlaying
         : (currentPlayer ? currentPlayer.isPlaying : false)
 
-    expanded: hasPlayer && expandHover.hovered
+    expanded: hasPlayer && isHovered
 
     property var currentPlayer: null
     property var manualPlayerOverride: null
@@ -60,7 +60,17 @@ ExpandableModule {
     property real expandedHeight: 290
 
     implicitHeight: expanded ? expandedHeight : Theme.moduleHeight
-    implicitWidth: expanded ? 280 : titleBtn.implicitWidth + 10
+    implicitWidth: collapsedWidth
+
+    collapsedWidth: expanded ? 230 : titleBtn.implicitWidth + 10
+
+    // Overlay dropdown setup
+    expandedDropdownWidth: 280
+
+    dropdownAlignment: "right"
+
+    leftCornerStyle: "side"
+    rightCornerStyle: "top"
 
     // ── Helper: time formatter (seconds -> mm:ss) ────────────────
     function formatTime(seconds) {
@@ -399,12 +409,7 @@ ExpandableModule {
 
             implicitHeight: Theme.moduleHeight - 10
             Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-            Layout.topMargin: nowPlayingModule.expanded ? 10 : 5
-            cursorShape: Qt.ArrowCursor
-
-            Behavior on Layout.topMargin {
-                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-            }
+            Layout.topMargin: 5
 
             implicitWidth: scrollingText.implicitWidth + artistText.implicitWidth + 5
             radius: Theme.moduleEdgeRadius - 5
@@ -435,7 +440,7 @@ ExpandableModule {
                         anchors.fill: parent
                         maskEnabled: true
                         maskSource: titleMaskItem
-                        visible: !nowPlayingModule.expanded
+                        visible: true
                     }
 
                     Rectangle {
@@ -539,22 +544,18 @@ ExpandableModule {
         // ── Expanded art / carousel / controls ──────────────────
         ModuleButton {
             id: trackArt
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: -Theme.moduleHeight - 5
-            z: -1
+            parent: nowPlayingModule.overlay
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 8
+            width: 260
+            z: 1
             clip: false
             opacity: nowPlayingModule.expanded ? 1 : 0
             color: "transparent"
-            implicitWidth: nowPlayingModule.expanded ? 260 : titleBtn.implicitWidth
-            implicitHeight: nowPlayingModule.expanded ? (nowPlayingModule.expandedHeight - 5) : 0
 
             Behavior on opacity {
-                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-            }
-            Behavior on implicitWidth {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-            }
-            Behavior on implicitHeight {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
 
@@ -572,7 +573,7 @@ ExpandableModule {
                 Rectangle {
                     id: carouselPanel
                     anchors.top: parent.top
-                    anchors.topMargin: Theme.moduleHeight + 15
+                    anchors.topMargin: 8
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 0
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -588,7 +589,7 @@ ExpandableModule {
                         anchors.top: parent.top
                         anchors.topMargin: 22
                         anchors.bottom: middleControls.top
-                        anchors.bottomMargin: 18
+                        anchors.bottomMargin: 35
                         anchors.left: parent.left
                         anchors.right: parent.right
 
@@ -639,7 +640,7 @@ ExpandableModule {
                                 + Math.max(0, 1.0 - delegateRoot.absCenterDist / 50) * 0.05
 
                             transform: Translate {
-                                x: -Math.pow(delegateRoot.effectiveNormDist, 3) * 80
+                                x: -Math.pow(delegateRoot.effectiveNormDist, 3) * 130
                             }
 
                             property real imgAspect: (delegateImg.implicitWidth > 0 && delegateImg.implicitHeight > 0)
@@ -738,6 +739,90 @@ ExpandableModule {
                                 }
                             } else {
                                 nowPlayingModule.changeVolume(wheel.angleDelta.y > 0 ? 0.05 : -0.05)
+                            }
+                        }
+                    }
+
+                    // Carousel Pagination Dots (multi-source direction indicators)
+                    Item {
+                        id: carouselIndicators
+                        anchors.top: playerCarousel.bottom
+                        anchors.bottom: middleControls.top
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: indicatorsRow.width
+                        visible: opacity > 0
+                        opacity: (nowPlayingModule.playerCount > 1) ? 1.0 : 0.0
+                        z: 10
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: 150 }
+                        }
+
+                        Row {
+                            id: indicatorsRow
+                            anchors.centerIn: parent
+                            spacing: 4
+
+                            Repeater {
+                                model: nowPlayingModule.playersList
+
+                                Item {
+                                    id: dotDelegate
+                                    required property var modelData
+                                    required property int index
+
+                                    readonly property bool isActive: index === playerCarousel.currentIndex
+
+                                    width: isActive ? 20 : 10
+                                    height: 20
+
+                                    Behavior on width {
+                                        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                                    }
+
+                                    Rectangle {
+                                        id: dotVisual
+                                        anchors.centerIn: parent
+                                        width: dotDelegate.isActive ? 16 : 6
+                                        height: 6
+                                        radius: 3
+                                        color: dotDelegate.isActive ? Theme.light.base : Theme.textPrimary
+                                        opacity: dotDelegate.isActive ? 1.0 : (dotMouseArea.containsMouse ? 0.75 : 0.35)
+
+                                        Behavior on width {
+                                            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                                        }
+                                        Behavior on opacity {
+                                            NumberAnimation { duration: 150 }
+                                        }
+                                        Behavior on color {
+                                            ColorAnimation { duration: 150 }
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: dotMouseArea
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            if (playerCarousel.currentIndex !== dotDelegate.index) {
+                                                playerCarousel.currentIndex = dotDelegate.index
+                                            }
+                                        }
+                                        onWheel: function(wheel) {
+                                            if (nowPlayingModule.playerCount > 1) {
+                                                if (wheel.angleDelta.y > 0 || wheel.angleDelta.x > 0) {
+                                                    if (playerCarousel.currentIndex > 0)
+                                                        playerCarousel.decrementCurrentIndex()
+                                                } else {
+                                                    if (playerCarousel.currentIndex < playerCarousel.count - 1)
+                                                        playerCarousel.incrementCurrentIndex()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

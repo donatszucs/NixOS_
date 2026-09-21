@@ -1,4 +1,4 @@
-// Audio volume — reads from wpctl, scroll to adjust
+// Audio volume — PipeWire sink & source control, scroll to adjust
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
@@ -8,13 +8,45 @@ import "../elements"
 
 ExpandableModule {
     id: audioModule
-    useDefaultPill: false
 
-    property int maxSinkBarLength: 270
-    property int sinkNameMaxChars: 30
+    property var pwAudio: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
+    property bool isMuted: pwAudio ? pwAudio.muted : false
+    property real currentVolume: pwAudio ? pwAudio.volume : 0.0
+
+    pillPercent: expanded ? 100 : Math.round(currentVolume * 100)
+    pillText: {
+        if (expanded) return ""
+        var v = Math.round(currentVolume * 100)
+        if (isMuted) return v + "% 󰖁"
+        if (v === 0) return v + "% "
+        if (v > 0 && v < 50) return v + "% "
+        return v + "% "
+    }
+    pillVariant: "dark"
+    expandedPillLabel: "Audio"
+
+    function getNode(nodeId) {
+        if (!Pipewire || !Pipewire.nodes || !Pipewire.nodes.values) return null
+        var vals = Pipewire.nodes.values
+        for (var i = 0; i < vals.length; ++i) {
+            if (vals[i] && vals[i].id === nodeId) return vals[i]
+        }
+        return null
+    }
 
     PwObjectTracker {
-        objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource]
+        objects: {
+            var arr = [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource]
+            if (Pipewire && Pipewire.nodes && Pipewire.nodes.values) {
+                for (var i = 0; i < Pipewire.nodes.values.length; ++i) {
+                    var n = Pipewire.nodes.values[i]
+                    if (n && (n.isSink || (n.properties && n.properties["media.class"] === "Audio/Sink"))) {
+                        arr.push(n)
+                    }
+                }
+            }
+            return arr
+        }
     }
 
     ListModel {
@@ -96,100 +128,34 @@ ExpandableModule {
     property int cardWidth: 280
 
     implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
-    implicitWidth: expanded ? baseColumn.implicitWidth : volumeButton.implicitWidth
+    implicitWidth: collapsedWidth
 
-    PillBarButton {
-        id: volumeButton
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-        }
-        height: Theme.moduleHeight
-        implicitHeight: Theme.moduleHeight
+    // Overlay dropdown setup
+    expandedDropdownWidth: cardWidth + 20
+    dropdownAlignment: "center"
 
-        property var pwAudio: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
-        property bool isMuted: pwAudio ? pwAudio.muted : false
-        property real currentVolume: pwAudio ? pwAudio.volume : 0.0
+    leftCornerStyle: "side"
+    rightCornerStyle: "side"
 
-        percent: Math.round(currentVolume * 100)
-
-        pillText: {
-            var v = percent
-            if (isMuted) return v + "% 󰖁"
-            if (v === 0) return v + "% "
-            if (v > 0 && v < 50) return v + "% "
-            return v + "% "
-        }
-
-        pillVariant: "dark"
-        variant: "neutral"
-        textAlign: "right"
-
-        colorOpacity: 0.5
-        pillColorOpacity: Theme.moduleOpacity
-        colorOverride: true
-        noHoverColorChange: !audioModule.expanded
-
-        rightMargin: Theme.modulePaddingH
-
-        bottomLeftRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
-        bottomRightRadius: audioModule.expanded ? Theme.moduleEdgeRadius : 0
-
-        MouseArea {
-            id: volMouseArea
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            hoverEnabled: true
-
-            property real startX: 0
-            property bool isDragging: false
-
-            onPressed: (mouse) => {
-                startX = mouse.x
-                isDragging = false
+    onPillWheel: (wheel) => {
+        if (pwAudio) {
+            if (wheel.angleDelta.y > 0) {
+                pwAudio.volume = Math.min(1.0, currentVolume + 0.02)
+            } else {
+                pwAudio.volume = Math.max(0.0, currentVolume - 0.02)
             }
-
-            onPositionChanged: (mouse) => {
-                if (mouse.buttons & Qt.LeftButton) {
-                    if (Math.abs(mouse.x - startX) > 4) {
-                        isDragging = true
-                    }
-                    if (isDragging && volumeButton.pwAudio) {
-                        var trackWidth = volumeButton.width - 10
-                        var frac = Math.max(0.0, Math.min(1.0, (mouse.x - 5) / trackWidth))
-                        volumeButton.pwAudio.volume = frac
-                    }
-                }
-            }
-
-            onReleased: (mouse) => {
-                if (!isDragging) {
-                    audioModule.expanded = !audioModule.expanded
-                }
-                isDragging = false
-            }
-
-            onWheel: (wheel) => {
-                if (volumeButton.pwAudio) {
-                    if (wheel.angleDelta.y > 0) {
-                        volumeButton.pwAudio.volume = Math.min(1.0, volumeButton.currentVolume + 0.02)
-                    } else {
-                        volumeButton.pwAudio.volume = Math.max(0.0, volumeButton.currentVolume - 0.02)
-                    }
-                }
-                wheel.accepted = true
-            }
+            wheel.accepted = true
         }
     }
 
     ColumnLayout {
         id: baseColumn
+        parent: audioModule.overlay
         spacing: 10
 
         anchors {
-            top: volumeButton.bottom
+            top: parent.top
+            left: parent.left
             right: parent.right
         }
 
@@ -298,96 +264,141 @@ ExpandableModule {
 
                         Repeater {
                             model: sinksListModel
-                            delegate: ModuleButton {
+                            delegate: Rectangle {
                                 id: sinkBtn
                                 required property var modelData
                                 required property int index
 
-                                variant: "neutral"
-                                cursorShape: Qt.PointingHandCursor
+                                property var devNode: audioModule.getNode(modelData.id)
+                                property var devAudio: devNode ? devNode.audio : null
+                                property real devVolume: devAudio ? devAudio.volume : 0.0
+                                property bool devMuted: devAudio ? devAudio.muted : false
+
                                 Layout.fillWidth: true
-                                implicitHeight: 46
+                                implicitHeight: 74
                                 radius: Theme.moduleEdgeRadius / 2 + 5
-                                opacity: 1.0
+                                color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.15) : Theme.neutral.base
                                 border.width: 2
-                                border.color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
-                                RowLayout {
-                                    id: sinkRow
-                                    anchors.fill: parent
-                                    anchors.rightMargin: 10
-                                    spacing: 12
-
-                                    Rectangle {
-                                        id: devIconBox
-                                        Layout.fillHeight: true
-                                        Layout.preferredWidth: sinkBtn.implicitHeight
-                                        implicitWidth: sinkBtn.implicitHeight
-                                        implicitHeight: sinkBtn.implicitHeight
-                                        color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
-                                        topLeftRadius: sinkBtn.radius
-                                        bottomLeftRadius: sinkBtn.radius
-
-                                        InverseRadius {
-                                            anchors.top: parent.top
-                                            anchors.left: parent.right
-                                            cornerPosition: "topLeft"
-                                            color: parent.color
-                                            size: 10
-                                        }
-
-                                        InverseRadius {
-                                            anchors.bottom: parent.bottom
-                                            anchors.left: parent.right
-                                            cornerPosition: "bottomLeft"
-                                            color: parent.color
-                                            size: 10
-                                        }
-
-                                        Text {
-                                            id: devIconText
-                                            anchors.centerIn: parent
-                                            text: modelData.icon
-                                            color: modelData.active ? Theme.statusBlue : Theme.textPrimary
-                                            opacity: modelData.active ? 1.0 : 0.7
-                                            font.family: Theme.font
-                                            font.pixelSize: Theme.fontSize + 3
-                                            font.bold: true
-                                            horizontalAlignment: Text.AlignHCenter
-                                            verticalAlignment: Text.AlignVCenter
-                                        }
-                                    }
-
-                                    ColumnLayout {
-                                        Layout.fillWidth: true
-                                        Layout.alignment: Qt.AlignVCenter
-                                        spacing: 2
-
-                                        HoverMarqueeText {
-                                            text: modelData.name
-                                            textMaxWidth: audioModule.cardWidth - 85
-                                            Layout.fillWidth: true
-                                            fontFamily: Theme.font
-                                            pixelSize: Theme.fontSize
-                                            fontBold: modelData.active
-                                            textColor: Theme.textPrimary
-                                        }
-
-                                        Text {
-                                            text: modelData.active ? "Active" : "Output"
-                                            color: modelData.active ? Theme.statusGreen : Theme.statusDisabled
-                                            font.family: Theme.font
-                                            font.pixelSize: Theme.fontSize * 0.75
-                                            font.bold: modelData.active
-                                        }
-                                    }
-                                }
+                                border.color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.45) : Theme.cardBorder
+                                clip: true
 
                                 Process {
                                     id: actionProc
                                     command: ["bash", "-c", "wpctl set-default " + modelData.id]
                                 }
 
-                                onClicked: actionProc.running = true
+                                ColumnLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 10
+                                    spacing: 10
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 8
+
+                                        Item {
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: 28
+
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: actionProc.running = true
+                                            }
+
+                                            RowLayout {
+                                                anchors.fill: parent
+                                                spacing: 8
+
+                                                Rectangle {
+                                                    width: 28
+                                                    height: 28
+                                                    radius: 6
+                                                    color: modelData.active ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: modelData.icon
+                                                        color: modelData.active ? Theme.statusBlue : Theme.textPrimary
+                                                        opacity: modelData.active ? 1.0 : 0.7
+                                                        font.family: Theme.font
+                                                        font.pixelSize: Theme.fontSize + 2
+                                                        font.bold: true
+                                                    }
+                                                }
+
+                                                ColumnLayout {
+                                                    Layout.fillWidth: true
+                                                    spacing: 1
+
+                                                    HoverMarqueeText {
+                                                        text: modelData.name
+                                                        textMaxWidth: audioModule.cardWidth - 145
+                                                        Layout.fillWidth: true
+                                                        fontFamily: Theme.font
+                                                        pixelSize: Theme.fontSize
+                                                        fontBold: modelData.active
+                                                        textColor: Theme.textPrimary
+                                                    }
+
+                                                    Text {
+                                                        text: modelData.active ? "Active" : "Output"
+                                                        color: modelData.active ? Theme.statusGreen : Theme.statusDisabled
+                                                        font.family: Theme.font
+                                                        font.pixelSize: Theme.fontSize * 0.72
+                                                        font.bold: modelData.active
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        Text {
+                                            text: devMuted ? "Muted" : Math.round(devVolume * 100) + "%"
+                                            color: devMuted ? Theme.statusRed : (modelData.active ? Theme.textPrimary : Theme.statusDisabled)
+                                            font.family: Theme.font
+                                            font.pixelSize: Theme.fontSize - 1
+                                            font.bold: true
+                                            Layout.alignment: Qt.AlignVCenter
+                                        }
+
+                                        ModuleButton {
+                                            variant: devMuted ? "red" : (modelData.active ? "light" : "neutral")
+                                            label: devMuted ? "󰖁" : ""
+                                            textFont: 12
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                if (devAudio) {
+                                                    devAudio.muted = !devAudio.muted
+                                                }
+                                            }
+                                            implicitHeight: 24
+                                            implicitWidth: 24
+                                            radius: 6
+                                            border.width: 1
+                                            Layout.alignment: Qt.AlignVCenter
+                                        }
+                                    }
+
+                                    StyledSlider {
+                                        id: devSlider
+                                        Layout.fillWidth: true
+                                        sliderHeight: 18
+                                        radius: Theme.moduleEdgeRadius / 2
+                                        from: 0.0
+                                        to: 1.0
+                                        value: devVolume
+                                        onMoved: {
+                                            if (devAudio) {
+                                                devAudio.volume = value
+                                                if (devAudio.muted && value > 0) {
+                                                    devAudio.muted = false
+                                                }
+                                            }
+                                        }
+                                        Layout.alignment: Qt.AlignVCenter
+
+                                    }
+                                }
                             }
                         }
                     }

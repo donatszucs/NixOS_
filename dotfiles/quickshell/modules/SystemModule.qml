@@ -7,12 +7,10 @@ import "../elements"
 
 ExpandableModule {
     id: systemModule
-    expandedBottomRightRadius: 0   // right screen edge — no rounding
-    property color buttonColor: headerPill.color
+    expandedBottomRightRadius: 0
     property int cardWidth: 200
 
-    // ── Standard pill setup ──────────────────────────────────────
-    pillText: expanded ? "":""
+    pillText: expanded ? "" : ""
     expandedPillLabel: "System"
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
@@ -20,25 +18,26 @@ ExpandableModule {
 
     headerPill.bottomRightRadius: 0
 
+    leftCornerStyle: "side"
+    rightCornerStyle: "bottom"
+
     implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
-    implicitWidth: expanded ? baseColumn.implicitWidth : 50
+    implicitWidth: collapsedWidth
 
-    InverseRadius {
-        id: corner
-        cornerPosition: "topRight"
-        color: headerPill.color
-        size: Theme.moduleEdgeRadius
+    collapsedWidth: expanded ? Math.max(50, expandedLabelWidth) : 50
 
-        anchors.top: headerPill.bottom
-        anchors.right: parent.right
+    // Overlay dropdown setup
+    expandedDropdownWidth: cardWidth + 10
+    dropdownAlignment: "right"
 
-    }
 
     ColumnLayout {
         id: baseColumn
+        parent: systemModule.overlay
         spacing: 10
         anchors {
-            top: headerPill.bottom
+            top: parent.top
+            left: parent.left
             right: parent.right
         }
 

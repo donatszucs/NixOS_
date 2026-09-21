@@ -89,6 +89,16 @@ PanelWindow {
             item: rightRow
         }
 
+        // Expandable module interaction regions
+        Region { item: (clockModule.contentVisible || clockModule.hasProtrudingCorners) ? clockModule.flowingBackground : null }
+        Region { item: (weatherModule.contentVisible || weatherModule.hasProtrudingCorners) ? weatherModule.flowingBackground : null }
+        Region { item: (nowPlayingModule.contentVisible || nowPlayingModule.hasProtrudingCorners) ? nowPlayingModule.flowingBackground : null }
+        Region { item: (lightSwitchModule.contentVisible || lightSwitchModule.hasProtrudingCorners) ? lightSwitchModule.flowingBackground : null }
+        Region { item: (audioModule.contentVisible || audioModule.hasProtrudingCorners) ? audioModule.flowingBackground : null }
+        Region { item: (connectionsModule.contentVisible || connectionsModule.hasProtrudingCorners) ? connectionsModule.flowingBackground : null }
+        Region { item: (trayModule.contentVisible || trayModule.hasProtrudingCorners) ? trayModule.flowingBackground : null }
+        Region { item: (systemModule.contentVisible || systemModule.hasProtrudingCorners) ? systemModule.flowingBackground : null }
+
         // Wallpaper Picker interaction region (side edge)
         Region {
             item: wallpaperPicker
@@ -120,10 +130,16 @@ PanelWindow {
         Region { item: rbwMenu }
         Region { item: notificationCenter }
         Region { item: sysmonAppWrapper }
-        
-        // Expose the protruding corners from the specific gaps you labeled
-        Region { item: leftCorner.leftRadius }
-        Region { item: rightCorner.rightRadius }
+
+        // Expandable module flowing backgrounds
+        Region { item: (clockModule.contentVisible || clockModule.hasProtrudingCorners) ? clockModule.flowingBackground : null }
+        Region { item: (weatherModule.contentVisible || weatherModule.hasProtrudingCorners) ? weatherModule.flowingBackground : null }
+        Region { item: (nowPlayingModule.contentVisible || nowPlayingModule.hasProtrudingCorners) ? nowPlayingModule.flowingBackground : null }
+        Region { item: (lightSwitchModule.contentVisible || lightSwitchModule.hasProtrudingCorners) ? lightSwitchModule.flowingBackground : null }
+        Region { item: (audioModule.contentVisible || audioModule.hasProtrudingCorners) ? audioModule.flowingBackground : null }
+        Region { item: (connectionsModule.contentVisible || connectionsModule.hasProtrudingCorners) ? connectionsModule.flowingBackground : null }
+        Region { item: (trayModule.contentVisible || trayModule.hasProtrudingCorners) ? trayModule.flowingBackground : null }
+        Region { item: (systemModule.contentVisible || systemModule.hasProtrudingCorners) ? systemModule.flowingBackground : null }
         Region { item: bottomLeftBorder }
     }
 
@@ -149,6 +165,17 @@ PanelWindow {
         visible: launcherModule.activeDragCount > 0
     }
 
+
+    // Left-row spacer helpers
+    readonly property real _clockSpacerNeed: clockModule.expanded
+        ? (clockModule.expandedDropdownWidth + (2 * Theme.moduleEdgeRadius)) 
+        - (clockModule.collapsedWidth + weatherModule.collapsedWidth + nowPlayingModule.collapsedWidth)
+        : 0
+
+    readonly property real _weatherSpacerNeed: weatherModule.expanded
+        ? ((weatherModule.expandedDropdownWidth / 2) + (2 * Theme.moduleEdgeRadius)) - ((weatherModule.collapsedWidth / 2) + nowPlayingModule.collapsedWidth)
+        : 0
+    readonly property real _leftSpacerWidth: Math.max(_clockSpacerNeed, _weatherSpacerNeed)
     // ── LEFT ─────────────────────────────────────────────────────────────
     RowLayout {
         id: leftRow
@@ -161,40 +188,27 @@ PanelWindow {
         layer.enabled: true
         layer.effect: panelShadowEffect
 
-        ModuleGap {
-            id: leftCorner
-            Layout.alignment: Qt.AlignTop
-            leftColor: clockModule.color
-            leftExpanded: true
-            implicitWidth: 0
-            implicitHeight: clockModule.implicitHeight
-        }
         ClockModule {
             Layout.alignment: Qt.AlignTop
             id: clockModule
-        }
-        ModuleGap {
-            Layout.alignment: Qt.AlignTop
-            leftModule: clockModule
-            rightModule: weatherModule
         }
         WeatherModule {
             Layout.alignment: Qt.AlignTop
             id: weatherModule
         }
-        ModuleGap {
+        // Spacer: grows when an expanded dropdown would overflow NowPlaying's right edge
+        Rectangle {
             Layout.alignment: Qt.AlignTop
-            leftModule: weatherModule
-            rightModule: nowPlayingModule
+            implicitHeight: Theme.moduleHeight
+            implicitWidth: _leftSpacerWidth
+            Behavior on implicitWidth {
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
+            color: nowPlayingModule.baseColor
         }
         NowPlayingModule {
             Layout.alignment: Qt.AlignTop
             id: nowPlayingModule
-        }
-        InverseRadius {
-            Layout.alignment: Qt.AlignTop
-            color: nowPlayingModule.color
-            cornerPosition: "topLeft"
         }
     }
 
@@ -268,74 +282,35 @@ PanelWindow {
         layer.enabled: true
         layer.effect: panelShadowEffect
 
-        InverseRadius {
-            Layout.alignment: Qt.AlignTop
-            cornerPosition: "topRight"
-            color: lightSwitchModule.color
-        }
         LightSwitchModule {
             Layout.alignment: Qt.AlignTop
             id: lightSwitchModule
         }
-        ModuleGap {
-            Layout.alignment: Qt.AlignTop
-            leftModule: lightSwitchModule
-        }
         VirtualKeyboardModule {
             Layout.alignment: Qt.AlignTop
             id: virtualKeyboardModule
-        }
-        ModuleGap {
-            Layout.alignment: Qt.AlignTop
         }
         MonitorBrightnessModule {
             Layout.alignment: Qt.AlignTop
             screenName: modelData.name
             id: monitorBrightnessModule
         }
-        ModuleGap {
-            Layout.alignment: Qt.AlignTop
-            rightModule: audioModule
-        }
         AudioModule {
             Layout.alignment: Qt.AlignTop
             id: audioModule
         }
-        ModuleGap {
-            Layout.alignment: Qt.AlignTop
-            leftModule: audioModule
-            rightModule: connectionsModule
-        }
         ConnectionsModule {
             Layout.alignment: Qt.AlignTop
             id: connectionsModule
-        }
-        ModuleGap {
-            Layout.alignment: Qt.AlignTop
-            leftModule: connectionsModule
-            rightModule: trayModule
         }
         TrayModule {
             Layout.alignment: Qt.AlignTop
             id: trayModule
             parentWindow: topPanel
         }
-        ModuleGap {
-            Layout.alignment: Qt.AlignTop
-            leftModule: trayModule
-            rightModule: systemModule
-        }
         SystemModule {
             Layout.alignment: Qt.AlignTop
             id: systemModule
-        }
-        ModuleGap {
-            id: rightCorner
-            Layout.alignment: Qt.AlignTop
-            rightColor: systemModule.color
-            rightExpanded: true
-            implicitHeight: systemModule.implicitHeight
-            implicitWidth: 0
         }
     }
 

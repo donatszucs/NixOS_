@@ -158,7 +158,16 @@ ExpandableModule {
 
     // ── Sizing ─────────────────────────────────────────────────
     implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
-    implicitWidth:  expanded ? baseColumn.implicitWidth : 65
+    implicitWidth: collapsedWidth
+
+    collapsedWidth: expanded ? Math.max(65, expandedLabelWidth) : 65
+
+    // Overlay dropdown setup
+    expandedDropdownWidth: cardWidth + 20
+    dropdownAlignment: "center"
+
+    leftCornerStyle: "side"
+    rightCornerStyle: "side"
 
     // Collapsed content inside the base pill
     Row {
@@ -191,8 +200,10 @@ ExpandableModule {
 
     ColumnLayout {
         id: baseColumn
+        parent: connectionsModule.overlay
         anchors { 
-            top: headerPill.bottom
+            top: parent.top
+            left: parent.left
             right: parent.right
          }
         spacing: 10

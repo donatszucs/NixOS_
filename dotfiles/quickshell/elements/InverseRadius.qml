@@ -38,8 +38,11 @@ Canvas {
     onSmoothCurveChanged: requestPaint()
     onSmoothToleranceChanged: requestPaint()
     onOuterRadiusChanged: requestPaint()
+    onWidthChanged: requestPaint()
+    onHeightChanged: requestPaint()
 
     onPaint: {
+        if (width <= 0 || height <= 0) return;
         var ctx = getContext("2d");
         ctx.clearRect(0, 0, width, height);
         ctx.fillStyle = color;

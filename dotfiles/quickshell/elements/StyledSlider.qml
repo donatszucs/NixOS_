@@ -12,6 +12,48 @@ Slider {
     property int topRightRadius: radius
     property int bottomLeftRadius: radius
     property int bottomRightRadius: radius
+    property real scrollStep: 0
+
+    HoverHandler {
+        cursorShape: Qt.PointingHandCursor
+    }
+
+    WheelHandler {
+        target: control
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: (event) => {
+            if (event.angleDelta.y === 0) return
+            var range = control.to - control.from
+            var defaultStep = (Math.abs(range) <= 1.01) ? 0.02 : Math.max(1, Math.round(Math.abs(range) / 20))
+            var singleStep = (control.scrollStep > 0) ? control.scrollStep
+                           : ((control.stepSize > 0) ? control.stepSize : defaultStep)
+
+            var notches = Math.round(event.angleDelta.y / 120.0)
+            if (notches === 0) notches = (event.angleDelta.y > 0 ? 1 : -1)
+            var delta = notches * singleStep
+
+            var minVal = Math.min(control.from, control.to)
+            var maxVal = Math.max(control.from, control.to)
+            var rawVal = control.value + delta
+
+            var newVal
+            if (control.stepSize > 0) {
+                newVal = Math.round(rawVal / control.stepSize) * control.stepSize
+            } else if (Math.abs(range) <= 1.01) {
+                newVal = Math.round(rawVal * 100) / 100.0
+            } else {
+                newVal = Math.round(rawVal)
+            }
+
+            newVal = Math.max(minVal, Math.min(maxVal, newVal))
+
+            if (newVal !== control.value) {
+                control.value = newVal
+                control.moved()
+            }
+            event.accepted = true
+        }
+    }
 
     background: Rectangle {
         x: control.leftPadding

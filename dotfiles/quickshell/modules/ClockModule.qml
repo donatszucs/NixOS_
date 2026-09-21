@@ -54,36 +54,37 @@ ExpandableModule {
 
     readonly property string viewMonthName: monthNames[viewMonth]
 
-    // ── Google Calendar Events State ─────────────────────────────
-    property var eventsByDate: ({})
-    property var eventColorsByDate: ({})
-    property var calendars: []
-    property var upcomingEvents: []
-    property bool hasCalendarUrl: false
-    property bool isUpdating: false
+    // Google Calendar State (backed by SharedState)
+    readonly property var eventsByDate: SharedState.calendarEventsByDate
+    readonly property var eventColorsByDate: SharedState.calendarEventColorsByDate
+    readonly property var calendars: SharedState.calendars
+    readonly property var upcomingEvents: SharedState.calendarUpcomingEvents
+    readonly property bool hasCalendarUrl: SharedState.hasCalendarUrl
+    readonly property bool isUpdating: SharedState.calendarUpdating
     property var selectedEvents: (eventsByDate && eventsByDate[selectedDate]) ? eventsByDate[selectedDate] : []
 
-    // ── Sizing & Appearance ──────────────────────────────────────
+    onEventsByDateChanged: {
+        root.selectedEvents = (root.eventsByDate && root.eventsByDate[root.selectedDate]) ? root.eventsByDate[root.selectedDate] : []
+    }
+
     property int cardWidth: 340
-    implicitWidth: expanded ? cardWidth : clockContent.implicitWidth + 24
+    implicitWidth: collapsedWidth
     implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + 20 : Theme.moduleHeight
+
+    expandedDropdownWidth: cardWidth + 20
+    dropdownAlignment: "left"
+
+    collapsedWidth: clockContent.implicitWidth + 24
 
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
     expandedPillLabel: "Calendar"
+    expandedBottomLeftRadius: 0
     bottomLeftRadius: 0
     headerPill.bottomLeftRadius: 0
 
-    InverseRadius {
-            id: corner
-            cornerPosition: "topLeft"
-            color: headerPill.color
-            size: Theme.moduleEdgeRadius
-
-            anchors.top: headerPill.bottom
-            anchors.left: parent.left
-
-        }
+    leftCornerStyle: "bottom"
+    rightCornerStyle: "side"
 
     // ── Helper Functions ─────────────────────────────────────────
     function formatDateStr(y, m, d) {
@@ -205,27 +206,7 @@ ExpandableModule {
     }
 
     function fetchCalendar() {
-        if (isUpdating) return
-        isUpdating = true
-        fetchCalendarProc.running = false
-        fetchCalendarProc.running = true
-    }
-
-    function reloadEventsFromJson() {
-        var text = calendarJsonFile.text()
-        if (!text || text.trim() === "") return
-        try {
-            var data = JSON.parse(text)
-            root.eventsByDate = data.events_by_date || {}
-            root.eventColorsByDate = data.event_colors_by_date || {}
-            root.calendars = data.calendars || []
-            root.upcomingEvents = data.upcoming || []
-            root.hasCalendarUrl = (data.has_url === true)
-            // Trigger property re-evaluation
-            root.selectedEvents = (root.eventsByDate && root.eventsByDate[root.selectedDate]) ? root.eventsByDate[root.selectedDate] : []
-        } catch (e) {
-            console.log("Error parsing calendar json:", e)
-        }
+        SharedState.fetchCalendar()
     }
 
     onSelectedDateChanged: {
@@ -314,8 +295,9 @@ ExpandableModule {
     // ── Expanded Content (Calendar Dropdown) ─────────────────────
     ColumnLayout {
         id: baseColumn
+        parent: root.overlay
         anchors {
-            top: headerPill.bottom
+            top: parent.top
             left: parent.left
             right: parent.right
             margins: 10
@@ -951,38 +933,6 @@ ExpandableModule {
         onTriggered: root.updateTime()
     }
 
-    // 15-minute background calendar refresh timer
-    Timer {
-        interval: 900000 // 15 mins
-        running: true
-        repeat: true
-        onTriggered: root.fetchCalendar()
-    }
-
-    // Python / Node fetch process
-    Process {
-        id: fetchCalendarProc
-        command: ["node", Quickshell.env("HOME") + "/.config/quickshell/scripts/fetch_calendar.js"]
-        onRunningChanged: {
-            if (!running) {
-                root.isUpdating = false
-                calendarJsonFile.reload()
-                reloadEventsFromJson()
-            }
-        }
-    }
-
-    // FileView watching calendar JSON output
-    FileView {
-        id: calendarJsonFile
-        path: "/tmp/quickshell_calendar.json"
-        blockLoading: false
-        watchChanges: true
-        onLoaded: reloadEventsFromJson()
-        onFileChanged: reloadEventsFromJson()
-        onTextChanged: reloadEventsFromJson()
-    }
-
     // Browser launcher process for Google Calendar
     Process {
         id: calendarProc
@@ -993,6 +943,5 @@ ExpandableModule {
     Component.onCompleted: {
         updateTime()
         updateCalendarGrid()
-        fetchCalendar()
     }
 }

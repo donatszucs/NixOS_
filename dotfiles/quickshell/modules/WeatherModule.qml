@@ -1,5 +1,4 @@
-// Weather module — Budapest V district via open-meteo.com (free, no API key)
-// Updates every 10 minutes using XMLHttpRequest
+// Weather module — powered by SharedState & Open-Meteo
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
@@ -10,179 +9,43 @@ import "../elements"
 ExpandableModule {
     id: root
 
-    // ── State ─────────────────────────────────────────────────────────
-    property real temperature: 0
-    property string weatherIcon: "󰖐"       // default: cloudy
-    property string weatherDesc: "…"
-    property bool   isDay: true
-    property bool   loaded: false
-    property bool   isUpdating: false
-    property bool   fetchFinished: true
-    property var    hourlyForecast: []
-    property var    dailyForecast: []
-
-    implicitWidth: expanded ? baseColumn.implicitWidth : pillContent.implicitWidth + 30
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
-
-    // ── Open-Meteo fetch ──────────────────────────────────────────────
-    // Budapest V district: lat 47.5049 lon 19.0495
-    readonly property string apiUrl:
-        "https://api.open-meteo.com/v1/forecast" +
-        "?latitude=47.5049&longitude=19.0495" +
-        "&current=temperature_2m,weather_code,is_day" +
-        "&hourly=temperature_2m,weather_code,is_day" +
-        "&daily=weather_code,temperature_2m_max,temperature_2m_min" +
-        "&forecast_days=10" +
-        "&past_days=2" +
-        "&timezone=Europe%2FBudapest"
+    readonly property real   temperature:    SharedState.weatherTemperature
+    readonly property string weatherIcon:    SharedState.weatherIcon
+    readonly property string weatherDesc:    SharedState.weatherDesc
+    readonly property bool   isDay:          SharedState.weatherIsDay
+    readonly property bool   loaded:         SharedState.weatherLoaded
+    readonly property bool   isUpdating:     SharedState.weatherUpdating
+    readonly property var    hourlyForecast: SharedState.weatherHourlyForecast
+    readonly property var    dailyForecast:  SharedState.weatherDailyForecast
 
     function fetchWeather() {
-        if (root.isUpdating) return
-        root.isUpdating = true
-        root.fetchFinished = false
-        updateMinTimer.restart()
-        var xhr = new XMLHttpRequest()
-        xhr.open("GET", root.apiUrl)
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState !== XMLHttpRequest.DONE) return
-            root.fetchFinished = true
-            if (!updateMinTimer.running) {
-                root.isUpdating = false
-            }
-            if (xhr.status === 200) {
-                try {
-                    var data = JSON.parse(xhr.responseText)
-                    var cur  = data.current
-                    root.temperature = Math.round(cur.temperature_2m)
-                    root.isDay       = cur.is_day === 1
-                    var wmo = cur.weather_code
-                    root.weatherIcon = root.wmoIcon(wmo, root.isDay)
-                    root.weatherDesc = root.wmoDesc(wmo)
-
-                    // Parse hourly
-                    var h = data.hourly
-                    var hData = []
-                    var nowTime = new Date().getTime()
-                    var startIndex = 0
-                    for (var i = 0; i < h.time.length; i++) {
-                        var tzTime = new Date(h.time[i]) 
-                        if (tzTime.getTime() > nowTime) {
-                            startIndex = i
-                            break
-                        }
-                    }
-                    for (var j = 0; j < 25; j++) {
-                        var idx = startIndex + j
-                        if (idx < h.time.length) {
-                            var t = new Date(h.time[idx])
-                            var hrs = t.getHours().toString().padStart(2, '0')
-                            var mins = t.getMinutes().toString().padStart(2, '0')
-                            hData.push({
-                                time: hrs + ":" + mins,
-                                temp: Math.round(h.temperature_2m[idx]),
-                                icon: root.wmoIcon(h.weather_code[idx], h.is_day[idx] === 1)
-                            })
-                        }
-                    }
-                    root.hourlyForecast = hData
-
-                    // Parse daily
-                    var d = data.daily
-                    var dData = []
-                    var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-                    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-                    for (var k = 0; k < d.time.length; k++) {
-                        var date = new Date(d.time[k])
-                        var dayName = (k === 2) ? "Today" : days[date.getDay()]
-                        var dateStr = date.getDate() + " " + months[date.getMonth()]
-                        dData.push({
-                            day: dayName,
-                            date: dateStr,
-                            icon: root.wmoIcon(d.weather_code[k], true),
-                            maxTemp: Math.round(d.temperature_2m_max[k]),
-                            minTemp: Math.round(d.temperature_2m_min[k])
-                        })
-                    }
-                    root.dailyForecast = dData
-                    
-                    root.loaded = true
-                } catch (e) {
-                    console.warn("WeatherModule: JSON parse error", e)
-                }
-            } else {
-                console.warn("WeatherModule: HTTP", xhr.status)
-            }
-        }
-        xhr.send()
+        SharedState.fetchWeather()
     }
 
-    Component.onCompleted: fetchWeather()
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
+    implicitWidth: collapsedWidth
 
-    Timer {
-        interval: 600000   // 10 minutes
-        running: true
-        repeat: true
-        onTriggered: root.fetchWeather()
-    }
+    readonly property real weatherNaturalWidth: Math.max(80, Math.round(pillContent.implicitWidth + 30))
+    property real lastWeatherWidth: 100
 
-    Timer {
-        id: updateMinTimer
-        interval: 1000
-        running: false
-        repeat: false
-        onTriggered: {
-            if (root.fetchFinished) {
-                root.isUpdating = false
-            }
+    onWeatherNaturalWidthChanged: {
+        if (!expanded && weatherNaturalWidth > 80) {
+            lastWeatherWidth = weatherNaturalWidth
         }
     }
 
-    // ── WMO code → Nerd Font icon (Nerd Font v3, RobotoMono Nerd Font Propo) ──
-    function wmoIcon(code, day) {
-        if (code === 0)                  return day ? "󰖙" : "󰖔"  // clear sky
-        if (code === 1)                  return day ? "󰖙" : "󰖔"  // mainly clear
-        if (code === 2)                  return day ? "󰖕" : "󰼱"  // partly cloudy
-        if (code === 3)                  return "󰖐"               // overcast
-        if (code === 45 || code === 48)  return "󰖑"               // fog / rime fog
-        if (code >= 51 && code <= 55)    return "󰖗"               // drizzle
-        if (code >= 56 && code <= 57)    return "󰙿"               // freezing drizzle
-        if (code >= 61 && code <= 65)    return "󰖗"               // rain
-        if (code >= 66 && code <= 67)    return "󰙿"               // freezing rain
-        if (code >= 71 && code <= 75)    return "󰼶"               // snow
-        if (code === 77)                 return "󰼶"               // snow grains
-        if (code >= 80 && code <= 82)    return "󰖗"               // rain showers
-        if (code >= 85 && code <= 86)    return "󰼶"               // snow showers
-        if (code === 95)                 return "󰖓"               // thunderstorm
-        if (code >= 96 && code <= 99)    return "󰖓"               // thunderstorm + hail
-        return "󰖐"
-    }
+    collapsedWidth: expanded ? Math.max(expandedLabelWidth, lastWeatherWidth) : weatherNaturalWidth
 
-    // ── WMO code → short description ─────────────────────────────────
-    function wmoDesc(code) {
-        if (code === 0)                  return "Clear"
-        if (code === 1)                  return "Mostly clear"
-        if (code === 2)                  return "Partly cloudy"
-        if (code === 3)                  return "Overcast"
-        if (code === 45 || code === 48)  return "Foggy"
-        if (code >= 51 && code <= 55)    return "Drizzle"
-        if (code >= 56 && code <= 57)    return "Freezing drizzle"
-        if (code >= 61 && code <= 65)    return "Rain"
-        if (code >= 66 && code <= 67)    return "Freezing rain"
-        if (code >= 71 && code <= 75)    return "Snow"
-        if (code === 77)                 return "Snow grains"
-        if (code >= 80 && code <= 82)    return "Showers"
-        if (code >= 85 && code <= 86)    return "Snow showers"
-        if (code === 95)                 return "Thunderstorm"
-        if (code >= 96 && code <= 99)    return "Thunderstorm"
-        return "Unknown"
-    }
+    expandedDropdownWidth: 340
+    dropdownAlignment: "center"
 
-    // ── Standard pill setup ──────────────────────────────────────
+    leftCornerStyle: "side"
+    rightCornerStyle: "side"
+
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
     expandedPillLabel: "Weather"
 
-    // ── Layout ──────────────────────────────────────────
     // Collapsed content inside the base pill
     RowLayout {
         id: pillContent
@@ -235,14 +98,16 @@ ExpandableModule {
 
     ColumnLayout {
         id: baseColumn
-        anchors.top: headerPill.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
+        parent: root.overlay
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
         spacing: 10
 
         MouseArea {
             visible: root.contentVisible
             opacity: root.contentOpacity
-            Layout.preferredWidth: 370
+            Layout.preferredWidth: expandedDropdownWidth - 20
             Layout.preferredHeight: popupCol.implicitHeight
             Layout.margins: 10
             acceptedButtons: Qt.NoButton
@@ -689,7 +554,7 @@ ExpandableModule {
                             scale: 1.1 - 0.4 * delegateRoot.absDist + Math.max(0, 1.0 - delegateRoot.absCenterDist / 90) * 0.1
                             
                             transform: Translate {
-                                x: -Math.pow(delegateRoot.effectiveNormDist, 3) * 55
+                                x: -Math.pow(delegateRoot.effectiveNormDist, 3) * 95
                             }
                             
                             ModuleButton {

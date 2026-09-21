@@ -6,128 +6,186 @@ import "../elements"
 
 ExpandableModule {
     id: root
-    // We manage our own content; keep the inherited label empty
-    label: ""
-    useDefaultPill: false
-    // ── Custom radii for this module's unique styling ────────────
-    expandedBottomLeftRadius:   130 / 2 + 10
+    property int cardWidth: 210
+
+    pillPercent: expanded ? 100 : (SharedState.lightAvailable && SharedState.lightActive ? SharedState.lightBrightness : 0)
+    pillText: {
+        if (expanded) return ""
+        if (!SharedState.lightAvailable) return "Offline"
+        if (SharedState.lightActive) return SharedState.lightBrightness + "% 󱩒"
+        return "Off 󱩎"
+    }
+    pillVariant: SharedState.lightVariant
+    expandedPillLabel: "Lights"
+
+    expandedBottomLeftRadius:   Theme.moduleEdgeRadius + 5
     expandedBottomRightRadius:  Theme.moduleEdgeRadius + 5
     collapsedBottomLeftRadius:  Theme.moduleEdgeRadius
     collapsedBottomRightRadius: 0
-    clip: false
 
-    property color buttonColor: labelText.color
+    leftCornerStyle: "top"
+    rightCornerStyle: "side"
 
-    implicitHeight: expanded
-        ? contentColumn.implicitHeight
-        : Theme.moduleHeight
-    implicitWidth: expanded ? 190 : labelText.implicitWidth
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
+    implicitWidth: collapsedWidth
 
+    // Overlay dropdown setup
+    expandedDropdownWidth: cardWidth + 20
+    dropdownAlignment: "left"
+
+    onPillRightClicked: {
+        SharedState.toggleLight()
+    }
+
+    onPillWheel: (wheel) => {
+        if (wheel.angleDelta.y > 0) {
+            SharedState.adjustLightBrightness(5)
+        } else if (wheel.angleDelta.y < 0) {
+            SharedState.adjustLightBrightness(-5)
+        }
+        wheel.accepted = true
+    }
 
     ColumnLayout {
-        id: contentColumn
+        id: baseColumn
+        parent: root.overlay
+        spacing: 10
         anchors {
             top: parent.top
+            left: parent.left
             right: parent.right
-            rightMargin: 0
         }
 
-        spacing: 0
+        MouseArea {
+            visible: root.contentVisible
+            opacity: root.contentOpacity
+            implicitWidth: root.cardWidth
+            Layout.preferredHeight: popupCol.implicitHeight
+            Layout.margins: 10
+            acceptedButtons: Qt.NoButton
 
-        PillBarButton {
-            id: labelText
-            colorOverride: true
-            noHoverColorChange: !root.expanded
-            implicitHeight: Theme.moduleHeight
-            clip: false
+            ColumnLayout {
+                id: popupCol
+                width: parent.width
+                spacing: 10
 
-            colorOpacity: 0.5
-            pillColorOpacity: Theme.moduleOpacity
+        // ── Brightness Card with Slider ──────────────────────────
+        Rectangle {
+            id: brightnessCard
+            color: Theme.bgBlurColor
+            radius: Theme.moduleEdgeRadius / 2 + 10
+            Layout.fillWidth: true
+            implicitHeight: brightTopBar.height + brightContent.implicitHeight + 20
+            clip: true
+            border.width: 2
+            border.color: Theme.cardBorder
 
-            variant: "neutral"
-            
-            Layout.alignment: Qt.AlignRight
-            Layout.preferredWidth: root.expanded ? 190 : labelText.implicitWidth
-            Behavior on Layout.preferredWidth {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            Rectangle {
+                id: brightTopBar
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: 35
+                color: Theme.topBarBlurColor
+
+                topLeftRadius: parent.radius
+                topRightRadius: parent.radius
+                bottomLeftRadius: 0
+                bottomRightRadius: 0
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 12
+                    anchors.rightMargin: 12
+                    spacing: 8
+
+                    Text {
+                        text: "Brightness"
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize + 1
+                        font.bold: true
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    Item { Layout.fillWidth: true } // spacer
+
+                    Text {
+                        text: SharedState.lightActive ? (SharedState.lightBrightness + "%") : "Off"
+                        color: SharedState.lightActive ? Theme.textPrimary : Theme.statusDisabled
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: true
+                        opacity: 0.85
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    ModuleButton {
+                        variant: SharedState.lightActive ? "light" : "neutral"
+                        label: SharedState.lightActive ? "󱩒" : "󱩎"
+                        textFont: 14
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: SharedState.toggleLight()
+                        implicitHeight: 24
+                        implicitWidth: 24
+                        radius: Theme.moduleEdgeRadius / 2
+                        border.width: 1
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                }
             }
 
-            percent: SharedState.lightAvailable && SharedState.lightActive ? SharedState.lightBrightness : 0
-            pillText: !SharedState.lightAvailable
-                ? "Offline"
-                : SharedState.lightActive
-                ? SharedState.lightBrightness + "% 󱩒"
-                : "Off 󱩎"
-            pillVariant: SharedState.lightVariant
-            
-            bottomLeftRadius:  0
-            bottomRightRadius: root.expanded ? Theme.moduleEdgeRadius + 5 : 0
+            InverseRadius {
+                anchors.top: brightTopBar.bottom
+                anchors.left: brightTopBar.left
+                color: brightTopBar.color
+            }
 
             InverseRadius {
-                anchors.top: labelText.top
-                anchors.right: labelText.left
                 cornerPosition: "topRight"
-                size: Theme.moduleEdgeRadius
-                color: labelText.color
+                anchors.top: brightTopBar.bottom
+                anchors.right: brightTopBar.right
+                color: brightTopBar.color
             }
 
-            InverseRadius {
-                anchors.top: labelText.bottom
-                anchors.left: labelText.left
-                cornerPosition: "topLeft"
-                size: Theme.moduleEdgeRadius
-                color: labelText.color
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-                onWheel: wheel => {
-                    if (wheel.angleDelta.y > 0) {
-                        SharedState.adjustLightBrightness(5)
-                    } else if (wheel.angleDelta.y < 0) {
-                        SharedState.adjustLightBrightness(-5)
-                    }
-                    wheel.accepted = true
+            RowLayout {
+                id: brightContent
+                anchors {
+                    top: brightTopBar.bottom
+                    left: parent.left
+                    right: parent.right
+                    margins: 10
                 }
+                spacing: 10
 
-                onPressedChanged: {
-                    if (!root.expanded) {
-                        root.pressed = !root.pressed
-                    } else {
-                        labelText.pressed = !labelText.pressed
+                StyledSlider {
+                    id: brightSlider
+                    Layout.fillWidth: true
+                    sliderHeight: 28
+                    radius: Theme.moduleEdgeRadius / 2
+                    from: 1
+                    to: 100
+                    value: SharedState.lightBrightness
+                    onMoved: {
+                        if (!SharedState.lightActive) {
+                            SharedState.lightActive = true
+                            SharedState.lightVariant = "dark"
+                        }
+                        SharedState.setLightBrightness(Math.round(value))
                     }
-                }
-                onClicked: (mouse) => {
-                    if (mouse.button === Qt.RightButton) {
-                        root.expanded = !root.expanded
-                    } else {
-                        SharedState.toggleLight()
-                    }
+                    Layout.alignment: Qt.AlignVCenter
                 }
             }
         }
-        // ── Colour wheel with surround ─────────────────────────────────────
+
+        // Colour wheel
         Rectangle {
             id: colorCard
-            opacity: root.expanded ? 1.0 : 0.0
-            visible: opacity > 0
-            Behavior on opacity {
-                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-            }
-
-            Layout.preferredWidth: 170
-            Layout.preferredHeight: 130
-            Layout.alignment: Qt.AlignTop | Qt.AlignRight
-            Layout.margins: 10
+            Layout.fillWidth: true
+            implicitHeight: 130
 
             color: Theme.bgBlurColor
-            topLeftRadius: Theme.moduleEdgeRadius
-            topRightRadius: Theme.moduleEdgeRadius
-            bottomRightRadius: Theme.moduleEdgeRadius
-            bottomLeftRadius: 130 / 2
+            radius: Theme.moduleEdgeRadius / 2 + 10
             border.width: 2
             border.color: Theme.cardBorder
 
@@ -137,8 +195,8 @@ ExpandableModule {
                 width: 130
                 height: 130
                 anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
+                anchors.leftMargin: 20
+                anchors.verticalCenter: parent.verticalCenter
 
                 Canvas {
                     id: colorWheel
@@ -226,13 +284,15 @@ ExpandableModule {
             ModuleButton {
                 id: resetButton
                 anchors.right: parent.right
+                anchors.rightMargin: 10
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                anchors.margins: 5
-                width: 30
+                anchors.topMargin: 8
+                anchors.bottomMargin: 8
+                width: 36
 
-                radius: width / 2
-                variant: "neutral"
+                radius: 10
+                variant: "light"
                 border.width: 2
                 cursorShape: Qt.PointingHandCursor
                 label: "R\nE\nS\nE\nT"
@@ -241,6 +301,8 @@ ExpandableModule {
                     colorDebounceTimer.stop()
                     SharedState.setLightWhite()
                 }
+            }
+        }
             }
         }
     }
