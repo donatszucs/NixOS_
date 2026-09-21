@@ -17,6 +17,18 @@ ModuleButton {
     property int activeDragCount: (activeWorkspaces ? activeWorkspaces.activeDragCount : 0) + (otherWorkspaces ? otherWorkspaces.activeDragCount : 0)
     clip: activeDragCount === 0
 
+    function collapseModule() {
+        launcherModule.expanded = false
+    }
+
+    onExpandedChanged: {
+        if (expanded) {
+            SharedState.setActiveModule(launcherModule)
+        } else {
+            SharedState.clearActiveModule(launcherModule)
+        }
+    }
+
     signal toggleWallpaperPicker()
     signal toggleBitwardenMenu()
     signal toggleClipboardHistory()

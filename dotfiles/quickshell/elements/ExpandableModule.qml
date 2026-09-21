@@ -124,7 +124,7 @@ ModuleButton {
     }
 
     // Render above RowLayout siblings when expanded so overlay is on top (and during collapse animation)
-    z: (expanded || contentVisible) ? 10 : 0
+    z: (SharedState.activeModule === root) ? 20 : (contentVisible ? 10 : 0)
 
     // ── Hover collapse ───────────────────────────────────────────
     // Set collapseOnHoverExit to false for modules that manage their
@@ -159,6 +159,18 @@ ModuleButton {
     onIsHoveredChanged: {
         if (!isHovered && expanded && collapseOnHoverExit) {
             root.expanded = false
+        }
+    }
+
+    function collapseModule() {
+        root.expanded = false
+    }
+
+    onExpandedChanged: {
+        if (expanded) {
+            SharedState.setActiveModule(root)
+        } else {
+            SharedState.clearActiveModule(root)
         }
     }
 

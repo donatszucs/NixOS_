@@ -35,7 +35,20 @@ ExpandableModule {
         ? _optimisticPlaying
         : (currentPlayer ? currentPlayer.isPlaying : false)
 
-    expanded: hasPlayer && isHovered
+    function checkHoverExpand() {
+        if (isHovered && hasPlayer && (SharedState.activeModule === null || SharedState.activeModule === nowPlayingModule)) {
+            nowPlayingModule.expanded = true
+        } else if (!isHovered && nowPlayingModule.expanded) {
+            nowPlayingModule.expanded = false
+        }
+    }
+
+    onIsHoveredChanged: checkHoverExpand()
+    onHasPlayerChanged: {
+        if (!hasPlayer && nowPlayingModule.expanded) {
+            nowPlayingModule.expanded = false
+        }
+    }
 
     property var currentPlayer: null
     property var manualPlayerOverride: null

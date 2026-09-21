@@ -7,6 +7,54 @@ import Quickshell.Services.Notifications as Notif
 
 Item {
     id: root
+
+    // ==========================================
+    // Module Mutex (Only one module open at a time)
+    // ==========================================
+    property var activeModule: null
+
+    function setActiveModule(mod) {
+        if (!mod) {
+            clearActiveModule(null)
+            return
+        }
+        if (activeModule === mod) return
+
+        var prev = activeModule
+        activeModule = mod
+
+        if (prev) {
+            if (typeof prev.collapseModule === "function") {
+                prev.collapseModule()
+            } else if (prev.expanded !== undefined && prev.expanded) {
+                prev.expanded = false
+            }
+            if (typeof prev.closeMenu === "function") {
+                prev.closeMenu()
+            }
+        }
+    }
+
+    function clearActiveModule(mod) {
+        if (!mod || activeModule === mod) {
+            activeModule = null
+        }
+    }
+
+    function closeActiveModule() {
+        if (activeModule) {
+            var prev = activeModule
+            activeModule = null
+            if (typeof prev.collapseModule === "function") {
+                prev.collapseModule()
+            } else if (prev.expanded !== undefined && prev.expanded) {
+                prev.expanded = false
+            }
+            if (typeof prev.closeMenu === "function") {
+                prev.closeMenu()
+            }
+        }
+    }
     
     // ==========================================
     // Light Switch State
