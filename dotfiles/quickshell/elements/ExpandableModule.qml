@@ -82,7 +82,14 @@ ModuleButton {
     property alias leftTopCorner:      _flowingBg
     property alias rightTopCorner:     _flowingBg
 
-    property int collapsedWidth: expanded ? Math.max(expandedLabelWidth, lastPillWidth) : pillNaturalWidth
+    // Title bar configuration
+    property int titleBarHeight: useDefaultPill ? Theme.moduleHeight *1.6 : 0
+    property string titleIcon: ""
+
+    property bool shrinkEnabled: true
+    property int shrinkAmount: 10
+    property int collapsedWidth: expanded ? lastPillWidth : pillNaturalWidth
+    implicitWidth: Math.max(20, collapsedWidth - ((root.expanded && shrinkEnabled) ? shrinkAmount : 0))
 
     clip: false
     noHoverColorChange: expanded
@@ -136,7 +143,7 @@ ModuleButton {
     property alias expandHover: _expandHover
 
     // Combined hover state: true when mouse is over the pill, overlay, or flowing background (protruding corners)
-    readonly property bool rawHovered: _expandHover.hovered || _overlayHover.hovered || _flowingBgHover.hovered
+    readonly property bool rawHovered: _expandHover.hovered || _overlayHover.hovered || _flowingBgHover.hovered || _headerPillHover.hovered
     property bool isHovered: rawHovered || _hoverGraceTimer.running
 
     Timer {
@@ -187,7 +194,8 @@ ModuleButton {
         NumberAnimation {
             id: _widthAnim
             duration: Theme.horizontalDuration
-            easing.type: Easing.OutCubic
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.1
         }
     }
 
@@ -201,7 +209,7 @@ ModuleButton {
         }
     }
 
-    readonly property bool contentVisible: expanded || _heightAnim.running || _widthAnim.running || _overlayWidthAnim.running || _opacityAnim.running || contentOpacity > 0.01 || implicitHeight > Theme.moduleHeight + 1
+    readonly property bool contentVisible: expanded || _heightAnim.running || _headerPillHeightAnim.running || _overlayWidthAnim.running || _opacityAnim.running || _headerPillYAnim.running || contentOpacity > 0.01 || implicitHeight > Theme.moduleHeight + 1
 
     // ── Overlay (dropdown container) ─────────────────────────────
     // The overlay renders the wider dropdown content below the header pill.
@@ -217,6 +225,7 @@ ModuleButton {
 
     Item {
         id: _overlay
+        z: 2
 
         // Vertical: starts right below the header pill area
         y: Theme.moduleHeight
@@ -336,11 +345,35 @@ ModuleButton {
         }
     }
 
+    // ── Bar tab MouseArea ────────────────────────────────────────
+    // When expanded, the header pill moves down underneath the bar.
+    // This MouseArea allows clicking or scrolling on the remaining bar tab.
+    MouseArea {
+        id: _barTabMouseArea
+        z: 3
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+        height: Theme.moduleHeight
+        cursorShape: Qt.PointingHandCursor
+        enabled: root.expanded
+        visible: enabled
+        onClicked: {
+            root.collapseModule()
+        }
+        onWheel: (wheel) => {
+            root.pillWheel(wheel)
+        }
+    }
+
     property alias headerPill: _headerPill
 
     PillBarButton {
         id: _headerPill
         visible: root.useDefaultPill
+        z: 1
 
         colorOpacity: 0.5
         pillColorOpacity: Theme.moduleOpacity
@@ -354,22 +387,45 @@ ModuleButton {
         noHoverColorChange: true
         noPressColorChange: true
 
-        height: Theme.moduleHeight
-        implicitHeight: Theme.moduleHeight
+        x: root.contentVisible ? _overlay.x : 0
+        y: root.expanded ? Theme.moduleHeight : 0
+        width: root.contentVisible ? _overlay.width : root.width
+        height: root.expanded ? Math.max(Theme.moduleHeight, _overlay.height) : Theme.moduleHeight
         implicitWidth: root.implicitWidth
+        openBottom: root.expanded
+        pillPaddingH: root.expanded ? 12 : 10
+        pillHeight: root.expanded ? Math.max(Theme.moduleHeight - 10, _overlay.height) : (Theme.moduleHeight - 10)
+        pillRadius: root.expanded ? 16 : ((Theme.moduleHeight - 10) / 2)
 
-        bottomLeftRadius:  0
-        bottomRightRadius: 0
+        Behavior on y {
+            NumberAnimation {
+                id: _headerPillYAnim
+                duration: Theme.verticalDuration
+                easing.type: Easing.OutCubic
+            }
+        }
 
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
+        Behavior on height {
+            enabled: !root.expanded
+            NumberAnimation {
+                id: _headerPillHeightAnim
+                duration: Theme.verticalDuration
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        HoverHandler {
+            id: _headerPillHover
         }
 
         MouseArea {
             id: _headerMouseArea
-            anchors.fill: parent
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+            }
+            height: root.expanded ? root.titleBarHeight : parent.height
             cursorShape: Qt.PointingHandCursor
             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
@@ -392,16 +448,20 @@ ModuleButton {
                 root.pillWheel(wheel)
             }
         }
-
         // ── Expanded title overlay ───────────────────────────────
         // Shows the expandedPillLabel when expanded, hidden when collapsed.
         Text {
             id: _expandedLabel
-            anchors.centerIn: parent
+            anchors {
+                top: parent.top
+                horizontalCenter: parent.horizontalCenter
+            }
+            height: root.titleBarHeight
+            verticalAlignment: Text.AlignVCenter
             text: root.expandedPillLabel
             color: Theme.textPrimary
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.fontSize + 2
             font.bold: true
             visible: opacity > 0 && root.expandedPillLabel !== ""
             opacity: root.expanded ? 1.0 : 0.0

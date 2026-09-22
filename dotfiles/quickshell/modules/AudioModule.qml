@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
 import Quickshell.Services.Pipewire
+import QtQuick.Effects
 
 import "../elements"
 
@@ -24,6 +25,7 @@ ExpandableModule {
     }
     pillVariant: "dark"
     expandedPillLabel: "Audio"
+    titleIcon: ""
 
     function getNode(nodeId) {
         if (!Pipewire || !Pipewire.nodes || !Pipewire.nodes.values) return null
@@ -127,15 +129,25 @@ ExpandableModule {
 
     property int cardWidth: 280
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
-    implicitWidth: collapsedWidth
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + audioModule.titleBarHeight + 15 : Theme.moduleHeight
 
     // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + 20
+    expandedDropdownWidth: cardWidth + 30
     dropdownAlignment: "center"
 
     leftCornerStyle: "side"
     rightCornerStyle: "side"
+
+    Component {
+        id: cardShadowEffect
+        MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.65)
+            shadowBlur: 0.8
+            shadowVerticalOffset: 2
+            shadowHorizontalOffset: 0
+        }
+    }
 
     onPillWheel: (wheel) => {
         if (pwAudio) {
@@ -155,8 +167,8 @@ ExpandableModule {
 
         anchors {
             top: parent.top
-            left: parent.left
-            right: parent.right
+            topMargin: audioModule.titleBarHeight
+            horizontalCenter: parent.horizontalCenter
         }
 
         scale: expanded ? 1 : 0
@@ -167,8 +179,9 @@ ExpandableModule {
             visible: audioModule.contentVisible
             opacity: audioModule.contentOpacity
             implicitWidth: audioModule.cardWidth
+            Layout.preferredWidth: audioModule.cardWidth
             Layout.preferredHeight: popupCol.implicitHeight
-            Layout.margins: 10
+            Layout.alignment: Qt.AlignHCenter
             acceptedButtons: Qt.NoButton
 
             ColumnLayout {
@@ -181,9 +194,12 @@ ExpandableModule {
                     radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
                     implicitHeight: audioTopBar.height + sinkCol.implicitHeight + 20
-                    clip: true
                     border.width: 2
                     border.color: Theme.cardBorder
+
+                    layer.enabled: true
+                    layer.smooth: true
+                    layer.effect: cardShadowEffect
 
                     Rectangle {
                         id: audioTopBar
@@ -425,9 +441,12 @@ ExpandableModule {
                     radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
                     implicitHeight: inputTopBar.height + sourceCol.implicitHeight + 20
-                    clip: true
                     border.width: 2
                     border.color: Theme.cardBorder
+
+                    layer.enabled: true
+                    layer.smooth: true
+                    layer.effect: cardShadowEffect
 
                     Rectangle {
                         id: inputTopBar

@@ -68,20 +68,19 @@ ExpandableModule {
     }
 
     property int cardWidth: 340
-    implicitWidth: collapsedWidth
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + 20 : Theme.moduleHeight
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + 15 : Theme.moduleHeight
 
-    expandedDropdownWidth: cardWidth + 20
+    expandedDropdownWidth: cardWidth + 30
     dropdownAlignment: "left"
 
-    collapsedWidth: clockContent.implicitWidth + 24
+    collapsedWidth: clockContent.implicitWidth + 20
 
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
     expandedPillLabel: "Calendar"
+    titleIcon: "󰸗"
     expandedBottomLeftRadius: 0
     bottomLeftRadius: 0
-    headerPill.bottomLeftRadius: 0
 
     leftCornerStyle: "bottom"
     rightCornerStyle: "side"
@@ -216,12 +215,13 @@ ExpandableModule {
     // ── Collapsed Content inside headerPill ──────────────────────
     RowLayout {
         id: clockContent
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.topMargin: 5
-        anchors.leftMargin: 17
+        parent: root.headerPill
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.top
+        anchors.verticalCenterOffset: Math.round(Theme.moduleHeight / 2)
         spacing: 10
-        visible: !root.expanded || opacity > 0
+        z: 6
+        visible: opacity > 0
         opacity: root.expanded ? 0.0 : 1.0
 
         Behavior on opacity {
@@ -230,6 +230,10 @@ ExpandableModule {
 
         RowLayout {
             spacing: 0
+
+            Item {
+                width: 10
+            }
 
             Text {
                 text: root.hours
@@ -273,11 +277,12 @@ ExpandableModule {
         }
 
         Rectangle {
-            color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 0.5)
+            color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 0.6)
             radius: (Theme.moduleHeight - 10) / 2
-            Layout.topMargin: 2
-            implicitWidth: 58
+            implicitWidth: 60
             implicitHeight: Theme.moduleHeight - 14
+
+            Layout.rightMargin: -5
 
             Text {
                 anchors.centerIn: parent
@@ -298,9 +303,8 @@ ExpandableModule {
         parent: root.overlay
         anchors {
             top: parent.top
-            left: parent.left
-            right: parent.right
-            margins: 10
+            topMargin: root.titleBarHeight
+            horizontalCenter: parent.horizontalCenter
         }
         spacing: 10
 
@@ -308,7 +312,7 @@ ExpandableModule {
         opacity: root.expanded ? 1.0 : 0.0
 
         scale: expanded ? 1 : 0
-        transformOrigin: Item.TopLeft
+        transformOrigin: Item.Top
         Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
         Behavior on opacity {
@@ -318,9 +322,11 @@ ExpandableModule {
         // ── Card 1: Month Calendar ───────────────────────────────
         Rectangle {
             id: calendarCard
-            Layout.fillWidth: true
+            implicitWidth: root.cardWidth
+            Layout.preferredWidth: root.cardWidth
+            Layout.alignment: Qt.AlignHCenter
             implicitHeight: calTopBar.height + calGridContent.implicitHeight + 16
-            radius: Theme.moduleEdgeRadius / 2 + 5
+            radius: Theme.moduleEdgeRadius / 2 + 10
             color: Theme.bgBlurColor
             border.width: 2
             border.color: Theme.cardBorder
@@ -654,9 +660,11 @@ ExpandableModule {
         // ── Card 2: Selected Day Agenda & Events ─────────────────
         Rectangle {
             id: agendaCard
-            Layout.fillWidth: true
+            implicitWidth: root.cardWidth
+            Layout.preferredWidth: root.cardWidth
+            Layout.alignment: Qt.AlignHCenter
             implicitHeight: agendaContentCol.implicitHeight + 20
-            radius: Theme.moduleEdgeRadius / 2 + 5
+            radius: Theme.moduleEdgeRadius / 2 + 10
             color: Theme.bgBlurColor
             border.width: 2
             border.color: Theme.cardBorder

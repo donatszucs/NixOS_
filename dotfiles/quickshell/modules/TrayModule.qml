@@ -35,9 +35,8 @@ ExpandableModule {
 
     // This MUST be assigned when you create the component in your main file
     property var parentWindow: null
-
-    implicitWidth: collapsedWidth
-
+    shrinkEnabled: false
+    
     collapsedWidth: topRow.implicitWidth
     
     implicitHeight: expanded ? trayCard.implicitHeight + Theme.moduleHeight + 14 : Theme.moduleHeight

@@ -17,20 +17,20 @@ ExpandableModule {
     }
     pillVariant: SharedState.lightVariant
     expandedPillLabel: "Lights"
+    titleIcon: "󱩒"
 
-    expandedBottomLeftRadius:   Theme.moduleEdgeRadius + 5
-    expandedBottomRightRadius:  Theme.moduleEdgeRadius + 5
+    expandedBottomLeftRadius:   Theme.moduleEdgeRadius + 10
+    expandedBottomRightRadius:  Theme.moduleEdgeRadius + 10
     collapsedBottomLeftRadius:  Theme.moduleEdgeRadius
     collapsedBottomRightRadius: 0
 
     leftCornerStyle: "top"
     rightCornerStyle: "side"
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
-    implicitWidth: collapsedWidth
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + 5 : Theme.moduleHeight
 
     // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + 20
+    expandedDropdownWidth: cardWidth + 30
     dropdownAlignment: "left"
 
     onPillRightClicked: {
@@ -54,6 +54,8 @@ ExpandableModule {
             top: parent.top
             left: parent.left
             right: parent.right
+            topMargin: root.titleBarHeight
+            leftMargin: 5
         }
 
         scale: expanded ? 1 : 0

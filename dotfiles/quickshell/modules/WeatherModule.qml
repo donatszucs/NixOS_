@@ -22,8 +22,9 @@ ExpandableModule {
         SharedState.fetchWeather()
     }
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
-    implicitWidth: collapsedWidth
+    property int cardWidth: 310
+
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + 15 : Theme.moduleHeight
 
     readonly property real weatherNaturalWidth: Math.max(80, Math.round(pillContent.implicitWidth + 30))
     property real lastWeatherWidth: 100
@@ -34,9 +35,9 @@ ExpandableModule {
         }
     }
 
-    collapsedWidth: expanded ? Math.max(expandedLabelWidth, lastWeatherWidth) : weatherNaturalWidth
+    collapsedWidth: expanded ? lastWeatherWidth : weatherNaturalWidth
 
-    expandedDropdownWidth: 340
+    expandedDropdownWidth: cardWidth + 30
     dropdownAlignment: "center"
 
     leftCornerStyle: "side"
@@ -45,13 +46,17 @@ ExpandableModule {
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
     expandedPillLabel: "Weather"
+    titleIcon: root.weatherIcon
 
     // Collapsed content inside the base pill
     RowLayout {
         id: pillContent
-        anchors.centerIn: headerPill
+        parent: root.headerPill
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.top
+        anchors.verticalCenterOffset: Math.round(Theme.moduleHeight / 2)
         spacing: 8
-        z: 1
+        z: 6
 
         opacity: root.expanded ? 0.0 : 1.0
         visible: opacity > 0
@@ -99,10 +104,12 @@ ExpandableModule {
     ColumnLayout {
         id: baseColumn
         parent: root.overlay
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
         spacing: 10
+        anchors {
+            top: parent.top
+            topMargin: root.titleBarHeight
+            horizontalCenter: parent.horizontalCenter
+        }
 
         scale: expanded ? 1 : 0
         transformOrigin: Item.Top
@@ -111,9 +118,10 @@ ExpandableModule {
         MouseArea {
             visible: root.contentVisible
             opacity: root.contentOpacity
-            Layout.preferredWidth: expandedDropdownWidth - 20
+            implicitWidth: root.cardWidth
+            Layout.preferredWidth: root.cardWidth
             Layout.preferredHeight: popupCol.implicitHeight
-            Layout.margins: 10
+            Layout.alignment: Qt.AlignHCenter
             acceptedButtons: Qt.NoButton
 
             ColumnLayout {

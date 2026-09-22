@@ -10,7 +10,42 @@ ModuleButton {
     property string pillVariant: root.variant
     property var pillPal: Theme.palette(pillVariant)
     property int pillRadius: (Theme.moduleHeight - 10) / 2
+    property int pillHeight: Theme.moduleHeight - 10
+    property int pillPaddingH: 10
     property real pillColorOpacity: root.colorOpacity 
+    property real gradientOpacityBase: root.openBottom ? 0.4 : 1.0
+    property real gradientOpacityLow: root.openBottom ? 0.0 : 1.0
+
+    property bool openBottom: false
+    property int openBottomTopMargin: 6
+    property int openBottomBottomMargin: 6
+
+    property int pillTopLeftRadius: pillRadius
+    property int pillTopRightRadius: pillRadius
+    property int pillBottomLeftRadius: openBottom ? (Theme.moduleEdgeRadius + 5): pillRadius
+    property int pillBottomRightRadius: openBottom ? (Theme.moduleEdgeRadius + 5): pillRadius
+
+    Behavior on pillHeight {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+    }
+    Behavior on pillRadius {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+    }
+    Behavior on pillPaddingH {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+    }
+    Behavior on pillTopLeftRadius {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+    }
+    Behavior on pillTopRightRadius {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+    }
+    Behavior on pillBottomLeftRadius {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+    }
+    Behavior on pillBottomRightRadius {
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+    }
 
     // Smooth percentage animation
     property real animatedPercent: percent
@@ -22,14 +57,34 @@ ModuleButton {
     label: pillText
     textColor: "transparent"
 
-        // Outer pill background
+    // Outer pill background
     Rectangle {
-        anchors.centerIn: parent
-        width: parent.width - 10
-        height: Theme.moduleHeight - 10
-        radius: pillRadius
-        color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.pillColorOpacity)
+        id: pillBg
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: Math.max(0, parent.width - root.pillPaddingH)
+        y: root.openBottom ? root.openBottomTopMargin : Math.round((parent.height - root.pillHeight) / 2)
+        height: root.openBottom ? Math.max(0, parent.height - root.openBottomTopMargin - root.openBottomBottomMargin) : root.pillHeight
         clip: true
+
+        topLeftRadius: root.pillTopLeftRadius
+        topRightRadius: root.pillTopRightRadius
+        bottomLeftRadius: root.pillBottomLeftRadius
+        bottomRightRadius: root.pillBottomRightRadius
+
+        gradient: Gradient {
+            orientation: Gradient.Vertical
+            GradientStop {
+                position: 0.0
+                color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.pillColorOpacity * gradientOpacityBase)
+            }
+            GradientStop {
+                position: 1.0
+                color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.pillColorOpacity * gradientOpacityLow)
+                Behavior on color {
+                    ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                }
+            }
+        }
 
         // Inner percentage fill (clipped linearly)
         Item {
@@ -38,16 +93,30 @@ ModuleButton {
                 top: parent.top
                 bottom: parent.bottom
             }
-            width: parent.width * (Math.min(Math.max(root.animatedPercent, 0), 100) / 100)
+            width: root.openBottom ? parent.width : parent.width * (Math.min(Math.max(root.animatedPercent, 0), 100) / 100)
             clip: true
 
             Rectangle {
                 width: parent.parent.width
                 height: parent.parent.height
-                radius: parent.parent.radius
-                color: Qt.rgba(root.pillPal.pillFill.r, root.pillPal.pillFill.g, root.pillPal.pillFill.b, root.pillPal.pillFill.a * root.pillColorOpacity)
-                Behavior on color {
-                    ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+                topLeftRadius: parent.parent.topLeftRadius
+                topRightRadius: parent.parent.topRightRadius
+                bottomLeftRadius: parent.parent.bottomLeftRadius
+                bottomRightRadius: parent.parent.bottomRightRadius
+
+                gradient: Gradient {
+                    orientation: Gradient.Vertical
+                    GradientStop {
+                        position: 0.0
+                        color: Qt.rgba(root.pillPal.pillFill.r, root.pillPal.pillFill.g, root.pillPal.pillFill.b, root.pillPal.pillFill.a * root.pillColorOpacity * gradientOpacityBase)
+                    }
+                    GradientStop {
+                        position: 1.0
+                        color: Qt.rgba(root.pillPal.pillFill.r, root.pillPal.pillFill.g, root.pillPal.pillFill.b, root.pillPal.pillFill.a * root.pillColorOpacity * gradientOpacityLow)
+                        Behavior on color {
+                            ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                        }
+                    }
                 }
             }
         }
@@ -55,10 +124,13 @@ ModuleButton {
         // Overlay border so it displays evenly over both track and fill colors
         Rectangle {
             anchors.fill: parent
-            radius: parent.radius
+            topLeftRadius: parent.topLeftRadius
+            topRightRadius: parent.topRightRadius
+            bottomLeftRadius: parent.bottomLeftRadius
+            bottomRightRadius: parent.bottomRightRadius
             color: "transparent"
-            border.color: Qt.rgba(root.pillPal.pillBorder.r, root.pillPal.pillBorder.g, root.pillPal.pillBorder.b, root.pillPal.pillBorder.a * root.pillColorOpacity)
-            border.width: 2
+            border.color: Qt.rgba(root.pillPal.pillBorder.r, root.pillPal.pillBorder.g, root.pillPal.pillBorder.b, root.pillPal.pillBorder.a * root.pillColorOpacity * gradientOpacityBase)
+            border.width: root.openBottom ? 2 : 2
         }
 
         // Text inside the pill
@@ -71,14 +143,15 @@ ModuleButton {
             font.bold: true
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
+            opacity: root.openBottom ? 0.0 : 1.0
+
+            Behavior on opacity {
+                NumberAnimation { duration: root.openBottom ? 0 : Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
 
             Behavior on color {
                 ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
             }
-        }
-
-        Behavior on color {
-            ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
     }
 }

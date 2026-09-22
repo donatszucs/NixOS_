@@ -73,8 +73,7 @@ ExpandableModule {
     property real expandedHeight: 290
 
     implicitHeight: expanded ? expandedHeight : Theme.moduleHeight
-    implicitWidth: collapsedWidth
-
+    shrinkEnabled: false
     collapsedWidth: expanded ? 230 : titleBtn.implicitWidth + 10
 
     // Overlay dropdown setup

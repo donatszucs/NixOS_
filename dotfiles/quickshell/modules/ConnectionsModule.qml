@@ -155,15 +155,15 @@ ExpandableModule {
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
     expandedPillLabel: "Connections"
+    titleIcon: btDevicesConnected ? "󰂱" : "󰈀"
 
     // ── Sizing ─────────────────────────────────────────────────
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
-    implicitWidth: collapsedWidth
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + connectionsModule.titleBarHeight + 15 : Theme.moduleHeight
 
-    collapsedWidth: expanded ? Math.max(65, expandedLabelWidth) : 65
+    collapsedWidth: 65
 
     // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + 20
+    expandedDropdownWidth: cardWidth + 30
     dropdownAlignment: "center"
 
     leftCornerStyle: "side"
@@ -172,9 +172,13 @@ ExpandableModule {
     // Collapsed content inside the base pill
     Row {
         id: labelRow
-        anchors.centerIn: headerPill
+        parent: connectionsModule.headerPill
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.top
+        anchors.verticalCenterOffset: Math.round(Theme.moduleHeight / 2)
+        height: implicitHeight
         spacing: 12
-        z: 1
+        z: 6
 
         opacity: connectionsModule.expanded ? 0.0 : 1.0
         visible: opacity > 0
@@ -187,14 +191,12 @@ ExpandableModule {
             color: connectionsModule.netColor
             font.family: Theme.font
             font.pixelSize: Theme.fontSize + 1
-            anchors.verticalCenter: parent.verticalCenter
         }
         Text {
             text: connectionsModule.btIcon
             color: connectionsModule.btColor
             font.family: Theme.font
             font.pixelSize: Theme.fontSize + 1
-            anchors.verticalCenter: parent.verticalCenter
         }
     }
 
@@ -203,9 +205,9 @@ ExpandableModule {
         parent: connectionsModule.overlay
         anchors { 
             top: parent.top
-            left: parent.left
-            right: parent.right
-         }
+            topMargin: connectionsModule.titleBarHeight
+            horizontalCenter: parent.horizontalCenter
+        }
         spacing: 10
 
 
@@ -218,10 +220,9 @@ ExpandableModule {
             visible: connectionsModule.contentVisible
             opacity: connectionsModule.contentOpacity
             implicitWidth: connectionsModule.cardWidth
+            Layout.preferredWidth: connectionsModule.cardWidth
             Layout.preferredHeight: popupCol.implicitHeight
-            Layout.leftMargin: 10
-            Layout.rightMargin: 10
-            Layout.bottomMargin: 10
+            Layout.alignment: Qt.AlignHCenter
 
             acceptedButtons: Qt.NoButton
             onWheel: (wheel) => {

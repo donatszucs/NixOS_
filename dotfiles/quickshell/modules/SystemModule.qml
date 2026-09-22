@@ -12,6 +12,7 @@ ExpandableModule {
 
     pillText: expanded ? "" : ""
     expandedPillLabel: "System"
+    titleIcon: ""
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
     expandedBottomLeftRadius: Theme.moduleEdgeRadius + 10
@@ -21,13 +22,12 @@ ExpandableModule {
     leftCornerStyle: "side"
     rightCornerStyle: "bottom"
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight : Theme.moduleHeight
-    implicitWidth: collapsedWidth
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + systemModule.titleBarHeight + 15 : Theme.moduleHeight
 
-    collapsedWidth: expanded ? Math.max(50, expandedLabelWidth) : 50
+    collapsedWidth: 50
 
     // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + 10
+    expandedDropdownWidth: cardWidth + 30
     dropdownAlignment: "right"
 
 
@@ -37,21 +37,22 @@ ExpandableModule {
         spacing: 10
         anchors {
             top: parent.top
-            left: parent.left
-            right: parent.right
+            topMargin: systemModule.titleBarHeight
+            horizontalCenter: parent.horizontalCenter
         }
 
 
         scale: expanded ? 1 : 0
-        transformOrigin: Item.TopRight
+        transformOrigin: Item.Top
         Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
         MouseArea {
             visible: systemModule.contentVisible
             opacity: systemModule.contentOpacity
-            implicitWidth: systemModule.cardWidth - 10
+            implicitWidth: systemModule.cardWidth
+            Layout.preferredWidth: systemModule.cardWidth
             Layout.preferredHeight: popupCol.implicitHeight
-            Layout.margins: 10
+            Layout.alignment: Qt.AlignHCenter
             acceptedButtons: Qt.NoButton
 
             ColumnLayout {
