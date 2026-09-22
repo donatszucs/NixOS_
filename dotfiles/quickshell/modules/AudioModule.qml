@@ -25,7 +25,6 @@ ExpandableModule {
     }
     pillVariant: "dark"
     expandedPillLabel: "Audio"
-    titleIcon: ""
 
     function getNode(nodeId) {
         if (!Pipewire || !Pipewire.nodes || !Pipewire.nodes.values) return null

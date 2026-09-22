@@ -17,7 +17,6 @@ ExpandableModule {
     }
     pillVariant: SharedState.lightVariant
     expandedPillLabel: "Lights"
-    titleIcon: "󱩒"
 
     expandedBottomLeftRadius:   Theme.moduleEdgeRadius + 10
     expandedBottomRightRadius:  Theme.moduleEdgeRadius + 10

@@ -78,7 +78,6 @@ ExpandableModule {
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
     expandedPillLabel: "Calendar"
-    titleIcon: "󰸗"
     expandedBottomLeftRadius: 0
     bottomLeftRadius: 0
 

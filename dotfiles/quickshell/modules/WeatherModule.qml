@@ -46,7 +46,6 @@ ExpandableModule {
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
     expandedPillLabel: "Weather"
-    titleIcon: root.weatherIcon
 
     // Collapsed content inside the base pill
     RowLayout {

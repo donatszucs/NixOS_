@@ -12,7 +12,6 @@ ExpandableModule {
 
     pillText: expanded ? "" : ""
     expandedPillLabel: "System"
-    titleIcon: ""
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
     expandedBottomLeftRadius: Theme.moduleEdgeRadius + 10

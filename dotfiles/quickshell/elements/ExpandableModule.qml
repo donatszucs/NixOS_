@@ -84,7 +84,6 @@ ModuleButton {
 
     // Title bar configuration
     property int titleBarHeight: useDefaultPill ? Theme.moduleHeight *1.6 : 0
-    property string titleIcon: ""
 
     property bool shrinkEnabled: true
     property int shrinkAmount: 10

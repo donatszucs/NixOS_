@@ -155,7 +155,6 @@ ExpandableModule {
     pillPercent: expanded ? 100 : 0
     pillVariant: "neutral"
     expandedPillLabel: "Connections"
-    titleIcon: btDevicesConnected ? "󰂱" : "󰈀"
 
     // ── Sizing ─────────────────────────────────────────────────
     implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + connectionsModule.titleBarHeight + 15 : Theme.moduleHeight
