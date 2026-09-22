@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 
 ModuleButton {
     id: root
@@ -15,6 +16,7 @@ ModuleButton {
     property real pillColorOpacity: root.colorOpacity 
     property real gradientOpacityBase: root.openBottom ? 0.4 : 1.0
     property real gradientOpacityLow: root.openBottom ? 0.0 : 1.0
+    property string bgImageSource: ""
 
     property bool openBottom: false
     property int openBottomTopMargin: 6
@@ -83,6 +85,64 @@ ModuleButton {
                 Behavior on color {
                     ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                 }
+            }
+        }
+
+        // Background album art image (collapsed only)
+        Item {
+            id: _bgImgContainer
+            anchors.fill: parent
+            anchors.margins: 2
+            visible: root.bgImageSource !== "" && opacity > 0
+            opacity: root.openBottom ? 0.0 : 1.0
+
+            Behavior on opacity {
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
+
+            Image {
+                id: _bgImg
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectCrop
+                source: root.bgImageSource
+                sourceSize.width: 300
+                asynchronous: true
+                smooth: true
+                visible: false
+            }
+
+            Item {
+                id: _bgImgMask
+                anchors.fill: parent
+                visible: false
+                layer.enabled: true
+                layer.smooth: true
+
+                Rectangle {
+                    anchors.fill: parent
+                    topLeftRadius: Math.max(0, pillBg.topLeftRadius - 2)
+                    topRightRadius: Math.max(0, pillBg.topRightRadius - 2)
+                    bottomLeftRadius: Math.max(0, pillBg.bottomLeftRadius - 2)
+                    bottomRightRadius: Math.max(0, pillBg.bottomRightRadius - 2)
+                    color: "black"
+                }
+            }
+
+            MultiEffect {
+                anchors.fill: parent
+                source: _bgImg
+                maskEnabled: true
+                maskSource: _bgImgMask
+                opacity: 0.28
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                topLeftRadius: Math.max(0, pillBg.topLeftRadius - 2)
+                topRightRadius: Math.max(0, pillBg.topRightRadius - 2)
+                bottomLeftRadius: Math.max(0, pillBg.bottomLeftRadius - 2)
+                bottomRightRadius: Math.max(0, pillBg.bottomRightRadius - 2)
+                color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.45)
             }
         }
 

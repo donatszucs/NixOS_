@@ -310,6 +310,7 @@ ModuleButton {
     property real   pillPercent: expanded ? 100 : 0
     property string pillVariant: "neutral"
     property string expandedPillLabel: ""
+    property string pillBgImageSource: ""
 
     Text {
         id: _expandedMeasureText
@@ -382,6 +383,7 @@ ModuleButton {
         pillVariant: root.pillVariant
         variant:     "neutral"
         colorOverride: true
+        bgImageSource: root.pillBgImageSource
 
         noHoverColorChange: true
         noPressColorChange: true

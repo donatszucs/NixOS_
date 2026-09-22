@@ -10,10 +10,6 @@ import "../elements"
 
 ExpandableModule {
     id: nowPlayingModule
-    collapseOnHoverExit: false
-    useDefaultPill: false
-    noHoverColorChange: expanded || !isPlaying
-    noPressColorChange: true
     collapsedBottomRightRadius: Theme.moduleEdgeRadius
 
     property string titleText: "Nothing playing"
@@ -35,18 +31,15 @@ ExpandableModule {
         ? _optimisticPlaying
         : (currentPlayer ? currentPlayer.isPlaying : false)
 
-    function checkHoverExpand() {
-        if (isHovered && hasPlayer && (SharedState.activeModule === null || SharedState.activeModule === nowPlayingModule)) {
-            nowPlayingModule.expanded = true
-        } else if (!isHovered && nowPlayingModule.expanded) {
+    onHasPlayerChanged: {
+        if (!hasPlayer && nowPlayingModule.expanded) {
             nowPlayingModule.expanded = false
         }
     }
 
-    onIsHoveredChanged: checkHoverExpand()
-    onHasPlayerChanged: {
-        if (!hasPlayer && nowPlayingModule.expanded) {
-            nowPlayingModule.expanded = false
+    onExpandedChanged: {
+        if (expanded && !hasPlayer) {
+            expanded = false
         }
     }
 
@@ -70,19 +63,40 @@ ExpandableModule {
     readonly property bool canSeek: currentPlayer && (currentPlayer.canSeek || currentPlayer.positionSupported) && trackLength > 0
     readonly property bool hasVolume: currentPlayer && currentPlayer.volumeSupported
 
-    property real expandedHeight: 290
+    pillPercent: expanded ? 100 : (trackLength > 0 ? Math.round((currentPosition / trackLength) * 100) : 0)
+    pillVariant: "dark"
+    pillBgImageSource: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
 
-    implicitHeight: expanded ? expandedHeight : Theme.moduleHeight
-    shrinkEnabled: false
-    collapsedWidth: expanded ? 230 : titleBtn.implicitWidth + 10
+    property int cardWidth: 260
+    property real cardHeight: 260
+
+    implicitHeight: expanded ? cardHeight + Theme.moduleHeight + nowPlayingModule.titleBarHeight + 15 : Theme.moduleHeight
+
+    readonly property real mediaNaturalWidth: Math.max(70, Math.min(200, Math.round(collapsedRow.implicitWidth + 26)))
+    property real lastCollapsedWidth: 100
+    onMediaNaturalWidthChanged: {
+        if (!expanded && mediaNaturalWidth > 70) {
+            lastCollapsedWidth = mediaNaturalWidth
+        }
+    }
+    collapsedWidth: expanded ? lastCollapsedWidth : mediaNaturalWidth
 
     // Overlay dropdown setup
-    expandedDropdownWidth: 280
+    expandedDropdownWidth: cardWidth + 30
 
     dropdownAlignment: "right"
 
     leftCornerStyle: "side"
     rightCornerStyle: "top"
+
+    onPillRightClicked: {
+        nowPlayingModule.doTogglePlay()
+    }
+
+    onPillWheel: (wheel) => {
+        nowPlayingModule.changeVolume(wheel.angleDelta.y > 0 ? 0.05 : -0.05)
+        wheel.accepted = true
+    }
 
     // ── Helper: time formatter (seconds -> mm:ss) ────────────────
     function formatTime(seconds) {
@@ -358,11 +372,11 @@ ExpandableModule {
         }
     }
 
-    // Position updater: active ONLY when expanded and playing (zero idle overhead)
+    // Position updater: active whenever playing (updates scrubber & collapsed progress pill)
     Timer {
         id: positionTimer
         interval: 350
-        running: nowPlayingModule.expanded && nowPlayingModule.currentPlayer !== null && nowPlayingModule.currentPlayer.isPlaying
+        running: nowPlayingModule.currentPlayer !== null && nowPlayingModule.currentPlayer.isPlaying
         repeat: true
         onTriggered: {
             if (!nowPlayingModule.scrubbing && nowPlayingModule.currentPlayer && nowPlayingModule.currentPlayer.positionSupported) {
@@ -405,196 +419,120 @@ ExpandableModule {
         }
     }
 
-    ColumnLayout {
-        id: column
-        anchors.fill: parent
-        anchors.bottomMargin: nowPlayingModule.expanded ? 10 : 0
-        spacing: 0
+    Component {
+        id: cardShadowEffect
+        MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.65)
+            shadowBlur: 0.8
+            shadowVerticalOffset: 2
+            shadowHorizontalOffset: 0
+        }
+    }
 
-        // ── Title bar ───────────────────────────────────────────
-        ModuleButton {
-            id: titleBtn
-            colorOverride: !nowPlayingModule.expanded
-            noHoverColorChange: !nowPlayingModule.expanded
-            noPressColorChange: !nowPlayingModule.expanded
-            variant: "dark"
+    // ── Header Content (Icon + Track Title, always visible in headerPill) ──
+    RowLayout {
+        id: collapsedRow
+        parent: nowPlayingModule.headerPill
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.top
+        anchors.verticalCenterOffset: nowPlayingModule.expanded
+            ? Math.round(nowPlayingModule.titleBarHeight / 2)
+            : Math.round(Theme.moduleHeight / 2)
+        spacing: nowPlayingModule.expanded ? 8 : 6
+        z: 6
 
-            implicitHeight: Theme.moduleHeight - 10
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-            Layout.topMargin: 5
-
-            implicitWidth: scrollingText.implicitWidth + artistText.implicitWidth + 5
-            radius: Theme.moduleEdgeRadius - 5
-
-            // Background album art (collapsed only)
-            Item {
-                anchors.fill: parent
-
-                Item {
-                    anchors.fill: parent
-                    anchors.margins: 2
-
-                    Item {
-                        id: titleArtCropped
-                        anchors.fill: parent
-                        visible: false
-                        Image {
-                            anchors.fill: parent
-                            fillMode: Image.PreserveAspectCrop
-                            source: currentPlayer && currentPlayer.trackArtUrl
-                                ? currentPlayer.trackArtUrl : ""
-                            sourceSize.width: 250
-                        }
-                    }
-
-                    MultiEffect {
-                        source: titleArtCropped
-                        anchors.fill: parent
-                        maskEnabled: true
-                        maskSource: titleMaskItem
-                        visible: true
-                    }
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: titleBtn.radius - 2
-                        color: Qt.lighter(Theme.palette("dark").base, 2.7)
-                        opacity: 0.8
-                    }
-
-                    Item {
-                        id: titleMaskItem
-                        anchors.fill: parent
-                        visible: false
-                        layer.enabled: true
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: titleBtn.radius - 2
-                            color: "black"
-                        }
-                    }
-                }
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: titleBtn.radius
-                    color: "transparent"
-                    border.width: 2
-                    border.color: Theme.palette("light").border
-                }
-            }
-
-            RowLayout {
-                anchors.fill: parent
-                spacing: 0
-                layoutDirection: Qt.RightToLeft
-
-                HoverMarqueeText {
-                    id: scrollingText
-                    clip: true
-                    Layout.alignment: Qt.AlignVCenter
-                    Layout.rightMargin: 10
-                    Layout.leftMargin: 5
-
-                    text: nowPlayingModule.titleText
-                    textMaxWidth: 190
-                    fontFamily: Theme.font
-                    pixelSize: Theme.fontSize
-                    textColor: Theme.textPrimary
-                    fontBold: true
-                }
-
-                ModuleButton {
-                    id: artistText
-                    variant: "neutral"
-                    clip: false
-                    Layout.fillHeight: true
-                    implicitWidth: 25
-
-                    topLeftRadius: titleBtn.radius
-                    bottomLeftRadius: titleBtn.radius
-                    topRightRadius: 0
-                    bottomRightRadius: 0
-
-                    label: nowPlayingModule.getPlayerIcon(nowPlayingModule.currentPlayer)
-                    leftMargin: 3
-
-                    Image {
-                        id: playerAppIcon
-                        anchors.leftMargin: 6
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.topMargin: 5
-                        width: 16
-                        height: 16
-                        sourceSize.width: 32
-                        sourceSize.height: 32
-                        fillMode: Image.PreserveAspectFit
-                        smooth: true
-                        source: nowPlayingModule.getPlayerIconSource(nowPlayingModule.currentPlayer)
-                        visible: status === Image.Ready && source != ""
-                    }
-
-                    InverseRadius {
-                        anchors.top: parent.top
-                        anchors.left: parent.right
-                        cornerPosition: "topLeft"
-                        color: artistText.color
-                        size: 10
-                    }
-                    InverseRadius {
-                        anchors.bottom: parent.bottom
-                        anchors.left: parent.right
-                        cornerPosition: "bottomLeft"
-                        color: artistText.color
-                        size: 10
-                    }
-                }
-            }
+        Behavior on anchors.verticalCenterOffset {
+            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+        }
+        Behavior on spacing {
+            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
         }
 
-        // ── Expanded art / carousel / controls ──────────────────
-        ModuleButton {
-            id: trackArt
-            parent: nowPlayingModule.overlay
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 8
-            width: 260
-            z: 1
-            clip: false
-            opacity: nowPlayingModule.expanded ? 1 : 0
-            color: "transparent"
+        Item {
+            implicitWidth: nowPlayingModule.expanded ? 18 : 16
+            implicitHeight: nowPlayingModule.expanded ? 18 : 16
+            Layout.alignment: Qt.AlignVCenter
+            Layout.leftMargin: 4
 
-            Behavior on opacity {
+            Behavior on implicitWidth {
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
+            Behavior on implicitHeight {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
 
-            Item {
-                id: albumArtClip
+            Image {
+                id: collapsedAppIcon
                 anchors.fill: parent
+                sourceSize.width: 36
+                sourceSize.height: 36
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                source: nowPlayingModule.getPlayerIconSource(nowPlayingModule.currentPlayer)
+                visible: status === Image.Ready && source != ""
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: nowPlayingModule.getPlayerIcon(nowPlayingModule.currentPlayer)
+                color: Theme.textPrimary
+                font.family: Theme.font
+                font.pixelSize: nowPlayingModule.expanded ? Theme.fontSize + 1 : Theme.fontSize
+                visible: !collapsedAppIcon.visible
+            }
+        }
+
+        HoverMarqueeText {
+            id: collapsedTitleText
+            clip: true
+            Layout.alignment: Qt.AlignVCenter
+            text: nowPlayingModule.titleText
+            textMaxWidth: nowPlayingModule.expanded ? 210 : 150
+            fontFamily: Theme.font
+            pixelSize: nowPlayingModule.expanded ? Theme.fontSize : Theme.fontSize - 1
+            textColor: Theme.textPrimary
+            fontBold: true
+        }
+    }
+
+    // ── Expanded art / carousel / controls ──────────────────
+    ColumnLayout {
+        id: baseColumn
+        parent: nowPlayingModule.overlay
+        spacing: 10
+        anchors {
+            top: parent.top
+            topMargin: nowPlayingModule.titleBarHeight
+            horizontalCenter: parent.horizontalCenter
+        }
+
+        scale: expanded ? 1 : 0
+        transformOrigin: Item.Top
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+
+        MouseArea {
+            visible: nowPlayingModule.contentVisible
+            opacity: nowPlayingModule.contentOpacity
+            implicitWidth: nowPlayingModule.cardWidth
+            Layout.preferredWidth: nowPlayingModule.cardWidth
+            implicitHeight: nowPlayingModule.cardHeight
+            Layout.preferredHeight: nowPlayingModule.cardHeight
+            Layout.alignment: Qt.AlignHCenter
+            acceptedButtons: Qt.NoButton
+
+            Rectangle {
+                id: carouselPanel
+                anchors.fill: parent
+                color: Theme.bgBlurColor
+                radius: Theme.moduleEdgeRadius / 2 + 10
+                clip: true
+                border.width: 2
+                border.color: Theme.cardBorder
 
                 layer.enabled: true
                 layer.smooth: true
-                layer.effect: MultiEffect {
-                    opacity: 0.95
-                }
-
-                // Carousel & Metadata Panel (translucent background card)
-                Rectangle {
-                    id: carouselPanel
-                    anchors.top: parent.top
-                    anchors.topMargin: 8
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 0
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: parent.width
-                    color: Theme.bgBlurColor
-                    radius: Theme.moduleEdgeRadius
-                    clip: true
-                    border.width: 2
-                    border.color: Theme.cardBorder
+                layer.effect: cardShadowEffect
                     // Multi-player: carousel
                     ListView {
                         id: playerCarousel
@@ -1154,4 +1092,3 @@ ExpandableModule {
             }
         }
     }
-}
