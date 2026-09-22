@@ -64,7 +64,7 @@ ExpandableModule {
     readonly property bool hasVolume: currentPlayer && currentPlayer.volumeSupported
 
     pillPercent: expanded ? 100 : (trackLength > 0 ? Math.round((currentPosition / trackLength) * 100) : 0)
-    pillVariant: "dark"
+    pillVariant: "neutral"
     pillBgImageSource: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
 
     property int cardWidth: 260

@@ -69,14 +69,99 @@ ExpandableModule {
                     border.width: 2
                     border.color: Theme.cardBorder
 
+                    InverseRadius {
+                        anchors.top: sysBottomBar.bottom
+                        anchors.left: sysBottomBar.left
+                        cornerPosition: "topLeft"
+                        color: sysBottomBar.color
+                    }
+
+                    InverseRadius {
+                        cornerPosition: "topRight"
+                        anchors.top: sysBottomBar.bottom
+                        anchors.right: sysBottomBar.right
+                        color: sysBottomBar.color
+                    }
+
+                    Rectangle {
+                        id: sysBottomBar
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        height: 35
+                        color: Theme.topBarBlurColor
+
+                        topLeftRadius: parent.radius
+                        topRightRadius: parent.radius
+                        bottomLeftRadius: 0
+                        bottomRightRadius: 0
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 15
+                            anchors.rightMargin: 15
+                            spacing: 5
+
+                            HoverMarqueeText {
+                                id: userNameText
+                                text: "User 󰚭"
+                                textMaxWidth: 100
+                                fontFamily: Theme.font
+                                pixelSize: Theme.fontSize + 8
+                                fontBold: true
+                                textColor: Theme.textPrimary
+
+                                Process {
+                                    command: ["whoami"]
+                                    running: true
+                                    stdout: StdioCollector {
+                                        onStreamFinished: {
+                                            var username = text.trim();
+                                            if (username.length > 0) {
+                                                userNameText.text = username.charAt(0).toUpperCase() + username.slice(1)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Item { Layout.fillWidth: true } // spacer
+
+                            ModuleButton {
+                                variant: "neutral"
+                                label: "󰚰"
+                                textFont: 16
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: updateProc.running = true
+                                implicitHeight: 23
+                                implicitWidth: 28
+                                radius: Theme.moduleEdgeRadius / 2
+                                border.width: 1
+                                Layout.alignment: Qt.AlignVCenter
+                            }
+
+                            ModuleButton {
+                                variant: "neutral"
+                                label: "󱄅"
+                                textFont: 16
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: rebuildProc.running = true
+                                implicitHeight: 23
+                                implicitWidth: 28
+                                radius: Theme.moduleEdgeRadius / 2
+                                border.width: 1
+                                Layout.alignment: Qt.AlignVCenter
+                            }
+                        }
+                    }
+
                     ColumnLayout {
                         id: sysContentCol
                         anchors {
-                            top: parent.top
+                            bottom: parent.bottom
                             left: parent.left
                             right: parent.right
-                            margins: 12
-                            topMargin: 10
+                            margins: 10
                         }
                         spacing: 5
 
@@ -183,92 +268,6 @@ ExpandableModule {
                                 }
 
                                 onClicked: actionProc.running = true
-                            }
-                        }
-                    }
-
-                    InverseRadius {
-                        anchors.bottom: sysBottomBar.top
-                        anchors.left: sysBottomBar.left
-                        cornerPosition: "bottomLeft"
-                        color: sysBottomBar.color
-                    }
-
-                    InverseRadius {
-                        cornerPosition: "bottomRight"
-                        anchors.bottom: sysBottomBar.top
-                        anchors.right: sysBottomBar.right
-                        color: sysBottomBar.color
-                    }
-
-                    Rectangle {
-                        id: sysBottomBar
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        height: 35
-                        color: Theme.topBarBlurColor
-
-                        topLeftRadius: 0
-                        topRightRadius: 0
-                        bottomLeftRadius: parent.radius
-                        bottomRightRadius: parent.radius
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 15
-                            anchors.rightMargin: 15
-                            spacing: 8
-
-                            HoverMarqueeText {
-                                id: userNameText
-                                text: "User 󰚭"
-                                textMaxWidth: 100
-                                fontFamily: Theme.font
-                                pixelSize: Theme.fontSize + 8
-                                fontBold: true
-                                textColor: Theme.textPrimary
-
-                                Process {
-                                    command: ["whoami"]
-                                    running: true
-                                    stdout: StdioCollector {
-                                        onStreamFinished: {
-                                            var username = text.trim();
-                                            if (username.length > 0) {
-                                                userNameText.text = username.charAt(0).toUpperCase() + username.slice(1)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            Item { Layout.fillWidth: true } // spacer
-
-                            ModuleButton {
-                                variant: "light"
-                                label: "󰚰"
-                                textFont: 16
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: updateProc.running = true
-                                implicitHeight: 23
-                                implicitWidth: 28
-                                radius: Theme.moduleEdgeRadius / 2
-                                border.width: 1
-                                Layout.alignment: Qt.AlignVCenter
-                            }
-
-                            ModuleButton {
-                                variant: "light"
-                                label: "󱄅"
-                                textFont: 16
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: rebuildProc.running = true
-                                implicitHeight: 23
-                                implicitWidth: 28
-                                radius: Theme.moduleEdgeRadius / 2
-                                border.width: 1
-                                Layout.alignment: Qt.AlignVCenter
                             }
                         }
                     }

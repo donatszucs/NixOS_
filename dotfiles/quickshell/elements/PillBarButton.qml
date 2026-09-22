@@ -142,7 +142,7 @@ ModuleButton {
                 topRightRadius: Math.max(0, pillBg.topRightRadius - 2)
                 bottomLeftRadius: Math.max(0, pillBg.bottomLeftRadius - 2)
                 bottomRightRadius: Math.max(0, pillBg.bottomRightRadius - 2)
-                color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.45)
+                color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.25)
             }
         }
 
