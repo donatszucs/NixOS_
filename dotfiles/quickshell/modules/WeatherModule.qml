@@ -9,6 +9,17 @@ import "../elements"
 ExpandableModule {
     id: root
 
+    Component {
+        id: cardShadowEffect
+        MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.65)
+            shadowBlur: 0.8
+            shadowVerticalOffset: 2
+            shadowHorizontalOffset: 0
+        }
+    }
+
     readonly property real   temperature:    SharedState.weatherTemperature
     readonly property string weatherIcon:    SharedState.weatherIcon
     readonly property string weatherDesc:    SharedState.weatherDesc
@@ -43,7 +54,7 @@ ExpandableModule {
     leftCornerStyle: "side"
     rightCornerStyle: "side"
 
-    pillPercent: expanded ? 100 : 0
+    pillPercent: 0
     pillVariant: "neutral"
     expandedPillLabel: "Weather"
 
@@ -156,6 +167,11 @@ ExpandableModule {
                     implicitHeight: 200
                     border.width: 2
                     border.color: Theme.cardBorder
+                    clip: true
+
+                    layer.enabled: true
+                    layer.smooth: true
+                    layer.effect: cardShadowEffect
 
                     Rectangle {
                         id: hourlyTopBar
@@ -433,10 +449,14 @@ ExpandableModule {
                     color: Theme.bgBlurColor
                     radius: Theme.moduleEdgeRadius / 2 + 10
                     Layout.fillWidth: true
-                    implicitHeight: 200
+                    implicitHeight: 165
                     border.width: 2
                     border.color: Theme.cardBorder
                     clip: true
+
+                    layer.enabled: true
+                    layer.smooth: true
+                    layer.effect: cardShadowEffect
 
                     Rectangle {
                         id: dailyTopBar
@@ -505,7 +525,7 @@ ExpandableModule {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.topMargin: 5
-                        anchors.bottomMargin: 10
+                        anchors.bottomMargin: 8
                         model: root.dailyForecast
                         orientation: ListView.Horizontal
                         currentIndex: 2
@@ -516,89 +536,91 @@ ExpandableModule {
                             }
                         }
                     
-                    // Center the selected item without wrapping
-                    preferredHighlightBegin: carousel.width / 2 - 37.5
-                    preferredHighlightEnd: carousel.width / 2 + 37.5
-                    highlightRangeMode: ListView.StrictlyEnforceRange
-                    snapMode: ListView.SnapToItem
-                    
-                    spacing: 15
-                    
+                        // Center the selected item without wrapping
+                        preferredHighlightBegin: carousel.width / 2 - 37.5
+                        preferredHighlightEnd: carousel.width / 2 + 37.5
+                        highlightRangeMode: ListView.StrictlyEnforceRange
+                        snapMode: ListView.SnapToItem
+                        
+                        spacing: 15
 
-                    MouseArea {
-                        anchors.fill: parent
-                        acceptedButtons: Qt.NoButton
-                        onWheel: function(wheel) {
-                            if (wheel.angleDelta.y > 0 || wheel.angleDelta.x > 0) {
-                                if (carousel.currentIndex > 2)
-                                    carousel.decrementCurrentIndex()
-                            } else {
-                                carousel.incrementCurrentIndex()
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.NoButton
+                            onWheel: function(wheel) {
+                                if (wheel.angleDelta.y > 0 || wheel.angleDelta.x > 0) {
+                                    if (carousel.currentIndex > 2)
+                                        carousel.decrementCurrentIndex()
+                                } else {
+                                    carousel.incrementCurrentIndex()
+                                }
                             }
                         }
-                    }
-                    
-                    delegate: Item {
-                        id: delegateRoot
-                        width: 75
-                        height: 160
                         
-                        property real itemCenter: x + width / 2
-                        property real viewCenter: carousel.contentX + carousel.width / 2
-                        property real centerDist: itemCenter - viewCenter
-                        
-                        // Create a deadzone so 3 cards stay in full focus (centers are at 0, 90, -90)
-                        property real absCenterDist: Math.abs(centerDist)
-                        property real outOfFocusDist: Math.max(0, absCenterDist - 95)
-                        
-                        property real absDist: Math.min(1.0, outOfFocusDist / 100)
-                        property real effectiveNormDist: (centerDist < 0 ? -1 : 1) * absDist
-                        
-                        z: 100 - absDist * 100
-                        
-                        Item {
-                            width: 75
-                            height: 110
-                            anchors.centerIn: parent
+                        delegate: Item {
+                            id: delegateRoot
+                            width: 70
+                            height: carousel.height
                             
-                            // 1.1 base scale for focus zone, plus an extra 0.1 bump for the true center card
-                            scale: 1.1 - 0.4 * delegateRoot.absDist + Math.max(0, 1.0 - delegateRoot.absCenterDist / 90) * 0.1
+                            property real itemCenter: x + width / 2
+                            property real viewCenter: carousel.contentX + carousel.width / 2
+                            property real centerDist: itemCenter - viewCenter
                             
-                            transform: Translate {
-                                x: -Math.pow(delegateRoot.effectiveNormDist, 3) * 95
-                            }
+                            // Create a deadzone so 3 cards stay in full focus (centers are at 0, 90, -90)
+                            property real absCenterDist: Math.abs(centerDist)
+                            property real outOfFocusDist: Math.max(0, absCenterDist - 90)
                             
-                            ModuleButton {
-                                anchors.fill: parent
-                                color: Theme.palettePaper
-                                radius: Theme.moduleEdgeRadius / 2
+                            property real absDist: Math.min(1.0, outOfFocusDist / 100)
+                            property real effectiveNormDist: (centerDist < 0 ? -1 : 1) * absDist
+                            
+                            z: 100 - absDist * 100
+                            
+                            Item {
+                                width: 70
+                                height: 90
+                                anchors.centerIn: parent
+                                
+                                // 1.1 base scale for focus zone, plus an extra 0.1 bump for the true center card
+                                scale: 1.1 - 0.4 * delegateRoot.absDist + Math.max(0, 1.0 - delegateRoot.absCenterDist / 90) * 0.1
+                                
+                                transform: Translate {
+                                    x: -Math.pow(delegateRoot.effectiveNormDist, 3) * 100
+                                }
+                                
+                                Rectangle {
+                                    id: cardBg
+                                    anchors.fill: parent
+                                    color: Qt.darker(Theme.palettePaper, 1.1)
+                                    radius: Theme.moduleEdgeRadius / 2
 
-                                layer.enabled: true
-                                layer.smooth: true
-                                layer.effect: MultiEffect {
-                                    brightness: -delegateRoot.absDist * 0.3
-                                    contrast: -delegateRoot.absDist * 0.7
-                                    shadowEnabled: true
-                                    shadowColor: Qt.rgba(0, 0, 0, 0.6)
-                                    shadowBlur: 0.8
-                                    shadowVerticalOffset: 0
-                                    shadowHorizontalOffset: 0
+                                    layer.enabled: true
+                                    layer.smooth: true
+                                    layer.effect: MultiEffect {
+                                        brightness: -delegateRoot.absDist * 0.3
+                                        contrast: -delegateRoot.absDist * 0.7
+                                        shadowEnabled: true
+                                        shadowColor: Qt.rgba(0, 0, 0, 0.6)
+                                        shadowBlur: 0.8
+                                        shadowVerticalOffset: 0
+                                        shadowHorizontalOffset: 0
 
-                                    Behavior on shadowColor {
-                                        ColorAnimation { duration: 150 }
+                                        Behavior on shadowColor {
+                                            ColorAnimation { duration: 150 }
+                                        }
                                     }
                                 }
                                 
                                 ColumnLayout {
                                     id: dailyCol
                                     anchors.centerIn: parent
-                                    spacing: 2
+                                    spacing: 1
+                                    opacity: 1.0 - delegateRoot.absDist * 0.4
                                     
                                     Text {
                                         text: modelData.day
                                         color: Theme.textDark
                                         font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize - 2
+                                        font.pixelSize: Theme.fontSize - 3
                                         font.bold: modelData.day === "Today" || carousel.currentIndex === index
                                         Layout.alignment: Qt.AlignHCenter
                                     }
@@ -606,23 +628,23 @@ ExpandableModule {
                                         text: modelData.date
                                         color: Theme.textDark
                                         font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize - 4
+                                        font.pixelSize: Theme.fontSize - 3
                                         opacity: 0.7
                                         Layout.alignment: Qt.AlignHCenter
                                     }
-                                    Item { Layout.preferredHeight: 3 }
+                                    Item { Layout.preferredHeight: 2 }
                                     Text {
                                         text: modelData.icon
                                         color: Theme.textDark
                                         font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize + 4
+                                        font.pixelSize: Theme.fontSize
                                         Layout.alignment: Qt.AlignHCenter
                                     }
                                     Text {
                                         text: modelData.maxTemp + "°"
                                         color: Theme.textDark
                                         font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize
+                                        font.pixelSize: Theme.fontSize - 2
                                         font.bold: true
                                         Layout.alignment: Qt.AlignHCenter
                                     }
@@ -631,24 +653,22 @@ ExpandableModule {
                                         color: Theme.textDark
                                         opacity: 0.6
                                         font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize - 2
+                                        font.pixelSize: Theme.fontSize - 4
                                         Layout.alignment: Qt.AlignHCenter
                                     }
                                 }
                             }
-                        
-                        }
-                        
-                        MouseArea {
-                            anchors.fill: parent
-                            preventStealing: false
-                            onClicked: {
-                                if (index >= 2) {
-                                    carousel.currentIndex = index
+                            
+                            MouseArea {
+                                anchors.fill: parent
+                                preventStealing: false
+                                onClicked: {
+                                    if (index >= 2) {
+                                        carousel.currentIndex = index
+                                    }
                                 }
                             }
                         }
-                    }
                     }
                 }
             }

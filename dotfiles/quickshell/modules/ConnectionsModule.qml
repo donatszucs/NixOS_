@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Effects
 import Quickshell
 import Quickshell._Window
 import Quickshell.Io
@@ -13,6 +14,17 @@ import "../elements"
 ExpandableModule {
     id: connectionsModule
     property int currentPage: 0
+
+    Component {
+        id: cardShadowEffect
+        MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.65)
+            shadowBlur: 0.8
+            shadowVerticalOffset: 2
+            shadowHorizontalOffset: 0
+        }
+    }
 
     property int cardWidth: 280
     property int textMaxWidth: cardWidth - 40
@@ -152,7 +164,7 @@ ExpandableModule {
     // 4. Your icon logic
     property string btIcon: connectionsModule.btPowered ? (btDevicesConnected ? "󰂱" : "󰂯") : "󰂲"
     // ── Standard pill setup ──────────────────────────────────────
-    pillPercent: expanded ? 100 : 0
+    pillPercent: 0
     pillVariant: "neutral"
     expandedPillLabel: "Connections"
 
@@ -289,6 +301,10 @@ ExpandableModule {
                 clip: true
                 border.width: 2
                 border.color: Theme.cardBorder
+
+                layer.enabled: true
+                layer.smooth: true
+                layer.effect: cardShadowEffect
                 
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
@@ -386,6 +402,10 @@ ExpandableModule {
                 clip: true
                 border.width: 2
                 border.color: Theme.cardBorder
+
+                layer.enabled: true
+                layer.smooth: true
+                layer.effect: cardShadowEffect
                 
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
@@ -956,6 +976,10 @@ ExpandableModule {
                 border.width: 2
                 border.color: Theme.cardBorder
 
+                layer.enabled: true
+                layer.smooth: true
+                layer.effect: cardShadowEffect
+
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
                 implicitHeight: headsetTopBar.height + headsetContentCol.implicitHeight + 20
@@ -1060,6 +1084,10 @@ ExpandableModule {
                 clip: true
                 border.width: 2
                 border.color: Theme.cardBorder
+
+                layer.enabled: true
+                layer.smooth: true
+                layer.effect: cardShadowEffect
 
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth

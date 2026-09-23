@@ -23,7 +23,7 @@ ExpandableModule {
         if (v > 0 && v < 50) return v + "% "
         return v + "% "
     }
-    pillVariant: "dark"
+    pillVariant: expanded ? "neutral" : "dark"
     expandedPillLabel: "Audio"
 
     function getNode(nodeId) {

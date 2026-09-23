@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.SystemTray
@@ -8,6 +9,17 @@ import "../elements"
 
 ExpandableModule {
     id: root
+
+    Component {
+        id: cardShadowEffect
+        MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.65)
+            shadowBlur: 0.8
+            shadowVerticalOffset: 2
+            shadowHorizontalOffset: 0
+        }
+    }
     collapseOnHoverExit: false   // managed manually (menu-aware)
     useDefaultPill: false
 
@@ -39,11 +51,14 @@ ExpandableModule {
     
     collapsedWidth: topRow.implicitWidth
     
-    implicitHeight: expanded ? trayCard.implicitHeight + Theme.moduleHeight + 14 : Theme.moduleHeight
+    implicitHeight: expanded ? trayCard.implicitHeight + Theme.moduleHeight + 10 : Theme.moduleHeight
 
     // Overlay dropdown setup
     expandedDropdownWidth: Math.max(topRow.implicitWidth, trayCard.implicitWidth + 10)
     dropdownAlignment: "center"
+
+    expandedBottomLeftRadius: 20
+    expandedBottomRightRadius: 20
 
     leftCornerStyle: "side"
     rightCornerStyle: "side"
@@ -96,6 +111,10 @@ ExpandableModule {
 
         border.width: 2
         border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+
+        layer.enabled: true
+        layer.smooth: true
+        layer.effect: cardShadowEffect
 
         implicitWidth: trayColumn.implicitWidth + 10
         implicitHeight: trayColumn.implicitHeight + 10

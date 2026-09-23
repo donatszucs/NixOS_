@@ -88,7 +88,12 @@ ModuleButton {
     property bool shrinkEnabled: true
     property int shrinkAmount: 10
     property int collapsedWidth: expanded ? lastPillWidth : pillNaturalWidth
-    implicitWidth: Math.max(20, collapsedWidth - ((root.expanded && shrinkEnabled) ? shrinkAmount : 0))
+    implicitWidth: (root.expanded && shrinkEnabled) ? 100 : collapsedWidth
+
+    // Close button configuration for bar tab
+    property bool showCloseButton: shrinkEnabled
+    property string closeButtonText: "Close"
+    property alias barTabCloseButton: _closeButtonBg
 
     clip: false
     noHoverColorChange: expanded
@@ -141,8 +146,8 @@ ModuleButton {
     // binds expanded to isPlaying && isHovered).
     property alias expandHover: _expandHover
 
-    // Combined hover state: true when mouse is over the pill, overlay, or flowing background (protruding corners)
-    readonly property bool rawHovered: _expandHover.hovered || _overlayHover.hovered || _flowingBgHover.hovered || _headerPillHover.hovered
+    // Combined hover state: true when mouse is over the pill, overlay, flowing background, or bar tab close button
+    readonly property bool rawHovered: _expandHover.hovered || _overlayHover.hovered || _flowingBgHover.hovered || _headerPillHover.hovered || (_barTabMouseArea.containsMouse && root.expanded)
     property bool isHovered: rawHovered || _hoverGraceTimer.running
 
     Timer {
@@ -307,7 +312,7 @@ ModuleButton {
     signal pillRightClicked(var mouse)
 
     property string pillText: ""
-    property real   pillPercent: expanded ? 100 : 0
+    property real   pillPercent: 0
     property string pillVariant: "neutral"
     property string expandedPillLabel: ""
     property string pillBgImageSource: ""
@@ -345,9 +350,10 @@ ModuleButton {
         }
     }
 
-    // ── Bar tab MouseArea ────────────────────────────────────────
+    // ── Bar tab MouseArea & Close Button ─────────────────────────
     // When expanded, the header pill moves down underneath the bar.
-    // This MouseArea allows clicking or scrolling on the remaining bar tab.
+    // This MouseArea displays a subtle close button in the bar tab
+    // and collapses the module when clicked.
     MouseArea {
         id: _barTabMouseArea
         z: 3
@@ -358,13 +364,62 @@ ModuleButton {
         }
         height: Theme.moduleHeight
         cursorShape: Qt.PointingHandCursor
+        hoverEnabled: true
         enabled: root.expanded
-        visible: enabled
+        visible: root.expanded || _closeButtonBg.opacity > 0.001
+
         onClicked: {
             root.collapseModule()
         }
         onWheel: (wheel) => {
             root.pillWheel(wheel)
+        }
+
+        Rectangle {
+            id: _closeButtonBg
+            anchors {
+                fill: parent
+                topMargin: 5
+                bottomMargin: 5
+                leftMargin: 6
+                rightMargin: 6
+            }
+            radius: 8
+            visible: opacity > 0.001
+            opacity: (root.expanded && root.showCloseButton) ? 1.0 : 0.0
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Theme.horizontalDuration
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            color: _barTabMouseArea.pressed
+                ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.16)
+                : (_barTabMouseArea.containsMouse
+                    ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.10)
+                    : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.04))
+
+            Behavior on color {
+                ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
+            }
+
+            Text {
+                id: _closeButtonText
+                anchors.centerIn: parent
+                text: root.closeButtonText
+                color: _barTabMouseArea.containsMouse
+                    ? Qt.lighter(Theme.textPrimary, 1.15)
+                    : Theme.textPrimary
+                font.family: Theme.font
+                font.pixelSize: Theme.fontSize - 1
+                font.bold: true
+
+                Behavior on color {
+                    ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
+                }
+            }
         }
     }
 

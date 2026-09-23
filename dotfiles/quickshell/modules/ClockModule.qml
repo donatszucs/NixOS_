@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 
@@ -9,6 +10,17 @@ import "../elements"
 
 ExpandableModule {
     id: root
+
+    Component {
+        id: cardShadowEffect
+        MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.65)
+            shadowBlur: 0.8
+            shadowVerticalOffset: 2
+            shadowHorizontalOffset: 0
+        }
+    }
 
     // ── Time State (collapsed view) ──────────────────────────────
     property string hours: ""
@@ -75,7 +87,7 @@ ExpandableModule {
 
     collapsedWidth: clockContent.implicitWidth + 20
 
-    pillPercent: expanded ? 100 : 0
+    pillPercent: 0
     pillVariant: "neutral"
     expandedPillLabel: "Calendar"
     expandedBottomLeftRadius: 0
@@ -330,6 +342,10 @@ ExpandableModule {
             border.width: 2
             border.color: Theme.cardBorder
             clip: true
+
+            layer.enabled: true
+            layer.smooth: true
+            layer.effect: cardShadowEffect
 
             // Top Header Bar
             Rectangle {
@@ -668,6 +684,10 @@ ExpandableModule {
             border.width: 2
             border.color: Theme.cardBorder
             clip: true
+
+            layer.enabled: true
+            layer.smooth: true
+            layer.effect: cardShadowEffect
 
             ColumnLayout {
                 id: agendaContentCol

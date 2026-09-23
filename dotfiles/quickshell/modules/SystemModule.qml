@@ -1,6 +1,7 @@
 // System group — system icon stays fixed right, action buttons slide out below
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell.Io
 
 import "../elements"
@@ -12,7 +13,7 @@ ExpandableModule {
 
     pillText: expanded ? "" : ""
     expandedPillLabel: "System"
-    pillPercent: expanded ? 100 : 0
+    pillPercent: 0
     pillVariant: "neutral"
     expandedBottomLeftRadius: Theme.moduleEdgeRadius + 10
 
@@ -29,6 +30,16 @@ ExpandableModule {
     expandedDropdownWidth: cardWidth + 30
     dropdownAlignment: "right"
 
+    Component {
+        id: cardShadowEffect
+        MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.65)
+            shadowBlur: 0.8
+            shadowVerticalOffset: 2
+            shadowHorizontalOffset: 0
+        }
+    }
 
     ColumnLayout {
         id: baseColumn
@@ -68,6 +79,10 @@ ExpandableModule {
                     clip: true
                     border.width: 2
                     border.color: Theme.cardBorder
+
+                    layer.enabled: true
+                    layer.smooth: true
+                    layer.effect: cardShadowEffect
 
                     InverseRadius {
                         anchors.top: sysBottomBar.bottom

@@ -1,12 +1,24 @@
 // Tapo Light Switch — toggles on/off, scroll for brightness, expand for colour wheel
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 
 import "../elements"
 
 ExpandableModule {
     id: root
     property int cardWidth: 210
+
+    Component {
+        id: cardShadowEffect
+        MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.65)
+            shadowBlur: 0.8
+            shadowVerticalOffset: 2
+            shadowHorizontalOffset: 0
+        }
+    }
 
     pillPercent: expanded ? 100 : (SharedState.lightAvailable && SharedState.lightActive ? SharedState.lightBrightness : 0)
     pillText: {
@@ -84,6 +96,10 @@ ExpandableModule {
             clip: true
             border.width: 2
             border.color: Theme.cardBorder
+
+            layer.enabled: true
+            layer.smooth: true
+            layer.effect: cardShadowEffect
 
             Rectangle {
                 id: brightTopBar
@@ -193,6 +209,11 @@ ExpandableModule {
             radius: Theme.moduleEdgeRadius / 2 + 10
             border.width: 2
             border.color: Theme.cardBorder
+            clip: true
+
+            layer.enabled: true
+            layer.smooth: true
+            layer.effect: cardShadowEffect
 
             // ── Colour wheel ────────────────────────────────────────────
             Item {
