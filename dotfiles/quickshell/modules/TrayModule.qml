@@ -57,8 +57,8 @@ ExpandableModule {
     expandedDropdownWidth: Math.max(topRow.implicitWidth, trayCard.implicitWidth + 10)
     dropdownAlignment: "center"
 
-    expandedBottomLeftRadius: 20
-    expandedBottomRightRadius: 20
+    expandedBottomLeftRadius: expandedDropdownWidth / 2
+    expandedBottomRightRadius: expandedDropdownWidth / 2
 
     leftCornerStyle: "side"
     rightCornerStyle: "side"
@@ -70,6 +70,7 @@ ExpandableModule {
 
     RowLayout {
         id: topRow
+        z: 10
         spacing: 0
         layoutDirection: Qt.RightToLeft
         anchors {
@@ -78,19 +79,23 @@ ExpandableModule {
         }
 
         ModuleButton {
+            id: notificationButton
+            z: 1
             variant: "neutral"
             colorOverride: true
-            noHoverColorChange: !root.expanded
-            noPressColorChange: !root.expanded
-            id: notificationButton
+            overrideColor: "transparent"
+            hoverColor: Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.22)
+            pressedColor: Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.45)
+            textColor: notificationButton.pressed
+                ? "#ffffff"
+                : (notificationButton.hovered ? Qt.lighter(Theme.textPrimary, 1.25) : Theme.textPrimary)
+
             cursorShape: Qt.PointingHandCursor
             implicitWidth: Theme.moduleHeight + 6
             implicitHeight: Theme.moduleHeight
             label: "󱊖"
             textFont: Theme.fontSize + 1
 
-            colorOpacity: 0.5
-            
             bottomRightRadius: root.expanded ? Theme.moduleEdgeRadius : 0
             bottomLeftRadius: root.expanded ? Theme.moduleEdgeRadius : 0
 

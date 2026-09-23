@@ -369,8 +369,8 @@ ModuleButton {
         height: Theme.moduleHeight
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: true
-        enabled: root.expanded
-        visible: root.expanded || _closeButtonBg.opacity > 0.001
+        enabled: root.expanded && root.showCloseButton
+        visible: (root.expanded && root.showCloseButton) || _closeButtonBg.opacity > 0.001
 
         onClicked: {
             root.collapseModule()

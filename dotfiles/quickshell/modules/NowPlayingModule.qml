@@ -63,7 +63,7 @@ ExpandableModule {
     readonly property bool canSeek: currentPlayer && (currentPlayer.canSeek || currentPlayer.positionSupported) && trackLength > 0
     readonly property bool hasVolume: currentPlayer && currentPlayer.volumeSupported
 
-    pillPercent: expanded ? 100 : (trackLength > 0 ? Math.round((currentPosition / trackLength) * 100) : 0)
+    pillPercent: expanded ? 0 : (trackLength > 0 ? Math.round((currentPosition / trackLength) * 100) : 0)
     pillVariant: "neutral"
     pillBgImageSource: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
 
