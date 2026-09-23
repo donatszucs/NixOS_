@@ -20,14 +20,14 @@ ExpandableModule {
         }
     }
 
-    pillPercent: expanded ? 100 : (SharedState.lightAvailable && SharedState.lightActive ? SharedState.lightBrightness : 0)
+    pillPercent: expanded ? 0 : (SharedState.lightAvailable && SharedState.lightActive ? SharedState.lightBrightness : 0)
     pillText: {
         if (expanded) return ""
         if (!SharedState.lightAvailable) return "Offline"
         if (SharedState.lightActive) return SharedState.lightBrightness + "% 󱩒"
         return "Off 󱩎"
     }
-    pillVariant: SharedState.lightVariant
+    pillVariant: expanded ? "neutral" : SharedState.lightVariant
     expandedPillLabel: "Lights"
 
     expandedBottomLeftRadius:   Theme.moduleEdgeRadius + 10

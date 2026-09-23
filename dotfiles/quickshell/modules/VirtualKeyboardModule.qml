@@ -9,7 +9,7 @@ PillBarButton {
     id: virtualKbrd
     pillText: ""
     pillVariant: virtualKbrd.active ? "light" : "neutral"
-    percent: 0
+    percent: virtualKbrd.active ? 100 : 0
     cursorShape: Qt.PointingHandCursor
     property bool active: false
 
