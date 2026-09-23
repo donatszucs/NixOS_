@@ -14,6 +14,10 @@ ModuleButton {
     property int pillHeight: Theme.moduleHeight - 10
     property int pillPaddingH: 10
     property real pillColorOpacity: root.colorOpacity 
+    property var pillBorderColor: null
+    readonly property color effectiveBorderColor: pillBorderColor !== null
+        ? pillBorderColor
+        : Qt.rgba(root.pillPal.pillBorder.r, root.pillPal.pillBorder.g, root.pillPal.pillBorder.b, root.pillPal.pillBorder.a * root.pillColorOpacity * gradientOpacityBase)
     property real gradientOpacityBase: root.openBottom ? 0.4 : 1.0
     property real gradientOpacityLow: root.openBottom ? 0.0 : 1.0
     property string bgImageSource: ""
@@ -189,8 +193,12 @@ ModuleButton {
             bottomLeftRadius: parent.bottomLeftRadius
             bottomRightRadius: parent.bottomRightRadius
             color: "transparent"
-            border.color: Qt.rgba(root.pillPal.pillBorder.r, root.pillPal.pillBorder.g, root.pillPal.pillBorder.b, root.pillPal.pillBorder.a * root.pillColorOpacity * gradientOpacityBase)
+            border.color: root.effectiveBorderColor
             border.width: root.openBottom ? 2 : 2
+
+            Behavior on border.color {
+                ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            }
         }
 
         // Text inside the pill

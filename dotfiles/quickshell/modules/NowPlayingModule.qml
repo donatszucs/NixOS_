@@ -65,7 +65,9 @@ ExpandableModule {
     readonly property bool hasVolume: currentPlayer && currentPlayer.volumeSupported
 
     pillPercent: expanded ? 0 : (trackLength > 0 ? Math.round((currentPosition / trackLength) * 100) : 0)
-    pillVariant: "neutral"
+    pillVariant: expanded ? "neutral" : "dark"
+    pillBorderColor: expanded ? null : Qt.darker(Theme.palette("light").border, 1.4)
+    pillColorOpacity: 0.8
     pillBgImageSource: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
 
     property int cardWidth: 260
