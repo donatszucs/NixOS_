@@ -10,6 +10,7 @@ Item {
     property int pixelSize: Theme.fontSize
     property bool fontBold: true
     property int horizontalAlignment: Text.AlignLeft
+    readonly property bool hovered: hover.hovered
 
     // Removed maxChars! We let text elide based on pixel width correctly.
 
@@ -22,6 +23,20 @@ Item {
 
     HoverHandler { id: hover }
 
+    NumberAnimation {
+        id: resetAnim
+        target: visibleText
+        property: "x"
+        to: 0
+        duration: 250
+        easing.type: Easing.OutCubic
+    }
+
+    onTextChanged: {
+        resetAnim.stop();
+        visibleText.x = 0;
+    }
+
     Text {
         id: visibleText
         text: root.text
@@ -33,8 +48,9 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         horizontalAlignment: root.horizontalAlignment
 
-        width: (hover.hovered && visibleText.implicitWidth > root.width) ? implicitWidth : root.width
-        elide: (hover.hovered && visibleText.implicitWidth > root.width) ? Text.ElideNone : Text.ElideRight
+        readonly property bool isScrolling: (hover.hovered && visibleText.implicitWidth > root.width) || resetAnim.running
+        width: isScrolling ? implicitWidth : root.width
+        elide: isScrolling ? Text.ElideNone : Text.ElideRight
     }
     
     SequentialAnimation {
@@ -43,7 +59,11 @@ Item {
         loops: Animation.Infinite
 
         onRunningChanged: {
-            if (!running) visibleText.x = 0;
+            if (running) {
+                resetAnim.stop();
+            } else if (visibleText.x !== 0) {
+                resetAnim.restart();
+            }
         }
 
         PauseAnimation { duration: 250 }

@@ -151,7 +151,8 @@ ModuleButton {
     property alias expandHover: _expandHover
 
     // Combined hover state: true when mouse is over the pill, overlay, flowing background, or bar tab close button
-    readonly property bool rawHovered: _expandHover.hovered || _overlayHover.hovered || _flowingBgHover.hovered || _headerPillHover.hovered || (_barTabMouseArea.containsMouse && root.expanded)
+    property bool extraHovered: false
+    readonly property bool rawHovered: _expandHover.hovered || _overlayHover.hovered || _flowingBgHover.hovered || _headerPillHover.hovered || (_barTabMouseArea.containsMouse && root.expanded) || (_expandedLabel && _expandedLabel.hovered) || extraHovered
     property bool isHovered: rawHovered || _hoverGraceTimer.running
 
     Timer {
@@ -510,19 +511,20 @@ ModuleButton {
         }
         // ── Expanded title overlay ───────────────────────────────
         // Shows the expandedPillLabel when expanded, hidden when collapsed.
-        Text {
+        HoverMarqueeText {
             id: _expandedLabel
             anchors {
                 top: parent.top
                 horizontalCenter: parent.horizontalCenter
             }
             height: root.titleBarHeight
-            verticalAlignment: Text.AlignVCenter
             text: root.expandedPillLabel
-            color: Theme.textPrimary
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize + 2
-            font.bold: true
+            textColor: Theme.textPrimary
+            fontFamily: Theme.font
+            pixelSize: Theme.fontSize + 2
+            fontBold: true
+            textMaxWidth: Math.max(100, parent.width - 40)
+            horizontalAlignment: Text.AlignHCenter
             visible: opacity > 0 && root.expandedPillLabel !== ""
             opacity: root.expanded ? 1.0 : 0.0
 

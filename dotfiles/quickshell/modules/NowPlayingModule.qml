@@ -11,6 +11,7 @@ import "../elements"
 ExpandableModule {
     id: nowPlayingModule
     collapsedBottomRightRadius: Theme.moduleEdgeRadius
+    extraHovered: collapsedRowHover.hovered || collapsedTitleText.hovered
 
     property string titleText: "Nothing playing"
     property string authorText: "Unknown artist"
@@ -433,14 +434,20 @@ ExpandableModule {
     // ── Header Content (Icon + Track Title, always visible in headerPill) ──
     RowLayout {
         id: collapsedRow
-        parent: nowPlayingModule.headerPill
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.top
+        parent: nowPlayingModule
+        anchors.horizontalCenter: nowPlayingModule.headerPill.horizontalCenter
+        anchors.verticalCenter: nowPlayingModule.expanded
+            ? nowPlayingModule.headerPill.top
+            : nowPlayingModule.headerPill.verticalCenter
         anchors.verticalCenterOffset: nowPlayingModule.expanded
             ? Math.round(nowPlayingModule.titleBarHeight / 2)
-            : Math.round(Theme.moduleHeight / 2)
+            : 0
         spacing: nowPlayingModule.expanded ? 8 : 6
-        z: 6
+        z: 10
+
+        HoverHandler {
+            id: collapsedRowHover
+        }
 
         Behavior on anchors.verticalCenterOffset {
             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
