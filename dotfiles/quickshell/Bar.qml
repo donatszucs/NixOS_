@@ -169,11 +169,11 @@ PanelWindow {
     // Left-row spacer helpers
     readonly property real _clockSpacerNeed: clockModule.expanded
         ? (clockModule.expandedDropdownWidth + (2 * Theme.moduleEdgeRadius)) 
-        - (clockModule.collapsedWidth + weatherModule.collapsedWidth + nowPlayingModule.collapsedWidth)
+        - (100 + weatherModule.collapsedWidth + nowPlayingModule.collapsedWidth)
         : 0
 
     readonly property real _weatherSpacerNeed: weatherModule.expanded
-        ? ((weatherModule.expandedDropdownWidth / 2) + (2 * Theme.moduleEdgeRadius)) - ((weatherModule.collapsedWidth / 2) + nowPlayingModule.collapsedWidth)
+        ? ((weatherModule.expandedDropdownWidth / 2) + (2 * Theme.moduleEdgeRadius)) - (50 + nowPlayingModule.collapsedWidth)
         : 0
     readonly property real _leftSpacerWidth: Math.max(_clockSpacerNeed, _weatherSpacerNeed)
     // ── LEFT ─────────────────────────────────────────────────────────────

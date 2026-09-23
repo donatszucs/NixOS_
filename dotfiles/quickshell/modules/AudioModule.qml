@@ -14,7 +14,7 @@ ExpandableModule {
     property bool isMuted: pwAudio ? pwAudio.muted : false
     property real currentVolume: pwAudio ? pwAudio.volume : 0.0
 
-    pillPercent: expanded ? 100 : Math.round(currentVolume * 100)
+    pillPercent: expanded ? 0 : Math.round(currentVolume * 100)
     pillText: {
         if (expanded) return ""
         var v = Math.round(currentVolume * 100)
