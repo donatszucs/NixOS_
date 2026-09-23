@@ -14,6 +14,12 @@ Item {
 
     // ── Corner Radii ─────────────────────────────────────────────
     property real cornerRadius: Theme.moduleEdgeRadius
+    property real topCornerRadius: Theme.topCornerRadius
+    property real expandedTopCornerRadius: Theme.expandedTopCornerRadius
+    property real leftTopCornerRadius: topCornerRadius
+    property real rightTopCornerRadius: topCornerRadius
+    property real expandedLeftTopCornerRadius: expandedTopCornerRadius
+    property real expandedRightTopCornerRadius: expandedTopCornerRadius
     property real topLeftRadius: 0
     property real topRightRadius: 0
     property real bottomLeftRadius: 0
@@ -47,14 +53,27 @@ Item {
     readonly property bool hasLeftTopCorner: (leftCornerStyle === "top")
     readonly property bool hasRightTopCorner: (rightCornerStyle === "top")
 
+    // Interpolate top corner radius smoothly with dh
+    function calcTop(cR, eR, isExp, currentDh) {
+        if (!isExp || currentDh <= 0.1) return cR;
+        if (eR >= cR) {
+            return Math.min(eR, cR + currentDh / 2);
+        } else {
+            return Math.max(eR, cR - currentDh / 2);
+        }
+    }
+
+    readonly property real currentLeftTopR: calcTop(leftTopCornerRadius, expandedLeftTopCornerRadius, isExpanded, isExpanded ? overlayHeight : 0)
+    readonly property real currentRightTopR: calcTop(rightTopCornerRadius, expandedRightTopCornerRadius, isExpanded, isExpanded ? overlayHeight : 0)
+
     // Dynamic bounding box covering the entire outer silhouette (used for outer bounds query)
     readonly property real sideR: Math.min(cornerRadius, (isExpanded ? overlayHeight : 0) / 2)
     readonly property real minX: Math.min(
-        hasLeftTopCorner ? -cornerRadius : 0,
+        hasLeftTopCorner ? -currentLeftTopR : 0,
         (hasLeftSideCorner && overlayHeight > 0.1) ? (overlayX - sideR) : 0
     )
     readonly property real maxX: Math.max(
-        hasRightTopCorner ? (headerWidth + cornerRadius) : headerWidth,
+        hasRightTopCorner ? (headerWidth + currentRightTopR) : headerWidth,
         (hasRightSideCorner && overlayHeight > 0.1) ? (overlayX + overlayWidth + sideR) : headerWidth
     )
     readonly property real maxY: (isExpanded ? (headerHeight + overlayHeight) : headerHeight) + ((hasLeftBottomCorner || hasRightBottomCorner) ? cornerRadius : 0)
@@ -70,6 +89,8 @@ Item {
     // SVG path string generator
     readonly property string pathData: {
         var R = cornerRadius;
+        var ltR = hasLeftTopCorner ? currentLeftTopR : 0;
+        var rtR = hasRightTopCorner ? currentRightTopR : 0;
         var hw = headerWidth;
         var hh = headerHeight;
         var ow = overlayWidth;
@@ -113,10 +134,10 @@ Item {
             botR = Math.min(botR, Math.max(0, dh - sR));
         }
         if (hasLeftTopCorner) {
-            botL = Math.min(botL, Math.max(0, totalY - R));
+            botL = Math.min(botL, Math.max(0, totalY - ltR));
         }
         if (hasRightTopCorner) {
-            botR = Math.min(botR, Math.max(0, totalY - R));
+            botR = Math.min(botR, Math.max(0, totalY - rtR));
         }
 
         var k = 0.55228475;
@@ -126,8 +147,8 @@ Item {
         var p = "";
 
         // 1. Header Top-Left
-        if (hasLeftTopCorner && R > 0.1) {
-            p += "M " + f(-R) + " 0 ";
+        if (hasLeftTopCorner && ltR > 0.1) {
+            p += "M " + f(-ltR) + " 0 ";
         } else if (topL > 0.1) {
             p += "M 0 " + f(topL) + " ";
             p += "C 0 " + f(topL * ik) + ", " + f(topL * ik) + " 0, " + f(topL) + " 0 ";
@@ -136,9 +157,9 @@ Item {
         }
 
         // 2. Header Top Edge & Top-Right
-        if (hasRightTopCorner && R > 0.1) {
-            p += "L " + f(hw + R) + " 0 ";
-            p += "C " + f(hw + R * ik) + " 0, " + f(hw) + " " + f(R * ik) + ", " + f(hw) + " " + f(R) + " ";
+        if (hasRightTopCorner && rtR > 0.1) {
+            p += "L " + f(hw + rtR) + " 0 ";
+            p += "C " + f(hw + rtR * ik) + " 0, " + f(hw) + " " + f(rtR * ik) + ", " + f(hw) + " " + f(rtR) + " ";
         } else if (topR > 0.1) {
             p += "L " + f(hw - topR) + " 0 ";
             p += "C " + f(hw - topR * ik) + " 0, " + f(hw) + " " + f(topR * ik) + ", " + f(hw) + " " + f(topR) + " ";
@@ -187,9 +208,9 @@ Item {
         }
 
         // 7. Left Side Wall & Transition
-        if (hasLeftTopCorner && R > 0.1) {
-            p += "L 0 " + f(R) + " ";
-            p += "C 0 " + f(R * ik) + ", " + f(-R * ik) + " 0, " + f(-R) + " 0 ";
+        if (hasLeftTopCorner && ltR > 0.1) {
+            p += "L 0 " + f(ltR) + " ";
+            p += "C 0 " + f(ltR * ik) + ", " + f(-ltR * ik) + " 0, " + f(-ltR) + " 0 ";
         } else if (hasLeftSideCorner && sR > 0.1) {
             p += "L " + f(ox) + " " + f(hh + sR) + " ";
             p += "C " + f(ox) + " " + f(hh + sR * ik) + ", " + f(ox - sR * ik) + " " + f(hh) + ", " + f(ox - sR) + " " + f(hh) + " ";

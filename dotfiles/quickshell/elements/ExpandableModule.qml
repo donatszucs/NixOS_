@@ -68,6 +68,8 @@ ModuleButton {
     property string leftCornerStyle:  "side"
     property string rightCornerStyle: "side"
     property int inverseCornerSize: Theme.moduleEdgeRadius
+    property int topCornerRadius: Theme.topCornerRadius
+    property int expandedTopCornerRadius: Theme.expandedTopCornerRadius
     property bool inverseCornerSmoothCurve: false
     property real inverseCornerSmoothTolerance: 0.15
     readonly property bool hasOwnInverseCorners: true
@@ -112,6 +114,8 @@ ModuleButton {
         contentVisible: root.contentVisible
 
         cornerRadius: root.inverseCornerSize
+        topCornerRadius: root.topCornerRadius
+        expandedTopCornerRadius: root.expandedTopCornerRadius
         topLeftRadius: root.topLeftRadius
         topRightRadius: root.topRightRadius
         bottomLeftRadius: root.collapsedBottomLeftRadius

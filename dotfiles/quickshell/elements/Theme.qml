@@ -116,6 +116,8 @@ QtObject {
     readonly property real listHeight: 50
     readonly property real moduleOpacity: 0.85
     readonly property int moduleEdgeRadius: 18
+    readonly property int topCornerRadius: moduleEdgeRadius
+    readonly property int expandedTopCornerRadius: 36
     readonly property int modulePaddingH: 15
     readonly property int modulePaddingV: 5
 
