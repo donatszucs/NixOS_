@@ -67,8 +67,10 @@ ExpandableModule {
     pillPercent: expanded ? 0 : (trackLength > 0 ? Math.round((currentPosition / trackLength) * 100) : 0)
     pillVariant: expanded ? "neutral" : "dark"
     pillBorderColor: expanded ? null : Qt.darker(Theme.palette("light").border, 1.1)
-    pillColorOpacity: 0.9
+    pillColorOpacity: 1.0
     pillBgImageSource: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
+    pillBgImageBrightness: 0.3
+    pillBgImageOpacity: 0.4
 
     property int cardWidth: 260
     property real cardHeight: 260
@@ -446,6 +448,15 @@ ExpandableModule {
             : 0
         spacing: nowPlayingModule.expanded ? 8 : 6
         z: 10
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.85)
+            shadowBlur: 0.6
+            shadowVerticalOffset: 1
+            shadowHorizontalOffset: 0
+        }
 
         HoverHandler {
             id: collapsedRowHover

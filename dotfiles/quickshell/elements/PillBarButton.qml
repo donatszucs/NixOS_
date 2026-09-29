@@ -21,6 +21,10 @@ ModuleButton {
     property real gradientOpacityBase: root.openBottom ? 0.4 : 1.0
     property real gradientOpacityLow: root.openBottom ? 0.0 : 1.0
     property string bgImageSource: ""
+    property real bgImageOpacity: 0.35
+    property real bgImageBrightness: 0.35
+    property real bgImageContrast: 0.0
+    property real bgImageDarkOverlayOpacity: 0.0
 
     property bool openBottom: false
     property int openBottomTopMargin: 6
@@ -137,7 +141,9 @@ ModuleButton {
                 source: _bgImg
                 maskEnabled: true
                 maskSource: _bgImgMask
-                opacity: 0.28
+                opacity: root.bgImageOpacity
+                brightness: root.bgImageBrightness
+                contrast: root.bgImageContrast
             }
 
             Rectangle {
@@ -146,7 +152,8 @@ ModuleButton {
                 topRightRadius: Math.max(0, pillBg.topRightRadius - 2)
                 bottomLeftRadius: Math.max(0, pillBg.bottomLeftRadius - 2)
                 bottomRightRadius: Math.max(0, pillBg.bottomRightRadius - 2)
-                color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.25)
+                visible: root.bgImageDarkOverlayOpacity > 0
+                color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, root.bgImageDarkOverlayOpacity)
             }
         }
 

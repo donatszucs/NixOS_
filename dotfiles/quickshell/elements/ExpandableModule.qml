@@ -323,6 +323,10 @@ ModuleButton {
     property var  pillBorderColor: null
     property string expandedPillLabel: ""
     property string pillBgImageSource: ""
+    property real   pillBgImageOpacity: 0.35
+    property real   pillBgImageBrightness: 0.35
+    property real   pillBgImageContrast: 0.0
+    property real   pillBgImageDarkOverlayOpacity: 0.0
 
     Text {
         id: _expandedMeasureText
@@ -447,6 +451,10 @@ ModuleButton {
         variant:     "neutral"
         colorOverride: true
         bgImageSource: root.pillBgImageSource
+        bgImageOpacity: root.pillBgImageOpacity
+        bgImageBrightness: root.pillBgImageBrightness
+        bgImageContrast: root.pillBgImageContrast
+        bgImageDarkOverlayOpacity: root.pillBgImageDarkOverlayOpacity
 
         noHoverColorChange: true
         noPressColorChange: true

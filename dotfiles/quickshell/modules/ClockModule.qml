@@ -293,7 +293,7 @@ ExpandableModule {
             implicitWidth: 60
             implicitHeight: Theme.moduleHeight - 14
 
-            Layout.rightMargin: -5
+            Layout.rightMargin: - 3
 
             Text {
                 anchors.centerIn: parent
