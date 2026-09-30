@@ -23,11 +23,58 @@ ModuleButton {
     radius: Theme.moduleEdgeRadius + 2
     property int overlay: 4
     property int activeDragCount: 0
+    z: activeDragCount > 0 ? 100 : 0
 
     anchors.topMargin: 4
     implicitHeight: Theme.moduleHeight - 4
 
     property var activeSpecialWorkspaces: ({})
+
+    function getCurrentWorkspace() {
+        var mons = Hyprland.monitors.values;
+        for (var i = 0; i < mons.length; i++) {
+            if (mons[i].name === root.screenName && mons[i].activeWorkspace) {
+                return mons[i].activeWorkspace;
+            }
+        }
+        if (Hyprland.focusedMonitor && Hyprland.focusedMonitor.activeWorkspace) {
+            return Hyprland.focusedMonitor.activeWorkspace;
+        }
+        return null;
+    }
+
+    property alias workspacesRow: workspacesRow
+
+    function findDropWorkspaceButton(windowPoint) {
+        var modules = [];
+        if (root.parent && root.parent.children) {
+            for (var i = 0; i < root.parent.children.length; i++) {
+                var child = root.parent.children[i];
+                if (child && child.workspacesRow) {
+                    modules.push(child);
+                }
+            }
+        }
+        if (modules.indexOf(root) === -1) {
+            modules.push(root);
+        }
+
+        for (var m = 0; m < modules.length; m++) {
+            var mod = modules[m];
+            var row = mod.workspacesRow;
+            if (!row || !row.children) continue;
+            for (var b = 0; b < row.children.length; b++) {
+                var btn = row.children[b];
+                if (btn && btn.visible && (btn.isEmptyWorkspace !== undefined || btn.isOtherWorkspace !== undefined)) {
+                    var localPt = btn.mapFromItem(null, windowPoint.x, windowPoint.y);
+                    if (localPt.x >= 0 && localPt.x <= btn.width && localPt.y >= 0 && localPt.y <= btn.height) {
+                        return btn;
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
     Process {
         id: monitorsInitProc
@@ -189,21 +236,10 @@ ModuleButton {
         label: isEmptyWorkspace ? "" : ""
 
         colorOverride: true
-        overrideColor: dropArea.containsDrag ? hoverColor : (control.isSpecial ? "transparent" : Qt.darker(control.pal.base, 1.4))
-
-        DropArea {
-            id: dropArea
-            anchors.fill: parent
-            onDropped: (drop) => {
-                if (drop.source && drop.source.address) {
-                    var targetId = isEmptyWorkspace ? 'empty' : modelData.id;
-                    Hyprland.dispatch("hl.dsp.window.move({ workspace = '" + targetId + "', window = 'address:0x" + drop.source.address + "', follow = false })")
-                }
-            }
-        }
+        overrideColor: control.isSpecial ? "transparent" : Qt.darker(control.pal.base, 1.4)
 
         onClicked: {
-            var targetId = isEmptyWorkspace ? 'empty' : modelData.id;
+            var targetId = isEmptyWorkspace ? 'empty' : (control.isSpecial ? modelData.name : modelData.id);
             Hyprland.dispatch("hl.dsp.focus({ workspace = '" + targetId + "' })")
         }
 
@@ -289,7 +325,7 @@ ModuleButton {
         required property var modelData
         property var workspaceBtn
         
-        z: windowIcon.Drag.active ? 99 : 0
+        z: windowIcon.isDragging ? 99 : 0
         
         implicitWidth: windowIcon.width
         implicitHeight: Theme.moduleHeight - 20
@@ -309,10 +345,14 @@ ModuleButton {
         Image {
             id: windowIcon
             
-            anchors.verticalCenter: dragArea.drag.active ? undefined : parent.verticalCenter
-            anchors.horizontalCenter: dragArea.drag.active ? undefined : parent.horizontalCenter
+            x: 0
+            y: 0
             
             property string address: String(modelData.address)
+            property bool isDragging: false
+
+            opacity: isDragging ? 0.85 : 1.0
+            scale: isDragging ? 1.15 : 1.0
 
             height: Theme.moduleHeight - 20
             property real imgAspect: (implicitWidth > 0 && implicitHeight > 0) ? (implicitWidth / implicitHeight) : 1.0
@@ -380,12 +420,7 @@ ModuleButton {
 
             source: resolvedIcon
             visible: appId !== ""
-            z: dragArea.drag.active ? 999 : 0
-
-            Drag.active: dragArea.drag.active
-            Drag.source: windowIcon
-            Drag.hotSpot.x: width / 2
-            Drag.hotSpot.y: height / 2
+            z: isDragging ? 999 : 0
             
             Process {
                 id: steamIconProc
@@ -398,38 +433,32 @@ ModuleButton {
             }
 
             MouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.MiddleButton
-                cursorShape: Qt.PointingHandCursor
-
-                onClicked: function(mouse) {
-                    if (mouse.button === Qt.MiddleButton) {
-                        Hyprland.dispatch("hl.dsp.window.close({ window = 'address:0x" + modelData.address + "' })")
-                    }
-                }
-            }
-
-            MouseArea {
                 id: dragArea
                 anchors.fill: parent
-                acceptedButtons: Qt.LeftButton
+                acceptedButtons: Qt.LeftButton | Qt.MiddleButton
                 cursorShape: Qt.PointingHandCursor
                 hoverEnabled: true
+
+                property point pressPos: Qt.point(0, 0)
+                property bool wasDragged: false
 
                 ToolTip {
                     id: appToolTip
                     x: parent.width + 10
-                    y: -parent.height / 2
-                    visible: dragArea.containsMouse && !dragArea.drag.active
+                    y: (parent.height - height) / 2
+                    visible: dragArea.containsMouse && !windowIcon.isDragging
                     delay: 250
                     text: modelData.title || windowIcon.appId
-                    
 
-                    contentItem: Text {
+                    contentItem: HoverMarqueeText {
                         text: appToolTip.text
-                        color: "white"
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        textMaxWidth: 240
+                        textColor: "white"
+                        fontFamily: Theme.font
+                        pixelSize: Theme.fontSize
+                        fontBold: false
+                        horizontalAlignment: Text.AlignHCenter
+                        autoScroll: appToolTip.visible
                     }
 
                     background: Rectangle {
@@ -444,30 +473,129 @@ ModuleButton {
                 drag.axis: Drag.XAndYAxis
                 drag.threshold: 4
 
-                onReleased: {
-                    if (drag.active) {
-                        windowIcon.Drag.drop()
+                function handleDragStart() {
+                    if (windowIcon.isDragging) return;
+                    dragArea.wasDragged = true;
+                    windowIcon.isDragging = true;
+                    if (workspaceBtn) workspaceBtn.activeDragCount++;
+                    root.activeDragCount++;
+                }
+
+                function handleDragEnd() {
+                    if (!windowIcon.isDragging && !dragArea.wasDragged) return;
+
+                    var iconCenterInWindow = windowIcon.mapToItem(null, windowIcon.width / 2, windowIcon.height / 2);
+                    var addr = String(modelData.address).trim();
+                    if (addr.indexOf("0x") === 0) addr = addr.substring(2);
+                    var winSelector = "address:0x" + addr;
+
+                    // 1. Check if dropped on any workspace button (in activeWorkspaces or otherWorkspaces)
+                    var targetBtn = root.findDropWorkspaceButton(iconCenterInWindow);
+                    if (targetBtn) {
+                        if (targetBtn === workspaceBtn) {
+                            // Dropped on itself - do nothing
+                        } else if (targetBtn.isEmptyWorkspace) {
+                            var emptyMon = targetBtn.isOtherWorkspace && targetBtn.modelData && targetBtn.modelData.monitor 
+                                           ? targetBtn.modelData.monitor.name : root.screenName;
+                            if (emptyMon && emptyMon !== "") {
+                                Hyprland.dispatch("hl.dsp.focus({ monitor = '" + emptyMon + "' })) and hl.dispatch(hl.dsp.window.move({ workspace = 'empty', window = '" + winSelector + "', follow = false })");
+                            } else {
+                                Hyprland.dispatch("hl.dsp.window.move({ workspace = 'empty', window = '" + winSelector + "', follow = false })");
+                            }
+                        } else if (targetBtn.modelData) {
+                            var targetWsId = targetBtn.isSpecial ? targetBtn.modelData.name : targetBtn.modelData.id;
+                            Hyprland.dispatch("hl.dsp.window.move({ workspace = '" + targetWsId + "', window = '" + winSelector + "', follow = false })");
+                        }
+                    } else {
+                        // 2. Check if dropped on the desktop (current monitor or other monitor)
+                        var originMon = null;
+                        var mons = Hyprland.monitors.values;
+                        for (var i = 0; i < mons.length; i++) {
+                            if (mons[i].name === root.screenName) {
+                                originMon = mons[i];
+                                break;
+                            }
+                        }
+                        if (!originMon && Hyprland.focusedMonitor) {
+                            originMon = Hyprland.focusedMonitor;
+                        }
+
+                        var globalX = originMon ? (originMon.x + iconCenterInWindow.x) : iconCenterInWindow.x;
+                        var globalY = originMon ? (originMon.y + iconCenterInWindow.y) : iconCenterInWindow.y;
+
+                        var targetMon = null;
+                        for (var j = 0; j < mons.length; j++) {
+                            var m = mons[j];
+                            if (globalX >= m.x && globalX < m.x + m.width &&
+                                globalY >= m.y && globalY < m.y + m.height) {
+                                targetMon = m;
+                                break;
+                            }
+                        }
+                        if (!targetMon) targetMon = originMon;
+
+                        var targetWs = targetMon && targetMon.activeWorkspace ? targetMon.activeWorkspace : null;
+                        var isBelowBar = (iconCenterInWindow.y > Theme.moduleHeight + 5) || (targetMon !== originMon);
+                        var isCurrentWs = (targetWs && workspaceBtn && workspaceBtn.modelData && 
+                                           !workspaceBtn.isSpecial && workspaceBtn.modelData.id === targetWs.id);
+
+                        if (isBelowBar && !isCurrentWs && targetWs) {
+                            Hyprland.dispatch("hl.dsp.window.move({ workspace = '" + targetWs.id + "', window = '" + winSelector + "', follow = false })");
+                        }
+                    }
+
+                    windowIcon.isDragging = false;
+                    windowIcon.x = 0;
+                    windowIcon.y = 0;
+                    if (workspaceBtn) workspaceBtn.activeDragCount = Math.max(0, workspaceBtn.activeDragCount - 1);
+                    root.activeDragCount = Math.max(0, root.activeDragCount - 1);
+                }
+
+                property bool isDragActive: drag.active
+                onIsDragActiveChanged: {
+                    if (isDragActive && !windowIcon.isDragging) {
+                        handleDragStart();
                     }
                 }
 
-                onClicked: function(mouse) {
-                    if (dragArea.drag.active) return;
-                    if (workspaceBtn && workspaceBtn.modelData) {
-                        Hyprland.dispatch("hl.dsp.focus({ workspace = '" + workspaceBtn.modelData.id + "' })")
+                onPressed: (mouse) => {
+                    dragArea.wasDragged = false;
+                    dragArea.pressPos = Qt.point(mouse.x, mouse.y);
+                }
+
+                onPositionChanged: (mouse) => {
+                    if (!windowIcon.isDragging && (mouse.buttons & Qt.LeftButton)) {
+                        var dx = mouse.x - dragArea.pressPos.x;
+                        var dy = mouse.y - dragArea.pressPos.y;
+                        if ((dx * dx + dy * dy) > 16) {
+                            handleDragStart();
+                        }
                     }
                 }
-            }
-            
-            Connections {
-                target: dragArea.drag
-                function onActiveChanged() {
-                    if (!workspaceBtn) return;
-                    if (dragArea.drag.active) {
-                        workspaceBtn.activeDragCount++;
-                        root.activeDragCount++;
-                    } else {
-                        workspaceBtn.activeDragCount--;
-                        root.activeDragCount--;
+
+                onReleased: (mouse) => {
+                    if (windowIcon.isDragging || dragArea.wasDragged) {
+                        handleDragEnd();
+                    }
+                }
+
+                onCanceled: {
+                    if (windowIcon.isDragging || dragArea.wasDragged) {
+                        handleDragEnd();
+                    }
+                }
+
+                onClicked: (mouse) => {
+                    if (dragArea.wasDragged) return;
+                    if (mouse.button === Qt.MiddleButton) {
+                        var addr = String(modelData.address).trim();
+                        if (addr.indexOf("0x") === 0) addr = addr.substring(2);
+                        Hyprland.dispatch("hl.dsp.window.close({ window = 'address:0x" + addr + "' })");
+                    } else if (mouse.button === Qt.LeftButton) {
+                        if (workspaceBtn && workspaceBtn.modelData) {
+                            var targetId = workspaceBtn.isSpecial ? workspaceBtn.modelData.name : workspaceBtn.modelData.id;
+                            Hyprland.dispatch("hl.dsp.focus({ workspace = '" + targetId + "' })");
+                        }
                     }
                 }
             }

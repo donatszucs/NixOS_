@@ -10,7 +10,10 @@ Item {
     property int pixelSize: Theme.fontSize
     property bool fontBold: true
     property int horizontalAlignment: Text.AlignLeft
-    readonly property bool hovered: hover.hovered
+    property bool forceHovered: false
+    property bool autoScroll: false
+    readonly property bool isHovered: hover.hovered || forceHovered || autoScroll
+    readonly property bool hovered: isHovered
 
     // Removed maxChars! We let text elide based on pixel width correctly.
 
@@ -48,14 +51,14 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         horizontalAlignment: root.horizontalAlignment
 
-        readonly property bool isScrolling: (hover.hovered && visibleText.implicitWidth > root.width) || resetAnim.running
+        readonly property bool isScrolling: (root.isHovered && visibleText.implicitWidth > root.width) || resetAnim.running
         width: isScrolling ? implicitWidth : root.width
         elide: isScrolling ? Text.ElideNone : Text.ElideRight
     }
     
     SequentialAnimation {
         id: marqueeAnim
-        running: hover.hovered && visibleText.implicitWidth > root.width
+        running: root.isHovered && visibleText.implicitWidth > root.width
         loops: Animation.Infinite
 
         onRunningChanged: {

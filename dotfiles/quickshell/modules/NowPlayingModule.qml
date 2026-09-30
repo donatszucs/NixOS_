@@ -32,6 +32,9 @@ ExpandableModule {
         ? _optimisticPlaying
         : (currentPlayer ? currentPlayer.isPlaying : false)
 
+    readonly property bool isNothingPlaying: !hasPlayer || titleText === "Nothing playing"
+    readonly property bool showPlayerIcon: expanded || !isNothingPlaying
+
     onHasPlayerChanged: {
         if (!hasPlayer && nowPlayingModule.expanded) {
             nowPlayingModule.expanded = false
@@ -149,6 +152,7 @@ ExpandableModule {
     }
 
     function getPlayerIcon(player) {
+        if (!player) return ""
         return getPlayerIconSource(player) !== "" ? "" : defaultPlayerIcon
     }
 
@@ -446,7 +450,7 @@ ExpandableModule {
         anchors.verticalCenterOffset: nowPlayingModule.expanded
             ? Math.round(nowPlayingModule.titleBarHeight / 2)
             : 0
-        spacing: nowPlayingModule.expanded ? 8 : 6
+        spacing: nowPlayingModule.expanded ? 8 : (nowPlayingModule.showPlayerIcon ? 6 : 0)
         z: 10
 
         layer.enabled: true
@@ -470,10 +474,12 @@ ExpandableModule {
         }
 
         Item {
-            implicitWidth: nowPlayingModule.expanded ? 18 : 16
-            implicitHeight: nowPlayingModule.expanded ? 18 : 16
+            id: collapsedIconItem
+            visible: nowPlayingModule.showPlayerIcon
+            implicitWidth: visible ? (nowPlayingModule.expanded ? 18 : 16) : 0
+            implicitHeight: visible ? (nowPlayingModule.expanded ? 18 : 16) : 0
             Layout.alignment: Qt.AlignVCenter
-            Layout.leftMargin: 4
+            Layout.leftMargin: visible ? 4 : 0
 
             Behavior on implicitWidth {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -513,6 +519,7 @@ ExpandableModule {
             pixelSize: nowPlayingModule.expanded ? Theme.fontSize : Theme.fontSize - 1
             textColor: Theme.textPrimary
             fontBold: true
+            horizontalAlignment: nowPlayingModule.isNothingPlaying ? Text.AlignHCenter : Text.AlignLeft
         }
     }
 
