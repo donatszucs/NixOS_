@@ -7,13 +7,15 @@ chmod +x setup.sh && ./setup.sh
 sudo nixos-rebuild switch --flake ./nix_files#doni
 ```
 
-## Tapo Light Setup
+## Peripheral & Tapo Light Setup
 
-The light switch is controlled by the Rust `peripherial_monitor` daemon. Its
-credentials are read from a user-only environment file and are not stored in
-the repository.
+The system includes two dedicated Rust daemons:
+- `mouse_monitor`: Keychron mouse battery monitor (reads HID raw reports, status via `/tmp/mouse_state.json`)
+- `light_controller`: Tapo smart bulb controller (state via `/tmp/light_state.json`)
 
-After a fresh install, create the file before starting the service:
+### Tapo Light Credentials
+
+Light credentials are read from a user-only environment file:
 
 ```bash
 install -d -m 700 ~/.config/peripheral-monitor
@@ -21,8 +23,7 @@ ${EDITOR:-nano} ~/.config/peripheral-monitor/tapo.env
 chmod 600 ~/.config/peripheral-monitor/tapo.env
 ```
 
-Add these values using the email, password, and local IP address for the Tapo
-light:
+Add these values:
 
 ```ini
 TAPO_EMAIL=your-tapo-email
@@ -30,34 +31,34 @@ TAPO_PASSWORD=your-tapo-password
 TAPO_IP=192.168.1.100
 ```
 
-Apply the service configuration and restart the daemon:
+Apply configuration and restart the daemons:
 
 ```bash
 sudo nixos-rebuild switch --flake ./nix_files#doni
 systemctl --user daemon-reload
-systemctl --user restart peripheral-monitor
-systemctl --user status peripheral-monitor
+systemctl --user restart mouse-monitor light-controller
+systemctl --user status mouse-monitor light-controller
 ```
 
-Verify the daemon and shared state:
+### CLI Commands
 
+Mouse manual poll:
 ```bash
-cat /tmp/peripherals.json
-ls -l /tmp/peripheral_monitor.sock
+mouse_monitor poll
 ```
 
-The light controls use the daemon client:
-
+Light controls:
 ```bash
-peripherial_monitor light on
-peripherial_monitor light off
-peripherial_monitor light set 50
-peripherial_monitor light color 180 100
-peripherial_monitor light white
+light_controller on
+light_controller off
+light_controller set 50
+light_controller color 180 100
+light_controller white
+light_controller refresh
 ```
 
-Quickshell reads light and mouse state from `/tmp/peripherals.json` and updates
-when the daemon changes it. Reload Quickshell after installation with
+Quickshell reads state from `/tmp/mouse_state.json` and `/tmp/light_state.json`
+and updates reactively when the daemons refresh them. Reload Quickshell with
 `SUPER+Q` or:
 
 ```bash

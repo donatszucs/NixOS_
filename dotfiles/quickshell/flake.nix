@@ -13,20 +13,34 @@
     {
       packages = forAllSystems (system: pkgs:
         let
-          peripheral-monitor = pkgs.rustPlatform.buildRustPackage {
-            pname = "peripherial_monitor";
+          mouse-monitor = pkgs.rustPlatform.buildRustPackage {
+            pname = "mouse_monitor";
             version = "0.1.0";
             src = ./scripts/peripherial_monitor;
             cargoLock = {
               lockFile = ./scripts/peripherial_monitor/Cargo.lock;
             };
+            cargoBuildFlags = [ "-p" "mouse_monitor" ];
+            nativeBuildInputs = [ pkgs.pkg-config ];
+            buildInputs = [ pkgs.udev ];
+          };
+
+          light-controller = pkgs.rustPlatform.buildRustPackage {
+            pname = "light_controller";
+            version = "0.1.0";
+            src = ./scripts/peripherial_monitor;
+            cargoLock = {
+              lockFile = ./scripts/peripherial_monitor/Cargo.lock;
+            };
+            cargoBuildFlags = [ "-p" "light_controller" ];
             nativeBuildInputs = [ pkgs.pkg-config ];
             buildInputs = [ pkgs.udev ];
           };
 
           runtimeDeps = with pkgs; [
-            # Quickflow peripheral daemon
-            peripheral-monitor
+            # Quickflow peripheral daemons
+            mouse-monitor
+            light-controller
 
             # Audio & Volume
             wireplumber     # wpctl
@@ -109,7 +123,9 @@
           quickshell = quickflux-wrapped; # backward compatibility alias
           quickflux-runner = quickflux-runner;
           quickflux-bundle = quickflux-bundle;
-          peripheral-monitor = peripheral-monitor;
+          mouse-monitor = mouse-monitor;
+          light-controller = light-controller;
+          peripheral-monitor = mouse-monitor; # backward compatibility alias
         }
       );
 
@@ -133,10 +149,15 @@
             program = "${pkgs_system.quickshell}/bin/quickshell";
             meta.description = "Run wrapped Quickshell binary";
           };
-          peripheral-monitor = {
+          mouse-monitor = {
             type = "app";
-            program = "${pkgs_system.peripheral-monitor}/bin/peripherial_monitor";
-            meta.description = "Run Keychron M6 & Tapo light monitor daemon";
+            program = "${pkgs_system.mouse-monitor}/bin/mouse_monitor";
+            meta.description = "Run Keychron mouse battery monitor daemon";
+          };
+          light-controller = {
+            type = "app";
+            program = "${pkgs_system.light-controller}/bin/light_controller";
+            meta.description = "Run Tapo light controller daemon";
           };
         }
       );
@@ -153,7 +174,7 @@
               rustc
               udev
               nodejs
-              pkgs_system.quickflux
+              quickshell
             ];
           };
         }
@@ -164,27 +185,38 @@
         let
           system = pkgs.stdenv.hostPlatform.system;
           qfPkg = self.packages.${system}.quickflux;
-          pmPkg = self.packages.${system}.peripheral-monitor;
+          mmPkg = self.packages.${system}.mouse-monitor;
+          lcPkg = self.packages.${system}.light-controller;
         in
         {
           environment.systemPackages = [
             qfPkg
-            pmPkg
+            mmPkg
+            lcPkg
           ];
 
-          # Keychron M6 mouse udev access
+          # Keychron mouse and wireless receiver udev access (M6, M6S 8K, Ultra-Link 0x3434:0xd028, etc.)
           services.udev.extraRules = ''
-            KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3434", ATTRS{idProduct}=="d030", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
-            KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3434", ATTRS{idProduct}=="d03f", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
+            KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3434", MODE="0666", TAG+="uaccess"
           '';
 
-          # User service for peripheral battery and Tapo light monitor
-          systemd.user.services.peripheral-monitor = {
-            description = "Keychron M6 & Tapo Peripheral Monitor Daemon";
+          systemd.user.services.mouse-monitor = {
+            description = "Keychron Mouse Battery Monitor";
             wantedBy = [ "graphical-session.target" ];
             after = [ "graphical-session.target" ];
             serviceConfig = {
-              ExecStart = "${pmPkg}/bin/peripherial_monitor";
+              ExecStart = "${mmPkg}/bin/mouse_monitor";
+              Restart = "always";
+              RestartSec = 3;
+            };
+          };
+
+          systemd.user.services.light-controller = {
+            description = "Tapo Light Controller";
+            wantedBy = [ "graphical-session.target" ];
+            after = [ "graphical-session.target" ];
+            serviceConfig = {
+              ExecStart = "${lcPkg}/bin/light_controller";
               EnvironmentFile = "-%h/.config/peripheral-monitor/tapo.env";
               Restart = "always";
               RestartSec = 3;
@@ -199,24 +231,41 @@
         let
           system = pkgs.stdenv.hostPlatform.system;
           qfPkg = self.packages.${system}.quickflux;
-          pmPkg = self.packages.${system}.peripheral-monitor;
+          mmPkg = self.packages.${system}.mouse-monitor;
+          lcPkg = self.packages.${system}.light-controller;
         in
         {
           home.packages = [
             qfPkg
-            pmPkg
+            mmPkg
+            lcPkg
           ];
 
-          systemd.user.services.peripheral-monitor = {
+          systemd.user.services.mouse-monitor = {
             Unit = {
-              Description = "Keychron M6 & Tapo Peripheral Monitor Daemon";
+              Description = "Keychron Mouse Battery Monitor";
               After = [ "graphical-session.target" ];
             };
             Install = {
               WantedBy = [ "graphical-session.target" ];
             };
             Service = {
-              ExecStart = "${pmPkg}/bin/peripherial_monitor";
+              ExecStart = "${mmPkg}/bin/mouse_monitor";
+              Restart = "always";
+              RestartSec = 3;
+            };
+          };
+
+          systemd.user.services.light-controller = {
+            Unit = {
+              Description = "Tapo Light Controller";
+              After = [ "graphical-session.target" ];
+            };
+            Install = {
+              WantedBy = [ "graphical-session.target" ];
+            };
+            Service = {
+              ExecStart = "${lcPkg}/bin/light_controller";
               EnvironmentFile = "-%h/.config/peripheral-monitor/tapo.env";
               Restart = "always";
               RestartSec = 3;

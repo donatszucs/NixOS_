@@ -95,11 +95,12 @@
   # Enable Bluetooth audio support
   services.blueman.enable = true;
 
-  # udev rules for HyperX Cloud II Wireless 0x03f0:0x018b, Cloud III S Wireless 0x03f0:0x02cc and wireshark usbmon
+  # udev rules for HyperX headsets, Keychron mice (0x3434) and wireshark usbmon
   services.udev.extraRules = ''
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03f0", ATTRS{idProduct}=="018b", MODE="0666"
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03f0", ATTRS{idProduct}=="02cc", MODE="0666"
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03f0", ATTRS{idProduct}=="01cc", MODE="0666"
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3434", MODE="0666", TAG+="uaccess"
     SUBSYSTEM=="usbmon", GROUP="wireshark", MODE="0640"
   '';
 }

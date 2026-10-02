@@ -65,13 +65,13 @@ Item {
     property int lightBrightness: 100
     property int lightHue: 30
     property int lightSaturation: 0
-    property string lightDaemonCommand: "peripherial_monitor"
+    property string lightDaemonCommand: "light_controller"
     property int targetBrightness: -1
     property int inFlightBrightness: -1
 
     FileView {
         id: peripheralStateFile
-        path: "/tmp/peripherals.json"
+        path: "/tmp/light_state.json"
         blockLoading: true
         watchChanges: true
         onLoaded: root.scheduleLightStateUpdate()
@@ -111,7 +111,8 @@ Item {
         }
 
         try {
-            var state = JSON.parse(text).light
+            var raw = JSON.parse(text)
+            var state = (raw && raw.light) ? raw.light : raw
             if (!state) {
                 root.scheduleLightStateUpdate()
                 return
@@ -151,13 +152,13 @@ Item {
 
     Process {
         id: lightOnProc
-        command: [root.lightDaemonCommand, "light", "on"]
+        command: ["sh", "-c", "light_controller on || ~/.nix-profile/bin/light_controller on"]
         onRunningChanged: if (!running) root.refreshLightStatus()
     }
 
     Process {
         id: lightOffProc
-        command: [root.lightDaemonCommand, "light", "off"]
+        command: ["sh", "-c", "light_controller off || ~/.nix-profile/bin/light_controller off"]
         onRunningChanged: if (!running) root.refreshLightStatus()
     }
 
@@ -213,7 +214,7 @@ Item {
     Process {
         id: lightSetBrightnessProc
         property int targetBrightness: 100
-        command: [root.lightDaemonCommand, "light", "set", targetBrightness.toString()]
+        command: ["sh", "-c", "light_controller set " + targetBrightness + " || ~/.nix-profile/bin/light_controller set " + targetBrightness]
         onRunningChanged: {
             if (!running) {
                 root.inFlightBrightness = -1
@@ -238,7 +239,7 @@ Item {
         id: lightSetColorProc
         property int targetHue: 30
         property int targetSat: 0
-        command: [root.lightDaemonCommand, "light", "color", targetHue.toString(), targetSat.toString()]
+        command: ["sh", "-c", "light_controller color " + targetHue + " " + targetSat + " || ~/.nix-profile/bin/light_controller color " + targetHue + " " + targetSat]
         onRunningChanged: if (!running) root.refreshLightStatus()
     }
 
@@ -248,7 +249,7 @@ Item {
 
     Process {
         id: lightSetWhiteProc
-        command: [root.lightDaemonCommand, "light", "white"]
+        command: ["sh", "-c", "light_controller white || ~/.nix-profile/bin/light_controller white"]
         onRunningChanged: if (!running) root.refreshLightStatus()
     }
 

@@ -116,12 +116,15 @@ ExpandableModule {
     property string headsetBatteryState: "not available"
     property string headsetBatteryPercentLabel: headsetBatteryPercent + "%"
     
-    // Mouse battery
-    property bool mouseBatteryAvailable: false
-    property int  mouseBatteryPercent: -1
-    property string mouseBatteryLabel: "Keychron M6"
+    // Mouse battery & status
+    property bool   mouseBatteryAvailable: false
+    property int    mouseBatteryPercent: -1
+    property string mouseBatteryLabel: "Keychron M6S"
     property string mouseBatteryState: "not available"
     property string mouseBatteryPercentLabel: mouseBatteryPercent + "%"
+    property string mouseStatus: "disconnected"
+    property bool   mouseCharging: false
+    property bool   mousePollingActive: false
     
     property int statusColumnWidth: 60
 
@@ -1115,15 +1118,17 @@ ExpandableModule {
                         anchors.left: parent.left
                         anchors.leftMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
+                        opacity: connectionsModule.mousePollingActive ? 0.35 : 1.0
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: 150 }
+                        }
 
                         MouseArea {
                             anchors.fill: parent
-                            anchors.margins: -5
+                            anchors.margins: -6
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                peripheralsFile.reload()
-                                updatePeripherals()
-                            }
+                            onClicked: connectionsModule.triggerMousePoll()
                         }
                     }
 
@@ -1141,14 +1146,20 @@ ExpandableModule {
                         id: mouseBatteryBtn
                         variant: "light"
                         visible: connectionsModule.mouseBatteryAvailable
-                        label: connectionsModule.mouseBatteryPercentLabel
+                        cursorShape: Qt.PointingHandCursor
+                        label: connectionsModule.mouseCharging
+                            ? ("󱐋 " + connectionsModule.mouseBatteryPercentLabel)
+                            : connectionsModule.mouseBatteryPercentLabel
                         implicitHeight: 22
-                        implicitWidth: label.length * (Theme.fontSize * 0.6) + 14
+                        implicitWidth: label.length * (Theme.fontSize * 0.6) + 16
                         radius: 11
-                        color: connectionsModule.mouseBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed
+                        color: connectionsModule.mouseCharging
+                            ? Theme.statusGreen
+                            : (connectionsModule.mouseBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed)
                         anchors.right: parent.right
                         anchors.rightMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
+                        onClicked: connectionsModule.triggerMousePoll()
                     }
                 }
 
@@ -1182,14 +1193,59 @@ ExpandableModule {
                         Layout.fillWidth: true
                     }
 
-                    Text {
-                        color: Theme.textPrimary
-                        opacity: 0.7
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize * 0.9
-                        text: connectionsModule.mouseBatteryState
+                    // Status line with color-coded dot & timestamp
+                    RowLayout {
+                        spacing: 6
                         Layout.fillWidth: true
-                        horizontalAlignment: Text.AlignLeft
+
+                        Rectangle {
+                            width: 7
+                            height: 7
+                            radius: 3.5
+                            color: connectionsModule.mouseCharging
+                                ? Theme.statusGreen
+                                : (connectionsModule.mouseStatus === "connected"
+                                    ? Theme.statusGreen
+                                    : (connectionsModule.mouseStatus === "idle"
+                                        ? Theme.paletteYellow
+                                        : (connectionsModule.mouseStatus === "off"
+                                            ? Theme.paletteYellow
+                                            : Theme.statusDisabled)))
+                        }
+
+                        Text {
+                            color: Theme.textPrimary
+                            opacity: 0.85
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize * 0.85
+                            text: {
+                                if (connectionsModule.mousePollingActive) {
+                                    return "Polling..."
+                                } else if (connectionsModule.mouseCharging) {
+                                    return "Charging"
+                                } else if (connectionsModule.mouseStatus === "connected") {
+                                    return "Active"
+                                } else if (connectionsModule.mouseStatus === "idle") {
+                                    return "Idle (Standby)"
+                                } else if (connectionsModule.mouseStatus === "off") {
+                                    return "Dongle Connected (Mouse Off)"
+                                } else {
+                                    return "Dongle Disconnected"
+                                }
+                            }
+                            elide: Text.ElideRight
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        Text {
+                            color: Theme.textPrimary
+                            opacity: 0.5
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize * 0.75
+                            text: connectionsModule.mouseBatteryState
+                            elide: Text.ElideRight
+                        }
                     }
                 }
             }
@@ -1263,10 +1319,42 @@ ExpandableModule {
         command: ["bash", "-c", " overskride || blueman-manager || gnome-control-center bluetooth || true"]
     }
 
+    Process {
+        id: mousePollProcess
+        command: ["sh", "-c", "mouse_monitor poll || ~/.nix-profile/bin/mouse_monitor poll"]
+        onRunningChanged: {
+            if (!running) {
+                connectionsModule.mousePollingActive = false;
+                peripheralsFile.reload();
+                updatePeripherals();
+            }
+        }
+    }
+
+    Timer {
+        id: mousePollSafetyTimer
+        interval: 3000
+        repeat: false
+        onTriggered: {
+            if (connectionsModule.mousePollingActive) {
+                connectionsModule.mousePollingActive = false;
+                peripheralsFile.reload();
+                updatePeripherals();
+            }
+        }
+    }
+
+    function triggerMousePoll() {
+        if (mousePollingActive) return;
+        mousePollingActive = true;
+        mousePollSafetyTimer.restart();
+        mousePollProcess.running = true;
+    }
+
     // Peripheral JSON reader (RAM-based, instantaneous via FileView)
     FileView {
         id: peripheralsFile
-        path: "/tmp/peripherals.json"
+        path: "/tmp/mouse_state.json"
         blockLoading: true
         watchChanges: true
         onLoaded: updatePeripherals()
@@ -1285,23 +1373,31 @@ ExpandableModule {
 
         try {
             var data = JSON.parse(txt)
-            if (data.mouse !== undefined && data.mouse !== null && data.mouse >= 0) {
+            if (data.name) {
+                connectionsModule.mouseBatteryLabel = data.name
+            } else {
+                connectionsModule.mouseBatteryLabel = "Keychron M6S"
+            }
+            if (data.battery !== undefined && data.battery !== null && data.battery >= 0) {
                 connectionsModule.mouseBatteryAvailable = true
-                connectionsModule.mouseBatteryPercent = data.mouse
+                connectionsModule.mouseBatteryPercent = data.battery
 
                 var timeAgo = ""
-                var updatedSec = data.mouse_updated
+                var updatedSec = data.updated
                 if (updatedSec && !isNaN(updatedSec)) {
                     var diffMins = Math.floor((Date.now() - (updatedSec * 1000)) / 60000)
-                    if (diffMins < 0) diffMins = 0
-                    var days = Math.floor(diffMins / 1440)
-                    var hours = Math.floor((diffMins % 1440) / 60)
-                    var mins = diffMins % 60
+                    if (diffMins <= 0) {
+                        timeAgo = "just now"
+                    } else {
+                        var days = Math.floor(diffMins / 1440)
+                        var hours = Math.floor((diffMins % 1440) / 60)
+                        var mins = diffMins % 60
 
-                    if (days > 0) timeAgo += days + "d "
-                    if (hours > 0) timeAgo += hours + "h "
-                    if (mins > 0 || (days === 0 && hours === 0)) timeAgo += mins + "m "
-                    timeAgo += "ago"
+                        if (days > 0) timeAgo += days + "d "
+                        if (hours > 0) timeAgo += hours + "h "
+                        if (mins > 0 || (days === 0 && hours === 0)) timeAgo += mins + "m "
+                        timeAgo += "ago"
+                    }
                 } else {
                     timeAgo = "recently"
                 }
@@ -1311,10 +1407,14 @@ ExpandableModule {
                 connectionsModule.mouseBatteryPercent = -1
                 connectionsModule.mouseBatteryState = "Disconnected"
             }
+            connectionsModule.mouseStatus = data.status || (connectionsModule.mouseBatteryAvailable ? "connected" : "disconnected")
+            connectionsModule.mouseCharging = !!data.charging
         } catch (e) {
             connectionsModule.mouseBatteryAvailable = false
             connectionsModule.mouseBatteryPercent = -1
             connectionsModule.mouseBatteryState = "not available"
+            connectionsModule.mouseStatus = "disconnected"
+            connectionsModule.mouseCharging = false
         }
     }
 

@@ -36,6 +36,8 @@
         default = inputs.quickflux.packages.${system}.default;
         quickflux = inputs.quickflux.packages.${system}.quickflux;
         peripheral-monitor = inputs.quickflux.packages.${system}.peripheral-monitor;
+        mouse-monitor = inputs.quickflux.packages.${system}.mouse-monitor;
+        light-controller = inputs.quickflux.packages.${system}.light-controller;
       };
 
       nixosConfigurations.doni = inputs.nixpkgs.lib.nixosSystem {
