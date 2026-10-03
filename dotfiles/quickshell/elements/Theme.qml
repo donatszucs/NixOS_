@@ -124,8 +124,8 @@ QtObject {
     // ── Card styling ──────────────────────────────────────────────────
     readonly property int  cardRadius:       moduleEdgeRadius / 2 + 10
     readonly property int  cardBorderWidth:  2
-    readonly property real cardHeaderHeight: 45
-    readonly property int  cardButtonRadius: 8
+    readonly property real cardHeaderHeight: 40
+    readonly property int  cardButtonRadius: 13
 
     // ── Pill Bar Variables ───────────────────────────────────────────
 

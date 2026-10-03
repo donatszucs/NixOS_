@@ -38,6 +38,8 @@ Rectangle {
     property color headerColor: Theme.topBarBlurColor
     property string headerTitle: ""
     property string headerIcon: ""
+    property real headerRightMargin: 7
+    property real headerLeftMargin: 15
 
     // ── Header aliases & slots ───────────────────────────────────────
     property alias headerBar: headerBar
@@ -72,8 +74,8 @@ Rectangle {
             id: headerStandardRow
             visible: root.headerTitle !== "" || root.headerIcon !== ""
             anchors.fill: parent
-            anchors.leftMargin: 15
-            anchors.rightMargin: 15
+            anchors.leftMargin: root.headerLeftMargin
+            anchors.rightMargin: root.headerRightMargin
             spacing: 8
 
             Text {

@@ -205,20 +205,9 @@ Item {
                     RowLayout {
                         anchors.fill: parent
                         anchors.leftMargin: 14
-                        anchors.rightMargin: 14
+                        anchors.rightMargin: 7
                         spacing: 8
-
-                        Text {
-                            text: card.volExpanded ? "Volume" : "Notification Center"
-                            color: Theme.textPrimary
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize + 1
-                            font.bold: true
-                            elide: Text.ElideRight
-                            Layout.alignment: Qt.AlignVCenter
-                        }
-
-                        Item { Layout.fillWidth: true }
+                        layoutDirection: Qt.RightToLeft
 
                         // Clear all button (visible when there are notifications)
                         ModuleButton {
@@ -288,7 +277,7 @@ Item {
                                 StyledSlider {
                                     Layout.fillWidth: true
                                     sliderHeight: 24
-                                    radius: Theme.cardButtonRadius
+                                    radius: Theme.cardButtonRadius - 8
                                     from: 0.0
                                     to: 1.0
                                     value: SharedState.notifVolume
@@ -313,6 +302,18 @@ Item {
                                     Layout.alignment: Qt.AlignVCenter
                                 }
                             }
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        Text {
+                            text: card.volExpanded ? "Volume" : "Notification Center"
+                            color: Theme.textPrimary
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize + 1
+                            font.bold: true
+                            elide: Text.ElideRight
+                            Layout.alignment: Qt.AlignVCenter
                         }
                     }
                 ]

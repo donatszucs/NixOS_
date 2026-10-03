@@ -71,7 +71,7 @@ ExpandableModule {
                         RowLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 15
-                            anchors.rightMargin: 15
+                            anchors.rightMargin: 7
                             spacing: 5
 
                             HoverMarqueeText {

@@ -1010,8 +1010,8 @@ ExpandableModule {
                                 Layout.preferredWidth: 28
                                 Layout.preferredHeight: 26
                                 Layout.alignment: Qt.AlignVCenter
-                                bottomLeftRadius: Theme.cardButtonRadius + 5
-                                topLeftRadius: Theme.cardButtonRadius + 5
+                                bottomLeftRadius: Theme.cardButtonRadius
+                                topLeftRadius: Theme.cardButtonRadius
 
                                 label: "󰙣"
                                 textColor: nowPlayingModule.canPrev ? Theme.textPrimary : Theme.statusDisabled
@@ -1030,8 +1030,8 @@ ExpandableModule {
                                 Layout.preferredHeight: 26
                                 Layout.alignment: Qt.AlignVCenter
                                 Layout.leftMargin: -6
-                                bottomRightRadius: Theme.cardButtonRadius + 5
-                                topRightRadius: Theme.cardButtonRadius + 5
+                                bottomRightRadius: Theme.cardButtonRadius
+                                topRightRadius: Theme.cardButtonRadius
 
                                 label: "󰙡"
                                 textColor: nowPlayingModule.canNext ? Theme.textPrimary : Theme.statusDisabled
@@ -1072,7 +1072,7 @@ ExpandableModule {
                                 Layout.preferredWidth: 46
                                 Layout.preferredHeight: 26
                                 Layout.alignment: Qt.AlignVCenter
-                                radius: Theme.cardButtonRadius + 5
+                                radius: Theme.cardButtonRadius
 
                                 label: {
                                     if (!nowPlayingModule.hasVolume) return ""
