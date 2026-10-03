@@ -15,16 +15,6 @@ ExpandableModule {
     id: connectionsModule
     property int currentPage: 0
 
-    Component {
-        id: cardShadowEffect
-        MultiEffect {
-            shadowEnabled: true
-            shadowColor: Qt.rgba(0, 0, 0, 0.65)
-            shadowBlur: 0.8
-            shadowVerticalOffset: 2
-            shadowHorizontalOffset: 0
-        }
-    }
 
     property int cardWidth: 280
     property int textMaxWidth: cardWidth - 40
@@ -296,36 +286,15 @@ ExpandableModule {
             }
 
             // ── Network ──────────────────────────────────
-            Rectangle {
+            BaseCard {
                 id: netModule
                 visible: connectionsModule.contentVisible && connectionsModule.currentPage === 0
-                color: Theme.bgBlurColor
-                radius: Theme.moduleEdgeRadius / 2 + 10
-                clip: true
-                border.width: 2
-                border.color: Theme.cardBorder
-
-                layer.enabled: true
-                layer.smooth: true
-                layer.effect: cardShadowEffect
-                
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: netTopBar.height + netContentCol.implicitHeight + 20
+                implicitHeight: headerBar.height + netContentCol.implicitHeight + 20
+                hasHeader: true
 
-                Rectangle {
-                    id: netTopBar
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    height: 35
-                    color: Theme.topBarBlurColor
-
-                    topLeftRadius: parent.radius
-                    topRightRadius: parent.radius
-                    bottomLeftRadius: 0
-                    bottomRightRadius: 0
-
+                headerContent: [
                     Text {
                         id: netStatusIcon
                         text: connectionsModule.netIcon
@@ -342,37 +311,23 @@ ExpandableModule {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: netOpen.running = true
                         }
-                    }
+                    },
 
                     Text {
                         id: netTitle
                         text: "Network"
                         color: Theme.textPrimary
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        font.pixelSize: Theme.fontSize + 1
                         font.bold: true
                         anchors.centerIn: parent
                     }
-
-                }
-
-                InverseRadius {
-                    anchors.top: netTopBar.bottom
-                    anchors.left: netTopBar.left
-                    color: netTopBar.color
-                }
-
-                InverseRadius {
-                    cornerPosition: "topRight"
-                    anchors.top: netTopBar.bottom
-                    anchors.right: netTopBar.right
-                    color: netTopBar.color
-                }
+                ]
 
                 ColumnLayout {
                     id: netContentCol
                     anchors {
-                        top: netTopBar.bottom
+                        top: netModule.headerBar.bottom
                         left: parent.left
                         right: parent.right
                         margins: 15
@@ -397,36 +352,15 @@ ExpandableModule {
             }
                             
             // ── Bluetooth ──────────────────────────────────
-            Rectangle {
+            BaseCard {
                 id: btModule
                 visible: connectionsModule.contentVisible && connectionsModule.currentPage === 0
-                color: Theme.bgBlurColor
-                radius: Theme.moduleEdgeRadius / 2 + 10
-                clip: true
-                border.width: 2
-                border.color: Theme.cardBorder
-
-                layer.enabled: true
-                layer.smooth: true
-                layer.effect: cardShadowEffect
-                
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: btTopBar.height + btInfoCol.implicitHeight + 20
+                implicitHeight: headerBar.height + btInfoCol.implicitHeight + 20
+                hasHeader: true
 
-                Rectangle {
-                    id: btTopBar
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    height: 35
-                    color: Theme.topBarBlurColor
-
-                    topLeftRadius: parent.radius
-                    topRightRadius: parent.radius
-                    bottomLeftRadius: 0
-                    bottomRightRadius: 0
-
+                headerContent: [
                     Text {
                         id: btStatusIcon
                         text: connectionsModule.btIcon
@@ -443,23 +377,23 @@ ExpandableModule {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: btOpen.running = true
                         }
-                    }
+                    },
 
                     Text {
                         id: btTitle
                         text: "Bluetooth"
                         color: Theme.textPrimary
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        font.pixelSize: Theme.fontSize + 1
                         font.bold: true
                         anchors.centerIn: parent
-                    }
+                    },
 
                     // Custom-styled switch (smaller, themed)
                     Rectangle {
                         id: btSwitch
-                        width: 32
-                        height: 20
+                        width: 34
+                        height: 22
                         radius: height / 2
                         color: connectionsModule.btColor
                         border.color: connectionsModule.btColor
@@ -492,25 +426,12 @@ ExpandableModule {
                             cursorShape: Qt.PointingHandCursor
                         }
                     }
-                }
-
-                InverseRadius {
-                    anchors.top: btTopBar.bottom
-                    anchors.left: btTopBar.left
-                    color: btTopBar.color
-                }
-
-                InverseRadius {
-                    cornerPosition: "topRight"
-                    anchors.top: btTopBar.bottom
-                    anchors.right: btTopBar.right
-                    color: btTopBar.color
-                }
+                ]
 
                 ColumnLayout {
                     id: btInfoCol
                     anchors {
-                        top: btTopBar.bottom
+                        top: btModule.headerBar.bottom
                         left: parent.left
                         right: parent.right
                         margins: 12
@@ -970,36 +891,15 @@ ExpandableModule {
             }
 
             // ── Headset ──────────────────────────────────
-            Rectangle {
+            BaseCard {
                 id: headsetModule
                 visible: connectionsModule.contentVisible && connectionsModule.currentPage === 1
-                color: Theme.bgBlurColor
-                radius: Theme.moduleEdgeRadius / 2 + 10
-                clip: true
-                border.width: 2
-                border.color: Theme.cardBorder
-
-                layer.enabled: true
-                layer.smooth: true
-                layer.effect: cardShadowEffect
-
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: headsetTopBar.height + headsetContentCol.implicitHeight + 20
+                implicitHeight: headerBar.height + headsetContentCol.implicitHeight + 20
+                hasHeader: true
 
-                Rectangle {
-                    id: headsetTopBar
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    height: 35
-                    color: Theme.topBarBlurColor
-
-                    topLeftRadius: parent.radius
-                    topRightRadius: parent.radius
-                    bottomLeftRadius: 0
-                    bottomRightRadius: 0
-
+                headerContent: [
                     Text {
                         id: headsetIcon
                         text: ""
@@ -1009,50 +909,37 @@ ExpandableModule {
                         anchors.left: parent.left
                         anchors.leftMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
-                    }
+                    },
 
                     Text {
                         id: headsetTitle
                         text: "Headset"
                         color: Theme.textPrimary
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        font.pixelSize: Theme.fontSize + 1
                         font.bold: true
                         anchors.centerIn: parent
-                    }
+                    },
 
                     ModuleButton {
                         id: headsetBatteryBtn
-                        variant: "light"
+                        variant: "neutral"
                         visible: connectionsModule.headsetBatteryAvailable
                         label: connectionsModule.headsetBatteryPercentLabel
-                        implicitHeight: 22
+                        implicitHeight: 24
                         implicitWidth: label.length * (Theme.fontSize * 0.6) + 14
-                        radius: 11
+                        radius: Theme.cardButtonRadius
                         color: connectionsModule.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed
                         anchors.right: parent.right
                         anchors.rightMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
                     }
-                }
-
-                InverseRadius {
-                    anchors.top: headsetTopBar.bottom
-                    anchors.left: headsetTopBar.left
-                    color: headsetTopBar.color
-                }
-
-                InverseRadius {
-                    cornerPosition: "topRight"
-                    anchors.top: headsetTopBar.bottom
-                    anchors.right: headsetTopBar.right
-                    color: headsetTopBar.color
-                }
+                ]
 
                 ColumnLayout {
                     id: headsetContentCol
                     anchors {
-                        top: headsetTopBar.bottom
+                        top: headsetModule.headerBar.bottom
                         left: parent.left
                         right: parent.right
                         margins: 15
@@ -1079,36 +966,15 @@ ExpandableModule {
             }
 
             // ── Mouse ──────────────────────────────────
-            Rectangle {
+            BaseCard {
                 id: mouseModule
                 visible: connectionsModule.contentVisible && connectionsModule.currentPage === 1
-                color: Theme.bgBlurColor
-                radius: Theme.moduleEdgeRadius / 2 + 10
-                clip: true
-                border.width: 2
-                border.color: Theme.cardBorder
-
-                layer.enabled: true
-                layer.smooth: true
-                layer.effect: cardShadowEffect
-
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: mouseTopBar.height + mouseContentCol.implicitHeight + 20
+                implicitHeight: headerBar.height + mouseContentCol.implicitHeight + 20
+                hasHeader: true
 
-                Rectangle {
-                    id: mouseTopBar
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    height: 35
-                    color: Theme.topBarBlurColor
-
-                    topLeftRadius: parent.radius
-                    topRightRadius: parent.radius
-                    bottomLeftRadius: 0
-                    bottomRightRadius: 0
-
+                headerContent: [
                     Text {
                         id: mouseIcon
                         text: "󰍽"
@@ -1130,17 +996,17 @@ ExpandableModule {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: connectionsModule.triggerMousePoll()
                         }
-                    }
+                    },
 
                     Text {
                         id: mouseTitle
                         text: "Mouse"
                         color: Theme.textPrimary
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        font.pixelSize: Theme.fontSize + 1
                         font.bold: true
                         anchors.centerIn: parent
-                    }
+                    },
 
                     ModuleButton {
                         id: mouseBatteryBtn
@@ -1150,9 +1016,9 @@ ExpandableModule {
                         label: connectionsModule.mouseCharging
                             ? ("󱐋 " + connectionsModule.mouseBatteryPercentLabel)
                             : connectionsModule.mouseBatteryPercentLabel
-                        implicitHeight: 22
+                        implicitHeight: 24
                         implicitWidth: label.length * (Theme.fontSize * 0.6) + 16
-                        radius: 11
+                        radius: Theme.cardButtonRadius
                         color: connectionsModule.mouseCharging
                             ? Theme.statusGreen
                             : (connectionsModule.mouseBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed)
@@ -1161,25 +1027,12 @@ ExpandableModule {
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: connectionsModule.triggerMousePoll()
                     }
-                }
-
-                InverseRadius {
-                    anchors.top: mouseTopBar.bottom
-                    anchors.left: mouseTopBar.left
-                    color: mouseTopBar.color
-                }
-
-                InverseRadius {
-                    cornerPosition: "topRight"
-                    anchors.top: mouseTopBar.bottom
-                    anchors.right: mouseTopBar.right
-                    color: mouseTopBar.color
-                }
+                ]
 
                 ColumnLayout {
                     id: mouseContentCol
                     anchors {
-                        top: mouseTopBar.bottom
+                        top: mouseModule.headerBar.bottom
                         left: parent.left
                         right: parent.right
                         margins: 15

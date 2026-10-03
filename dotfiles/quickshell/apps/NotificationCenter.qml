@@ -44,8 +44,8 @@ Item {
     readonly property bool isCardOpen: isManuallyOpen || hasActiveToasts || isHovered || inlineReplyInputFocused
 
     onIsCardOpenChanged: {
-        if (!isCardOpen && typeof notifTopBar !== "undefined" && notifTopBar) {
-            notifTopBar.volExpanded = false
+        if (!isCardOpen && typeof card !== "undefined" && card) {
+            card.volExpanded = false
         }
     }
 
@@ -157,9 +157,9 @@ Item {
                     return calculateNotifColumnHeight()
                 }
                 if (notificationRepeater.count === 0) {
-                    return 55 + emptyState.implicitHeight
+                    return (Theme.cardHeaderHeight + 20) + emptyState.implicitHeight
                 }
-                return 55 + calculateNotifColumnHeight()
+                return (Theme.cardHeaderHeight + 20) + calculateNotifColumnHeight()
             }
 
             property bool isHovered: (containerHoverHandler ? containerHoverHandler.hovered : false) || (cardHoverHandler ? cardHoverHandler.hovered : false)
@@ -174,19 +174,15 @@ Item {
             }
 
             // ── The Unified Card Inside Base Container ──────────────────
-            Rectangle {
+            BaseCard {
                 id: card
                 anchors.fill: parent
                 anchors.margins: 10
 
                 color: root.showAllNotifications ? Theme.bgBlurColor : "transparent"
-                radius: Theme.moduleEdgeRadius / 2 + 10
-                border.width: root.showAllNotifications ? 2 : 0
+                border.width: root.showAllNotifications ? Theme.cardBorderWidth : 0
                 border.color: root.showAllNotifications ? Theme.cardBorder : "transparent"
-                clip: true
-
-                Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-                Behavior on border.color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+                shadowEnabled: false
 
                 opacity: root.isCardOpen ? 1.0 : 0.0
                 visible: opacity > 0
@@ -197,40 +193,23 @@ Item {
 
                 Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
 
-                // ── Card Top Bar ────────────────────────────────────────
-                Rectangle {
-                    id: notifTopBar
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    height: root.showAllNotifications ? 35 : 0
-                    opacity: root.showAllNotifications ? 1.0 : 0.0
-                    visible: opacity > 0
-                    clip: true
-                    Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-                    color: Theme.topBarBlurColor
-                    z: 10
+                hasHeader: root.showAllNotifications
+                property bool volExpanded: false
 
-                    topLeftRadius: parent.radius
-                    topRightRadius: parent.radius
-                    bottomLeftRadius: 0
-                    bottomRightRadius: 0
-
-                    property bool volExpanded: false
-
+                headerContent: [
                     MouseArea {
                         anchors.fill: parent
                         z: -1
-                    }
+                    },
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 12
-                        anchors.rightMargin: 12
-                        spacing: 6
+                        anchors.leftMargin: 14
+                        anchors.rightMargin: 14
+                        spacing: 8
 
                         Text {
-                            text: notifTopBar.volExpanded ? "Volume" : "Notification Center"
+                            text: card.volExpanded ? "Volume" : "Notification Center"
                             color: Theme.textPrimary
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize + 1
@@ -250,10 +229,10 @@ Item {
                             textFont: 14
                             cursorShape: Qt.PointingHandCursor
                             onClicked: root.dismissAll()
-                            implicitHeight: 24
-                            implicitWidth: 24
-                            radius: Theme.moduleEdgeRadius / 2
-                            border.width: 2
+                            implicitHeight: 26
+                            implicitWidth: 26
+                            radius: Theme.cardButtonRadius
+                            border.width: 1
                             Layout.alignment: Qt.AlignVCenter
                         }
 
@@ -265,16 +244,16 @@ Item {
                             textFont: 14
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                if (!notifTopBar.volExpanded) {
-                                    notifTopBar.volExpanded = true
+                                if (!card.volExpanded) {
+                                    card.volExpanded = true
                                 } else {
                                     SharedState.muted = !SharedState.muted
                                 }
                             }
-                            implicitHeight: 24
-                            implicitWidth: 24
-                            radius: Theme.moduleEdgeRadius / 2
-                            border.width: 2
+                            implicitHeight: 26
+                            implicitWidth: 26
+                            radius: Theme.cardButtonRadius
+                            border.width: 1
                             Layout.alignment: Qt.AlignVCenter
                         }
 
@@ -282,11 +261,11 @@ Item {
                         Item {
                             id: volEditorContainer
                             clip: true
-                            implicitHeight: 24
-                            Layout.preferredHeight: 24
-                            Layout.preferredWidth: notifTopBar.volExpanded ? 135 : 0
-                            visible: Layout.preferredWidth > 0 || notifTopBar.volExpanded
-                            opacity: notifTopBar.volExpanded ? 1.0 : 0.0
+                            implicitHeight: 26
+                            Layout.preferredHeight: 26
+                            Layout.preferredWidth: card.volExpanded ? 135 : 0
+                            visible: Layout.preferredWidth > 0 || card.volExpanded
+                            opacity: card.volExpanded ? 1.0 : 0.0
                             Layout.alignment: Qt.AlignVCenter
 
                             Behavior on Layout.preferredWidth {
@@ -308,8 +287,8 @@ Item {
 
                                 StyledSlider {
                                     Layout.fillWidth: true
-                                    sliderHeight: 20
-                                    radius: Theme.moduleEdgeRadius / 2
+                                    sliderHeight: 24
+                                    radius: Theme.cardButtonRadius
                                     from: 0.0
                                     to: 1.0
                                     value: SharedState.notifVolume
@@ -336,31 +315,10 @@ Item {
                             }
                         }
                     }
-                }
-
-                InverseRadius {
-                    anchors.top: notifTopBar.bottom
-                    anchors.left: notifTopBar.left
-                    color: notifTopBar.color
-                    visible: root.showAllNotifications && notifTopBar.height > 0
-                    opacity: root.showAllNotifications ? 1.0 : 0.0
-                    Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-                    z: 10
-                }
-
-                InverseRadius {
-                    cornerPosition: "topRight"
-                    anchors.top: notifTopBar.bottom
-                    anchors.right: notifTopBar.right
-                    color: notifTopBar.color
-                    visible: root.showAllNotifications && notifTopBar.height > 0
-                    opacity: root.showAllNotifications ? 1.0 : 0.0
-                    Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-                    z: 10
-                }
+                ]
 
                 Item {
-                    anchors.top: notifTopBar.bottom
+                    anchors.top: card.headerBar.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right
                     height: root.showAllNotifications ? 10 : 0
@@ -386,7 +344,7 @@ Item {
                 // ── Main Content Area ───────────────────────────────────
                 Item {
                     id: mainContentArea
-                    anchors.top: notifTopBar.bottom
+                    anchors.top: card.headerBar.bottom
                     anchors.bottom: parent.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: root.cardWidth - 20

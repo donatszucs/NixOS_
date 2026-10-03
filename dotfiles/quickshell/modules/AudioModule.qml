@@ -137,16 +137,6 @@ ExpandableModule {
     leftCornerStyle: "side"
     rightCornerStyle: "side"
 
-    Component {
-        id: cardShadowEffect
-        MultiEffect {
-            shadowEnabled: true
-            shadowColor: Qt.rgba(0, 0, 0, 0.65)
-            shadowBlur: 0.8
-            shadowVerticalOffset: 2
-            shadowHorizontalOffset: 0
-        }
-    }
 
     onPillWheel: (wheel) => {
         if (pwAudio) {
@@ -188,93 +178,44 @@ ExpandableModule {
                 width: parent.width
                 spacing: 10
 
-                Rectangle {
-                    color: Theme.bgBlurColor
-                    radius: Theme.moduleEdgeRadius / 2 + 10
+                BaseCard {
+                    id: sinkCard
                     Layout.fillWidth: true
-                    implicitHeight: audioTopBar.height + sinkCol.implicitHeight + 20
-                    border.width: 2
-                    border.color: Theme.cardBorder
+                    implicitHeight: headerBar.height + sinkCol.implicitHeight + 20
+                    headerTitle: "Output Devices"
 
-                    layer.enabled: true
-                    layer.smooth: true
-                    layer.effect: cardShadowEffect
+                    headerControls: [
+                        ModuleButton {
+                            variant: "neutral"
+                            label: ""
+                            textFont: 14
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: testSoundProcess.running = true
+                            implicitHeight: 26
+                            implicitWidth: 26
+                            radius: Theme.cardButtonRadius
+                            border.width: 1
+                            Layout.alignment: Qt.AlignVCenter
+                        },
 
-                    Rectangle {
-                        id: audioTopBar
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        height: 35
-                        color: Theme.topBarBlurColor
-
-                        topLeftRadius: parent.radius
-                        topRightRadius: parent.radius
-                        bottomLeftRadius: 0
-                        bottomRightRadius: 0
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 12
-                            anchors.rightMargin: 12
-                            spacing: 8
-
-                            Text {
-                                text: "Output Devices"
-                                color: Theme.textPrimary
-                                font.family: Theme.font
-                                font.pixelSize: Theme.fontSize + 1
-                                font.bold: true
-                                Layout.alignment: Qt.AlignVCenter
-                            }
-
-                            Item { Layout.fillWidth: true } // spacer
-
-                            ModuleButton {
-                                variant: "light"
-                                label: ""
-                                textFont: 14
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: testSoundProcess.running = true
-                                implicitHeight: 24
-                                implicitWidth: 24
-                                radius: Theme.moduleEdgeRadius / 2
-                                border.width: 1
-                                Layout.alignment: Qt.AlignVCenter
-                            }
-
-                            ModuleButton {
-                                variant: "light"
-                                label: "󰓃"
-                                textFont: 14
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: pavu.running = true
-                                implicitHeight: 24
-                                implicitWidth: 24
-                                radius: Theme.moduleEdgeRadius / 2
-                                border.width: 1
-                                Layout.alignment: Qt.AlignVCenter
-                            }
+                        ModuleButton {
+                            variant: "neutral"
+                            label: "󰓃"
+                            textFont: 14
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: pavu.running = true
+                            implicitHeight: 26
+                            implicitWidth: 26
+                            radius: Theme.cardButtonRadius
+                            border.width: 1
+                            Layout.alignment: Qt.AlignVCenter
                         }
-                    }
-
-                    InverseRadius {
-                        anchors.top: audioTopBar.bottom
-                        anchors.left: audioTopBar.left
-                        color: audioTopBar.color
-                    }
-
-                    InverseRadius {
-                        cornerPosition: "topRight"
-                        anchors.top: audioTopBar.bottom
-                        anchors.right: audioTopBar.right
-                        color: audioTopBar.color
-                    }
+                    ]
 
                     ColumnLayout {
                         id: sinkCol
                         anchors {
-                            top: audioTopBar.bottom
+                            top: sinkCard.headerBar.bottom
                             left: parent.left
                             right: parent.right
                             margins: 10
@@ -435,87 +376,38 @@ ExpandableModule {
                     }
                 }
 
-                Rectangle {
-                    color: Theme.bgBlurColor
-                    radius: Theme.moduleEdgeRadius / 2 + 10
+                BaseCard {
+                    id: sourceCard
                     Layout.fillWidth: true
-                    implicitHeight: inputTopBar.height + sourceCol.implicitHeight + 20
-                    border.width: 2
-                    border.color: Theme.cardBorder
+                    implicitHeight: headerBar.height + sourceCol.implicitHeight + 20
+                    headerTitle: "Input Devices"
 
-                    layer.enabled: true
-                    layer.smooth: true
-                    layer.effect: cardShadowEffect
+                    headerControls: [
+                        ModuleButton {
+                            property var pwSourceAudio: Pipewire.defaultAudioSource ? Pipewire.defaultAudioSource.audio : null
+                            property bool isMuted: pwSourceAudio ? pwSourceAudio.muted : false
 
-                    Rectangle {
-                        id: inputTopBar
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        height: 35
-                        color: Theme.topBarBlurColor
-
-                        topLeftRadius: parent.radius
-                        topRightRadius: parent.radius
-                        bottomLeftRadius: 0
-                        bottomRightRadius: 0
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 12
-                            anchors.rightMargin: 12
-                            spacing: 8
-
-                            Text {
-                                text: "Input Devices"
-                                color: Theme.textPrimary
-                                font.family: Theme.font
-                                font.pixelSize: Theme.fontSize + 1
-                                font.bold: true
-                                Layout.alignment: Qt.AlignVCenter
-                            }
-
-                            Item { Layout.fillWidth: true } // spacer
-
-                            ModuleButton {
-                                property var pwSourceAudio: Pipewire.defaultAudioSource ? Pipewire.defaultAudioSource.audio : null
-                                property bool isMuted: pwSourceAudio ? pwSourceAudio.muted : false
-
-                                variant: isMuted ? "red" : "light"
-                                label: isMuted ? "" : ""
-                                textFont: 14
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    if (pwSourceAudio) {
-                                        pwSourceAudio.muted = !pwSourceAudio.muted
-                                    }
+                            variant: isMuted ? "red" : "neutral"
+                            label: isMuted ? "" : ""
+                            textFont: 14
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                if (pwSourceAudio) {
+                                    pwSourceAudio.muted = !pwSourceAudio.muted
                                 }
-                                implicitHeight: 24
-                                implicitWidth: 24
-                                radius: Theme.moduleEdgeRadius / 2
-                                border.width: 1
-                                Layout.alignment: Qt.AlignVCenter
-                            } 
+                            }
+                            implicitHeight: 26
+                            implicitWidth: 26
+                            radius: Theme.cardButtonRadius
+                            border.width: 1
+                            Layout.alignment: Qt.AlignVCenter
                         }
-                    }
-
-                    InverseRadius {
-                        anchors.top: inputTopBar.bottom
-                        anchors.left: inputTopBar.left
-                        color: inputTopBar.color
-                    }
-
-                    InverseRadius {
-                        cornerPosition: "topRight"
-                        anchors.top: inputTopBar.bottom
-                        anchors.right: inputTopBar.right
-                        color: inputTopBar.color
-                    }
+                    ]
 
                     ColumnLayout {
                         id: sourceCol
                         anchors {
-                            top: inputTopBar.bottom
+                            top: sourceCard.headerBar.bottom
                             left: parent.left
                             right: parent.right
                             margins: 10

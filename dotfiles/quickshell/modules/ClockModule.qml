@@ -11,16 +11,6 @@ import "../elements"
 ExpandableModule {
     id: root
 
-    Component {
-        id: cardShadowEffect
-        MultiEffect {
-            shadowEnabled: true
-            shadowColor: Qt.rgba(0, 0, 0, 0.65)
-            shadowBlur: 0.8
-            shadowVerticalOffset: 2
-            shadowHorizontalOffset: 0
-        }
-    }
 
     // ── Time State (collapsed view) ──────────────────────────────
     property string hours: ""
@@ -288,7 +278,7 @@ ExpandableModule {
         }
 
         Rectangle {
-            color: Theme.paletteInk
+            color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, Theme.paletteInk.a * 0.6)
             radius: (Theme.moduleHeight - 10) / 2
             topLeftRadius: radius - 6
             bottomLeftRadius: radius - 6
@@ -333,62 +323,40 @@ ExpandableModule {
         }
 
         // ── Card 1: Month Calendar ───────────────────────────────
-        Rectangle {
+        BaseCard {
             id: calendarCard
             implicitWidth: root.cardWidth
             Layout.preferredWidth: root.cardWidth
             Layout.alignment: Qt.AlignHCenter
-            implicitHeight: calTopBar.height + calGridContent.implicitHeight + 16
-            radius: Theme.moduleEdgeRadius / 2 + 10
-            color: Theme.bgBlurColor
-            border.width: 2
-            border.color: Theme.cardBorder
-            clip: true
+            implicitHeight: headerBar.height + calGridContent.implicitHeight + 16
+            hasHeader: true
 
-            layer.enabled: true
-            layer.smooth: true
-            layer.effect: cardShadowEffect
-
-            // Top Header Bar
-            Rectangle {
-                id: calTopBar
-                anchors {
-                    top: parent.top
-                    left: parent.left
-                    right: parent.right
-                }
-                height: 35
-                color: Theme.topBarBlurColor
-                topLeftRadius: parent.radius
-                topRightRadius: parent.radius
-                bottomLeftRadius: 0
-                bottomRightRadius: 0
-
+            headerContent: [
                 // Prev Month Button
                 ModuleButton {
                     id: prevBtn
-                    width: 26
-                    height: 20
-                    radius: 13
+                    width: 28
+                    height: 24
+                    radius: Theme.cardButtonRadius
                     topRightRadius: 0
                     bottomRightRadius: 0
                     anchors {
                         left: parent.left
-                        leftMargin: 8
+                        leftMargin: 12
                         verticalCenter: parent.verticalCenter
                     }
                     variant: "neutral"
                     label: "󰅁"
                     onClicked: root.prevMonth()
                     cursorShape: Qt.PointingHandCursor
-                }
+                },
                 
                 // Next Month Button
                 ModuleButton {
                     id: nextBtn
-                    width: 26
-                    height: 20
-                    radius: 13
+                    width: 28
+                    height: 24
+                    radius: Theme.cardButtonRadius
                     topLeftRadius: 0
                     bottomLeftRadius: 0
                     anchors {
@@ -400,37 +368,37 @@ ExpandableModule {
                     label: "󰅂"
                     onClicked: root.nextMonth()
                     cursorShape: Qt.PointingHandCursor
-                }
+                },
 
                 // Month & Year Title
                 Text {
                     id: monthTitleText
                     anchors {
                         left: nextBtn.right
-                        leftMargin: 6
+                        leftMargin: 8
                         verticalCenter: parent.verticalCenter
                     }
                     text: root.viewMonthName + " " + root.viewYear
                     color: Theme.textPrimary
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.fontSize + 1
                     font.bold: true
-                }
+                },
 
                 // Right action buttons (Today, Refresh, Google Calendar Web)
                 RowLayout {
                     anchors {
                         right: parent.right
-                        rightMargin: 8
+                        rightMargin: 12
                         verticalCenter: parent.verticalCenter
                     }
-                    spacing: 5
+                    spacing: 6
 
                     // "Today" button
                     Rectangle {
-                        implicitHeight: 22
-                        implicitWidth: todayBtnText.implicitWidth + 12
-                        radius: Theme.moduleEdgeRadius / 2
+                        implicitHeight: 24
+                        implicitWidth: todayBtnText.implicitWidth + 14
+                        radius: Theme.cardButtonRadius
                         color: todayHover.hovered ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.25) : Qt.rgba(1, 1, 1, 0.1)
                         border.width: 1
                         border.color: todayHover.hovered ? Theme.statusBlue : Theme.divider
@@ -442,7 +410,7 @@ ExpandableModule {
                             text: "Today"
                             color: todayHover.hovered ? Theme.statusBlue : Theme.textPrimary
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize * 0.75
+                            font.pixelSize: Theme.fontSize * 0.8
                             font.bold: true
                         }
 
@@ -457,7 +425,7 @@ ExpandableModule {
                     Rectangle {
                         width: 24
                         height: 24
-                        radius: 12
+                        radius: Theme.cardButtonRadius
                         color: refreshHover.hovered ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
                         HoverHandler { id: refreshHover }
 
@@ -489,7 +457,7 @@ ExpandableModule {
                     Rectangle {
                         width: 24
                         height: 24
-                        radius: 12
+                        radius: Theme.cardButtonRadius
                         color: webHover.hovered ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
                         HoverHandler { id: webHover }
 
@@ -508,26 +476,13 @@ ExpandableModule {
                         }
                     }
                 }
-            }
-
-            InverseRadius {
-                anchors.top: calTopBar.bottom
-                anchors.left: calTopBar.left
-                color: calTopBar.color
-            }
-
-            InverseRadius {
-                cornerPosition: "topRight"
-                anchors.top: calTopBar.bottom
-                anchors.right: calTopBar.right
-                color: calTopBar.color
-            }
+            ]
 
             // Calendar Grid Content
             ColumnLayout {
                 id: calGridContent
                 anchors {
-                    top: calTopBar.bottom
+                    top: calendarCard.headerBar.bottom
                     left: parent.left
                     right: parent.right
                     margins: 10
@@ -675,21 +630,12 @@ ExpandableModule {
         }
 
         // ── Card 2: Selected Day Agenda & Events ─────────────────
-        Rectangle {
+        BaseCard {
             id: agendaCard
             implicitWidth: root.cardWidth
             Layout.preferredWidth: root.cardWidth
             Layout.alignment: Qt.AlignHCenter
             implicitHeight: agendaContentCol.implicitHeight + 20
-            radius: Theme.moduleEdgeRadius / 2 + 10
-            color: Theme.bgBlurColor
-            border.width: 2
-            border.color: Theme.cardBorder
-            clip: true
-
-            layer.enabled: true
-            layer.smooth: true
-            layer.effect: cardShadowEffect
 
             ColumnLayout {
                 id: agendaContentCol

@@ -76,7 +76,7 @@ ExpandableModule {
     pillBgImageOpacity: 0.4
 
     property int cardWidth: 260
-    property real cardHeight: 260
+    property real cardHeight: 270
 
     implicitHeight: expanded ? cardHeight + Theme.moduleHeight + nowPlayingModule.titleBarHeight + 15 : Theme.moduleHeight
 
@@ -428,16 +428,6 @@ ExpandableModule {
         }
     }
 
-    Component {
-        id: cardShadowEffect
-        MultiEffect {
-            shadowEnabled: true
-            shadowColor: Qt.rgba(0, 0, 0, 0.65)
-            shadowBlur: 0.8
-            shadowVerticalOffset: 2
-            shadowHorizontalOffset: 0
-        }
-    }
 
     // ── Header Content (Icon + Track Title, always visible in headerPill) ──
     RowLayout {
@@ -548,18 +538,9 @@ ExpandableModule {
             Layout.alignment: Qt.AlignHCenter
             acceptedButtons: Qt.NoButton
 
-            Rectangle {
+            BaseCard {
                 id: carouselPanel
                 anchors.fill: parent
-                color: Theme.bgBlurColor
-                radius: Theme.moduleEdgeRadius / 2 + 10
-                clip: true
-                border.width: 2
-                border.color: Theme.cardBorder
-
-                layer.enabled: true
-                layer.smooth: true
-                layer.effect: cardShadowEffect
                     // Multi-player: carousel
                     ListView {
                         id: playerCarousel
@@ -991,7 +972,7 @@ ExpandableModule {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        height: 35
+                        height: Theme.cardHeaderHeight
                         color: Theme.topBarBlurColor
                         bottomLeftRadius: carouselPanel.radius
                         bottomRightRadius: carouselPanel.radius
@@ -1003,7 +984,7 @@ ExpandableModule {
                             anchors.left: authorBar.left
                             cornerPosition: "bottomLeft"
                             color: authorBar.color
-                            size: 13
+                            size: 15
                         }
 
                         InverseRadius {
@@ -1011,13 +992,13 @@ ExpandableModule {
                             anchors.bottom: authorBar.top
                             anchors.right: authorBar.right
                             color: authorBar.color
-                            size: 13
+                            size: 15
                         }
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 8
-                            anchors.rightMargin: 8
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
                             spacing: 6
 
                             // Previous Button
@@ -1026,11 +1007,11 @@ ExpandableModule {
                                 variant: "neutral"
                                 cursorShape: nowPlayingModule.canPrev ? Qt.PointingHandCursor : Qt.ArrowCursor
                                 textFont: 15
-                                Layout.preferredWidth: 25
-                                Layout.preferredHeight: 25
+                                Layout.preferredWidth: 28
+                                Layout.preferredHeight: 26
                                 Layout.alignment: Qt.AlignVCenter
-                                bottomLeftRadius: 11
-                                topLeftRadius: 11
+                                bottomLeftRadius: Theme.cardButtonRadius + 5
+                                topLeftRadius: Theme.cardButtonRadius + 5
 
                                 label: "󰙣"
                                 textColor: nowPlayingModule.canPrev ? Theme.textPrimary : Theme.statusDisabled
@@ -1045,12 +1026,12 @@ ExpandableModule {
                                 variant: "neutral"
                                 cursorShape: nowPlayingModule.canNext ? Qt.PointingHandCursor : Qt.ArrowCursor
                                 textFont: 15
-                                Layout.preferredWidth: 25
-                                Layout.preferredHeight: 25
+                                Layout.preferredWidth: 28
+                                Layout.preferredHeight: 26
                                 Layout.alignment: Qt.AlignVCenter
                                 Layout.leftMargin: -6
-                                bottomRightRadius: 11
-                                topRightRadius: 11
+                                bottomRightRadius: Theme.cardButtonRadius + 5
+                                topRightRadius: Theme.cardButtonRadius + 5
 
                                 label: "󰙡"
                                 textColor: nowPlayingModule.canNext ? Theme.textPrimary : Theme.statusDisabled
@@ -1088,10 +1069,10 @@ ExpandableModule {
                                 variant: "neutral"
                                 cursorShape: Qt.PointingHandCursor
                                 textFont: 15
-                                Layout.preferredWidth: 44
-                                Layout.preferredHeight: 25
+                                Layout.preferredWidth: 46
+                                Layout.preferredHeight: 26
                                 Layout.alignment: Qt.AlignVCenter
-                                radius: 11
+                                radius: Theme.cardButtonRadius + 5
 
                                 label: {
                                     if (!nowPlayingModule.hasVolume) return ""

@@ -9,16 +9,6 @@ import "../elements"
 ExpandableModule {
     id: root
 
-    Component {
-        id: cardShadowEffect
-        MultiEffect {
-            shadowEnabled: true
-            shadowColor: Qt.rgba(0, 0, 0, 0.65)
-            shadowBlur: 0.8
-            shadowVerticalOffset: 2
-            shadowHorizontalOffset: 0
-        }
-    }
 
     readonly property real   temperature:    SharedState.weatherTemperature
     readonly property string weatherIcon:    SharedState.weatherIcon
@@ -160,41 +150,22 @@ ExpandableModule {
                     }
                 }
 
-                Rectangle {
-                    color: Theme.bgBlurColor
-                    radius: Theme.moduleEdgeRadius / 2 + 10
+                BaseCard {
+                    id: hourlyCard
                     Layout.fillWidth: true
-                    implicitHeight: 200
-                    border.width: 2
-                    border.color: Theme.cardBorder
-                    clip: true
+                    implicitHeight: hourlyCard.headerBar.height + 165
+                    hasHeader: true
 
-                    layer.enabled: true
-                    layer.smooth: true
-                    layer.effect: cardShadowEffect
-
-                    Rectangle {
-                        id: hourlyTopBar
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        height: 35
-                        color: Theme.topBarBlurColor
-
-                        topLeftRadius: parent.radius
-                        topRightRadius: parent.radius
-                        bottomLeftRadius: 0
-                        bottomRightRadius: 0
-
+                    headerContent: [
                         Text {
                             id: hourlyTitle
                             text: "Hourly"
                             color: Theme.textPrimary
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
+                            font.pixelSize: Theme.fontSize + 1
                             font.bold: true
                             anchors.centerIn: parent
-                        }
+                        },
 
                         Text {
                             text: "Reset"
@@ -226,24 +197,11 @@ ExpandableModule {
                                 easing.type: Easing.OutCubic
                             }
                         }
-                    }
-
-                    InverseRadius {
-                        anchors.top: hourlyTopBar.bottom
-                        anchors.left: hourlyTopBar.left
-                        color: hourlyTopBar.color
-                    }
-
-                    InverseRadius {
-                        cornerPosition: "topRight"
-                        anchors.top: hourlyTopBar.bottom
-                        anchors.right: hourlyTopBar.right
-                        color: hourlyTopBar.color
-                    }
+                    ]
 
                     Flickable {
                         id: graphFlickable
-                        anchors.top: hourlyTopBar.bottom
+                        anchors.top: hourlyCard.headerBar.bottom
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -445,42 +403,22 @@ ExpandableModule {
                     }
                 }
 
-                Rectangle {
-                    color: Theme.bgBlurColor
-                    radius: Theme.moduleEdgeRadius / 2 + 10
+                BaseCard {
+                    id: dailyCard
                     Layout.fillWidth: true
-                    implicitHeight: 165
-                    border.width: 2
-                    border.color: Theme.cardBorder
-                    clip: true
+                    implicitHeight: dailyCard.headerBar.height + 130
+                    hasHeader: true
 
-                    layer.enabled: true
-                    layer.smooth: true
-                    layer.effect: cardShadowEffect
-
-                    Rectangle {
-                        id: dailyTopBar
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        height: 35
-                        color: Theme.topBarBlurColor
-
-                        radius: parent.radius
-                        topLeftRadius: parent.radius
-                        topRightRadius: parent.radius
-                        bottomLeftRadius: 0
-                        bottomRightRadius: 0
-
+                    headerContent: [
                         Text {
                             id: dailyTitle
                             text: "10-Day"
                             color: Theme.textPrimary
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
+                            font.pixelSize: Theme.fontSize + 1
                             font.bold: true
                             anchors.centerIn: parent
-                        }
+                        },
 
                         Text {
                             text: "Reset"
@@ -503,24 +441,11 @@ ExpandableModule {
                                 }
                             }
                         }
-                    }
-
-                    InverseRadius {
-                        anchors.top: dailyTopBar.bottom
-                        anchors.left: dailyTopBar.left
-                        color: dailyTopBar.color
-                    }
-
-                    InverseRadius {
-                        cornerPosition: "topRight"
-                        anchors.top: dailyTopBar.bottom
-                        anchors.right: dailyTopBar.right
-                        color: dailyTopBar.color
-                    }
+                    ]
 
                     ListView {
                         id: carousel
-                        anchors.top: dailyTopBar.bottom
+                        anchors.top: dailyCard.headerBar.bottom
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left
                         anchors.right: parent.right

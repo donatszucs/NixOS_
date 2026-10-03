@@ -9,16 +9,6 @@ ExpandableModule {
     id: root
     property int cardWidth: 210
 
-    Component {
-        id: cardShadowEffect
-        MultiEffect {
-            shadowEnabled: true
-            shadowColor: Qt.rgba(0, 0, 0, 0.65)
-            shadowBlur: 0.8
-            shadowVerticalOffset: 2
-            shadowHorizontalOffset: 0
-        }
-    }
 
     pillPercent: expanded ? 0 : (SharedState.lightAvailable && SharedState.lightActive ? SharedState.lightBrightness : 0)
     pillText: {
@@ -87,92 +77,41 @@ ExpandableModule {
                 spacing: 10
 
         // ── Brightness Card with Slider ──────────────────────────
-        Rectangle {
+        BaseCard {
             id: brightnessCard
-            color: Theme.bgBlurColor
-            radius: Theme.moduleEdgeRadius / 2 + 10
             Layout.fillWidth: true
-            implicitHeight: brightTopBar.height + brightContent.implicitHeight + 20
-            clip: true
-            border.width: 2
-            border.color: Theme.cardBorder
+            implicitHeight: headerBar.height + brightContent.implicitHeight + 20
+            headerTitle: "Brightness"
 
-            layer.enabled: true
-            layer.smooth: true
-            layer.effect: cardShadowEffect
+            headerControls: [
+                Text {
+                    text: SharedState.lightActive ? (SharedState.lightBrightness + "%") : "Off"
+                    color: SharedState.lightActive ? Theme.textPrimary : Theme.statusDisabled
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize
+                    font.bold: true
+                    opacity: 0.85
+                    Layout.alignment: Qt.AlignVCenter
+                },
 
-            Rectangle {
-                id: brightTopBar
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                height: 35
-                color: Theme.topBarBlurColor
-
-                topLeftRadius: parent.radius
-                topRightRadius: parent.radius
-                bottomLeftRadius: 0
-                bottomRightRadius: 0
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 12
-                    spacing: 8
-
-                    Text {
-                        text: "Brightness"
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize + 1
-                        font.bold: true
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-
-                    Item { Layout.fillWidth: true } // spacer
-
-                    Text {
-                        text: SharedState.lightActive ? (SharedState.lightBrightness + "%") : "Off"
-                        color: SharedState.lightActive ? Theme.textPrimary : Theme.statusDisabled
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
-                        font.bold: true
-                        opacity: 0.85
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-
-                    ModuleButton {
-                        variant: SharedState.lightActive ? "light" : "neutral"
-                        label: SharedState.lightActive ? "󱩒" : "󱩎"
-                        textFont: 14
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: SharedState.toggleLight()
-                        implicitHeight: 24
-                        implicitWidth: 24
-                        radius: Theme.moduleEdgeRadius / 2
-                        border.width: 1
-                        Layout.alignment: Qt.AlignVCenter
-                    }
+                ModuleButton {
+                    variant: SharedState.lightActive ? "light" : "neutral"
+                    label: SharedState.lightActive ? "󱩒" : "󱩎"
+                    textFont: 14
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: SharedState.toggleLight()
+                    implicitHeight: 26
+                    implicitWidth: 26
+                    radius: Theme.cardButtonRadius
+                    border.width: 1
+                    Layout.alignment: Qt.AlignVCenter
                 }
-            }
-
-            InverseRadius {
-                anchors.top: brightTopBar.bottom
-                anchors.left: brightTopBar.left
-                color: brightTopBar.color
-            }
-
-            InverseRadius {
-                cornerPosition: "topRight"
-                anchors.top: brightTopBar.bottom
-                anchors.right: brightTopBar.right
-                color: brightTopBar.color
-            }
+            ]
 
             RowLayout {
                 id: brightContent
                 anchors {
-                    top: brightTopBar.bottom
+                    top: brightnessCard.headerBar.bottom
                     left: parent.left
                     right: parent.right
                     margins: 10
@@ -200,20 +139,10 @@ ExpandableModule {
         }
 
         // Colour wheel
-        Rectangle {
+        BaseCard {
             id: colorCard
             Layout.fillWidth: true
             implicitHeight: 130
-
-            color: Theme.bgBlurColor
-            radius: Theme.moduleEdgeRadius / 2 + 10
-            border.width: 2
-            border.color: Theme.cardBorder
-            clip: true
-
-            layer.enabled: true
-            layer.smooth: true
-            layer.effect: cardShadowEffect
 
             // ── Colour wheel ────────────────────────────────────────────
             Item {

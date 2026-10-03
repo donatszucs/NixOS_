@@ -10,16 +10,6 @@ import "../elements"
 ExpandableModule {
     id: root
 
-    Component {
-        id: cardShadowEffect
-        MultiEffect {
-            shadowEnabled: true
-            shadowColor: Qt.rgba(0, 0, 0, 0.65)
-            shadowBlur: 0.8
-            shadowVerticalOffset: 2
-            shadowHorizontalOffset: 0
-        }
-    }
     collapseOnHoverExit: false   // managed manually (menu-aware)
     useDefaultPill: false
 
@@ -104,7 +94,7 @@ ExpandableModule {
     }
 
     // Tray items — revealed in the overlay below the header
-    ModuleButton {
+    BaseCard {
         id: trayCard
         parent: root.overlay
         anchors.horizontalCenter: parent.horizontalCenter
@@ -117,20 +107,12 @@ ExpandableModule {
         border.width: 2
         border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
 
-        layer.enabled: true
-        layer.smooth: true
-        layer.effect: cardShadowEffect
-
         implicitWidth: trayColumn.implicitWidth + 10
         implicitHeight: trayColumn.implicitHeight + 10
 
         // Visible when expanded or animating close (clipped)
         visible: root.contentVisible && trayColumn.implicitHeight > 0
         opacity: root.contentOpacity
-        
-        // disable default interactions
-        noHoverColorChange: true
-        noPressColorChange: true
 
         ColumnLayout {
             id: trayColumn

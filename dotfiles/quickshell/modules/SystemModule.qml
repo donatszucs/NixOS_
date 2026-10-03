@@ -30,16 +30,6 @@ ExpandableModule {
     expandedDropdownWidth: cardWidth + 30
     dropdownAlignment: "right"
 
-    Component {
-        id: cardShadowEffect
-        MultiEffect {
-            shadowEnabled: true
-            shadowColor: Qt.rgba(0, 0, 0, 0.65)
-            shadowBlur: 0.8
-            shadowVerticalOffset: 2
-            shadowHorizontalOffset: 0
-        }
-    }
 
     ColumnLayout {
         id: baseColumn
@@ -71,46 +61,13 @@ ExpandableModule {
                 spacing: 10
 
                 // ── System Actions ─────────────────────────────────────────
-                Rectangle {
-                    color: Theme.bgBlurColor
-                    radius: Theme.moduleEdgeRadius / 2 + 10
+                BaseCard {
+                    id: sysCard
                     Layout.fillWidth: true
-                    implicitHeight: sysBottomBar.height + sysContentCol.implicitHeight + 20
-                    clip: true
-                    border.width: 2
-                    border.color: Theme.cardBorder
+                    implicitHeight: headerBar.height + sysContentCol.implicitHeight + 20
+                    hasHeader: true
 
-                    layer.enabled: true
-                    layer.smooth: true
-                    layer.effect: cardShadowEffect
-
-                    InverseRadius {
-                        anchors.top: sysBottomBar.bottom
-                        anchors.left: sysBottomBar.left
-                        cornerPosition: "topLeft"
-                        color: sysBottomBar.color
-                    }
-
-                    InverseRadius {
-                        cornerPosition: "topRight"
-                        anchors.top: sysBottomBar.bottom
-                        anchors.right: sysBottomBar.right
-                        color: sysBottomBar.color
-                    }
-
-                    Rectangle {
-                        id: sysBottomBar
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        height: 35
-                        color: Theme.topBarBlurColor
-
-                        topLeftRadius: parent.radius
-                        topRightRadius: parent.radius
-                        bottomLeftRadius: 0
-                        bottomRightRadius: 0
-
+                    headerContent: [
                         RowLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 15
@@ -148,9 +105,9 @@ ExpandableModule {
                                 textFont: 16
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: updateProc.running = true
-                                implicitHeight: 23
-                                implicitWidth: 28
-                                radius: Theme.moduleEdgeRadius / 2
+                                implicitHeight: 26
+                                implicitWidth: 30
+                                radius: Theme.cardButtonRadius
                                 border.width: 1
                                 Layout.alignment: Qt.AlignVCenter
                             }
@@ -161,18 +118,19 @@ ExpandableModule {
                                 textFont: 16
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: rebuildProc.running = true
-                                implicitHeight: 23
-                                implicitWidth: 28
-                                radius: Theme.moduleEdgeRadius / 2
+                                implicitHeight: 26
+                                implicitWidth: 30
+                                radius: Theme.cardButtonRadius
                                 border.width: 1
                                 Layout.alignment: Qt.AlignVCenter
                             }
                         }
-                    }
+                    ]
 
                     ColumnLayout {
                         id: sysContentCol
                         anchors {
+                            top: sysCard.headerBar.bottom
                             bottom: parent.bottom
                             left: parent.left
                             right: parent.right
