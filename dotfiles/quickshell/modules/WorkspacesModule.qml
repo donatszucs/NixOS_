@@ -16,6 +16,8 @@ ModuleButton {
     property string displayMode: "all"
     property bool expanded: false
 
+    signal requestContextMenu(var windowData, var globalPos)
+
     clip: false
 
     color: Qt.rgba(Theme.palette("dark").base.r, Theme.palette("dark").base.g, Theme.palette("dark").base.b, Theme.moduleOpacity)
@@ -435,40 +437,13 @@ ModuleButton {
             MouseArea {
                 id: dragArea
                 anchors.fill: parent
-                acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+                acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
                 cursorShape: Qt.PointingHandCursor
                 hoverEnabled: true
 
                 property point pressPos: Qt.point(0, 0)
                 property bool wasDragged: false
 
-                ToolTip {
-                    id: appToolTip
-                    x: parent.width + 10
-                    y: (parent.height - height) / 2
-                    visible: dragArea.containsMouse && !windowIcon.isDragging
-                    delay: 250
-                    text: modelData.title || windowIcon.appId
-
-                    contentItem: HoverMarqueeText {
-                        text: appToolTip.text
-                        textMaxWidth: 240
-                        textColor: "white"
-                        fontFamily: Theme.font
-                        pixelSize: Theme.fontSize
-                        fontBold: false
-                        horizontalAlignment: Text.AlignHCenter
-                        autoScroll: appToolTip.visible
-                    }
-
-                    background: Rectangle {
-                        color: Theme.palette("dark").base
-                        radius: 5
-                        border.color: Theme.palette("light").base
-                        border.width: 2
-                    }
-                }
-                
                 drag.target: windowIcon
                 drag.axis: Drag.XAndYAxis
                 drag.threshold: 4
@@ -596,6 +571,19 @@ ModuleButton {
                             var targetId = workspaceBtn.isSpecial ? workspaceBtn.modelData.name : workspaceBtn.modelData.id;
                             Hyprland.dispatch("hl.dsp.focus({ workspace = '" + targetId + "' })");
                         }
+                    } else if (mouse.button === Qt.RightButton) {
+                        var iconCenterBottom = windowIcon.mapToItem(null, windowIcon.width / 2, windowIcon.height + 4);
+                        var winData = {
+                            address: String(modelData.address),
+                            title: modelData.title || windowIcon.appId || "Window",
+                            appId: windowIcon.appId,
+                            icon: windowIcon.resolvedIcon,
+                            isFloating: (modelData.lastIpcObject && modelData.lastIpcObject.floating !== undefined) ? Boolean(modelData.lastIpcObject.floating) : false,
+                            isPinned: (modelData.lastIpcObject && modelData.lastIpcObject.pinned !== undefined) ? Boolean(modelData.lastIpcObject.pinned) : false,
+                            isFullscreen: (modelData.lastIpcObject && modelData.lastIpcObject.fullscreen !== undefined) ? (modelData.lastIpcObject.fullscreen > 0) : false,
+                            workspace: (workspaceBtn && workspaceBtn.modelData) ? (workspaceBtn.isSpecial ? workspaceBtn.modelData.name : workspaceBtn.modelData.id) : ""
+                        };
+                        root.requestContextMenu(winData, iconCenterBottom);
                     }
                 }
             }

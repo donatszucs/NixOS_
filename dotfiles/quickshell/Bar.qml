@@ -43,13 +43,14 @@ PanelWindow {
 
     HyprlandFocusGrab {
         windows: [topPanel]
-        active: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || notificationCenter.inlineReplyInputFocused || wallpaperPicker.expanded
+        active: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || notificationCenter.inlineReplyInputFocused || wallpaperPicker.expanded || windowContextMenu.isOpen
         onCleared: {
             launcherModule.expanded = false
             wallpaperPicker.expanded = false
             clipboardHistory.expanded = false
             rbwMenu.closeMenu()
             notificationCenter.inlineReplyInputFocused = false
+            windowContextMenu.close()
         }
     }
 
@@ -118,6 +119,11 @@ PanelWindow {
             item: notificationCenter
         }
 
+        // Window Context Menu region
+        Region {
+            item: windowContextMenu.visible ? windowContextMenu : null
+        }
+
     }
 
     BackgroundEffect.blurRegion: Region {
@@ -141,6 +147,7 @@ PanelWindow {
         Region { item: (trayModule.contentVisible || trayModule.hasProtrudingCorners) ? trayModule.flowingBackground : null }
         Region { item: (systemModule.contentVisible || systemModule.hasProtrudingCorners) ? systemModule.flowingBackground : null }
         Region { item: bottomLeftBorder }
+        Region { item: windowContextMenu.isOpen ? windowContextMenu.menuCard : null }
     }
 
     // Background MouseArea to close the launcher when clicking outside of it
@@ -148,13 +155,14 @@ PanelWindow {
         id: bgMouseArea
         anchors.fill: parent
         visible: enabled
-        enabled: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded || notificationCenter.isManuallyOpen
+        enabled: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded || notificationCenter.isManuallyOpen || windowContextMenu.isOpen
         onClicked: {
             launcherModule.expanded = false
             wallpaperPicker.expanded = false
             clipboardHistory.expanded = false
             rbwMenu.closeMenu()
             notificationCenter.isManuallyOpen = false
+            windowContextMenu.close()
         }
         z: -1
     }
@@ -235,6 +243,9 @@ PanelWindow {
             } else {
                 clipboardHistory.openMenu();
             }
+        }
+        onRequestContextMenu: (winData, globalPos) => {
+            windowContextMenu.open(winData, globalPos);
         }
 
         layer.enabled: activeDragCount === 0
@@ -380,6 +391,11 @@ PanelWindow {
 
         layer.enabled: true
         layer.effect: panelShadowEffect
+    }
+
+    WindowContextMenu {
+        id: windowContextMenu
+        z: 9999
     }
 
 

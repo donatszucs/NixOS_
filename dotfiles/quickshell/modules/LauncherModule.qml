@@ -32,6 +32,7 @@ ModuleButton {
     signal toggleWallpaperPicker()
     signal toggleBitwardenMenu()
     signal toggleClipboardHistory()
+    signal requestContextMenu(var windowData, var globalPos)
 
     property int  panelWidth:  400
     property int  maxVisible:  6
@@ -222,6 +223,7 @@ ModuleButton {
                     displayMode: "monitor"
                     color: "transparent"
                     anchors.topMargin: 0
+                    onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)
                 }
 
                 Item {
@@ -268,6 +270,7 @@ ModuleButton {
                     color: "transparent"
                     anchors.topMargin: 0
                     visible: otherWorkspaces.monitorWorkspaces.others.length > 0 || otherWorkspaces.implicitWidth > 0.5
+                    onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)
                 }
             }
 

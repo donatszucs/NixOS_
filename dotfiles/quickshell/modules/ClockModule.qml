@@ -288,8 +288,10 @@ ExpandableModule {
         }
 
         Rectangle {
-            color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a * 0.6)
+            color: Theme.paletteInk
             radius: (Theme.moduleHeight - 10) / 2
+            topLeftRadius: radius - 6
+            bottomLeftRadius: radius - 6
             implicitWidth: 60
             implicitHeight: Theme.moduleHeight - 14
 
@@ -298,7 +300,7 @@ ExpandableModule {
             Text {
                 anchors.centerIn: parent
                 text: root.date
-                color: Theme.paletteInk
+                color: Theme.palettePaper
                 font.family: Theme.font
                 font.pixelSize: Theme.fontSize - 2
                 font.bold: false
