@@ -87,4 +87,13 @@ PillBarButton {
             wheel.accepted = true
         }
     }
+
+    Behavior on implicitWidth {
+        NumberAnimation {
+            id: _widthAnim
+            duration: Theme.horizontalDuration
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.1
+        }
+    }
 }

@@ -106,7 +106,7 @@ ExpandableModule {
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: updateProc.running = true
                                 implicitHeight: 26
-                                implicitWidth: 30
+                                implicitWidth: 36
                                 radius: Theme.cardButtonRadius
                                 border.width: 1
                                 Layout.alignment: Qt.AlignVCenter
@@ -119,7 +119,7 @@ ExpandableModule {
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: rebuildProc.running = true
                                 implicitHeight: 26
-                                implicitWidth: 30
+                                implicitWidth: 36
                                 radius: Theme.cardButtonRadius
                                 border.width: 1
                                 Layout.alignment: Qt.AlignVCenter
