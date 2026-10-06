@@ -37,10 +37,21 @@
             buildInputs = [ pkgs.udev ];
           };
 
+          phone-monitor = pkgs.rustPlatform.buildRustPackage {
+            pname = "phone_monitor";
+            version = "0.1.0";
+            src = ./scripts/peripherial_monitor;
+            cargoLock = {
+              lockFile = ./scripts/peripherial_monitor/Cargo.lock;
+            };
+            cargoBuildFlags = [ "-p" "phone_monitor" ];
+          };
+
           runtimeDeps = with pkgs; [
             # Quickflow peripheral daemons
             mouse-monitor
             light-controller
+            phone-monitor
 
             # Audio & Volume
             wireplumber     # wpctl

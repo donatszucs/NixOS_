@@ -26,10 +26,21 @@
       General = {
         Experimental = true; # Show battery charge for supported devices
         Privacy = "device";
+        FastConnectable = true;
         #JustWorksRepairing = "always"; # Helps with some devices that fail to pair
+      };
+      LE = {
+        MinConnectionInterval = 7;
+        MaxConnectionInterval = 9;
+        ConnectionLatency = 0;
       };
     };
   };
+
+  # Disable ERTM for Xbox controller Bluetooth stability
+  boot.extraModprobeConfig = ''
+    options bluetooth disable_ertm=1
+  '';
 
   hardware.xpadneo.enable = true;
   hardware.uinput.enable = true; # For virtual inputs (e.g. Sunshine)
@@ -95,12 +106,13 @@
   # Enable Bluetooth audio support
   services.blueman.enable = true;
 
-  # udev rules for HyperX headsets, Keychron mice (0x3434) and wireshark usbmon
+  # udev rules for HyperX headsets, Keychron mice (0x3434), wireshark usbmon, and ASUS BT500 dongle
   services.udev.extraRules = ''
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03f0", ATTRS{idProduct}=="018b", MODE="0666"
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03f0", ATTRS{idProduct}=="02cc", MODE="0666"
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03f0", ATTRS{idProduct}=="01cc", MODE="0666"
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3434", MODE="0666", TAG+="uaccess"
     SUBSYSTEM=="usbmon", GROUP="wireshark", MODE="0640"
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0b05", ATTR{idProduct}=="190e", TEST=="power/control", ATTR{power/control}="on"
   '';
 }

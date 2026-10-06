@@ -99,12 +99,45 @@ ExpandableModule {
         }
     }
 
-    // Headset battery
-    property bool headsetBatteryAvailable: false
-    property int  headsetBatteryPercent: -1
-    property string headsetBatteryLabel: "HyprX Cloud II"
-    property string headsetBatteryState: "not available"
-    property string headsetBatteryPercentLabel: headsetBatteryPercent + "%"
+    // Phone state (KDE Connect)
+    property bool   phoneConnected: false
+    property bool   phonePaired: false
+    property string phoneDeviceId: ""
+    property string phoneName: "Pixel 8"
+    property string phoneType: "phone"
+    property string phoneProvider: "LAN"
+    property string phoneIp: ""
+    property bool   phoneBatteryAvailable: false
+    property int    phoneBatteryPercent: -1
+    property bool   phoneCharging: false
+    property int    phoneSignalStrength: -1
+    property string phoneNetworkType: "Cellular"
+    property bool   phonePollingActive: false
+    property string phoneActionStatus: ""
+    property string phoneBatteryPercentLabel: phoneBatteryPercent >= 0 ? (phoneBatteryPercent + "%") : "--"
+
+    function getPhoneBatteryIcon(pct, charging) {
+        if (charging) return "󰂄";
+        if (pct >= 90) return "󰁹";
+        if (pct >= 80) return "󰂂";
+        if (pct >= 70) return "󰂁";
+        if (pct >= 60) return "󰂀";
+        if (pct >= 50) return "󰁿";
+        if (pct >= 40) return "󰁾";
+        if (pct >= 30) return "󰁽";
+        if (pct >= 20) return "󰁼";
+        if (pct >= 10) return "󰁻";
+        if (pct >= 0)  return "󰁺";
+        return "󰂎";
+    }
+
+    function getPhoneSignalIcon(strength) {
+        if (strength >= 4) return "󰢿";
+        if (strength === 3) return "󰢾";
+        if (strength === 2) return "󰢽";
+        if (strength === 1) return "󰢼";
+        return "󰤯";
+    }
     
     // Mouse battery & status
     property bool   mouseBatteryAvailable: false
@@ -164,7 +197,7 @@ ExpandableModule {
     // ── Sizing ─────────────────────────────────────────────────
     implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + connectionsModule.titleBarHeight + 15 : Theme.moduleHeight
 
-    collapsedWidth: 65
+    collapsedWidth: connectionsModule.phoneConnected ? 88 : 65
 
     // Overlay dropdown setup
     expandedDropdownWidth: cardWidth + 30
@@ -172,6 +205,14 @@ ExpandableModule {
 
     leftCornerStyle: "side"
     rightCornerStyle: "side"
+
+    onPillWheel: (wheel) => {
+        if (wheel.angleDelta.y > 0) {
+            connectionsModule.currentPage = 1
+        } else if (wheel.angleDelta.y < 0) {
+            connectionsModule.currentPage = 0
+        }
+    }
 
     // Collapsed content inside the base pill
     Row {
@@ -181,7 +222,7 @@ ExpandableModule {
         anchors.verticalCenter: parent.top
         anchors.verticalCenterOffset: Math.round(Theme.moduleHeight / 2)
         height: implicitHeight
-        spacing: 12
+        spacing: 10
         z: 6
 
         opacity: connectionsModule.expanded ? 0.0 : 1.0
@@ -190,17 +231,71 @@ ExpandableModule {
             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
         }
 
-        Text {
-            text: connectionsModule.netIcon
-            color: connectionsModule.netColor
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize + 1
+        Item {
+            width: netIconText.implicitWidth
+            height: netIconText.implicitHeight
+            anchors.verticalCenter: parent.verticalCenter
+            Text {
+                id: netIconText
+                text: connectionsModule.netIcon
+                color: connectionsModule.netColor
+                font.family: Theme.font
+                font.pixelSize: Theme.fontSize + 1
+            }
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -4
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    connectionsModule.currentPage = 0
+                    connectionsModule.expanded = true
+                }
+            }
         }
-        Text {
-            text: connectionsModule.btIcon
-            color: connectionsModule.btColor
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize + 1
+
+        Item {
+            width: btIconText.implicitWidth
+            height: btIconText.implicitHeight
+            anchors.verticalCenter: parent.verticalCenter
+            Text {
+                id: btIconText
+                text: connectionsModule.btIcon
+                color: connectionsModule.btColor
+                font.family: Theme.font
+                font.pixelSize: Theme.fontSize + 1
+            }
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -4
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    connectionsModule.currentPage = 0
+                    connectionsModule.expanded = true
+                }
+            }
+        }
+
+        Item {
+            visible: connectionsModule.phoneConnected
+            width: phoneIconText.implicitWidth
+            height: phoneIconText.implicitHeight
+            anchors.verticalCenter: parent.verticalCenter
+            Text {
+                id: phoneIconText
+                text: connectionsModule.getPhoneBatteryIcon(connectionsModule.phoneBatteryPercent, connectionsModule.phoneCharging)
+                color: connectionsModule.phoneCharging ? Theme.statusGreen : (connectionsModule.phoneBatteryPercent > 20 ? Theme.palettePaper : Theme.statusRed)
+                font.family: Theme.font
+                font.pixelSize: Theme.fontSize + 1
+            }
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -4
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    connectionsModule.currentPage = 1
+                    connectionsModule.expanded = true
+                }
+            }
         }
     }
 
@@ -267,13 +362,13 @@ ExpandableModule {
                     }
                 }
 
-                Text {
-                    text: "Peripherals"
-                    color: Theme.textPrimary
-                    opacity: connectionsModule.currentPage === 1 ? 1.0 : 0.5
-                    font.family: Theme.font
-                    font.pixelSize: 18
-                    font.bold: true
+                        Text {
+                            text: "Devices"
+                            color: Theme.textPrimary
+                            opacity: connectionsModule.currentPage === 1 ? 1.0 : 0.5
+                            font.family: Theme.font
+                            font.pixelSize: 18
+                            font.bold: true
                     
                     Behavior on opacity { NumberAnimation { duration: 150 } }
 
@@ -890,30 +985,42 @@ ExpandableModule {
                 }
             }
 
-            // ── Headset ──────────────────────────────────
+            // ── Phone (KDE Connect) ──────────────────────
             BaseCard {
-                id: headsetModule
+                id: phoneModule
                 visible: connectionsModule.contentVisible && connectionsModule.currentPage === 1
                 Layout.fillWidth: true
                 implicitWidth: connectionsModule.cardWidth
-                implicitHeight: headerBar.height + headsetContentCol.implicitHeight + 20
+                implicitHeight: headerBar.height + phoneContentCol.implicitHeight + 20
                 hasHeader: true
 
                 headerContent: [
                     Text {
-                        id: headsetIcon
-                        text: ""
-                        color: connectionsModule.headsetBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
+                        id: phoneHeaderIcon
+                        text: ""
+                        color: connectionsModule.phoneConnected ? Theme.palettePaper : Theme.statusDisabled
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize + 2
                         anchors.left: parent.left
                         anchors.leftMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
+                        opacity: connectionsModule.phonePollingActive ? 0.35 : 1.0
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: 150 }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            anchors.margins: -6
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: connectionsModule.triggerPhonePoll()
+                        }
                     },
 
                     Text {
-                        id: headsetTitle
-                        text: "Headset"
+                        id: phoneHeaderTitle
+                        text: "Phone"
                         color: Theme.textPrimary
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize + 1
@@ -922,45 +1029,317 @@ ExpandableModule {
                     },
 
                     ModuleButton {
-                        id: headsetBatteryBtn
+                        id: phoneSettingsBtn
                         variant: "neutral"
-                        visible: connectionsModule.headsetBatteryAvailable
-                        label: connectionsModule.headsetBatteryPercentLabel
-                        implicitHeight: 24
-                        implicitWidth: label.length * (Theme.fontSize * 0.6) + 14
+                        cursorShape: Qt.PointingHandCursor
+                        label: "󰒓"
+                        textFont: Theme.fontSize + 1
+                        implicitHeight: 26
+                        implicitWidth: 28
                         radius: Theme.cardButtonRadius
-                        color: connectionsModule.headsetBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed
                         anchors.right: parent.right
-                        anchors.rightMargin: 15
+                        anchors.rightMargin: 7
                         anchors.verticalCenter: parent.verticalCenter
+                        onClicked: phoneAppProc.running = true
                     }
                 ]
 
                 ColumnLayout {
-                    id: headsetContentCol
+                    id: phoneContentCol
                     anchors {
-                        top: headsetModule.headerBar.bottom
+                        top: phoneModule.headerBar.bottom
                         left: parent.left
                         right: parent.right
-                        margins: 15
-                        topMargin: 10
+                        margins: 14
+                        topMargin: 12
                     }
-                    spacing: 4
+                    spacing: 12
 
-                    HoverMarqueeText {
-                        text: connectionsModule.headsetBatteryLabel
-                        textMaxWidth: connectionsModule.cardWidth - 30
+                    // 1. Hero Row: Big Smartphone Icon + Information & Battery Gauge
+                    RowLayout {
                         Layout.fillWidth: true
+                        spacing: 12
+
+                        // ── BIG SMARTPHONE FRAME ─────────────────────────
+                        Rectangle {
+                            id: bigPhoneFrame
+                            implicitWidth: 62
+                            implicitHeight: 82
+                            Layout.alignment: Qt.AlignVCenter
+                            radius: 12
+                            color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.45)
+                            border.width: 1.5
+                            border.color: connectionsModule.phoneCharging
+                                ? Theme.statusGreen
+                                : (connectionsModule.phoneConnected ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.06))
+
+                            Behavior on border.color {
+                                ColorAnimation { duration: 250 }
+                            }
+
+                            // Big Smartphone Glyph inside the frame
+                            Text {
+                                anchors.centerIn: parent
+                                text: "󰀄"
+                                color: connectionsModule.phoneConnected
+                                    ? Theme.palettePaper
+                                    : Theme.statusDisabled
+                                opacity: connectionsModule.phoneConnected ? 1.0 : 0.35
+                                font.family: Theme.font
+                                font.pixelSize: 44
+                            }
+
+                            // Charging lightning badge in top-right corner
+                            Rectangle {
+                                visible: connectionsModule.phoneConnected && connectionsModule.phoneCharging
+                                width: 16
+                                height: 16
+                                radius: 8
+                                color: Theme.statusGreen
+                                anchors {
+                                    top: parent.top
+                                    right: parent.right
+                                    margins: 5
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "󱐋"
+                                    color: Theme.paletteInk
+                                    font.family: Theme.font
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                }
+                            }
+
+                            // Active connection indicator dot in bottom-right corner
+                            Rectangle {
+                                visible: connectionsModule.phoneConnected && !connectionsModule.phoneCharging
+                                width: 8
+                                height: 8
+                                radius: 4
+                                color: Theme.statusGreen
+                                anchors {
+                                    bottom: parent.bottom
+                                    right: parent.right
+                                    margins: 5
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: phoneAppProc.running = true
+                            }
+                        }
+
+                        // ── INFO & BATTERY COLUMN ────────────────────────
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            spacing: 4
+
+                            // Device name
+                            Text {
+                                text: connectionsModule.phoneConnected ? connectionsModule.phoneName : "Phone Disconnected"
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize + 2
+                                font.bold: true
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+
+                            // Connection IP & Signal row
+                            RowLayout {
+                                spacing: 5
+                                Layout.fillWidth: true
+
+                                Text {
+                                    text: connectionsModule.phoneConnected
+                                        ? ((connectionsModule.phoneIp !== "" ? connectionsModule.phoneIp : "LAN Connected"))
+                                        : "Not reachable"
+                                    color: Theme.textPrimary
+                                    opacity: 0.7
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize * 0.78
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+                                }
+
+                                // Cellular signal indicator
+                                RowLayout {
+                                    spacing: 3
+                                    visible: connectionsModule.phoneConnected && connectionsModule.phoneSignalStrength >= 0
+
+                                    Text {
+                                        text: connectionsModule.getPhoneSignalIcon(connectionsModule.phoneSignalStrength)
+                                        color: Theme.palettePaper
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize * 0.82
+                                    }
+
+                                    Text {
+                                        text: connectionsModule.phoneSignalStrength + "/4"
+                                        color: Theme.textPrimary
+                                        opacity: 0.65
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize * 0.72
+                                    }
+                                }
+                            }
+
+                            // ── The ONE Single Battery Meter ─────────────
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 3
+                                visible: connectionsModule.phoneConnected && connectionsModule.phoneBatteryAvailable
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+
+                                    Text {
+                                        text: connectionsModule.phoneCharging
+                                            ? "󱐋 Charging"
+                                            : (connectionsModule.getPhoneBatteryIcon(connectionsModule.phoneBatteryPercent, false) + " Battery")
+                                        color: connectionsModule.phoneCharging ? Theme.statusGreen : Theme.textPrimary
+                                        opacity: connectionsModule.phoneCharging ? 1.0 : 0.85
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize * 0.76
+                                        font.bold: connectionsModule.phoneCharging
+                                    }
+
+                                    Item { Layout.fillWidth: true }
+
+                                    Text {
+                                        text: connectionsModule.phoneBatteryPercent + "%"
+                                        color: connectionsModule.phoneCharging 
+                                            ? Theme.statusGreen 
+                                            : (connectionsModule.phoneBatteryPercent > 20 ? Theme.textPrimary : Theme.statusRed)
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize * 0.76
+                                        font.bold: true
+                                    }
+                                }
+
+                                // Battery gauge track
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    height: 5
+                                    radius: 2.5
+                                    color: Qt.rgba(1, 1, 1, 0.12)
+                                    clip: true
+
+                                    Rectangle {
+                                        height: parent.height
+                                        width: Math.max(0, Math.min(parent.width, parent.width * (connectionsModule.phoneBatteryPercent / 100.0)))
+                                        radius: 2.5
+                                        color: connectionsModule.phoneCharging 
+                                            ? Theme.statusGreen 
+                                            : (connectionsModule.phoneBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed)
+                                        Behavior on width {
+                                            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
 
+                    // 2. Temporary action status feedback
                     Text {
-                        color: Theme.textPrimary
-                        opacity: 0.7
+                        visible: connectionsModule.phoneActionStatus !== ""
+                        text: connectionsModule.phoneActionStatus
+                        color: Theme.statusGreen
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize * 0.9
-                        text: connectionsModule.headsetBatteryState
+                        font.pixelSize: Theme.fontSize * 0.72
+                        font.bold: true
                         Layout.fillWidth: true
-                        horizontalAlignment: Text.AlignLeft
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+
+                    // 3. Quick Actions Row (Ring, Files, Ping — Clip removed!)
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+                        visible: connectionsModule.phoneConnected
+
+                        ModuleButton {
+                            Layout.fillWidth: true
+                            variant: "neutral"
+                            label: "󰂚 Ring"
+                            textFont: Theme.fontSize * 0.75
+                            implicitHeight: 26
+                            cursorShape: Qt.PointingHandCursor
+                            radius: Theme.cardButtonRadius
+                            onClicked: connectionsModule.triggerRing()
+                        }
+
+                        ModuleButton {
+                            Layout.fillWidth: true
+                            variant: "neutral"
+                            label: "󰉋 Files"
+                            textFont: Theme.fontSize * 0.75
+                            implicitHeight: 26
+                            cursorShape: Qt.PointingHandCursor
+                            radius: Theme.cardButtonRadius
+                            onClicked: connectionsModule.triggerBrowse()
+                        }
+
+                        ModuleButton {
+                            Layout.fillWidth: true
+                            variant: "neutral"
+                            label: "󰅟 Ping"
+                            textFont: Theme.fontSize * 0.75
+                            implicitHeight: 26
+                            cursorShape: Qt.PointingHandCursor
+                            radius: Theme.cardButtonRadius
+                            onClicked: connectionsModule.triggerPing()
+                        }
+                    }
+
+                    // 4. Disconnected Fallback controls
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+                        visible: !connectionsModule.phoneConnected
+
+                        Text {
+                            text: "Phone not reachable"
+                            color: Theme.statusDisabled
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize * 0.85
+                            font.italic: true
+                            horizontalAlignment: Text.AlignHCenter
+                            Layout.fillWidth: true
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 6
+
+                            ModuleButton {
+                                Layout.fillWidth: true
+                                variant: "neutral"
+                                label: "󰑐 Scan / Refresh"
+                                textFont: Theme.fontSize * 0.75
+                                implicitHeight: 26
+                                cursorShape: Qt.PointingHandCursor
+                                radius: Theme.cardButtonRadius
+                                onClicked: connectionsModule.triggerPhonePoll()
+                            }
+
+                            ModuleButton {
+                                Layout.fillWidth: true
+                                variant: "neutral"
+                                label: "󰒓 KDE Connect"
+                                textFont: Theme.fontSize * 0.75
+                                implicitHeight: 26
+                                cursorShape: Qt.PointingHandCursor
+                                radius: Theme.cardButtonRadius
+                                onClicked: phoneAppProc.running = true
+                            }
+                        }
                     }
                 }
             }
@@ -1282,8 +1661,113 @@ ExpandableModule {
         }
     }
 
+    // ── Phone Processes & Synchronization (Rust Backend) ────────
+    Process {
+        id: phonePollProcess
+        command: ["sh", "-c", "phone_monitor poll || ~/.config/quickshell/scripts/peripherial_monitor/target/release/phone_monitor poll || ~/.local/bin/phone_monitor poll"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                connectionsModule.phonePollingActive = false;
+                connectionsModule.applyPhoneData(text);
+            }
+        }
+    }
+
+    Process {
+        id: phoneRingProc
+        command: ["sh", "-c", "phone_monitor ring || ~/.config/quickshell/scripts/peripherial_monitor/target/release/phone_monitor ring || ~/.local/bin/phone_monitor ring"]
+    }
+
+    Process {
+        id: phoneBrowseProc
+        command: ["sh", "-c", "phone_monitor browse || ~/.config/quickshell/scripts/peripherial_monitor/target/release/phone_monitor browse || ~/.local/bin/phone_monitor browse"]
+    }
+
+    Process {
+        id: phonePingProc
+        command: ["sh", "-c", "phone_monitor ping || ~/.config/quickshell/scripts/peripherial_monitor/target/release/phone_monitor ping || ~/.local/bin/phone_monitor ping"]
+    }
+
+    Process {
+        id: phoneAppProc
+        command: ["sh", "-c", "phone_monitor app || ~/.config/quickshell/scripts/peripherial_monitor/target/release/phone_monitor app || ~/.local/bin/phone_monitor app"]
+    }
+
+    Timer {
+        id: phonePollTimer
+        interval: 3000
+        running: true
+        repeat: true
+        onTriggered: {
+            if (!phonePollProcess.running) {
+                phonePollProcess.running = true;
+            }
+        }
+    }
+
+    Timer {
+        id: phoneFeedbackResetTimer
+        interval: 2500
+        repeat: false
+        onTriggered: connectionsModule.phoneActionStatus = ""
+    }
+
+    function triggerRing() {
+        phoneActionStatus = "Ringing phone...";
+        phoneFeedbackResetTimer.restart();
+        phoneRingProc.running = true;
+    }
+
+    function triggerBrowse() {
+        phoneActionStatus = "Opening files...";
+        phoneFeedbackResetTimer.restart();
+        phoneBrowseProc.running = true;
+    }
+
+    function triggerPing() {
+        phoneActionStatus = "Ping sent!";
+        phoneFeedbackResetTimer.restart();
+        phonePingProc.running = true;
+    }
+
+    function triggerPhonePoll() {
+        if (phonePollingActive || phonePollProcess.running) return;
+        phonePollingActive = true;
+        phonePollProcess.running = true;
+    }
+
+    function applyPhoneData(rawText) {
+        if (!rawText || rawText.trim() === "") return;
+        try {
+            var data = JSON.parse(rawText.trim());
+            connectionsModule.phoneConnected = !!data.connected;
+            connectionsModule.phoneDeviceId = data.deviceId || "";
+            connectionsModule.phoneName = data.name || "Phone";
+            connectionsModule.phoneIp = data.ip || "";
+
+            if (data.battery && data.battery.available) {
+                connectionsModule.phoneBatteryAvailable = true;
+                connectionsModule.phoneBatteryPercent = data.battery.level;
+                connectionsModule.phoneCharging = !!data.battery.charging;
+            } else {
+                connectionsModule.phoneBatteryAvailable = false;
+                connectionsModule.phoneBatteryPercent = -1;
+                connectionsModule.phoneCharging = false;
+            }
+
+            if (data.cellular) {
+                connectionsModule.phoneSignalStrength = (data.cellular.signal !== undefined) ? data.cellular.signal : -1;
+            } else {
+                connectionsModule.phoneSignalStrength = -1;
+            }
+        } catch (e) {
+            console.warn("Failed to parse phone json:", e);
+        }
+    }
+
     Component.onCompleted: {
         updatePeripherals();
+        triggerPhonePoll();
         if (btAdapter && btPowered) {
             try { btAdapter.pairable = true; } catch (e) {}
         }
