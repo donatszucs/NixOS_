@@ -479,7 +479,7 @@ Item {
         property var notif: null
         property int notifIndex: 0
         property bool isToastActive: false
-        property string cachedImage: ""
+        property string cachedImage: (notif && notif.image) ? notif.image : ""
 
         readonly property bool hasInlineReply: notif && notif.hasInlineReply
         readonly property bool isCritical: notif && notif.urgency === Notif.NotificationUrgency.Critical
@@ -493,7 +493,8 @@ Item {
 
         readonly property bool shouldBeVisible: root.showAllNotifications || isToastActive
 
-        implicitHeight: contentGrid.implicitHeight + 20
+        readonly property int minCol0Height: (cachedImage !== "" ? 99 : 61)
+        implicitHeight: Math.max(contentGrid.implicitHeight + 20, minCol0Height + 20)
         height: shouldBeVisible ? implicitHeight : 0
         visible: shouldBeVisible || height > 0
         opacity: shouldBeVisible ? 1.0 : 0.0
@@ -554,13 +555,14 @@ Item {
                 toastRow.isToastActive = true
                 expireTimer.restart()
             }
-            SharedState.playNotificationSound()
+            SharedState.playNotificationSound(toastRow.notif)
         }
 
         Connections {
             target: toastRow.notif
             function onBodyChanged()    { toastRow.revive() }
             function onSummaryChanged() { toastRow.revive() }
+            function onImageChanged()   { toastRow.revive() }
         }
 
         onClicked: {
@@ -575,28 +577,137 @@ Item {
             rowSpacing: 8
             columnSpacing: 10
 
-            // [Row 0, Col 0] App Icon & Time
+            // [Row 0, Col 0] App Icon & Sent Image & Time
             ColumnLayout {
                 Layout.row: 0
                 Layout.column: 0
+                Layout.preferredWidth: 40
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                spacing: 4
+                spacing: 6
 
-                Item {
-                    readonly property bool hasImage: toastRow.cachedImage !== ""
-                    readonly property bool hasIcon: toastRow.notif && toastRow.notif.appIcon !== ""
-                    visible: hasImage || hasIcon
+                readonly property bool hasAppIcon: toastRow.notif && (toastRow.notif.appIcon !== "" || toastRow.notif.desktopEntry !== "")
+                readonly property bool hasImage: toastRow.cachedImage !== ""
+
+                // App Icon Box (shown if app has an icon, or if no image is sent)
+                Rectangle {
+                    id: appIconBox
+                    visible: parent.hasAppIcon || !parent.hasImage
                     Layout.preferredWidth: 40
                     Layout.preferredHeight: 40
+                    implicitWidth: 40
+                    implicitHeight: 40
+                    radius: Theme.cardButtonRadius - 4
+                    color: Qt.rgba(0, 0, 0, 0.18)
+                    border.width: 1
+                    border.color: Qt.rgba(1, 1, 1, 0.1)
+                    clip: true
 
                     Image {
+                        id: appIconImage
                         anchors.fill: parent
-                        source: parent.hasImage ? toastRow.cachedImage : ((parent.hasIcon && toastRow.notif) ? "image://icon/" + toastRow.notif.appIcon : "")
+                        anchors.margins: 4
+                        source: {
+                            var icon = toastRow.notif ? toastRow.notif.appIcon : ""
+                            if (icon !== "") {
+                                if (icon.indexOf("/") !== -1 || icon.startsWith("file:")) return icon
+                                return "image://icon/" + icon
+                            }
+                            var desktop = toastRow.notif ? toastRow.notif.desktopEntry : ""
+                            if (desktop !== "") {
+                                if (desktop.indexOf("/") !== -1 || desktop.startsWith("file:")) return desktop
+                                return "image://icon/" + desktop
+                            }
+                            return ""
+                        }
                         fillMode: Image.PreserveAspectFit
                         smooth: true
                         cache: true
-                        sourceSize.width: 40
-                        sourceSize.height: 40
+                        sourceSize.width: 32
+                        sourceSize.height: 32
+                    }
+
+                    // Fallback icon when app icon is missing or fails to load
+                    Text {
+                        anchors.centerIn: parent
+                        visible: appIconImage.status !== Image.Ready || appIconImage.source == ""
+                        text: "󰂚"
+                        font.family: Theme.font
+                        font.pixelSize: 18
+                        color: toastRow.textColor
+                        opacity: 0.65
+                    }
+                }
+
+                // Sent Image Box (rounded corners with border, matching appIcon / nowplaying thumbnail)
+                Rectangle {
+                    id: sentImageBox
+                    visible: parent.hasImage
+                    Layout.preferredWidth: 40
+                    Layout.preferredHeight: 40
+                    implicitWidth: 40
+                    implicitHeight: 40
+                    Layout.alignment: Qt.AlignHCenter
+                    radius: Theme.cardButtonRadius - 5
+                    color: Qt.rgba(0, 0, 0, 0.22)
+                    border.width: 1
+                    border.color: Qt.rgba(1, 1, 1, 0.15)
+                    clip: true
+
+                    Item {
+                        id: sentImageContainer
+                        anchors.fill: parent
+                        anchors.margins: 2
+                        clip: true
+
+                        Image {
+                            id: sentImageRaw
+                            anchors.fill: parent
+                            source: toastRow.cachedImage
+                            fillMode: Image.PreserveAspectCrop
+                            smooth: true
+                            cache: true
+                            asynchronous: true
+                            sourceSize.width: 64
+                            sourceSize.height: 64
+                            clip: true
+                            visible: false
+                        }
+
+                        Item {
+                            id: sentImageMask
+                            anchors.fill: parent
+                            visible: false
+                            layer.enabled: true
+                            layer.smooth: true
+
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: Math.max(0, sentImageBox.radius - 2)
+                                color: "black"
+                                antialiasing: true
+                            }
+                        }
+
+                        MultiEffect {
+                            anchors.fill: parent
+                            source: sentImageRaw
+                            maskEnabled: true
+                            maskSource: sentImageMask
+                            clip: true
+                            visible: sentImageRaw.status === Image.Ready
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (toastRow.cachedImage.startsWith("file://") || toastRow.cachedImage.startsWith("/")) {
+                                Qt.openUrlExternally(toastRow.cachedImage)
+                            } else {
+                                toastRow.dismiss()
+                            }
+                        }
                     }
                 }
 
@@ -637,6 +748,7 @@ Item {
                 Text {
                     visible: toastRow.notif && toastRow.notif.summary !== ""
                     text: toastRow.notif ? toastRow.notif.summary : ""
+                    textFormat: Text.StyledText
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize
                     font.bold: true
@@ -650,14 +762,22 @@ Item {
                     id: bodyText
                     visible: toastRow.notif && toastRow.notif.body !== ""
                     text: toastRow.notif ? toastRow.notif.body : ""
+                    textFormat: Text.StyledText
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize - 1
                     color: toastRow.textColor
-                    opacity: 0.8
+                    linkColor: Theme.statusBlue
+                    opacity: 0.85
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     elide: Text.ElideRight
                     maximumLineCount: 5
                     Layout.fillWidth: true
+
+                    onLinkActivated: link => Qt.openUrlExternally(link)
+
+                    HoverHandler {
+                        cursorShape: (bodyText.hoveredLink !== "") ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    }
                 }
 
                 // Show More / Less

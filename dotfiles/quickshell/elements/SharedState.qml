@@ -280,8 +280,12 @@ Item {
         command: ["bash", "-c", "pkill wlsunset"]
     }
 
-    function playNotificationSound() {
-        if (!root.muted){
+    function playNotificationSound(notification) {
+        if (!root.muted && root.notifVolume > 0) {
+            if (notification && notification.hints) {
+                var suppress = notification.hints["suppress-sound"]
+                if (suppress === true || suppress === 1 || suppress === "true") return
+            }
             Quickshell.execDetached(["bash", "-c", "REPO=$(dirname $(dirname $(realpath ~/.config/quickshell))); pw-play --volume " + root.notifVolume + " \"$REPO/misc/ping.ogg\""])
         }
     }
@@ -342,10 +346,15 @@ Item {
         keepOnReload: false
         actionsSupported: true
         inlineReplySupported: true
+        bodyMarkupSupported: true
+        bodyHyperlinksSupported: true
+        bodyImagesSupported: true
+        imageSupported: true
+        persistenceSupported: true
         onNotification: notification => {
             notification.tracked = true
             root.addNotification(notification)
-            root.playNotificationSound()
+            root.playNotificationSound(notification)
 
             notification.closed.connect(() => {
                 root.removeNotification(notification)
