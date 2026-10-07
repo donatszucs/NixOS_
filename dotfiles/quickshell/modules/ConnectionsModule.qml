@@ -197,7 +197,31 @@ ExpandableModule {
     // ── Sizing ─────────────────────────────────────────────────
     implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + connectionsModule.titleBarHeight + 15 : Theme.moduleHeight
 
-    collapsedWidth: connectionsModule.phoneConnected ? 88 : 65
+    // ── Collapsed layout metrics ───────────────────────────────
+    readonly property int pillInsetH: 5
+
+    readonly property bool phoneBatteryVisible: connectionsModule.phoneConnected
+                                             && connectionsModule.phoneBatteryAvailable
+                                             && connectionsModule.phoneBatteryPercent >= 0
+
+    readonly property int collapsedInnerPaddingLeft: 10
+    readonly property int collapsedInnerPaddingRight: phoneBatteryVisible ? 5 : collapsedInnerPaddingLeft
+    readonly property int collapsedSpacing: 10
+
+    // Margins relative to headerPill (inner padding + pillInsetH)
+    readonly property int collapsedPaddingLeft: pillInsetH + collapsedInnerPaddingLeft
+    readonly property int collapsedPaddingRight: pillInsetH + collapsedInnerPaddingRight
+
+    readonly property real connectionsNaturalWidth: Math.max(Theme.moduleHeight, Math.round(labelRow.implicitWidth + collapsedPaddingLeft + collapsedPaddingRight))
+    property real lastConnectionsWidth: connectionsNaturalWidth
+
+    onConnectionsNaturalWidthChanged: {
+        if (!expanded && connectionsNaturalWidth > 0) {
+            lastConnectionsWidth = connectionsNaturalWidth
+        }
+    }
+
+    collapsedWidth: expanded ? lastConnectionsWidth : connectionsNaturalWidth
 
     // Overlay dropdown setup
     expandedDropdownWidth: cardWidth + 30
@@ -218,17 +242,21 @@ ExpandableModule {
     Row {
         id: labelRow
         parent: connectionsModule.headerPill
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.left: parent.left
+        anchors.leftMargin: connectionsModule.collapsedPaddingLeft
         anchors.verticalCenter: parent.top
         anchors.verticalCenterOffset: Math.round(Theme.moduleHeight / 2)
         height: implicitHeight
-        spacing: 10
+        spacing: connectionsModule.collapsedSpacing
         z: 6
 
         opacity: connectionsModule.expanded ? 0.0 : 1.0
         visible: opacity > 0
         Behavior on opacity { 
             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
+        }
+        Behavior on anchors.leftMargin {
+            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
 
         Item {
@@ -276,20 +304,73 @@ ExpandableModule {
         }
 
         Item {
-            visible: connectionsModule.phoneConnected
-            width: phoneIconText.implicitWidth
-            height: phoneIconText.implicitHeight
+            id: phoneCollapsedItem
+            visible: connectionsModule.phoneBatteryVisible
+            width: visible ? phoneBatteryBadge.implicitWidth : 0
+            height: phoneBatteryBadge.implicitHeight
             anchors.verticalCenter: parent.verticalCenter
-            Text {
-                id: phoneIconText
-                text: connectionsModule.getPhoneBatteryIcon(connectionsModule.phoneBatteryPercent, connectionsModule.phoneCharging)
-                color: connectionsModule.phoneCharging ? Theme.statusGreen : (connectionsModule.phoneBatteryPercent > 20 ? Theme.palettePaper : Theme.statusRed)
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize + 1
+
+            // Battery
+            Rectangle {
+                id: phoneBatteryBadge
+                anchors.verticalCenter: parent.verticalCenter
+                readonly property real badgePaddingH: 7.5
+                implicitHeight: 18
+                implicitWidth: Math.round(batteryBadgeRow.implicitWidth + (badgePaddingH * 2))
+                radius: Math.round(implicitHeight / 2)
+                color: connectionsModule.phoneCharging
+                    ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, phoneMouseArea.containsMouse ? 0.22 : 0.14)
+                    : (connectionsModule.phoneBatteryPercent <= 20
+                        ? Qt.rgba(Theme.statusRed.r, Theme.statusRed.g, Theme.statusRed.b, phoneMouseArea.containsMouse ? 0.24 : 0.16)
+                        : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, phoneMouseArea.containsMouse ? 0.14 : 0.08))
+                border.width: 1
+                border.color: connectionsModule.phoneCharging
+                    ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, 0.45)
+                    : (connectionsModule.phoneBatteryPercent <= 20
+                        ? Qt.rgba(Theme.statusRed.r, Theme.statusRed.g, Theme.statusRed.b, 0.45)
+                        : Qt.rgba(1, 1, 1, 0.15))
+
+                Behavior on color { ColorAnimation { duration: 150 } }
+                Behavior on border.color { ColorAnimation { duration: 150 } }
+
+                Row {
+                    id: batteryBadgeRow
+                    anchors.centerIn: parent
+                    spacing: 3
+
+                    // Battery level icon / lightning glyph
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: connectionsModule.phoneCharging
+                            ? "󱐋"
+                            : connectionsModule.getPhoneBatteryIcon(connectionsModule.phoneBatteryPercent, false)
+                        color: connectionsModule.phoneCharging
+                            ? Theme.statusGreen
+                            : (connectionsModule.phoneBatteryPercent <= 20 ? Theme.statusRed : Theme.palettePaper)
+                        font.family: Theme.font
+                        font.pixelSize: connectionsModule.phoneCharging ? 10 : 11
+                        font.bold: connectionsModule.phoneCharging
+                    }
+
+                    // Battery percentage text
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: connectionsModule.phoneBatteryPercent + "%"
+                        color: connectionsModule.phoneCharging
+                            ? Theme.statusGreen
+                            : (connectionsModule.phoneBatteryPercent <= 20 ? Theme.statusRed : Theme.palettePaper)
+                        font.family: Theme.font
+                        font.pixelSize: 10
+                        font.bold: true
+                    }
+                }
             }
+
             MouseArea {
+                id: phoneMouseArea
                 anchors.fill: parent
                 anchors.margins: -4
+                hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     connectionsModule.currentPage = 1
@@ -340,42 +421,119 @@ ExpandableModule {
                 width: parent.width
                 spacing: 10
 
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
-                Layout.margins: 10
-                spacing: 20
+            // ── Page Switcher Pill ──────────────────────────────────────
+            Rectangle {
+                id: pageSwitcher
+                Layout.fillWidth: true
+                Layout.preferredHeight: 38
+                implicitHeight: 38
+                radius: implicitHeight / 2
+                color: Qt.rgba(0, 0, 0, 0.28)
+                clip: true
 
-                Text {
-                    text: "Hardware"
-                    color: Theme.textPrimary
-                    opacity: connectionsModule.currentPage === 0 ? 1.0 : 0.5
-                    font.family: Theme.font
-                    font.pixelSize: 18
-                    font.bold: true
-                    
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                // Sliding thumb indicator
+                Rectangle {
+                    id: pillThumb
+                    x: connectionsModule.currentPage === 0 ? 3 : (parent.width / 2)
+                    y: 3
+                    width: (parent.width - 6) / 2
+                    height: parent.height - 6
+                    radius: height / 2
+                    color: Qt.rgba(Theme.divider.r, Theme.divider.g, Theme.divider.b, 0.22)
+                    border.width: 2
+                    border.color: Qt.rgba(Theme.divider.r, Theme.divider.g, Theme.divider.b, 0.45)
 
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: connectionsModule.currentPage = 0
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: Theme.horizontalDuration
+                            easing.type: Easing.OutCubic
+                        }
                     }
                 }
 
-                        Text {
-                            text: "Devices"
-                            color: Theme.textPrimary
-                            opacity: connectionsModule.currentPage === 1 ? 1.0 : 0.5
-                            font.family: Theme.font
-                            font.pixelSize: 18
-                            font.bold: true
-                    
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                Row {
+                    anchors.fill: parent
 
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: connectionsModule.currentPage = 1
+                    // Tab 0: Network
+                    Item {
+                        width: parent.width / 2
+                        height: parent.height
+
+                        HoverHandler {
+                            id: tab0Hover
+                            cursorShape: Qt.PointingHandCursor
+                        }
+
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: 6
+                            opacity: connectionsModule.currentPage === 0 ? 1.0 : (tab0Hover.hovered ? 0.8 : 0.45)
+                            Behavior on opacity { NumberAnimation { duration: 50 } }
+
+                            Text {
+                                text: "󰤨"
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize + 1
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                text: "Network"
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize
+                                font.bold: connectionsModule.currentPage === 0
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: connectionsModule.currentPage = 0
+                        }
+                    }
+
+                    // Tab 1: Devices
+                    Item {
+                        width: parent.width / 2
+                        height: parent.height
+
+                        HoverHandler {
+                            id: tab1Hover
+                            cursorShape: Qt.PointingHandCursor
+                        }
+
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: 6
+                            opacity: connectionsModule.currentPage === 1 ? 1.0 : (tab1Hover.hovered ? 0.8 : 0.45)
+                            Behavior on opacity { NumberAnimation { duration: 150 } }
+
+                            Text {
+                                text: "󰍽"
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize + 1
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                text: "Devices"
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize
+                                font.bold: connectionsModule.currentPage === 1
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: connectionsModule.currentPage = 1
+                        }
                     }
                 }
             }

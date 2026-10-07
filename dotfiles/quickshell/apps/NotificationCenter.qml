@@ -558,6 +558,49 @@ Item {
             SharedState.playNotificationSound(toastRow.notif)
         }
 
+        function cleanMarkup(text, isSingleLine) {
+            if (!text) return ""
+            var s = String(text)
+
+            // Decode HTML entities (handles notifications where apps double-escape tags like &lt;b&gt; or &lt;br/&gt;)
+            s = s.replace(/&lt;/gi, "<")
+                 .replace(/&gt;/gi, ">")
+                 .replace(/&quot;/gi, "\"")
+                 .replace(/&#39;|&apos;/gi, "'")
+                 .replace(/&amp;/gi, "&")
+
+            // Normalize linebreaks: <br/>, <br >, </p>, </div> -> \n
+            s = s.replace(/\r\n|\r/g, "\n")
+            s = s.replace(/<br\s*\/?>/gi, "\n")
+            s = s.replace(/<\/(?:p|div|h[1-6]|li)>/gi, "\n")
+            s = s.replace(/<li\b[^>]*>/gi, "• ")
+
+            // Remove unsupported / structural tags
+            s = s.replace(/<(?:\/)?(?:html|body|head|style|script|span|font|div|p|ul|ol|table|tr|td|th)\b[^>]*>/gi, "")
+
+            // Strip any other unknown tags, keeping only safe styled tags: b, i, u, s, a
+            s = s.replace(/<\/?(?!(?:b|i|u|s|a)\b)[a-z0-9]+[^>]*>/gi, "")
+
+            // Ensure formatting tags are properly closed
+            var openB = (s.match(/<b>/gi) || []).length - (s.match(/<\/b>/gi) || []).length
+            for (var i = 0; i < openB; i++) s += "</b>"
+            var openI = (s.match(/<i>/gi) || []).length - (s.match(/<\/i>/gi) || []).length
+            for (var i = 0; i < openI; i++) s += "</i>"
+            var openU = (s.match(/<u>/gi) || []).length - (s.match(/<\/u>/gi) || []).length
+            for (var i = 0; i < openU; i++) s += "</u>"
+            var openA = (s.match(/<a\b/gi) || []).length - (s.match(/<\/a>/gi) || []).length
+            for (var i = 0; i < openA; i++) s += "</a>"
+
+            if (isSingleLine) {
+                return s.replace(/\n+/g, " ").replace(/\s+/g, " ").trim()
+            }
+
+            s = s.replace(/\n\s*\n\s*\n+/g, "<br><br>")
+            s = s.replace(/\n/g, "<br>")
+            s = s.replace(/(?:<br\s*\/?>\s*){3,}/gi, "<br><br>")
+            return s.replace(/^(?:\s*<br\s*\/?>\s*)+|(?:\s*<br\s*\/?>\s*)+$/gi, "").trim()
+        }
+
         Connections {
             target: toastRow.notif
             function onBodyChanged()    { toastRow.revive() }
@@ -566,6 +609,7 @@ Item {
         }
 
         onClicked: {
+            if (bodyText && bodyText.hoveredLink !== "") return
             toastRow.dismiss()
         }
 
@@ -746,8 +790,8 @@ Item {
 
                 // Summary
                 Text {
-                    visible: toastRow.notif && toastRow.notif.summary !== ""
-                    text: toastRow.notif ? toastRow.notif.summary : ""
+                    visible: toastRow.notif && text !== ""
+                    text: toastRow.notif ? toastRow.cleanMarkup(toastRow.notif.summary, true) : ""
                     textFormat: Text.StyledText
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize
@@ -760,8 +804,8 @@ Item {
                 // Body
                 Text {
                     id: bodyText
-                    visible: toastRow.notif && toastRow.notif.body !== ""
-                    text: toastRow.notif ? toastRow.notif.body : ""
+                    visible: toastRow.notif && text !== ""
+                    text: toastRow.notif ? toastRow.cleanMarkup(toastRow.notif.body, false) : ""
                     textFormat: Text.StyledText
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize - 1
