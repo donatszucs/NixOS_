@@ -38,6 +38,7 @@
         peripheral-monitor = inputs.quickflux.packages.${system}.peripheral-monitor;
         mouse-monitor = inputs.quickflux.packages.${system}.mouse-monitor;
         light-controller = inputs.quickflux.packages.${system}.light-controller;
+        phone-monitor = inputs.quickflux.packages.${system}.phone-monitor;
       };
 
       nixosConfigurations.doni = inputs.nixpkgs.lib.nixosSystem {

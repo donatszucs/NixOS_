@@ -207,44 +207,66 @@ Item {
                         anchors.leftMargin: 14
                         anchors.rightMargin: 7
                         spacing: 8
-                        layoutDirection: Qt.RightToLeft
 
-                        // Clear all button (visible when there are notifications)
-                        ModuleButton {
-                            id: clearAllBtn
-                            visible: notificationRepeater.count > 0
-                            variant: "neutral"
-                            label: "󰅖"
-                            textFont: 14
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.dismissAll()
-                            implicitHeight: 26
-                            implicitWidth: 26
-                            radius: Theme.cardButtonRadius
-                            border.width: 1
-                            Layout.alignment: Qt.AlignVCenter
-                        }
+                        // Header title with smooth transition between Notification Center and Volume
+                        Item {
+                            id: titleContainer
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            implicitHeight: Math.max(notifTitle.implicitHeight, volumeTitle.implicitHeight)
+                            implicitWidth: card.volExpanded ? volumeTitle.implicitWidth : notifTitle.implicitWidth
+                            Layout.preferredWidth: implicitWidth
 
-                        // Button to toggle volume control
-                        ModuleButton {
-                            id: volToggleBtn
-                            variant: "neutral"
-                            visible: true
-                            label: card.volExpanded ? "" : ""
-                            textFont: 14
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                if (card.volExpanded) {
-                                    card.volExpanded = false
-                                } else {
-                                    card.volExpanded = true
+                            Behavior on implicitWidth {
+                                NumberAnimation {
+                                    duration: Theme.horizontalDuration
+                                    easing.type: Easing.OutCubic
                                 }
                             }
-                            implicitHeight: 26
-                            implicitWidth: 26
-                            radius: Theme.cardButtonRadius
-                            border.width: 1
-                            Layout.alignment: Qt.AlignVCenter
+
+                            Text {
+                                id: notifTitle
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Notification Center"
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize + 1
+                                font.bold: true
+                                opacity: card.volExpanded ? 0.0 : 1.0
+                                visible: opacity > 0
+
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: Theme.horizontalDuration
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+                            }
+
+                            Text {
+                                id: volumeTitle
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Volume"
+                                color: Theme.textPrimary
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize + 1
+                                font.bold: true
+                                opacity: card.volExpanded ? 1.0 : 0.0
+                                visible: opacity > 0
+
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: Theme.horizontalDuration
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+                            }
+                        }
+
+                        // Spacer pushing action controls to the right
+                        Item {
+                            Layout.fillWidth: true
                         }
 
                         // Inline sliding volume editor
@@ -253,7 +275,7 @@ Item {
                             clip: true
                             implicitHeight: 26
                             Layout.preferredHeight: 26
-                            Layout.preferredWidth: card.volExpanded ? 135 : 0
+                            Layout.preferredWidth: card.volExpanded ? 165 : 0
                             visible: Layout.preferredWidth > 0 || card.volExpanded
                             opacity: card.volExpanded ? 1.0 : 0.0
                             Layout.alignment: Qt.AlignVCenter
@@ -274,6 +296,23 @@ Item {
                             RowLayout {
                                 anchors.fill: parent
                                 spacing: 6
+
+                                // Button to toggle mute
+                                ModuleButton {
+                                    id: volMuteBtn
+                                    variant: SharedState.muted ? "red" : "neutral"
+                                    label: SharedState.muted ? "󰖁" : "󰕾"
+                                    textFont: 14
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        SharedState.muted = !SharedState.muted
+                                    }
+                                    implicitHeight: 22
+                                    implicitWidth: 22
+                                    radius: Theme.cardButtonRadius - 8
+                                    border.width: 1
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
 
                                 StyledSlider {
                                     Layout.fillWidth: true
@@ -305,34 +344,38 @@ Item {
                             }
                         }
 
-                        // Button to reveal the volume control / toggle mute
+                        // Button to toggle volume control expansion
                         ModuleButton {
-                            id: volMuteBtn
-                            visible: card.volExpanded
-                            variant: SharedState.muted ? "red" : "neutral"
-                            label: SharedState.muted ? "󰖁" : "󰕾"
+                            id: volToggleBtn
+                            variant: "neutral"
+                            visible: true
+                            label: card.volExpanded ? "" : ""
                             textFont: 14
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                SharedState.muted = !SharedState.muted
+                                card.volExpanded = !card.volExpanded
                             }
-                            implicitHeight: 22
-                            implicitWidth: 22
-                            radius: Theme.cardButtonRadius - 8
+                            implicitHeight: 26
+                            implicitWidth: 26
+                            radius: Theme.cardButtonRadius
                             border.width: 1
                             Layout.alignment: Qt.AlignVCenter
                         }
 
-                        Item { Layout.fillWidth: true }
-
-                        Text {
-                            text: card.volExpanded ? "Volume" : "Notification Center"
-                            color: Theme.textPrimary
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize + 1
-                            font.bold: true
-                            elide: Text.ElideRight
-                            Layout.alignment: Qt.AlignLeft
+                        // Clear all button (visible when there are notifications)
+                        ModuleButton {
+                            id: clearAllBtn
+                            visible: notificationRepeater.count > 0
+                            variant: "neutral"
+                            label: "󰅖"
+                            textFont: 14
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.dismissAll()
+                            implicitHeight: 26
+                            implicitWidth: 26
+                            radius: Theme.cardButtonRadius
+                            border.width: 1
+                            Layout.alignment: Qt.AlignVCenter
                         }
                     }
                 ]

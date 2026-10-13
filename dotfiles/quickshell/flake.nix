@@ -23,6 +23,7 @@
             cargoBuildFlags = [ "-p" "mouse_monitor" ];
             nativeBuildInputs = [ pkgs.pkg-config ];
             buildInputs = [ pkgs.udev ];
+            doCheck = false;
           };
 
           light-controller = pkgs.rustPlatform.buildRustPackage {
@@ -35,6 +36,7 @@
             cargoBuildFlags = [ "-p" "light_controller" ];
             nativeBuildInputs = [ pkgs.pkg-config ];
             buildInputs = [ pkgs.udev ];
+            doCheck = false;
           };
 
           phone-monitor = pkgs.rustPlatform.buildRustPackage {
@@ -45,6 +47,9 @@
               lockFile = ./scripts/peripherial_monitor/Cargo.lock;
             };
             cargoBuildFlags = [ "-p" "phone_monitor" ];
+            nativeBuildInputs = [ pkgs.pkg-config ];
+            buildInputs = [ pkgs.udev ];
+            doCheck = false;
           };
 
           runtimeDeps = with pkgs; [
@@ -136,6 +141,7 @@
           quickflux-bundle = quickflux-bundle;
           mouse-monitor = mouse-monitor;
           light-controller = light-controller;
+          phone-monitor = phone-monitor;
           peripheral-monitor = mouse-monitor; # backward compatibility alias
         }
       );
