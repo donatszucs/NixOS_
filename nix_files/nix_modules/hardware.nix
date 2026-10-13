@@ -25,21 +25,24 @@
     settings = {
       General = {
         Experimental = true; # Show battery charge for supported devices
-        Privacy = "device";
+        Privacy = "off"; # "device" causes address rotation which drops modern Xbox BLE controllers
         FastConnectable = true;
-        #JustWorksRepairing = "always"; # Helps with some devices that fail to pair
+        JustWorksRepairing = "always"; # Ensures clean reconnects without pairing handshake failures
       };
       LE = {
         MinConnectionInterval = 7;
         MaxConnectionInterval = 9;
         ConnectionLatency = 0;
+        ConnectionSupervisionTimeout = 320; # 3.2s timeout prevents drops during RF packet bursts/rumble
       };
     };
   };
 
-  # Disable ERTM for Xbox controller Bluetooth stability
+  # NOTE: Do NOT disable ERTM on modern Linux kernels (6.x/7.x) with BLE Xbox controllers!
+  # Kakra (xpadneo lead developer) notes that ERTM should remain enabled.
+  # Disabling ERTM is an obsolete workaround from Linux 4.x and causes connection instability.
   boot.extraModprobeConfig = ''
-    options bluetooth disable_ertm=1
+    options hid_xpadneo ff_connect_notify=0
   '';
 
   hardware.xpadneo.enable = true;

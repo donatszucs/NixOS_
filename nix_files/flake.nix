@@ -43,7 +43,7 @@
 
       nixosConfigurations.doni = inputs.nixpkgs.lib.nixosSystem {
         specialArgs = {
-          inherit ;
+          inherit inputs;
         };
         modules = [
           inputs.playit-nixos-module.nixosModules.default
