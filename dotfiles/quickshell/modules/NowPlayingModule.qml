@@ -1068,8 +1068,8 @@ ExpandableModule {
                                 id: volumeBtn
                                 variant: "neutral"
                                 cursorShape: Qt.PointingHandCursor
-                                textFont: 15
-                                Layout.preferredWidth: 46
+                                textFont: 13
+                                Layout.preferredWidth: 26
                                 Layout.preferredHeight: 26
                                 Layout.alignment: Qt.AlignVCenter
                                 radius: Theme.cardButtonRadius

@@ -225,18 +225,19 @@ Item {
                             Layout.alignment: Qt.AlignVCenter
                         }
 
-                        // Button to reveal the volume control / toggle mute
+                        // Button to toggle volume control
                         ModuleButton {
                             id: volToggleBtn
-                            variant: SharedState.muted ? "red" : "neutral"
-                            label: SharedState.muted ? "󰖁" : "󰕾"
+                            variant: "neutral"
+                            visible: true
+                            label: card.volExpanded ? "" : ""
                             textFont: 14
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                if (!card.volExpanded) {
-                                    card.volExpanded = true
+                                if (card.volExpanded) {
+                                    card.volExpanded = false
                                 } else {
-                                    SharedState.muted = !SharedState.muted
+                                    card.volExpanded = true
                                 }
                             }
                             implicitHeight: 26
@@ -304,6 +305,24 @@ Item {
                             }
                         }
 
+                        // Button to reveal the volume control / toggle mute
+                        ModuleButton {
+                            id: volMuteBtn
+                            visible: card.volExpanded
+                            variant: SharedState.muted ? "red" : "neutral"
+                            label: SharedState.muted ? "󰖁" : "󰕾"
+                            textFont: 14
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                SharedState.muted = !SharedState.muted
+                            }
+                            implicitHeight: 22
+                            implicitWidth: 22
+                            radius: Theme.cardButtonRadius - 8
+                            border.width: 1
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+
                         Item { Layout.fillWidth: true }
 
                         Text {
@@ -313,7 +332,7 @@ Item {
                             font.pixelSize: Theme.fontSize + 1
                             font.bold: true
                             elide: Text.ElideRight
-                            Layout.alignment: Qt.AlignVCenter
+                            Layout.alignment: Qt.AlignLeft
                         }
                     }
                 ]
@@ -489,6 +508,7 @@ Item {
         variant: isCritical ? "red" : "neutral"
         radius: Theme.moduleEdgeRadius / 2 + 5
         border.width: 2
+        border.color: toastRow.hovered ? Theme.palettePaper : toastRow.pal.border
         clip: true
 
         readonly property bool shouldBeVisible: root.showAllNotifications || isToastActive
