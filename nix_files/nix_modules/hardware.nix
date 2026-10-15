@@ -55,8 +55,19 @@
     "usbmon"
   ];
 
-  # Enable the graphics driver
-  hardware.graphics.enable = true;
+  # Enable the graphics driver and OpenCL runtimes
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+    extraPackages = with pkgs; [
+      pocl # CPU OpenCL implementation (Option 1 fallback)
+    ];
+  };
+
+  # Expose OpenCL ICD directory at /etc/OpenCL/vendors for standard tools
+  systemd.tmpfiles.rules = [
+    "L+ /etc/OpenCL/vendors - - - - /run/opengl-driver/etc/OpenCL/vendors"
+  ];
 
   # Load the Nvidia driver
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -81,7 +92,15 @@
     enable = true;
     enableOnBoot = true;
   };
-  hardware.nvidia-container-toolkit.enable = true;
+  hardware.nvidia-container-toolkit = {
+    enable = true;
+    mounts = [
+      {
+        hostPath = "/run/opengl-driver/etc/OpenCL/vendors";
+        containerPath = "/etc/OpenCL/vendors";
+      }
+    ];
+  };
 
   # Enable sound with pipewire.
   services.pulseaudio.enable = false; # Disable the old backend

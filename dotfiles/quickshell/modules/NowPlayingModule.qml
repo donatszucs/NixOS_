@@ -69,7 +69,8 @@ ExpandableModule {
 
     pillPercent: expanded ? 0 : (trackLength > 0 ? Math.round((currentPosition / trackLength) * 100) : 0)
     pillVariant: expanded ? "neutral" : "dark"
-    pillBorderColor: expanded ? null : Qt.darker(Theme.palette("light").border, 1.1)
+    pillBorderColor: expanded ? null : Qt.darker(Theme.palette("light").border, 1.2)
+    pillFillColor: expanded ? null : Qt.darker(Theme.palettePaper, 1.4)
     pillColorOpacity: 1.0
     pillBgImageSource: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
     pillBgImageBrightness: 0.3

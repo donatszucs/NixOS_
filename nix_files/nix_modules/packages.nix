@@ -113,6 +113,7 @@
     wlsunset # Automatic color temperature adjustment based on time of day
     overskride
     nixfmt
+    clinfo # OpenCL device diagnostic tool
 
     # -- Applications --
     caprine-bin

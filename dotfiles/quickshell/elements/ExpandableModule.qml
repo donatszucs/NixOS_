@@ -321,6 +321,7 @@ ModuleButton {
     property string pillVariant: "neutral"
     property real pillColorOpacity: Theme.moduleOpacity
     property var  pillBorderColor: null
+    property var  pillFillColor: null
     property string expandedPillLabel: ""
     property string pillBgImageSource: ""
     property real   pillBgImageOpacity: 0.35
@@ -448,6 +449,7 @@ ModuleButton {
         pillVariant: root.pillVariant
         pillColorOpacity: root.pillColorOpacity
         pillBorderColor: root.pillBorderColor
+        pillFillColor: root.pillFillColor
         variant:     "neutral"
         colorOverride: true
         bgImageSource: root.pillBgImageSource

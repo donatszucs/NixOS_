@@ -18,6 +18,10 @@ ModuleButton {
     readonly property color effectiveBorderColor: pillBorderColor !== null
         ? pillBorderColor
         : Qt.rgba(root.pillPal.pillBorder.r, root.pillPal.pillBorder.g, root.pillPal.pillBorder.b, root.pillPal.pillBorder.a * root.pillColorOpacity * gradientOpacityBase)
+    property var pillFillColor: null
+    readonly property color effectiveFillColor: pillFillColor !== null
+        ? pillFillColor
+        : root.pillPal.pillFill
     property real gradientOpacityBase: root.openBottom ? 0.4 : 1.0
     property real gradientOpacityLow: root.openBottom ? 0.0 : 1.0
     property string bgImageSource: ""
@@ -179,11 +183,11 @@ ModuleButton {
                     orientation: Gradient.Vertical
                     GradientStop {
                         position: 0.0
-                        color: Qt.rgba(root.pillPal.pillFill.r, root.pillPal.pillFill.g, root.pillPal.pillFill.b, root.pillPal.pillFill.a * root.pillColorOpacity * gradientOpacityBase)
+                        color: Qt.rgba(root.effectiveFillColor.r, root.effectiveFillColor.g, root.effectiveFillColor.b, root.effectiveFillColor.a * root.pillColorOpacity * gradientOpacityBase)
                     }
                     GradientStop {
                         position: 1.0
-                        color: Qt.rgba(root.pillPal.pillFill.r, root.pillPal.pillFill.g, root.pillPal.pillFill.b, root.pillPal.pillFill.a * root.pillColorOpacity * gradientOpacityLow)
+                        color: Qt.rgba(root.effectiveFillColor.r, root.effectiveFillColor.g, root.effectiveFillColor.b, root.effectiveFillColor.a * root.pillColorOpacity * gradientOpacityLow)
                         Behavior on color {
                             ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                         }
