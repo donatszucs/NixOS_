@@ -46,8 +46,10 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("blueman-applet &")
     hl.exec_cmd("quickflux &")
     hl.exec_cmd("[workspace 1 silent] zen &")
-    hl.exec_cmd("[workspace 3 silent] antigravity-ide &")
+    hl.exec_cmd("[workspace 3 silent] code &")
     hl.exec_cmd("discord --minimized &")
+    hl.exec_cmd("[workspace special:spotify silent] spotify &")
+    hl.exec_cmd("[workspace special:messenger silent] caprine &")
     hl.exec_cmd("systemctl --user start sunshine")
 
     hl.exec_cmd("~/.config/quickshell/scripts/WallpaperSetup/init-hyprpaper.sh &")
@@ -160,10 +162,16 @@ hl.window_rule({
     workspace = "2 silent"
 })
 
+-- VS Code rules
+hl.window_rule({
+    match = { class = "^([cC]ode)$" },
+    workspace = "3 silent"
+})
+
 -- Messenger special workspace rules
 hl.window_rule({
-    match = { class = "^(Caprine)$" },
-    workspace = "special:messenger",
+    match = { class = "^([cC]aprine)$" },
+    workspace = "special:messenger silent",
     float = true
 })
 hl.workspace_rule({
@@ -171,6 +179,16 @@ hl.workspace_rule({
     on_created_empty = "caprine"
 })
 
+-- Spotify special workspace rules
+hl.window_rule({
+    match = { class = "^([sS]potify)$" },
+    workspace = "special:spotify silent",
+    float = true
+})
+hl.workspace_rule({
+    workspace = "special:spotify",
+    on_created_empty = "spotify"
+})
 
 -- ==========================================
 -- ANIMATIONS (Lua API)
@@ -215,6 +233,7 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + F", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + M", hl.dsp.workspace.toggle_special("messenger"))
+hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("spotify"))
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("pkill wlsunset || wlsunset -l 47.5 -L 19.0 -t 3500 -T 6500"))
 

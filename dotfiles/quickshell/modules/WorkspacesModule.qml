@@ -78,6 +78,27 @@ ModuleButton {
         return null;
     }
 
+    function toggleSpecial(specName) {
+        var fullName = "special:" + specName;
+        var activeOn = "";
+        for (var mon in root.activeSpecialWorkspaces) {
+            if (root.activeSpecialWorkspaces[mon] === fullName) {
+                activeOn = mon;
+                break;
+            }
+        }
+
+        if (activeOn !== "") {
+            Hyprland.dispatch("hl.dsp.focus({ monitor = '" + activeOn + "' })");
+            Hyprland.dispatch("hl.dsp.workspace.toggle_special('" + specName + "')");
+        } else {
+            if (root.screenName && root.screenName !== "") {
+                Hyprland.dispatch("hl.dsp.focus({ monitor = '" + root.screenName + "' })");
+            }
+            Hyprland.dispatch("hl.dsp.workspace.toggle_special('" + specName + "')");
+        }
+    }
+
     Process {
         id: monitorsInitProc
         command: ["hyprctl", "monitors", "-j"]
@@ -124,30 +145,26 @@ ModuleButton {
         var all = Hyprland.workspaces.values
         var out = []
         var others = []
+        var special = []
         
         for (var i = 0; i < all.length; i++) {
             var isSpecial = all[i].name && all[i].name.indexOf("special:") === 0
             
             if (isSpecial) {
                 var isActiveSpecial = false;
-                var activeOnMon = "";
                 for (var monName in root.activeSpecialWorkspaces) {
                     if (root.activeSpecialWorkspaces[monName] === all[i].name) {
                         isActiveSpecial = true;
-                        activeOnMon = monName;
                         break;
                     }
                 }
                 
+                // Only visible when open/active
                 if (!isActiveSpecial) {
                     continue;
                 }
 
-                if (activeOnMon === screenName)
-                    out.push(all[i])
-                else 
-                    others.push(all[i])
-                
+                special.push(all[i]);
                 continue;
             }
 
@@ -156,10 +173,27 @@ ModuleButton {
             else 
                 others.push(all[i])
         }
-        return { workspaces: out, others: others }
+
+        out.sort(function(a, b) {
+            return (a.id || 0) - (b.id || 0);
+        });
+
+        others.sort(function(a, b) {
+            return (a.id || 0) - (b.id || 0);
+        });
+
+        special.sort(function(a, b) {
+            return (a.name || "").localeCompare(b.name || "");
+        });
+
+        return { workspaces: out, others: others, special: special }
     }
 
-    implicitWidth: (displayMode === "other" && monitorWorkspaces.others.length === 0) ? 0 : (workspacesRow.implicitWidth + 2 * overlay)
+    implicitWidth: {
+        if (displayMode === "other" && monitorWorkspaces.others.length === 0) return 0;
+        if (displayMode === "special" && monitorWorkspaces.special.length === 0) return 0;
+        return workspacesRow.implicitWidth + 2 * overlay;
+    }
 
     Behavior on implicitWidth {
         NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutCubic }
@@ -200,6 +234,14 @@ ModuleButton {
                 isLastInGroup: index === root.monitorWorkspaces.others.length - 1
             }
         }
+
+        Repeater {
+            model: (root.displayMode === "all" || root.displayMode === "special") ? root.monitorWorkspaces.special : []
+            delegate: WorkspaceButton {
+                isOtherWorkspace: false
+                isLastInGroup: index === root.monitorWorkspaces.special.length - 1
+            }
+        }
     }
 
     component WorkspaceButton : ModuleButton {
@@ -223,26 +265,43 @@ ModuleButton {
         cursorShape: Qt.PointingHandCursor
         clip: activeDragCount === 0
         
-        topLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
-        bottomLeftRadius: index === 0 ? Theme.moduleEdgeRadius : 5
-        topRightRadius: isLastInGroup ? Theme.moduleEdgeRadius : 5
-        bottomRightRadius: isLastInGroup ? Theme.moduleEdgeRadius : 5
+        topLeftRadius: isSpecial ? Theme.moduleEdgeRadius : (index === 0 ? Theme.moduleEdgeRadius : 5)
+        bottomLeftRadius: isSpecial ? Theme.moduleEdgeRadius : (index === 0 ? Theme.moduleEdgeRadius : 5)
+        topRightRadius: isSpecial ? Theme.moduleEdgeRadius : (isLastInGroup ? Theme.moduleEdgeRadius : 5)
+        bottomRightRadius: isSpecial ? Theme.moduleEdgeRadius : (isLastInGroup ? Theme.moduleEdgeRadius : 5)
 
         readonly property bool isSpecial: modelData !== null && modelData.name && modelData.name.indexOf("special:") === 0
 
-        readonly property bool active: !isEmptyWorkspace &&
-            Hyprland.focusedMonitor !== null &&
-            ((Hyprland.focusedMonitor.activeWorkspace !== null && Hyprland.focusedMonitor.activeWorkspace.id === modelData.id) ||
-             (isSpecial && root.activeSpecialWorkspaces[Hyprland.focusedMonitor.name] === modelData.name))
+        readonly property bool isSpecialActive: isSpecial && (function() {
+            for (var m in root.activeSpecialWorkspaces) {
+                if (root.activeSpecialWorkspaces[m] === modelData.name) return true;
+            }
+            return false;
+        })()
+
+        readonly property bool active: !isEmptyWorkspace && (
+            isSpecial ? isSpecialActive : (
+                Hyprland.focusedMonitor !== null &&
+                Hyprland.focusedMonitor.activeWorkspace !== null &&
+                Hyprland.focusedMonitor.activeWorkspace.id === modelData.id
+            )
+        )
 
         label: isEmptyWorkspace ? "" : ""
 
         colorOverride: true
-        overrideColor: control.isSpecial ? "transparent" : Qt.darker(control.pal.base, 1.4)
+        overrideColor: control.isSpecial
+            ? (active ? control.pal.base : (hovered ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.15) : Qt.darker(control.pal.base, 1.4)))
+            : Qt.darker(control.pal.base, 1.4)
 
         onClicked: {
-            var targetId = isEmptyWorkspace ? 'empty' : (control.isSpecial ? modelData.name : modelData.id);
-            Hyprland.dispatch("hl.dsp.focus({ workspace = '" + targetId + "' })")
+            if (control.isSpecial) {
+                var specName = modelData.name.replace(/^special:/, "");
+                root.toggleSpecial(specName);
+            } else {
+                var targetId = isEmptyWorkspace ? 'empty' : modelData.id;
+                Hyprland.dispatch("hl.dsp.focus({ workspace = '" + targetId + "' })")
+            }
         }
 
         scale: 0
@@ -256,7 +315,8 @@ ModuleButton {
 
         RowLayout {
             id: contentRow
-            anchors.left: parent.left
+            anchors.left: control.isSpecial ? undefined : parent.left
+            anchors.horizontalCenter: control.isSpecial ? parent.horizontalCenter : undefined
             anchors.verticalCenter: parent.verticalCenter
             height: parent.height
             spacing: 5
@@ -568,8 +628,12 @@ ModuleButton {
                         Hyprland.dispatch("hl.dsp.window.close({ window = 'address:0x" + addr + "' })");
                     } else if (mouse.button === Qt.LeftButton) {
                         if (workspaceBtn && workspaceBtn.modelData) {
-                            var targetId = workspaceBtn.isSpecial ? workspaceBtn.modelData.name : workspaceBtn.modelData.id;
-                            Hyprland.dispatch("hl.dsp.focus({ workspace = '" + targetId + "' })");
+                            if (workspaceBtn.isSpecial) {
+                                var specName = workspaceBtn.modelData.name.replace(/^special:/, "");
+                                root.toggleSpecial(specName);
+                            } else {
+                                Hyprland.dispatch("hl.dsp.focus({ workspace = '" + workspaceBtn.modelData.id + "' })");
+                            }
                         }
                     } else if (mouse.button === Qt.RightButton) {
                         var iconCenterBottom = windowIcon.mapToItem(null, windowIcon.width / 2, windowIcon.height + 4);

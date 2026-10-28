@@ -41,6 +41,17 @@ ModuleButton {
     // JS array of DesktopEntry objects matching the current search
     property var filteredApps: []
 
+    function isSpecialActive(specName) {
+        if (specialWorkspaces && specialWorkspaces.activeSpecialWorkspaces) {
+            for (var mon in specialWorkspaces.activeSpecialWorkspaces) {
+                if (specialWorkspaces.activeSpecialWorkspaces[mon] === ("special:" + specName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     radius: Theme.moduleEdgeRadius - 2
     bottomLeftRadius:  launcherModule.expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
     bottomRightRadius: launcherModule.expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
@@ -272,6 +283,19 @@ ModuleButton {
                     visible: otherWorkspaces.monitorWorkspaces.others.length > 0 || otherWorkspaces.implicitWidth > 0.5
                     onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)
                 }
+
+                WorkspacesModule {
+                    id: specialWorkspaces
+                    expanded: launcherModule.expanded
+                    Layout.alignment: Qt.AlignVCenter
+                    screenName: launcherModule.screenName
+                    displayMode: "special"
+                    color: "transparent"
+                    anchors.topMargin: 0
+                    Layout.leftMargin: (otherWorkspaces.visible && specialWorkspaces.visible) ? 4 : 0
+                    visible: specialWorkspaces.monitorWorkspaces.special.length > 0 || specialWorkspaces.implicitWidth > 0.5
+                    onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)
+                }
             }
 
             ColumnLayout {
@@ -290,7 +314,8 @@ ModuleButton {
                         variant: "light"
                         Layout.fillWidth: true
                         implicitHeight: Theme.moduleHeight
-                        label: "󰸉 Wallpaper"
+                        label: "󰸉"
+                        textFont: Theme.fontSize + 4
                         cursorShape: Qt.PointingHandCursor
 
                         radius: Theme.moduleEdgeRadius - 5
@@ -306,7 +331,8 @@ ModuleButton {
                         variant: "light"
                         Layout.fillWidth: true
                         implicitHeight: Theme.moduleHeight
-                        label: "󰌆 Bitwarden"
+                        label: "󰌆"
+                        textFont: Theme.fontSize + 4
                         cursorShape: Qt.PointingHandCursor
 
                         radius: Theme.moduleEdgeRadius - 5
@@ -322,7 +348,8 @@ ModuleButton {
                         variant: "light"
                         Layout.fillWidth: true
                         implicitHeight: Theme.moduleHeight
-                        label: " Clipboard"
+                        label: ""
+                        textFont: Theme.fontSize + 4
                         cursorShape: Qt.PointingHandCursor
 
                         radius: Theme.moduleEdgeRadius - 5
@@ -331,6 +358,40 @@ ModuleButton {
                         onClicked: {
                             launcherModule.expanded = false;
                             launcherModule.toggleClipboardHistory();
+                        }
+                    }
+
+                    ModuleButton {
+                        variant: launcherModule.isSpecialActive("spotify") ? "dark" : "light"
+                        Layout.fillWidth: true
+                        implicitHeight: Theme.moduleHeight
+                        label: ""
+                        textFont: Theme.fontSize + 4
+                        cursorShape: Qt.PointingHandCursor
+
+                        radius: Theme.moduleEdgeRadius - 5
+                        border.width: 2
+
+                        onClicked: {
+                            launcherModule.expanded = false;
+                            specialWorkspaces.toggleSpecial("spotify");
+                        }
+                    }
+
+                    ModuleButton {
+                        variant: launcherModule.isSpecialActive("messenger") ? "dark" : "light"
+                        Layout.fillWidth: true
+                        implicitHeight: Theme.moduleHeight
+                        label: "󰈎"
+                        textFont: Theme.fontSize + 4
+                        cursorShape: Qt.PointingHandCursor
+
+                        radius: Theme.moduleEdgeRadius - 5
+                        border.width: 2
+
+                        onClicked: {
+                            launcherModule.expanded = false;
+                            specialWorkspaces.toggleSpecial("messenger");
                         }
                     }
                 }
