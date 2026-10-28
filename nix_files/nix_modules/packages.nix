@@ -177,6 +177,7 @@
     kdePackages.plasma-browser-integration
     kdePackages.qtimageformats # Enables WebP support for Quickshell QML
     kdePackages.breeze # Provides BreezeDark.colors so KDE Connect and Qt apps render dark mode
+    kdePackages.qtdeclarative
   ];
 
   programs.bash.shellAliases = {

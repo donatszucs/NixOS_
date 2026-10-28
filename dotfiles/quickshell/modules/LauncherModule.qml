@@ -314,7 +314,7 @@ ModuleButton {
                         variant: "light"
                         Layout.fillWidth: true
                         implicitHeight: Theme.moduleHeight
-                        label: "󰸉"
+                        label: ""
                         textFont: Theme.fontSize + 4
                         cursorShape: Qt.PointingHandCursor
 

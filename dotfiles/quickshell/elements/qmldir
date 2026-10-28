@@ -1,0 +1,13 @@
+module elements
+BaseCard 1.0 BaseCard.qml
+ExpandableModule 1.0 ExpandableModule.qml
+FlowingBackground 1.0 FlowingBackground.qml
+HoverMarqueeText 1.0 HoverMarqueeText.qml
+InverseRadius 1.0 InverseRadius.qml
+ModuleButton 1.0 ModuleButton.qml
+PillBarButton 1.0 PillBarButton.qml
+StyledSlider 1.0 StyledSlider.qml
+WindowContextMenu 1.0 WindowContextMenu.qml
+singleton Theme 1.0 Theme.qml
+singleton SharedState 1.0 SharedState.qml
+
