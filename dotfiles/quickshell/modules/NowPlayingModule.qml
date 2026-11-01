@@ -105,19 +105,39 @@ ExpandableModule {
         wheel.accepted = true
     }
 
-    // ── Helper: time formatter (seconds -> [h:]mm:ss) ────────────
-    function formatTime(seconds, forceHours) {
+    // ── Helper: time formatter (seconds -> [[y:]d:]h:mm:ss) ───────
+    function formatTime(seconds, forceHours, forceDays) {
         if (isNaN(seconds) || seconds === undefined || seconds === null || seconds < 0) {
-            return forceHours ? "0:00:00" : "0:00"
+            if (forceDays) return "0d 00:00:00"
+            if (forceHours) return "0:00:00"
+            return "0:00"
         }
         var totalSec = Math.floor(seconds)
-        var hours = Math.floor(totalSec / 3600)
-        var mins = Math.floor((totalSec % 3600) / 60)
-        var secs = totalSec % 60
-        if (hours > 0 || forceHours) {
-            return hours + ":" + (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs
+        var years = Math.floor(totalSec / 31536000)
+        var remSec = totalSec % 31536000
+        var days = Math.floor(remSec / 86400)
+        remSec = remSec % 86400
+        var hours = Math.floor(remSec / 3600)
+        var mins = Math.floor((remSec % 3600) / 60)
+        var secs = remSec % 60
+
+        var pad2 = function(n) { return (n < 10 ? "0" : "") + n }
+
+        var prefix = ""
+        if (years > 0) {
+            prefix = years + "y " + days + "d "
+        } else if (days > 0 || forceDays) {
+            prefix = days + "d "
         }
-        return mins + ":" + (secs < 10 ? "0" : "") + secs
+
+        if (prefix !== "") {
+            return prefix + pad2(hours) + ":" + pad2(mins) + ":" + pad2(secs)
+        }
+
+        if (hours > 0 || forceHours) {
+            return hours + ":" + pad2(mins) + ":" + pad2(secs)
+        }
+        return mins + ":" + pad2(secs)
     }
 
     // ── Helper: player icon resolver (dynamic from MPRIS API & theme) ──
@@ -730,7 +750,7 @@ ExpandableModule {
                     Item {
                         id: carouselIndicators
                         anchors.bottom: middleControls.top
-                        anchors.bottomMargin: 4
+                        anchors.bottomMargin: 10
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: indicatorsRow.width
                         height: 12
@@ -818,7 +838,7 @@ ExpandableModule {
                         anchors.bottom: parent.bottom
                         anchors.leftMargin: 14
                         anchors.rightMargin: 14
-                        anchors.bottomMargin: 8
+                        anchors.bottomMargin: 28
                         spacing: 10
                         height: 34
 
@@ -827,12 +847,12 @@ ExpandableModule {
                             id: playPauseBtn
                             variant: nowPlayingModule.isMediaPlaying ? "light" : "neutral"
                             cursorShape: Qt.PointingHandCursor
-                            textFont: 19
-                            Layout.preferredWidth: 34
-                            Layout.preferredHeight: 34
+                            textFont: 30
+                            Layout.preferredWidth: 46
+                            Layout.preferredHeight: 46
                             Layout.alignment: Qt.AlignVCenter
                             Layout.fillWidth: false
-                            radius: 17
+                            radius: 23
                             clip: true
 
                             label: nowPlayingModule.playPauseIcon
@@ -945,16 +965,32 @@ ExpandableModule {
 
                             // Timestamps below the beginning and end of the seeker track
                             Item {
+                                id: timestampRow
                                 Layout.fillWidth: true
-                                implicitHeight: 12
+                                implicitHeight: Math.max(posLabel.implicitHeight, lenLabel.implicitHeight, 14)
+
+                                readonly property real gap: 6
+                                readonly property real availWidth: Math.max(0, width - gap)
+                                readonly property real halfWidth: availWidth / 2
 
                                 Text {
                                     id: posLabel
                                     anchors.left: parent.left
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: nowPlayingModule.formatTime(nowPlayingModule.currentPosition, nowPlayingModule.trackLength >= 3600)
+                                    width: {
+                                        if (timestampRow.availWidth <= 0) return 0
+                                        var posReq = implicitWidth
+                                        var lenReq = lenLabel.implicitWidth
+                                        if (posReq + lenReq <= timestampRow.availWidth) return posReq
+                                        if (lenReq < timestampRow.halfWidth) return timestampRow.availWidth - lenReq
+                                        if (posReq < timestampRow.halfWidth) return posReq
+                                        return timestampRow.halfWidth
+                                    }
+                                    horizontalAlignment: Text.AlignLeft
+                                    elide: Text.ElideRight
+                                    text: nowPlayingModule.formatTime(nowPlayingModule.currentPosition, nowPlayingModule.trackLength >= 3600, nowPlayingModule.trackLength >= 86400)
                                     font.family: Theme.font
-                                    font.pixelSize: 10
+                                    font.pixelSize: (nowPlayingModule.trackLength >= 31536000 || nowPlayingModule.currentPosition >= 31536000) ? 10 : 12
                                     color: Theme.textPrimary
                                     opacity: 0.65
                                 }
@@ -963,9 +999,20 @@ ExpandableModule {
                                     id: lenLabel
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
+                                    width: {
+                                        if (timestampRow.availWidth <= 0) return 0
+                                        var posReq = posLabel.implicitWidth
+                                        var lenReq = implicitWidth
+                                        if (posReq + lenReq <= timestampRow.availWidth) return lenReq
+                                        if (posReq < timestampRow.halfWidth) return timestampRow.availWidth - posReq
+                                        if (lenReq < timestampRow.halfWidth) return lenReq
+                                        return timestampRow.halfWidth
+                                    }
+                                    horizontalAlignment: Text.AlignRight
+                                    elide: Text.ElideRight
                                     text: nowPlayingModule.trackLength > 0 ? nowPlayingModule.formatTime(nowPlayingModule.trackLength) : "--:--"
                                     font.family: Theme.font
-                                    font.pixelSize: 10
+                                    font.pixelSize: (nowPlayingModule.trackLength >= 31536000 || nowPlayingModule.currentPosition >= 31536000) ? 10 : 12
                                     color: Theme.textPrimary
                                     opacity: 0.65
                                 }

@@ -16,7 +16,7 @@ Rectangle {
     Behavior on border.color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
     // ── Shadow configuration ─────────────────────────────────────────
-    property bool shadowEnabled: true
+    property bool shadowEnabled: false
     property color shadowColor: Qt.rgba(0, 0, 0, 0.65)
     property real shadowBlur: 0.8
     property real shadowVerticalOffset: 2
