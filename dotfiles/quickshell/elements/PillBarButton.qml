@@ -205,7 +205,7 @@ ModuleButton {
             bottomRightRadius: parent.bottomRightRadius
             color: "transparent"
             border.color: root.effectiveBorderColor
-            border.width: root.openBottom ? 2 : 2
+            border.width: 2
 
             Behavior on border.color {
                 ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }

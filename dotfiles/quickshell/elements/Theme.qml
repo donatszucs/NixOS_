@@ -19,8 +19,8 @@ QtObject {
     readonly property color statusDisabled:     Qt.rgba(palettePaper.r * 0.7, palettePaper.g * 0.7, palettePaper.b * 0.7, 0.7)
 
     readonly property color divider:        Qt.rgba(1,1,1,0.12)
-    readonly property color cardBorder:     Qt.rgba(1, 1, 1, 0.1)
-    readonly property color bgBlurColor:    Qt.rgba(palettePaper.r * 0.7, palettePaper.g * 0.7, palettePaper.b * 0.7, 0.13)
+    readonly property color cardBorder:     Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.22)
+    readonly property color bgBlurColor:    Qt.rgba(palettePaper.r * 0.75, palettePaper.g * 0.75, palettePaper.b * 0.75, 0.24)
     readonly property color topBarBlurColor:    Qt.rgba(palettePaper.r * 0.7, palettePaper.g * 0.7, palettePaper.b * 0.7, 0.4)
 
     // ── Variant palettes ─────────────────────────────────────────────
@@ -125,7 +125,7 @@ QtObject {
 
     // ── Card styling ──────────────────────────────────────────────────
     readonly property int  cardRadius:       moduleEdgeRadius / 2 + 10
-    readonly property int  cardBorderWidth:  2
+    readonly property int  cardBorderWidth:  0
     readonly property real cardHeaderHeight: 40
     readonly property int  cardButtonRadius: 13
 

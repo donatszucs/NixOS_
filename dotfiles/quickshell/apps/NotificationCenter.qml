@@ -202,64 +202,59 @@ Item {
                         z: -1
                     },
 
+                    // Centered default title "Notifications"
+                    Text {
+                        id: notifTitle
+                        anchors.centerIn: parent
+                        text: "Notifications"
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize + 1
+                        font.bold: true
+                        opacity: card.volExpanded ? 0.0 : 1.0
+                        visible: opacity > 0
+
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: Theme.horizontalDuration
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+                    },
+
                     RowLayout {
                         anchors.fill: parent
                         anchors.leftMargin: 14
                         anchors.rightMargin: 7
                         spacing: 8
 
-                        // Header title with smooth transition between Notification Center and Volume
-                        Item {
-                            id: titleContainer
-                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                            implicitHeight: Math.max(notifTitle.implicitHeight, volumeTitle.implicitHeight)
-                            implicitWidth: card.volExpanded ? volumeTitle.implicitWidth : notifTitle.implicitWidth
-                            Layout.preferredWidth: implicitWidth
+                        // Left icon
+                        Text {
+                            id: headerIconText
+                            text: "󰂚"
+                            color: Theme.textPrimary
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize + 2
+                            font.bold: true
+                            Layout.alignment: Qt.AlignVCenter
+                        }
 
-                            Behavior on implicitWidth {
+                        // Title when volume controls are expanded
+                        Text {
+                            id: volumeTitle
+                            text: "Volume"
+                            color: Theme.textPrimary
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize + 1
+                            font.bold: true
+                            opacity: card.volExpanded ? 1.0 : 0.0
+                            visible: opacity > 0
+                            Layout.alignment: Qt.AlignVCenter
+
+                            Behavior on opacity {
                                 NumberAnimation {
                                     duration: Theme.horizontalDuration
                                     easing.type: Easing.OutCubic
-                                }
-                            }
-
-                            Text {
-                                id: notifTitle
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: "Notification Center"
-                                color: Theme.textPrimary
-                                font.family: Theme.font
-                                font.pixelSize: Theme.fontSize + 1
-                                font.bold: true
-                                opacity: card.volExpanded ? 0.0 : 1.0
-                                visible: opacity > 0
-
-                                Behavior on opacity {
-                                    NumberAnimation {
-                                        duration: Theme.horizontalDuration
-                                        easing.type: Easing.OutCubic
-                                    }
-                                }
-                            }
-
-                            Text {
-                                id: volumeTitle
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: "Volume"
-                                color: Theme.textPrimary
-                                font.family: Theme.font
-                                font.pixelSize: Theme.fontSize + 1
-                                font.bold: true
-                                opacity: card.volExpanded ? 1.0 : 0.0
-                                visible: opacity > 0
-
-                                Behavior on opacity {
-                                    NumberAnimation {
-                                        duration: Theme.horizontalDuration
-                                        easing.type: Easing.OutCubic
-                                    }
                                 }
                             }
                         }
@@ -355,22 +350,6 @@ Item {
                             onClicked: {
                                 card.volExpanded = !card.volExpanded
                             }
-                            implicitHeight: 26
-                            implicitWidth: 26
-                            radius: Theme.cardButtonRadius
-                            border.width: 1
-                            Layout.alignment: Qt.AlignVCenter
-                        }
-
-                        // Clear all button (visible when there are notifications)
-                        ModuleButton {
-                            id: clearAllBtn
-                            visible: notificationRepeater.count > 0
-                            variant: "neutral"
-                            label: "󰅖"
-                            textFont: 14
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.dismissAll()
                             implicitHeight: 26
                             implicitWidth: 26
                             radius: Theme.cardButtonRadius

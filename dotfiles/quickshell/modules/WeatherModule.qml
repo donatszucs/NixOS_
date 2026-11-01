@@ -129,27 +129,6 @@ ExpandableModule {
                 width: parent.width
                 spacing: 10
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Text {
-                        text: "Forecast"
-                        color: Theme.textPrimary
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize + 8
-                        font.bold: true
-                        Layout.fillWidth: true
-                        Layout.leftMargin: launcherModule.padding
-                    }
-                    ModuleButton {
-                        variant: "light"
-                        label: root.isUpdating ? "Updating..." : "󰑐"
-                        implicitHeight: 30
-                        radius: Theme.moduleEdgeRadius / 2
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.fetchWeather()
-                    }
-                }
-
                 BaseCard {
                     id: hourlyCard
                     Layout.fillWidth: true
@@ -595,6 +574,19 @@ ExpandableModule {
                             }
                         }
                     }
+                }
+
+                ModuleButton {
+                    id: updateBtn
+                    Layout.fillWidth: true
+                    implicitHeight: 30
+                    radius: Theme.cardButtonRadius
+                    variant: root.isUpdating ? "light" : "neutral"
+                    label: root.isUpdating ? "󰑐  Updating..." : "󰑐  Update Forecast"
+                    textFont: Theme.fontSize - 1
+                    cursorShape: root.isUpdating ? Qt.ArrowCursor : Qt.PointingHandCursor
+                    enabled: !root.isUpdating
+                    onClicked: root.fetchWeather()
                 }
             }
         }

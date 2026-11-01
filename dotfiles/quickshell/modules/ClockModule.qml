@@ -395,85 +395,59 @@ ExpandableModule {
                     spacing: 6
 
                     // "Today" button
-                    Rectangle {
+                    ModuleButton {
+                        id: todayBtn
+                        variant: "neutral"
+                        Layout.preferredHeight: 24
                         implicitHeight: 24
-                        implicitWidth: todayBtnText.implicitWidth + 14
+                        Layout.preferredWidth: 46
+                        implicitWidth: 46
                         radius: Theme.cardButtonRadius
-                        color: todayHover.hovered ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.25) : Qt.rgba(1, 1, 1, 0.1)
-                        border.width: 1
-                        border.color: todayHover.hovered ? Theme.statusBlue : Theme.divider
-                        HoverHandler { id: todayHover }
-
-                        Text {
-                            id: todayBtnText
-                            anchors.centerIn: parent
-                            text: "Today"
-                            color: todayHover.hovered ? Theme.statusBlue : Theme.textPrimary
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize * 0.8
-                            font.bold: true
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.goToToday()
-                        }
+                        cursorShape: Qt.PointingHandCursor
+                        label: "Today"
+                        textFont: Math.round(Theme.fontSize * 0.8)
+                        onClicked: root.goToToday()
                     }
 
-                    // Refresh Feed Button
-                    Rectangle {
-                        width: 24
-                        height: 24
+                    // Refresh Feed Button (keeps rotation animation)
+                    ModuleButton {
+                        id: refreshBtn
+                        variant: "neutral"
+                        Layout.preferredWidth: 24
+                        Layout.preferredHeight: 24
+                        implicitWidth: 24
+                        implicitHeight: 24
                         radius: Theme.cardButtonRadius
-                        color: refreshHover.hovered ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
-                        HoverHandler { id: refreshHover }
+                        cursorShape: Qt.PointingHandCursor
+                        label: "󰑐"
+                        textFont: Theme.fontSize
+                        onClicked: root.fetchCalendar()
 
-                        Text {
-                            id: refreshIconText
-                            anchors.centerIn: parent
-                            text: "󰑐"
-                            color: root.isUpdating ? Theme.statusBlue : (refreshHover.hovered ? Theme.statusBlue : Theme.textPrimary)
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
-
-                            RotationAnimation on rotation {
-                                from: 0
-                                to: 360
-                                duration: 900
-                                loops: Animation.Infinite
-                                running: root.isUpdating
-                            }
+                        RotationAnimation on rotation {
+                            from: 0
+                            to: 360
+                            duration: 900
+                            loops: Animation.Infinite
+                            running: root.isUpdating
                         }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.fetchCalendar()
+                        onRotationChanged: {
+                            if (!root.isUpdating && rotation !== 0) rotation = 0;
                         }
                     }
 
                     // Google Calendar web shortcut
-                    Rectangle {
-                        width: 24
-                        height: 24
+                    ModuleButton {
+                        id: webBtn
+                        variant: "neutral"
+                        Layout.preferredWidth: 24
+                        Layout.preferredHeight: 24
+                        implicitWidth: 24
+                        implicitHeight: 24
                         radius: Theme.cardButtonRadius
-                        color: webHover.hovered ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
-                        HoverHandler { id: webHover }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "󰃭"
-                            color: webHover.hovered ? Theme.statusBlue : Theme.textPrimary
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize + 1
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: calendarProc.running = true
-                        }
+                        cursorShape: Qt.PointingHandCursor
+                        label: "󰃭"
+                        textFont: Theme.fontSize + 1
+                        onClicked: calendarProc.running = true
                     }
                 }
             ]
@@ -830,9 +804,9 @@ ExpandableModule {
                     Layout.fillWidth: true
                     implicitHeight: setupCol.implicitHeight + 16
                     radius: 8
-                    color: Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.08)
+                    color: Qt.rgba(1, 1, 1, 0.05)
                     border.width: 1
-                    border.color: Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.25)
+                    border.color: Theme.cardBorder
                     visible: !root.hasCalendarUrl
 
                     ColumnLayout {
@@ -849,7 +823,7 @@ ExpandableModule {
                             spacing: 8
                             Text {
                                 text: "󰃭"
-                                color: Theme.statusBlue
+                                color: Theme.textPrimary
                                 font.family: Theme.font
                                 font.pixelSize: Theme.fontSize + 2
                             }
@@ -872,30 +846,14 @@ ExpandableModule {
                             Layout.fillWidth: true
                         }
 
-                        Rectangle {
-                            implicitHeight: 22
-                            implicitWidth: openGcalText.implicitWidth + 14
-                            radius: Theme.moduleEdgeRadius / 2
-                            color: openGcalHover.hovered ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.3) : Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.18)
-                            border.width: 1
-                            border.color: Theme.statusBlue
-                            HoverHandler { id: openGcalHover }
-
-                            Text {
-                                id: openGcalText
-                                anchors.centerIn: parent
-                                text: "Open Google Calendar 󰌹"
-                                color: Theme.statusBlue
-                                font.family: Theme.font
-                                font.pixelSize: Theme.fontSize * 0.75
-                                font.bold: true
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: calendarProc.running = true
-                            }
+                        ModuleButton {
+                            variant: "neutral"
+                            implicitHeight: 24
+                            radius: Theme.cardButtonRadius
+                            cursorShape: Qt.PointingHandCursor
+                            label: "Open Google Calendar 󰌹"
+                            textFont: Math.round(Theme.fontSize * 0.75)
+                            onClicked: calendarProc.running = true
                         }
                     }
                 }

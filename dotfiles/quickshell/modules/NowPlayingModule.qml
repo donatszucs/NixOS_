@@ -59,13 +59,11 @@ ExpandableModule {
     property real currentPosition: 0
     property real trackLength: 0
     property bool scrubbing: false
-    property real _savedVolume: 0.5
 
     // ── Derived capability flags (avoid repeating long expressions) ──
     readonly property bool canPrev: currentPlayer && currentPlayer.canGoPrevious !== false
     readonly property bool canNext: currentPlayer && currentPlayer.canGoNext !== false
     readonly property bool canSeek: currentPlayer && (currentPlayer.canSeek || currentPlayer.positionSupported) && trackLength > 0
-    readonly property bool hasVolume: currentPlayer && currentPlayer.volumeSupported
 
     pillPercent: expanded ? 0 : (trackLength > 0 ? Math.round((currentPosition / trackLength) * 100) : 0)
     pillVariant: expanded ? "neutral" : "dark"
@@ -77,7 +75,7 @@ ExpandableModule {
     pillBgImageOpacity: 0.4
 
     property int cardWidth: 260
-    property real cardHeight: 270
+    property real cardHeight: 298
 
     implicitHeight: expanded ? cardHeight + Theme.moduleHeight + nowPlayingModule.titleBarHeight + 15 : Theme.moduleHeight
 
@@ -107,12 +105,18 @@ ExpandableModule {
         wheel.accepted = true
     }
 
-    // ── Helper: time formatter (seconds -> mm:ss) ────────────────
-    function formatTime(seconds) {
-        if (isNaN(seconds) || seconds === undefined || seconds === null || seconds < 0) return "0:00"
+    // ── Helper: time formatter (seconds -> [h:]mm:ss) ────────────
+    function formatTime(seconds, forceHours) {
+        if (isNaN(seconds) || seconds === undefined || seconds === null || seconds < 0) {
+            return forceHours ? "0:00:00" : "0:00"
+        }
         var totalSec = Math.floor(seconds)
-        var mins = Math.floor(totalSec / 60)
+        var hours = Math.floor(totalSec / 3600)
+        var mins = Math.floor((totalSec % 3600) / 60)
         var secs = totalSec % 60
+        if (hours > 0 || forceHours) {
+            return hours + ":" + (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs
+        }
         return mins + ":" + (secs < 10 ? "0" : "") + secs
     }
 
@@ -342,16 +346,6 @@ ExpandableModule {
         currentPlayer.volume = Math.round(newVol * 100) / 100
     }
 
-    function toggleMute() {
-        if (!currentPlayer || !currentPlayer.volumeSupported) return
-        if (currentPlayer.volume > 0.01) {
-            nowPlayingModule._savedVolume = currentPlayer.volume
-            currentPlayer.volume = 0.0
-        } else {
-            currentPlayer.volume = nowPlayingModule._savedVolume > 0.05 ? nowPlayingModule._savedVolume : 0.5
-        }
-    }
-
     // ── Instant Reactive D-Bus Signals ──────────────────────────
     // Detect player connect/disconnect immediately
     Connections {
@@ -413,18 +407,16 @@ ExpandableModule {
     Component {
         id: artPlaceholder
         Rectangle {
-            radius: 12
-            color: Theme.palette("dark").base
-            border.width: 1
-            border.color: Theme.palette("dark").border
+            color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.25)
 
             Text {
-                anchors.centerIn: parent
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: Math.max(16, Math.round((parent.height - 52 - height) / 2))
                 text: "󰎆"
                 font.family: Theme.font
-                font.pixelSize: parent.width > 100 ? 42 : 36
+                font.pixelSize: 42
                 color: Theme.palette("dark").text
-                opacity: 0.4
+                opacity: 0.35
             }
         }
     }
@@ -514,7 +506,7 @@ ExpandableModule {
         }
     }
 
-    // ── Expanded art / carousel / controls ──────────────────
+    // ── Expanded card / aspect-preserving art / overlaid controls ──
     ColumnLayout {
         id: baseColumn
         parent: nowPlayingModule.overlay
@@ -542,97 +534,115 @@ ExpandableModule {
             BaseCard {
                 id: carouselPanel
                 anchors.fill: parent
-                    // Multi-player: carousel
+
+                // Artwork stage above authorBar (fixed 256×256 box; only the image changes size per aspect ratio)
+                Item {
+                    id: artStage
+                    anchors.top: parent.top
+                    anchors.topMargin: carouselPanel.border.width
+                    anchors.left: parent.left
+                    anchors.leftMargin: carouselPanel.border.width
+                    anchors.right: parent.right
+                    anchors.rightMargin: carouselPanel.border.width
+                    anchors.bottom: authorBar.top
+                    clip: true
+
                     ListView {
                         id: playerCarousel
-                        anchors.top: parent.top
-                        anchors.topMargin: 22
-                        anchors.bottom: middleControls.top
-                        anchors.bottomMargin: 35
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-
+                        anchors.fill: parent
                         model: nowPlayingModule.playersList
                         orientation: ListView.Horizontal
+                        interactive: nowPlayingModule.playerCount > 1
+                        boundsBehavior: Flickable.StopAtBounds
+                        preferredHighlightBegin: 0
+                        preferredHighlightEnd: width
+                        highlightRangeMode: ListView.StrictlyEnforceRange
+                        snapMode: ListView.SnapOneItem
+                        highlightMoveDuration: 240
+                        spacing: 0
 
-                    onCurrentIndexChanged: {
-                        if (nowPlayingModule._syncingCarousel) return
-                        if (nowPlayingModule.playersList.length === 0) return
-                        if (currentIndex < 0 || currentIndex >= nowPlayingModule.playersList.length) return
+                        onCurrentIndexChanged: {
+                            if (nowPlayingModule._syncingCarousel) return
+                            if (nowPlayingModule.playersList.length === 0) return
+                            if (currentIndex < 0 || currentIndex >= nowPlayingModule.playersList.length) return
 
-                        var p = nowPlayingModule.playersList[currentIndex]
-                        if (nowPlayingModule.manualPlayerOverride !== p) {
-                            nowPlayingModule.manualPlayerOverride = p
-                            nowPlayingModule.pickPlayer()
-                        }
-                    }
-
-                    preferredHighlightBegin: width / 2 - 100
-                    preferredHighlightEnd: width / 2 + 100
-                    highlightRangeMode: ListView.StrictlyEnforceRange
-                    snapMode: ListView.SnapToItem
-                    spacing: -60
-
-                    delegate: Item {
-                        id: delegateRoot
-                        width: 200
-                        height: playerCarousel.height
-
-                        property real itemCenter: x + width / 2
-                        property real viewCenter: playerCarousel.contentX + playerCarousel.width / 2
-                        property real centerDist: itemCenter - viewCenter
-                        property real absCenterDist: Math.abs(centerDist)
-                        property real outOfFocusDist: Math.max(0, absCenterDist - 30)
-                        property real absDist: Math.min(1.0, outOfFocusDist / 120)
-                        property real effectiveNormDist: (centerDist < 0 ? -1 : 1) * absDist
-                        property bool hasArt: !!(modelData && modelData.trackArtUrl)
-
-                        z: 100 - absDist * 100
-
-                        Item {
-                            id: delegateWrapper
-                            width: 200
-                            height: playerCarousel.height
-                            anchors.centerIn: parent
-
-                            scale: 1.0 - 0.25 * delegateRoot.absDist
-                                + Math.max(0, 1.0 - delegateRoot.absCenterDist / 50) * 0.05
-
-                            transform: Translate {
-                                x: -Math.pow(delegateRoot.effectiveNormDist, 3) * 130
+                            var p = nowPlayingModule.playersList[currentIndex]
+                            if (nowPlayingModule.manualPlayerOverride !== p) {
+                                nowPlayingModule.manualPlayerOverride = p
+                                nowPlayingModule.pickPlayer()
                             }
+                        }
 
-                            property real imgAspect: (delegateImg.implicitWidth > 0 && delegateImg.implicitHeight > 0)
-                                ? delegateImg.implicitWidth / delegateImg.implicitHeight : 1.0
-                            property real targetW: Math.min(width, height * imgAspect)
-                            property real targetH: Math.min(height, width / imgAspect)
+                        delegate: Item {
+                            id: delegateRoot
+                            required property var modelData
+                            required property int index
+
+                            width: playerCarousel.width
+                            height: playerCarousel.height
+
+                            readonly property real itemCenter: x + width / 2
+                            readonly property real viewCenter: playerCarousel.contentX + playerCarousel.width / 2
+                            readonly property real absDist: playerCarousel.width > 0
+                                ? Math.min(1.0, Math.abs(itemCenter - viewCenter) / playerCarousel.width)
+                                : 0.0
+                            readonly property bool hasArt: !!(modelData && modelData.trackArtUrl)
+                            readonly property bool artReady: hasArt && delegateImg.status === Image.Ready
+
+                            // Compute native aspect ratio of this player's thumbnail without resizing the card
+                            readonly property real imgAspect: (artReady && delegateImg.implicitWidth > 0 && delegateImg.implicitHeight > 0)
+                                ? Math.max(0.65, Math.min(2.4, delegateImg.implicitWidth / delegateImg.implicitHeight))
+                                : 1.0
+                            readonly property real targetW: artReady
+                                ? Math.round(Math.min(width, height * imgAspect))
+                                : width
+                            readonly property real targetH: artReady
+                                ? Math.round(Math.min(height, width / imgAspect))
+                                : height
+                            readonly property real freeTopH: Math.max(120, height - (nowPlayingModule.playerCount > 1 ? 64 : 48))
+                            readonly property real targetY: Math.round(Math.max(0, (freeTopH - targetH) / 2))
+
+                            // Soft SDF alpha mask sized to the thumbnail's exact aspect-ratio bounds
+                            Item {
+                                id: delegateMask
+                                anchors.fill: delegateImgContainer
+                                visible: false
+                                layer.enabled: width > 0 && height > 0
+                                layer.smooth: true
+
+                                RectangularShadow {
+                                    anchors.fill: parent
+                                    anchors.margins: 6
+                                    radius: Theme.cardRadius - 3
+                                    blur: 15
+                                    spread: 0
+                                    color: "white"
+                                }
+                            }
 
                             Item {
                                 id: delegateImgContainer
-                                anchors.centerIn: parent
-                                width: delegateRoot.hasArt ? delegateWrapper.targetW : Math.min(parent.width, parent.height)
-                                height: delegateRoot.hasArt ? delegateWrapper.targetH : Math.min(parent.width, parent.height)
+                                width: delegateRoot.targetW
+                                height: delegateRoot.targetH
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                y: delegateRoot.targetY
+                                scale: 1.0 - 0.04 * delegateRoot.absDist
+                                opacity: 1.0 - 0.35 * delegateRoot.absDist
+                                clip: true
 
-                                layer.enabled: true
+                                layer.enabled: width > 0 && height > 0
                                 layer.smooth: true
                                 layer.effect: MultiEffect {
-                                    brightness: -delegateRoot.absDist * 0.35
-                                    contrast: -delegateRoot.absDist * 0.8
-                                    shadowEnabled: true
-                                    shadowColor: "black"
-                                    shadowBlur: 1.0
-                                    shadowVerticalOffset: 0
-                                    shadowHorizontalOffset: 0
-
-                                    Behavior on shadowColor {
-                                        ColorAnimation { duration: 150 }
-                                    }
+                                    maskEnabled: true
+                                    maskSource: delegateMask
+                                    maskThresholdMin: 0.52
+                                    maskSpreadAtMin: 0.96
                                 }
 
                                 Loader {
                                     anchors.fill: parent
                                     sourceComponent: artPlaceholder
-                                    active: !delegateRoot.hasArt
+                                    active: !delegateRoot.artReady
                                     visible: active
                                 }
 
@@ -641,40 +651,41 @@ ExpandableModule {
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectCrop
                                     source: delegateRoot.hasArt ? modelData.trackArtUrl : ""
-                                    sourceSize.width: 250
-                                    visible: false
-                                }
+                                    // Only constrain width so Qt preserves the image's exact native aspect ratio
+                                    sourceSize.width: 560
+                                    asynchronous: true
+                                    smooth: true
+                                    mipmap: true
+                                    opacity: delegateRoot.artReady ? 1.0 : 0.0
 
-                                MultiEffect {
-                                    anchors.fill: parent
-                                    source: delegateImg
-                                    visible: delegateRoot.hasArt
-                                    maskEnabled: true
-                                    maskSource: imgMask
-                                }
-
-                                Item {
-                                    id: imgMask
-                                    anchors.fill: parent
-                                    visible: false
-                                    layer.enabled: true
-                                    layer.smooth: true
-
-                                    Rectangle {
-                                        anchors.fill: parent
-                                        radius: 15
-                                        color: "black"
-                                        antialiasing: true
+                                    Behavior on opacity {
+                                        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
                                     }
                                 }
 
-                                // Clicking art selects carousel item
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        if (playerCarousel.currentIndex !== index) {
-                                            playerCarousel.currentIndex = index
+                                // Smooth dark fade at bottom only when tall/square art extends behind middleControls
+                                Rectangle {
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
+                                    height: Math.min(parent.height, 92)
+                                    opacity: delegateRoot.artReady
+                                        ? Math.max(0.0, Math.min(1.0, ((delegateImgContainer.y + delegateImgContainer.height) - (delegateRoot.freeTopH - 6)) / 36))
+                                        : 0.0
+                                    visible: opacity > 0.01
+                                    gradient: Gradient {
+                                        orientation: Gradient.Vertical
+                                        GradientStop {
+                                            position: 0.0
+                                            color: "transparent"
+                                        }
+                                        GradientStop {
+                                            position: 0.55
+                                            color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.48)
+                                        }
+                                        GradientStop {
+                                            position: 1.0
+                                            color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.84)
                                         }
                                     }
                                 }
@@ -683,9 +694,22 @@ ExpandableModule {
                     }
                 }
 
-                    // Wheel over art: multi-player switches player; single player adjusts volume
+                // Playback & seeker controls overlaid on the stage above authorBar
+                Item {
+                    id: controlsOverlay
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: authorBar.top
+                    z: 20
+
+                    // Wheel over open artwork area: multi-player switches player; single player adjusts volume
                     MouseArea {
-                        anchors.fill: playerCarousel
+                        anchors.top: parent.top
+                        anchors.topMargin: 6
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: carouselIndicators.visible ? carouselIndicators.top : middleControls.top
                         acceptedButtons: Qt.NoButton
                         onWheel: function(wheel) {
                             if (nowPlayingModule.playerCount > 1) {
@@ -702,16 +726,16 @@ ExpandableModule {
                         }
                     }
 
-                    // Carousel Pagination Dots (multi-source direction indicators)
+                    // Carousel Pagination Dots (clean, borderless)
                     Item {
                         id: carouselIndicators
-                        anchors.top: playerCarousel.bottom
                         anchors.bottom: middleControls.top
+                        anchors.bottomMargin: 4
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: indicatorsRow.width
+                        height: 12
                         visible: opacity > 0
                         opacity: (nowPlayingModule.playerCount > 1) ? 1.0 : 0.0
-                        z: 10
 
                         Behavior on opacity {
                             NumberAnimation { duration: 150 }
@@ -732,8 +756,8 @@ ExpandableModule {
 
                                     readonly property bool isActive: index === playerCarousel.currentIndex
 
-                                    width: isActive ? 20 : 10
-                                    height: 20
+                                    width: isActive ? 18 : 9
+                                    height: 12
 
                                     Behavior on width {
                                         NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
@@ -742,11 +766,11 @@ ExpandableModule {
                                     Rectangle {
                                         id: dotVisual
                                         anchors.centerIn: parent
-                                        width: dotDelegate.isActive ? 16 : 6
-                                        height: 6
-                                        radius: 3
-                                        color: dotDelegate.isActive ? Theme.light.base : Theme.textPrimary
-                                        opacity: dotDelegate.isActive ? 1.0 : (dotMouseArea.containsMouse ? 0.75 : 0.35)
+                                        width: dotDelegate.isActive ? 14 : 5
+                                        height: 5
+                                        radius: 2.5
+                                        color: dotDelegate.isActive ? Theme.palette("light").base : Theme.textPrimary
+                                        opacity: dotDelegate.isActive ? 1.0 : (dotMouseArea.containsMouse ? 0.75 : 0.38)
 
                                         Behavior on width {
                                             NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
@@ -786,29 +810,29 @@ ExpandableModule {
                         }
                     }
 
-                    // Middle Controls: Play/Pause (big) & Seeker Track + Timestamps
+                    // Middle Controls: Play/Pause + Clean Borderless Pill Seeker & Timestamps
                     RowLayout {
                         id: middleControls
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.bottom: authorBar.top
-                        anchors.leftMargin: 12
-                        anchors.rightMargin: 12
+                        anchors.bottom: parent.bottom
+                        anchors.leftMargin: 14
+                        anchors.rightMargin: 14
                         anchors.bottomMargin: 8
-                        spacing: 12
-                        height: 40
+                        spacing: 10
+                        height: 34
 
-                        // Large Play / Pause Button (Circle)
+                        // Play / Pause Button (standard "light" / "neutral" module palette, borderless)
                         ModuleButton {
                             id: playPauseBtn
                             variant: nowPlayingModule.isMediaPlaying ? "light" : "neutral"
                             cursorShape: Qt.PointingHandCursor
-                            textFont: 22
-                            Layout.preferredWidth: 36
-                            Layout.preferredHeight: 36
+                            textFont: 19
+                            Layout.preferredWidth: 34
+                            Layout.preferredHeight: 34
                             Layout.alignment: Qt.AlignVCenter
                             Layout.fillWidth: false
-                            radius: 18
+                            radius: 17
                             clip: true
 
                             label: nowPlayingModule.playPauseIcon
@@ -825,13 +849,13 @@ ExpandableModule {
                         ColumnLayout {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
-                            spacing: 0
+                            spacing: 1
 
-                            // Seeker Track
+                            // Seeker Track (borderless pill bar matching StyledSlider aesthetic)
                             Item {
                                 id: seekTrack
                                 Layout.fillWidth: true
-                                implicitHeight: 20
+                                implicitHeight: 16
 
                                 property real progressRatio: {
                                     if (nowPlayingModule.trackLength > 0) {
@@ -840,25 +864,29 @@ ExpandableModule {
                                     return 0.0
                                 }
 
-                                // Track groove
                                 Rectangle {
+                                    id: seekGroove
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
-                                    height: 6
-                                    radius: 3
+                                    height: (seekMouseArea.containsMouse || nowPlayingModule.scrubbing) ? 7 : 5
+                                    radius: height / 2
                                     color: Theme.palette("neutral").base
-                                    border.width: 1
-                                    border.color: Theme.palette("neutral").border
+                                    clip: true
 
-                                    // Fill bar
+                                    Behavior on height {
+                                        NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
+                                    }
+
                                     Rectangle {
                                         anchors.left: parent.left
                                         anchors.top: parent.top
                                         anchors.bottom: parent.bottom
                                         width: parent.width * seekTrack.progressRatio
-                                        radius: 3
-                                        color: Theme.palette("light").base
+                                        radius: parent.radius
+                                        color: nowPlayingModule.scrubbing
+                                            ? Theme.palette("light").pressed
+                                            : Theme.palette("light").base
 
                                         Behavior on width {
                                             enabled: !nowPlayingModule.scrubbing
@@ -867,33 +895,11 @@ ExpandableModule {
                                     }
                                 }
 
-                                // Scrubber knob
-                                Rectangle {
-                                    width: 12
-                                    height: 12
-                                    radius: 6
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    x: Math.max(0, Math.min(parent.width - width, (parent.width * seekTrack.progressRatio) - width / 2))
-                                    color: Theme.palette("light").text
-                                    border.width: 2
-                                    border.color: Theme.palette("light").border
-                                    visible: nowPlayingModule.trackLength > 0
-                                    opacity: (seekMouseArea.containsMouse || nowPlayingModule.scrubbing) ? 1.0 : 0.8
-                                    scale: (seekMouseArea.containsMouse || nowPlayingModule.scrubbing) ? 1.2 : 1.0
-
-                                    Behavior on scale {
-                                        NumberAnimation { duration: 120 }
-                                    }
-                                    Behavior on opacity {
-                                        NumberAnimation { duration: 120 }
-                                    }
-                                }
-
                                 MouseArea {
                                     id: seekMouseArea
                                     anchors.fill: parent
-                                    anchors.topMargin: -6
-                                    anchors.bottomMargin: -6
+                                    anchors.topMargin: -4
+                                    anchors.bottomMargin: -4
                                     hoverEnabled: true
                                     cursorShape: nowPlayingModule.canSeek ? Qt.PointingHandCursor : Qt.ArrowCursor
 
@@ -940,15 +946,15 @@ ExpandableModule {
                             // Timestamps below the beginning and end of the seeker track
                             Item {
                                 Layout.fillWidth: true
-                                implicitHeight: 14
+                                implicitHeight: 12
 
                                 Text {
                                     id: posLabel
                                     anchors.left: parent.left
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: nowPlayingModule.formatTime(nowPlayingModule.currentPosition)
+                                    text: nowPlayingModule.formatTime(nowPlayingModule.currentPosition, nowPlayingModule.trackLength >= 3600)
                                     font.family: Theme.font
-                                    font.pixelSize: 11
+                                    font.pixelSize: 10
                                     color: Theme.textPrimary
                                     opacity: 0.65
                                 }
@@ -959,145 +965,119 @@ ExpandableModule {
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: nowPlayingModule.trackLength > 0 ? nowPlayingModule.formatTime(nowPlayingModule.trackLength) : "--:--"
                                     font.family: Theme.font
-                                    font.pixelSize: 11
+                                    font.pixelSize: 10
                                     color: Theme.textPrimary
                                     opacity: 0.65
                                 }
                             }
                         }
                     }
+                }
 
-                    // Metadata footer bar: Previous/Next + Artist & Album + Mute Button
-                    Rectangle {
-                        id: authorBar
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        height: Theme.cardHeaderHeight
-                        color: Theme.topBarBlurColor
-                        bottomLeftRadius: carouselPanel.radius
-                        bottomRightRadius: carouselPanel.radius
-                        topLeftRadius: 0
-                        topRightRadius: 0
+                // Bottom metadata bar with InverseRadius fillets (matching BaseCard headerBar across all modules)
+                Rectangle {
+                    id: authorBar
+                    z: 25
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: Theme.cardHeaderHeight
+                    color: Theme.topBarBlurColor
+                    bottomLeftRadius: carouselPanel.radius
+                    bottomRightRadius: carouselPanel.radius
+                    topLeftRadius: 0
+                    topRightRadius: 0
 
-                        InverseRadius {
-                            anchors.bottom: authorBar.top
-                            anchors.left: authorBar.left
-                            cornerPosition: "bottomLeft"
-                            color: authorBar.color
-                            size: 15
+                    InverseRadius {
+                        anchors.bottom: authorBar.top
+                        anchors.left: authorBar.left
+                        cornerPosition: "bottomLeft"
+                        color: authorBar.color
+                        size: 15
+                    }
+
+                    InverseRadius {
+                        cornerPosition: "bottomRight"
+                        anchors.bottom: authorBar.top
+                        anchors.right: authorBar.right
+                        color: authorBar.color
+                        size: 15
+                    }
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 12
+                        spacing: 6
+
+                        // Previous Button
+                        ModuleButton {
+                            id: prevBtn
+                            variant: "neutral"
+                            cursorShape: nowPlayingModule.canPrev ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            textFont: 15
+                            Layout.preferredWidth: 28
+                            Layout.preferredHeight: 26
+                            Layout.alignment: Qt.AlignVCenter
+                            bottomLeftRadius: Theme.cardButtonRadius
+                            topLeftRadius: Theme.cardButtonRadius
+                            bottomRightRadius: 0
+                            topRightRadius: 0
+
+                            label: "󰙣"
+                            textColor: nowPlayingModule.canPrev ? Theme.textPrimary : Theme.statusDisabled
+                            opacity: nowPlayingModule.canPrev ? 1.0 : 0.45
+
+                            onClicked: nowPlayingModule.doPrevious()
                         }
 
-                        InverseRadius {
-                            cornerPosition: "bottomRight"
-                            anchors.bottom: authorBar.top
-                            anchors.right: authorBar.right
-                            color: authorBar.color
-                            size: 15
+                        // Next Button
+                        ModuleButton {
+                            id: nextBtn
+                            variant: "neutral"
+                            cursorShape: nowPlayingModule.canNext ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            textFont: 15
+                            Layout.preferredWidth: 28
+                            Layout.preferredHeight: 26
+                            Layout.alignment: Qt.AlignVCenter
+                            Layout.leftMargin: -6
+                            bottomRightRadius: Theme.cardButtonRadius
+                            topRightRadius: Theme.cardButtonRadius
+                            bottomLeftRadius: 0
+                            topLeftRadius: 0
+
+                            label: "󰙡"
+                            textColor: nowPlayingModule.canNext ? Theme.textPrimary : Theme.statusDisabled
+                            opacity: nowPlayingModule.canNext ? 1.0 : 0.45
+
+                            onClicked: nowPlayingModule.doNext()
                         }
 
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 10
-                            anchors.rightMargin: 10
-                            spacing: 6
+                        HoverMarqueeText {
+                            id: scrollingAuthorText
+                            clip: true
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
 
-                            // Previous Button
-                            ModuleButton {
-                                id: prevBtn
-                                variant: "neutral"
-                                cursorShape: nowPlayingModule.canPrev ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                textFont: 15
-                                Layout.preferredWidth: 28
-                                Layout.preferredHeight: 26
-                                Layout.alignment: Qt.AlignVCenter
-                                bottomLeftRadius: Theme.cardButtonRadius
-                                topLeftRadius: Theme.cardButtonRadius
-
-                                label: "󰙣"
-                                textColor: nowPlayingModule.canPrev ? Theme.textPrimary : Theme.statusDisabled
-                                opacity: nowPlayingModule.canPrev ? 1.0 : 0.45
-
-                                onClicked: nowPlayingModule.doPrevious()
+                            text: {
+                                var art = nowPlayingModule.authorText
+                                var alb = nowPlayingModule.albumText
+                                if (art && alb && art !== alb) return art + " — " + alb
+                                if (art) return art
+                                if (alb) return alb
+                                return nowPlayingModule.getPlayerName(nowPlayingModule.currentPlayer)
                             }
-
-                            // Next Button
-                            ModuleButton {
-                                id: nextBtn
-                                variant: "neutral"
-                                cursorShape: nowPlayingModule.canNext ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                textFont: 15
-                                Layout.preferredWidth: 28
-                                Layout.preferredHeight: 26
-                                Layout.alignment: Qt.AlignVCenter
-                                Layout.leftMargin: -6
-                                bottomRightRadius: Theme.cardButtonRadius
-                                topRightRadius: Theme.cardButtonRadius
-
-                                label: "󰙡"
-                                textColor: nowPlayingModule.canNext ? Theme.textPrimary : Theme.statusDisabled
-                                opacity: nowPlayingModule.canNext ? 1.0 : 0.45
-
-                                onClicked: nowPlayingModule.doNext()
-                            }
-
-                            HoverMarqueeText {
-                                id: scrollingAuthorText
-                                clip: true
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignVCenter
-                                horizontalAlignment: Text.AlignHCenter
-
-                                text: {
-                                    var art = nowPlayingModule.authorText
-                                    var alb = nowPlayingModule.albumText
-                                    if (art && alb && art !== alb) return art + " — " + alb
-                                    if (art) return art
-                                    if (alb) return alb
-                                    return nowPlayingModule.getPlayerName(nowPlayingModule.currentPlayer)
-                                }
-                                textMaxWidth: 200
-                                fontFamily: Theme.font
-                                pixelSize: Theme.fontSize - 1
-                                textColor: Theme.textPrimary
-                                opacity: 0.9
-                                fontBold: false
-                            }
-
-                            // Mute / Volume Button
-                            ModuleButton {
-                                id: volumeBtn
-                                variant: "neutral"
-                                cursorShape: Qt.PointingHandCursor
-                                textFont: 13
-                                Layout.preferredWidth: 26
-                                Layout.preferredHeight: 26
-                                Layout.alignment: Qt.AlignVCenter
-                                radius: Theme.cardButtonRadius
-
-                                label: {
-                                    if (!nowPlayingModule.hasVolume) return ""
-                                    var v = nowPlayingModule.currentPlayer.volume !== undefined ? nowPlayingModule.currentPlayer.volume : 1.0
-                                    if (v <= 0.01) return "󰖁"
-                                    if (v < 0.33) return ""
-                                    if (v < 0.66) return ""
-                                    return ""
-                                }
-                                textColor: (nowPlayingModule.hasVolume && currentPlayer.volume <= 0.01)
-                                    ? Theme.statusRed : Theme.textPrimary
-                                opacity: nowPlayingModule.hasVolume ? 1.0 : 0.6
-
-                                onClicked: nowPlayingModule.toggleMute()
-
-                                WheelHandler {
-                                    onWheel: function(event) {
-                                        nowPlayingModule.changeVolume(event.angleDelta.y > 0 ? 0.05 : -0.05)
-                                    }
-                                }
-                            }
+                            textMaxWidth: 176
+                            fontFamily: Theme.font
+                            pixelSize: Theme.fontSize - 1
+                            textColor: Theme.textPrimary
+                            opacity: 0.9
+                            fontBold: false
                         }
                     }
                 }
             }
         }
     }
+}
