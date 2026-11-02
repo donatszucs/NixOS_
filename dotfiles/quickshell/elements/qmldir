@@ -1,7 +1,9 @@
 module elements
 BaseCard 1.0 BaseCard.qml
+BatteryBadge 1.0 BatteryBadge.qml
 ExpandableModule 1.0 ExpandableModule.qml
 FlowingBackground 1.0 FlowingBackground.qml
+HeaderButton 1.0 HeaderButton.qml
 HoverMarqueeText 1.0 HoverMarqueeText.qml
 InverseRadius 1.0 InverseRadius.qml
 ModuleButton 1.0 ModuleButton.qml

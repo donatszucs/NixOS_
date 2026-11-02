@@ -68,19 +68,10 @@ ExpandableModule {
             top: parent.top
         }
 
-        ModuleButton {
+        HeaderButton {
             id: notificationButton
             z: 1
-            variant: "neutral"
-            colorOverride: true
-            overrideColor: "transparent"
-            hoverColor: Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.22)
-            pressedColor: Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.45)
-            textColor: notificationButton.pressed
-                ? "#ffffff"
-                : (notificationButton.hovered ? Qt.lighter(Theme.textPrimary, 1.25) : Theme.textPrimary)
-
-            cursorShape: Qt.PointingHandCursor
+            icon: "󱊖"
             implicitWidth: Theme.moduleHeight + 6
             implicitHeight: Theme.moduleHeight
             label: "󱊖"

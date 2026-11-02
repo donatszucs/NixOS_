@@ -71,7 +71,7 @@ ExpandableModule {
                         RowLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 15
-                            anchors.rightMargin: 7
+                            anchors.rightMargin: 10
                             spacing: 5
 
                             HoverMarqueeText {
@@ -99,30 +99,16 @@ ExpandableModule {
 
                             Item { Layout.fillWidth: true } // spacer
 
-                            ModuleButton {
-                                variant: "neutral"
-                                label: "󰚰"
-                                textFont: 16
-                                cursorShape: Qt.PointingHandCursor
+                            HeaderButton {
+                                icon: "󰚰"
+                                iconSize: 20
                                 onClicked: updateProc.running = true
-                                implicitHeight: 26
-                                implicitWidth: 36
-                                radius: Theme.cardButtonRadius
-                                border.width: 1
-                                Layout.alignment: Qt.AlignVCenter
                             }
 
-                            ModuleButton {
-                                variant: "neutral"
-                                label: "󱄅"
-                                textFont: 16
-                                cursorShape: Qt.PointingHandCursor
+                            HeaderButton {
+                                icon: "󱄅"
+                                iconSize: 20
                                 onClicked: rebuildProc.running = true
-                                implicitHeight: 26
-                                implicitWidth: 36
-                                radius: Theme.cardButtonRadius
-                                border.width: 1
-                                Layout.alignment: Qt.AlignVCenter
                             }
                         }
                     ]

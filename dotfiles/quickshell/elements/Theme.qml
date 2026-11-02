@@ -96,12 +96,29 @@ QtObject {
         readonly property color pillText:        text
     }
 
+    readonly property QtObject transparent: QtObject {
+        readonly property color base:            Qt.rgba(0, 0, 0, 0)
+        readonly property color hover:           Qt.rgba(0, 0, 0, 0)
+        readonly property color pressed:         Qt.rgba(0, 0, 0, 0)
+        readonly property color text:            Theme.palettePaper
+
+        readonly property color border:          Qt.rgba(0, 0, 0, 0)
+        readonly property color borderHover:     Qt.rgba(0, 0, 0, 0)
+        readonly property color borderPressed:   Qt.rgba(0, 0, 0, 0)
+
+        readonly property color pillTrack:       Qt.rgba(0, 0, 0, 0)
+        readonly property color pillFill:        Qt.rgba(0, 0, 0, 0)
+        readonly property color pillBorder:      Qt.rgba(0, 0, 0, 0)
+        readonly property color pillText:        text
+    }
+
     // Helper: resolve a variant name string → palette object
     // Usage: Theme.palette("dark").top
         function palette(name) {
         if (name === "light")       return Theme.light
-        if (name === "red")      return Theme.red
+        if (name === "red")         return Theme.red
         if (name === "neutral")     return Theme.neutral
+        if (name === "transparent") return Theme.transparent
         return Theme.dark
     }
 

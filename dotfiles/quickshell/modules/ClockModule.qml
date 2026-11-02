@@ -333,41 +333,29 @@ ExpandableModule {
 
             headerContent: [
                 // Prev Month Button
-                ModuleButton {
+                HeaderButton {
                     id: prevBtn
-                    width: 28
-                    height: 24
-                    radius: Theme.cardButtonRadius
-                    topRightRadius: 0
-                    bottomRightRadius: 0
                     anchors {
                         left: parent.left
                         leftMargin: 12
                         verticalCenter: parent.verticalCenter
                     }
-                    variant: "neutral"
-                    label: "󰅁"
+                    icon: "󰅁"
+                    iconSize: 20
                     onClicked: root.prevMonth()
-                    cursorShape: Qt.PointingHandCursor
                 },
                 
                 // Next Month Button
-                ModuleButton {
+                HeaderButton {
                     id: nextBtn
-                    width: 28
-                    height: 24
-                    radius: Theme.cardButtonRadius
-                    topLeftRadius: 0
-                    bottomLeftRadius: 0
                     anchors {
                         left: prevBtn.right
+                        leftMargin: 2
                         verticalCenter: parent.verticalCenter
                     }
-
-                    variant: "neutral"
-                    label: "󰅂"
+                    icon: "󰅂"
+                    iconSize: 20
                     onClicked: root.nextMonth()
-                    cursorShape: Qt.PointingHandCursor
                 },
 
                 // Month & Year Title
@@ -395,33 +383,22 @@ ExpandableModule {
                     spacing: 6
 
                     // "Today" button
-                    ModuleButton {
+                    HeaderButton {
                         id: todayBtn
-                        variant: "neutral"
-                        Layout.preferredHeight: 24
-                        implicitHeight: 24
-                        Layout.preferredWidth: 46
-                        implicitWidth: 46
-                        radius: Theme.cardButtonRadius
-                        cursorShape: Qt.PointingHandCursor
                         label: "Today"
-                        textFont: Math.round(Theme.fontSize * 0.8)
+                        hasBorder: true
+                        iconSize: Math.round(Theme.fontSize * 0.8)
                         onClicked: root.goToToday()
                     }
 
                     // Refresh Feed Button (keeps rotation animation)
-                    ModuleButton {
+                    HeaderButton {
                         id: refreshBtn
-                        variant: "neutral"
-                        Layout.preferredWidth: 24
-                        Layout.preferredHeight: 24
-                        implicitWidth: 24
-                        implicitHeight: 24
-                        radius: Theme.cardButtonRadius
-                        cursorShape: Qt.PointingHandCursor
-                        label: "󰑐"
-                        textFont: Theme.fontSize
+                        icon: "󰑐"
+                        iconSize: Theme.fontSize
                         onClicked: root.fetchCalendar()
+                        implicitWidth: 26
+                        implicitHeight: 26
 
                         RotationAnimation on rotation {
                             from: 0
@@ -436,17 +413,10 @@ ExpandableModule {
                     }
 
                     // Google Calendar web shortcut
-                    ModuleButton {
+                    HeaderButton {
                         id: webBtn
-                        variant: "neutral"
-                        Layout.preferredWidth: 24
-                        Layout.preferredHeight: 24
-                        implicitWidth: 24
-                        implicitHeight: 24
-                        radius: Theme.cardButtonRadius
-                        cursorShape: Qt.PointingHandCursor
-                        label: "󰃭"
-                        textFont: Theme.fontSize + 1
+                        icon: "󰃭"
+                        iconSize: Theme.fontSize + 1
                         onClicked: calendarProc.running = true
                     }
                 }

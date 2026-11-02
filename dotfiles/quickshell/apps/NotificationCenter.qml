@@ -293,20 +293,16 @@ Item {
                                 spacing: 6
 
                                 // Button to toggle mute
-                                ModuleButton {
+                                HeaderButton {
                                     id: volMuteBtn
-                                    variant: SharedState.muted ? "red" : "neutral"
-                                    label: SharedState.muted ? "󰖁" : "󰕾"
-                                    textFont: 14
-                                    cursorShape: Qt.PointingHandCursor
+                                    icon: SharedState.muted ? "󰖁" : "󰕾"
+                                    iconColor: SharedState.muted ? Theme.statusRed : Theme.textPrimary
+                                    iconSize: 14
+                                    implicitHeight: 22
+                                    implicitWidth: 22
                                     onClicked: {
                                         SharedState.muted = !SharedState.muted
                                     }
-                                    implicitHeight: 22
-                                    implicitWidth: 22
-                                    radius: Theme.cardButtonRadius - 8
-                                    border.width: 1
-                                    Layout.alignment: Qt.AlignVCenter
                                 }
 
                                 StyledSlider {
@@ -340,21 +336,14 @@ Item {
                         }
 
                         // Button to toggle volume control expansion
-                        ModuleButton {
+                        HeaderButton {
                             id: volToggleBtn
-                            variant: !card.volExpanded ? (SharedState.muted ? "red" : "neutral") : "neutral"
-                            visible: true
-                            label: !card.volExpanded ? (SharedState.muted ? "󰖁" : "󰕾") : ""
-                            textFont: 14
-                            cursorShape: Qt.PointingHandCursor
+                            icon: !card.volExpanded ? (SharedState.muted ? "󰖁" : "󰕾") : ""
+                            iconColor: (!card.volExpanded && SharedState.muted) ? Theme.statusRed : Theme.textPrimary
+                            iconSize: 14
                             onClicked: {
                                 card.volExpanded = !card.volExpanded
                             }
-                            implicitHeight: 26
-                            implicitWidth: 26
-                            radius: Theme.cardButtonRadius
-                            border.width: 1
-                            Layout.alignment: Qt.AlignVCenter
                         }
                     }
                 ]

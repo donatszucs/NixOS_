@@ -646,45 +646,22 @@ ExpandableModule {
                         spacing: 6
 
                         // Previous Button
-                        ModuleButton {
+                        HeaderButton {
                             id: prevBtn
-                            variant: "neutral"
-                            cursorShape: nowPlayingModule.canPrev ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            textFont: 15
-                            Layout.preferredWidth: 28
-                            Layout.preferredHeight: 26
-                            Layout.alignment: Qt.AlignVCenter
-                            bottomLeftRadius: Theme.cardButtonRadius
-                            topLeftRadius: Theme.cardButtonRadius
-                            bottomRightRadius: 0
-                            topRightRadius: 0
-
-                            label: "󰙣"
-                            textColor: nowPlayingModule.canPrev ? Theme.textPrimary : Theme.statusDisabled
-                            opacity: nowPlayingModule.canPrev ? 1.0 : 0.45
-
+                            icon: "󰙣"
+                            iconSize: 15
+                            enabled: nowPlayingModule.canPrev
+                            iconColor: enabled ? Theme.textPrimary : Theme.statusDisabled
                             onClicked: nowPlayingModule.doPrevious()
                         }
 
                         // Next Button
-                        ModuleButton {
+                        HeaderButton {
                             id: nextBtn
-                            variant: "neutral"
-                            cursorShape: nowPlayingModule.canNext ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            textFont: 15
-                            Layout.preferredWidth: 28
-                            Layout.preferredHeight: 26
-                            Layout.alignment: Qt.AlignVCenter
-                            Layout.leftMargin: -6
-                            bottomRightRadius: Theme.cardButtonRadius
-                            topRightRadius: Theme.cardButtonRadius
-                            bottomLeftRadius: 0
-                            topLeftRadius: 0
-
-                            label: "󰙡"
-                            textColor: nowPlayingModule.canNext ? Theme.textPrimary : Theme.statusDisabled
-                            opacity: nowPlayingModule.canNext ? 1.0 : 0.45
-
+                            icon: "󰙡"
+                            iconSize: 15
+                            enabled: nowPlayingModule.canNext
+                            iconColor: enabled ? Theme.textPrimary : Theme.statusDisabled
                             onClicked: nowPlayingModule.doNext()
                         }
 

@@ -310,68 +310,13 @@ ExpandableModule {
             height: phoneBatteryBadge.implicitHeight
             anchors.verticalCenter: parent.verticalCenter
 
-            // Battery
-            Rectangle {
+            BatteryBadge {
                 id: phoneBatteryBadge
-                anchors.verticalCenter: parent.verticalCenter
-                readonly property real badgePaddingH: 7.5
-                implicitHeight: 18
-                implicitWidth: Math.round(batteryBadgeRow.implicitWidth + (badgePaddingH * 2))
-                radius: Math.round(implicitHeight / 2)
-                color: connectionsModule.phoneCharging
-                    ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, phoneMouseArea.containsMouse ? 0.22 : 0.14)
-                    : (connectionsModule.phoneBatteryPercent <= 20
-                        ? Qt.rgba(Theme.statusRed.r, Theme.statusRed.g, Theme.statusRed.b, phoneMouseArea.containsMouse ? 0.24 : 0.16)
-                        : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, phoneMouseArea.containsMouse ? 0.14 : 0.08))
-                border.width: 1
-                border.color: connectionsModule.phoneCharging
-                    ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, 0.45)
-                    : (connectionsModule.phoneBatteryPercent <= 20
-                        ? Qt.rgba(Theme.statusRed.r, Theme.statusRed.g, Theme.statusRed.b, 0.45)
-                        : Qt.rgba(1, 1, 1, 0.15))
-
-                Behavior on color { ColorAnimation { duration: 150 } }
-                Behavior on border.color { ColorAnimation { duration: 150 } }
-
-                Row {
-                    id: batteryBadgeRow
-                    anchors.centerIn: parent
-                    spacing: 3
-
-                    // Battery level icon / lightning glyph
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: connectionsModule.phoneCharging
-                            ? "󱐋"
-                            : connectionsModule.getPhoneBatteryIcon(connectionsModule.phoneBatteryPercent, false)
-                        color: connectionsModule.phoneCharging
-                            ? Theme.statusGreen
-                            : (connectionsModule.phoneBatteryPercent <= 20 ? Theme.statusRed : Theme.palettePaper)
-                        font.family: Theme.font
-                        font.pixelSize: connectionsModule.phoneCharging ? 10 : 11
-                        font.bold: connectionsModule.phoneCharging
-                    }
-
-                    // Battery percentage text
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: connectionsModule.phoneBatteryPercent + "%"
-                        color: connectionsModule.phoneCharging
-                            ? Theme.statusGreen
-                            : (connectionsModule.phoneBatteryPercent <= 20 ? Theme.statusRed : Theme.palettePaper)
-                        font.family: Theme.font
-                        font.pixelSize: 10
-                        font.bold: true
-                    }
-                }
-            }
-
-            MouseArea {
-                id: phoneMouseArea
-                anchors.fill: parent
-                anchors.margins: -4
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
+                anchors.centerIn: parent
+                badgeHeight: 18
+                percent: connectionsModule.phoneBatteryPercent
+                charging: connectionsModule.phoneCharging
+                useStatusColors: false
                 onClicked: {
                     connectionsModule.currentPage = 1
                     connectionsModule.expanded = true
@@ -548,22 +493,15 @@ ExpandableModule {
                 hasHeader: true
 
                 headerContent: [
-                    Text {
+                    HeaderButton {
                         id: netStatusIcon
-                        text: connectionsModule.netIcon
-                        color: connectionsModule.netColor
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize + 2
+                        icon: connectionsModule.netIcon
+                        iconColor: connectionsModule.netColor
+                        iconSize: Theme.fontSize + 2
                         anchors.left: parent.left
                         anchors.leftMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
-
-                        MouseArea {
-                            anchors.fill: parent
-                            anchors.margins: -5
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: netOpen.running = true
-                        }
+                        onClicked: netOpen.running = true
                     },
 
                     Text {
@@ -614,22 +552,15 @@ ExpandableModule {
                 hasHeader: true
 
                 headerContent: [
-                    Text {
+                    HeaderButton {
                         id: btStatusIcon
-                        text: connectionsModule.btIcon
-                        color: connectionsModule.btColor
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize + 2
+                        icon: connectionsModule.btIcon
+                        iconColor: connectionsModule.btColor
+                        iconSize: Theme.fontSize + 2
                         anchors.left: parent.left
                         anchors.leftMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
-
-                        MouseArea {
-                            anchors.fill: parent
-                            anchors.margins: -5
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: btOpen.running = true
-                        }
+                        onClicked: btOpen.running = true
                     },
 
                     Text {
@@ -878,15 +809,12 @@ ExpandableModule {
                                     Layout.alignment: Qt.AlignVCenter
                                     Layout.rightMargin: 6
 
-                                    ModuleButton {
+                                    BatteryBadge {
                                         id: pairedDeviceBatteryBtn
-                                        variant: "light"
                                         visible: modelData.batteryAvailable
-                                        label: Math.round(modelData.battery * 100) + "%"
-                                        radius: Theme.moduleEdgeRadius / 2
-                                        implicitHeight: 20
-                                        implicitWidth: label.length * (Theme.fontSize * 0.6) + 12
-                                        color: modelData.battery > 0.2 ? Theme.statusGreen : Theme.statusRed
+                                        badgeHeight: 20
+                                        percent: Math.round(modelData.battery * 100)
+                                        clickable: false
                                     }
 
                                     // Forget / Unpair button on hover
@@ -1153,12 +1081,11 @@ ExpandableModule {
                 hasHeader: true
 
                 headerContent: [
-                    Text {
+                    HeaderButton {
                         id: phoneHeaderIcon
-                        text: ""
-                        color: connectionsModule.phoneConnected ? Theme.palettePaper : Theme.statusDisabled
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize + 2
+                        icon: ""
+                        iconColor: connectionsModule.phoneConnected ? Theme.palettePaper : Theme.statusDisabled
+                        iconSize: Theme.fontSize + 2
                         anchors.left: parent.left
                         anchors.leftMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
@@ -1168,12 +1095,7 @@ ExpandableModule {
                             NumberAnimation { duration: 150 }
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            anchors.margins: -6
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: connectionsModule.triggerPhonePoll()
-                        }
+                        onClicked: connectionsModule.triggerPhonePoll()
                     },
 
                     Text {
@@ -1186,15 +1108,10 @@ ExpandableModule {
                         anchors.centerIn: parent
                     },
 
-                    ModuleButton {
+                    HeaderButton {
                         id: phoneSettingsBtn
-                        variant: "neutral"
-                        cursorShape: Qt.PointingHandCursor
-                        label: "󰒓"
-                        textFont: Theme.fontSize + 1
-                        implicitHeight: 26
-                        implicitWidth: 28
-                        radius: Theme.cardButtonRadius
+                        icon: "󰒓"
+                        iconSize: Theme.fontSize + 1
                         anchors.right: parent.right
                         anchors.rightMargin: 7
                         anchors.verticalCenter: parent.verticalCenter
@@ -1512,12 +1429,11 @@ ExpandableModule {
                 hasHeader: true
 
                 headerContent: [
-                    Text {
+                    HeaderButton {
                         id: mouseIcon
-                        text: "󰍽"
-                        color: connectionsModule.mouseBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize + 2
+                        icon: "󰍽"
+                        iconColor: connectionsModule.mouseBatteryAvailable ? Theme.palettePaper : Theme.statusDisabled
+                        iconSize: Theme.fontSize + 2
                         anchors.left: parent.left
                         anchors.leftMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
@@ -1527,12 +1443,7 @@ ExpandableModule {
                             NumberAnimation { duration: 150 }
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            anchors.margins: -6
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: connectionsModule.triggerMousePoll()
-                        }
+                        onClicked: connectionsModule.triggerMousePoll()
                     },
 
                     Text {
@@ -1545,23 +1456,15 @@ ExpandableModule {
                         anchors.centerIn: parent
                     },
 
-                    ModuleButton {
+                    BatteryBadge {
                         id: mouseBatteryBtn
-                        variant: "light"
                         visible: connectionsModule.mouseBatteryAvailable
-                        cursorShape: Qt.PointingHandCursor
-                        label: connectionsModule.mouseCharging
-                            ? ("󱐋 " + connectionsModule.mouseBatteryPercentLabel)
-                            : connectionsModule.mouseBatteryPercentLabel
-                        implicitHeight: 24
-                        implicitWidth: label.length * (Theme.fontSize * 0.6) + 16
-                        radius: Theme.cardButtonRadius
-                        color: connectionsModule.mouseCharging
-                            ? Theme.statusGreen
-                            : (connectionsModule.mouseBatteryPercent > 20 ? Theme.statusGreen : Theme.statusRed)
                         anchors.right: parent.right
                         anchors.rightMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
+                        badgeHeight: 22
+                        percent: connectionsModule.mouseBatteryPercent
+                        charging: connectionsModule.mouseCharging
                         onClicked: connectionsModule.triggerMousePoll()
                     }
                 ]

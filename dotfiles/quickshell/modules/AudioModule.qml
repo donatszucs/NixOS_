@@ -185,30 +185,16 @@ ExpandableModule {
                     headerTitle: "Output Devices"
 
                     headerControls: [
-                        ModuleButton {
-                            variant: "neutral"
-                            label: ""
-                            textFont: 14
-                            cursorShape: Qt.PointingHandCursor
+                        HeaderButton {
+                            icon: ""
+                            iconSize: 15
                             onClicked: testSoundProcess.running = true
-                            implicitHeight: 26
-                            implicitWidth: 26
-                            radius: Theme.cardButtonRadius
-                            border.width: 1
-                            Layout.alignment: Qt.AlignVCenter
                         },
 
-                        ModuleButton {
-                            variant: "neutral"
-                            label: "󰓃"
-                            textFont: 14
-                            cursorShape: Qt.PointingHandCursor
+                        HeaderButton {
+                            icon: "󰓃"
+                            iconSize: 15
                             onClicked: pavu.running = true
-                            implicitHeight: 26
-                            implicitWidth: 26
-                            radius: Theme.cardButtonRadius
-                            border.width: 1
-                            Layout.alignment: Qt.AlignVCenter
                         }
                     ]
 
@@ -383,24 +369,18 @@ ExpandableModule {
                     headerTitle: "Input Devices"
 
                     headerControls: [
-                        ModuleButton {
+                        HeaderButton {
                             property var pwSourceAudio: Pipewire.defaultAudioSource ? Pipewire.defaultAudioSource.audio : null
                             property bool isMuted: pwSourceAudio ? pwSourceAudio.muted : false
 
-                            variant: isMuted ? "red" : "neutral"
-                            label: isMuted ? "" : ""
-                            textFont: 14
-                            cursorShape: Qt.PointingHandCursor
+                            icon: isMuted ? "" : ""
+                            iconColor: isMuted ? Theme.statusRed : Theme.textPrimary
+                            iconSize: 15
                             onClicked: {
                                 if (pwSourceAudio) {
                                     pwSourceAudio.muted = !pwSourceAudio.muted
                                 }
                             }
-                            implicitHeight: 26
-                            implicitWidth: 26
-                            radius: Theme.cardButtonRadius
-                            border.width: 1
-                            Layout.alignment: Qt.AlignVCenter
                         }
                     ]
 

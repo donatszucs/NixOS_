@@ -94,17 +94,13 @@ ExpandableModule {
                     Layout.alignment: Qt.AlignVCenter
                 },
 
-                ModuleButton {
-                    variant: SharedState.lightActive ? "light" : "neutral"
-                    label: SharedState.lightActive ? "󱩒" : "󱩎"
-                    textFont: 14
-                    cursorShape: Qt.PointingHandCursor
+                HeaderButton {
+                    icon: SharedState.lightActive ? "󱩒" : "󱩎"
+                    iconColor: SharedState.lightActive ? Theme.paletteYellow : Theme.statusDisabled
+                    iconSize: 15
                     onClicked: SharedState.toggleLight()
-                    implicitHeight: 26
-                    implicitWidth: 26
-                    radius: Theme.cardButtonRadius
-                    border.width: 1
-                    Layout.alignment: Qt.AlignVCenter
+                    hasBorder: hovered || pressed
+                    horizontalPadding: 8
                 }
             ]
 
