@@ -18,6 +18,7 @@ ExpandableModule {
     readonly property bool   isUpdating:     SharedState.weatherUpdating
     readonly property var    hourlyForecast: SharedState.weatherHourlyForecast
     readonly property var    dailyForecast:  SharedState.weatherDailyForecast
+    readonly property string timeAgoText:    SharedState.weatherTimeAgo
 
     function fetchWeather() {
         SharedState.fetchWeather()
@@ -128,6 +129,21 @@ ExpandableModule {
                 id: popupCol
                 width: parent.width
                 spacing: 10
+
+                ModuleButton {
+                    id: updateBtn
+                    Layout.fillWidth: true
+                    implicitHeight: 30
+                    radius: Theme.cardButtonRadius
+                    variant: root.isUpdating ? "light" : "neutral"
+                    label: root.isUpdating
+                        ? "󰑐  Updating..."
+                        : (root.timeAgoText !== "" ? "󰑐  Update Forecast (" + root.timeAgoText + ")" : "󰑐  Update Forecast")
+                    textFont: Theme.fontSize - 1
+                    cursorShape: root.isUpdating ? Qt.ArrowCursor : Qt.PointingHandCursor
+                    enabled: !root.isUpdating
+                    onClicked: root.fetchWeather()
+                }
 
                 BaseCard {
                     id: hourlyCard
@@ -574,19 +590,6 @@ ExpandableModule {
                             }
                         }
                     }
-                }
-
-                ModuleButton {
-                    id: updateBtn
-                    Layout.fillWidth: true
-                    implicitHeight: 30
-                    radius: Theme.cardButtonRadius
-                    variant: root.isUpdating ? "light" : "neutral"
-                    label: root.isUpdating ? "󰑐  Updating..." : "󰑐  Update Forecast"
-                    textFont: Theme.fontSize - 1
-                    cursorShape: root.isUpdating ? Qt.ArrowCursor : Qt.PointingHandCursor
-                    enabled: !root.isUpdating
-                    onClicked: root.fetchWeather()
                 }
             }
         }

@@ -376,7 +376,8 @@ Item {
     property bool weatherIsDay: true
     property bool weatherLoaded: false
     property bool weatherUpdating: false
-    property bool weatherFetchFinished: true
+    property double weatherLastUpdated: 0
+    property string weatherTimeAgo: ""
     property var weatherHourlyForecast: []
     property var weatherDailyForecast: []
 
@@ -393,8 +394,6 @@ Item {
     function fetchWeather() {
         if (root.weatherUpdating) return
         root.weatherUpdating = true
-        root.weatherFetchFinished = false
-        weatherUpdateMinTimer.restart()
         weatherFetchProc.running = false
         weatherFetchProc.running = true
     }
@@ -404,95 +403,150 @@ Item {
         if (!text || text.trim() === "") return
         try {
             var data = JSON.parse(text)
-            var cur  = data.current
-            root.weatherTemperature = Math.round(cur.temperature_2m)
+            if (!data || data.error || !data.current) {
+                if (data && data.reason) {
+                    console.warn("SharedState (Weather): API response contains error:", data.reason)
+                }
+                return
+            }
+            var cur = data.current
+            if (cur.temperature_2m !== undefined) {
+                root.weatherTemperature = Math.round(cur.temperature_2m)
+            }
             root.weatherIsDay       = cur.is_day === 1
-            var wmo = cur.weather_code
+            var wmo = cur.weather_code !== undefined ? cur.weather_code : 0
             root.weatherIcon = root.wmoIcon(wmo, root.weatherIsDay)
             root.weatherDesc = root.wmoDesc(wmo)
 
             // Parse hourly
             var h = data.hourly
-            var hData = []
-            var nowTime = new Date().getTime()
-            var startIndex = 0
-            for (var i = 0; i < h.time.length; i++) {
-                var tzTime = new Date(h.time[i]) 
-                if (tzTime.getTime() > nowTime) {
-                    startIndex = i
-                    break
+            if (h && h.time && h.temperature_2m && h.weather_code && h.is_day) {
+                var hData = []
+                var nowTime = new Date().getTime()
+                var startIndex = 0
+                for (var i = 0; i < h.time.length; i++) {
+                    var tzTime = new Date(h.time[i]) 
+                    if (tzTime.getTime() > nowTime) {
+                        startIndex = i
+                        break
+                    }
                 }
-            }
-            for (var j = 0; j < 25; j++) {
-                var idx = startIndex + j
-                if (idx < h.time.length) {
-                    var t = new Date(h.time[idx])
-                    var hrs = t.getHours().toString().padStart(2, '0')
-                    var mins = t.getMinutes().toString().padStart(2, '0')
-                    hData.push({
-                        time: hrs + ":" + mins,
-                        temp: Math.round(h.temperature_2m[idx]),
-                        icon: root.wmoIcon(h.weather_code[idx], h.is_day[idx] === 1)
-                    })
+                for (var j = 0; j < 25; j++) {
+                    var idx = startIndex + j
+                    if (idx < h.time.length && h.temperature_2m[idx] !== undefined) {
+                        var t = new Date(h.time[idx])
+                        var hrs = t.getHours().toString().padStart(2, '0')
+                        var mins = t.getMinutes().toString().padStart(2, '0')
+                        hData.push({
+                            time: hrs + ":" + mins,
+                            temp: Math.round(h.temperature_2m[idx]),
+                            icon: root.wmoIcon(h.weather_code[idx], h.is_day[idx] === 1)
+                        })
+                    }
                 }
+                root.weatherHourlyForecast = hData
             }
-            root.weatherHourlyForecast = hData
 
             // Parse daily
             var d = data.daily
-            var dData = []
-            var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-            for (var k = 0; k < d.time.length; k++) {
-                var date = new Date(d.time[k])
-                var dayName = (k === 2) ? "Today" : days[date.getDay()]
-                var dateStr = date.getDate() + " " + months[date.getMonth()]
-                dData.push({
-                    day: dayName,
-                    date: dateStr,
-                    icon: root.wmoIcon(d.weather_code[k], true),
-                    maxTemp: Math.round(d.temperature_2m_max[k]),
-                    minTemp: Math.round(d.temperature_2m_min[k])
-                })
+            if (d && d.time && d.temperature_2m_max && d.temperature_2m_min && d.weather_code) {
+                var dData = []
+                var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+                var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                for (var k = 0; k < d.time.length; k++) {
+                    var date = new Date(d.time[k])
+                    var dayName = (k === 2) ? "Today" : days[date.getDay()]
+                    var dateStr = date.getDate() + " " + months[date.getMonth()]
+                    dData.push({
+                        day: dayName,
+                        date: dateStr,
+                        icon: root.wmoIcon(d.weather_code[k], true),
+                        maxTemp: Math.round(d.temperature_2m_max[k]),
+                        minTemp: Math.round(d.temperature_2m_min[k])
+                    })
+                }
+                root.weatherDailyForecast = dData
             }
-            root.weatherDailyForecast = dData
             root.weatherLoaded = true
         } catch (e) {
             console.warn("SharedState (Weather): JSON parse error", e)
         }
     }
 
+    // Single unified weather timer: updates relative time display every 30s
+    // and triggers a background fetch if 10 minutes have elapsed
     Timer {
-        id: weatherRefreshTimer
-        interval: 600000   // 10 minutes
+        id: weatherTimer
+        interval: 30000   // 30 seconds
         running: true
         repeat: true
-        onTriggered: root.fetchWeather()
+        onTriggered: {
+            root.updateWeatherTimeAgo()
+            if (Date.now() - root.weatherLastUpdated >= 600000) {
+                root.fetchWeather()
+            }
+        }
     }
 
-    Timer {
-        id: weatherUpdateMinTimer
-        interval: 1000
-        running: false
-        repeat: false
-        onTriggered: {
-            if (root.weatherFetchFinished) {
-                root.weatherUpdating = false
-            }
+    function updateWeatherTimeAgo() {
+        if (!root.weatherLastUpdated || root.weatherLastUpdated <= 0) {
+            root.weatherTimeAgo = ""
+            return
+        }
+        var diffSec = Math.floor((Date.now() - root.weatherLastUpdated) / 1000)
+        if (diffSec < 0) diffSec = 0
+        if (diffSec < 45) {
+            root.weatherTimeAgo = "just now"
+        } else if (diffSec < 3600) {
+            root.weatherTimeAgo = Math.floor(diffSec / 60) + "m ago"
+        } else if (diffSec < 86400) {
+            var h = Math.floor(diffSec / 3600)
+            var m = Math.floor((diffSec % 3600) / 60)
+            root.weatherTimeAgo = h + "h" + (m > 0 ? " " + m + "m" : "") + " ago"
+        } else {
+            root.weatherTimeAgo = Math.floor(diffSec / 86400) + "d ago"
         }
     }
 
     Process {
         id: weatherFetchProc
-        command: ["curl", "-s", root.weatherApiUrl, "-o", "/tmp/weather.json"]
+        command: [
+            "sh", "-c",
+            "curl -sf --max-time 15 '" + root.weatherApiUrl + "' -o /tmp/weather.json.tmp && " +
+            "grep -q '\"current\"' /tmp/weather.json.tmp && " +
+            "mv /tmp/weather.json.tmp /tmp/weather.json && " +
+            "date +%s > /tmp/weather_updated_at.txt || rm -f /tmp/weather.json.tmp"
+        ]
         onRunningChanged: {
             if (!running) {
-                root.weatherFetchFinished = true
-                if (!weatherUpdateMinTimer.running) {
-                    root.weatherUpdating = false
-                }
+                root.weatherUpdating = false
                 weatherJsonFile.reload()
+                weatherUpdatedFile.reload()
+                root.readWeatherLastUpdated()
                 root.parseWeatherJson()
+                root.updateWeatherTimeAgo()
+            }
+        }
+    }
+
+    FileView {
+        id: weatherUpdatedFile
+        path: "/tmp/weather_updated_at.txt"
+        blockLoading: false
+        watchChanges: true
+        onLoaded: root.readWeatherLastUpdated()
+        onFileChanged: root.readWeatherLastUpdated()
+        onTextChanged: root.readWeatherLastUpdated()
+    }
+
+    function readWeatherLastUpdated() {
+        var txt = weatherUpdatedFile.text()
+        if (txt && txt.trim() !== "") {
+            var val = parseInt(txt.trim(), 10)
+            if (!isNaN(val) && val > 0) {
+                root.weatherLastUpdated = val * 1000
+                root.updateWeatherTimeAgo()
+                return
             }
         }
     }
@@ -608,6 +662,7 @@ Item {
     }
 
     Component.onCompleted: {
+        root.readWeatherLastUpdated()
         root.parseWeatherJson()
         root.fetchWeather()
         root.reloadCalendarEventsFromJson()

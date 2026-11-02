@@ -297,7 +297,7 @@ Item {
                                     id: volMuteBtn
                                     icon: SharedState.muted ? "󰖁" : "󰕾"
                                     iconColor: SharedState.muted ? Theme.statusRed : Theme.textPrimary
-                                    iconSize: 14
+                                    iconSize: 17
                                     implicitHeight: 22
                                     implicitWidth: 22
                                     onClicked: {
@@ -340,7 +340,7 @@ Item {
                             id: volToggleBtn
                             icon: !card.volExpanded ? (SharedState.muted ? "󰖁" : "󰕾") : ""
                             iconColor: (!card.volExpanded && SharedState.muted) ? Theme.statusRed : Theme.textPrimary
-                            iconSize: 14
+                            iconSize: 17
                             onClicked: {
                                 card.volExpanded = !card.volExpanded
                             }

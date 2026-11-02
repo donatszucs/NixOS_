@@ -646,22 +646,45 @@ ExpandableModule {
                         spacing: 6
 
                         // Previous Button
-                        HeaderButton {
+                        ModuleButton {
                             id: prevBtn
-                            icon: "󰙣"
-                            iconSize: 15
-                            enabled: nowPlayingModule.canPrev
-                            iconColor: enabled ? Theme.textPrimary : Theme.statusDisabled
+                            variant: "dark"
+                            cursorShape: nowPlayingModule.canPrev ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            textFont: 15
+                            Layout.preferredWidth: 28
+                            Layout.preferredHeight: 26
+                            Layout.alignment: Qt.AlignVCenter
+                            bottomLeftRadius: Theme.cardButtonRadius
+                            topLeftRadius: Theme.cardButtonRadius
+                            bottomRightRadius: 0
+                            topRightRadius: 0
+
+                            label: "󰙣"
+                            textColor: nowPlayingModule.canPrev ? Theme.textPrimary : Theme.statusDisabled
+                            opacity: nowPlayingModule.canPrev ? 1.0 : 0.45
+
                             onClicked: nowPlayingModule.doPrevious()
                         }
 
                         // Next Button
-                        HeaderButton {
+                        ModuleButton {
                             id: nextBtn
-                            icon: "󰙡"
-                            iconSize: 15
-                            enabled: nowPlayingModule.canNext
-                            iconColor: enabled ? Theme.textPrimary : Theme.statusDisabled
+                            variant: "dark"
+                            cursorShape: nowPlayingModule.canNext ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            textFont: 15
+                            Layout.preferredWidth: 28
+                            Layout.preferredHeight: 26
+                            Layout.alignment: Qt.AlignVCenter
+                            Layout.leftMargin: -6
+                            bottomRightRadius: Theme.cardButtonRadius
+                            topRightRadius: Theme.cardButtonRadius
+                            bottomLeftRadius: 0
+                            topLeftRadius: 0
+
+                            label: "󰙡"
+                            textColor: nowPlayingModule.canNext ? Theme.textPrimary : Theme.statusDisabled
+                            opacity: nowPlayingModule.canNext ? 1.0 : 0.45
+
                             onClicked: nowPlayingModule.doNext()
                         }
 
@@ -882,12 +905,12 @@ ExpandableModule {
                     RowLayout {
                         id: middleControls
                         anchors.top: parent.top
-                        anchors.topMargin: 8
+                        anchors.topMargin: 10
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.leftMargin: 14
+                        anchors.leftMargin: 10
                         anchors.rightMargin: 14
-                        height: 46
+                        height: 56
                         spacing: 10
 
                         // Play / Pause Button (standard "light" / "neutral" module palette, borderless, high opacity)
@@ -905,12 +928,12 @@ ExpandableModule {
                                 ? Qt.rgba(pal.pressed.r, pal.pressed.g, pal.pressed.b, 0.98)
                                 : Qt.tint(Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.92), Qt.rgba(1, 1, 1, 0.16))
                             cursorShape: Qt.PointingHandCursor
-                            textFont: 30
-                            Layout.preferredWidth: 46
-                            Layout.preferredHeight: 46
+                            textFont: 35
+                            Layout.preferredWidth: 56
+                            Layout.preferredHeight: 56
                             Layout.alignment: Qt.AlignVCenter
                             Layout.fillWidth: false
-                            radius: 23
+                            radius: 28
                             clip: true
 
                             label: nowPlayingModule.playPauseIcon
