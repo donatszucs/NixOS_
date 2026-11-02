@@ -1,8 +1,7 @@
-diff --git a/drw.c b/drw.c
-index 89ec8d8..c83869a 100644
---- a/drw.c
-+++ b/drw.c
-@@ -233,6 +233,46 @@ drw_over_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+diff -u -r -N --strip-trailing-cr a/drw.c b/drw.c
+--- a/drw.c	2026-11-02 08:08:37.431564599 +0100
++++ b/drw.c	2026-11-02 08:08:45.962915976 +0100
+@@ -233,6 +233,46 @@
      drw_do_rectangle(d, color, x, y, w, h, true, rounding);
  }
  
@@ -49,11 +48,10 @@ index 89ec8d8..c83869a 100644
  uint32_t
  setup_buffer(struct drwsurf *drwsurf, struct drwbuf *drwbuf)
  {
-diff --git a/drw.h b/drw.h
-index 060cb00..17c19e5 100644
---- a/drw.h
-+++ b/drw.h
-@@ -49,6 +49,9 @@ void drw_fill_rectangle(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
+diff -u -r -N --strip-trailing-cr a/drw.h b/drw.h
+--- a/drw.h	2026-11-02 08:08:37.431591731 +0100
++++ b/drw.h	2026-11-02 08:08:57.760629977 +0100
+@@ -49,6 +49,9 @@
                          uint32_t w, uint32_t h, int rounding);
  void drw_over_rectangle(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
                          uint32_t w, uint32_t h, int rounding);
@@ -63,11 +61,10 @@ index 060cb00..17c19e5 100644
  
  void drw_draw_text(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
                     uint32_t w, uint32_t h, uint32_t b, const char *label,
-diff --git a/keyboard.c b/keyboard.c
-index 8950fd0..0130d94 100644
---- a/keyboard.c
-+++ b/keyboard.c
-@@ -202,12 +202,35 @@ kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list,
+diff -u -r -N --strip-trailing-cr a/keyboard.c b/keyboard.c
+--- a/keyboard.c	2026-11-02 08:08:37.431650044 +0100
++++ b/keyboard.c	2026-11-02 08:09:26.907410346 +0100
+@@ -205,12 +205,35 @@
  }
  
  void
@@ -106,7 +103,7 @@ index 8950fd0..0130d94 100644
  
      struct key *k = l->keys;
      double rowlength = kbd_get_row_length(k);
-@@ -215,16 +238,16 @@ kbd_init_layout(struct layout *l, uint32_t width, uint32_t height)
+@@ -218,16 +241,16 @@
      while (k->type != Last) {
          if (k->type == EndRow) {
              y += l->keyheight;
@@ -126,20 +123,25 @@ index 8950fd0..0130d94 100644
                  k->w++;
                  x++;
              }
-@@ -694,7 +717,11 @@ kbd_draw_layout(struct kbd *kb)
+@@ -708,12 +731,12 @@
      if (kb->debug)
          fprintf(stderr, "Draw layout\n");
  
--    drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
+-    if (kb->corner_radius > 0) {
+-        drw_do_clear(d, 0, 0, kb->w, kb->h);
+-        drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, kb->corner_radius);
+-    } else {
+-        drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
 +    drw_do_clear(d, 0, 0, kb->w, kb->h);
 +    if (kb->shadow) {
 +        drw_draw_shadow(d, kb->card_x, kb->card_y, kb->card_w, kb->card_h, 18, 16, 5, 0.55);
-+    }
-+    drw_fill_rectangle(d, kb->schemes[0].bg, kb->card_x, kb->card_y, kb->card_w, kb->card_h, kb->schemes[0].rounding > 0 ? 18 : 0);
+     }
++    int bg_radius = kb->corner_radius > 0 ? kb->corner_radius : (kb->schemes[0].rounding > 0 ? 18 : 0);
++    drw_fill_rectangle(d, kb->schemes[0].bg, kb->card_x, kb->card_y, kb->card_w, kb->card_h, bg_radius);
  
      while (next_key->type != Last) {
          if ((next_key->type == Pad) || (next_key->type == EndRow)) {
-@@ -728,7 +755,7 @@ kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount)
+@@ -747,7 +770,7 @@
                  fprintf(stderr, "Initialising unnamed layout %d, keymap %s\n",
                          i, layouts[i].keymap_name);
          }
@@ -148,20 +150,19 @@ index 8950fd0..0130d94 100644
      }
      kbd_draw_layout(kb);
  }
-diff --git a/keyboard.h b/keyboard.h
-index e39f6cf..5682d9d 100644
---- a/keyboard.h
-+++ b/keyboard.h
-@@ -101,6 +101,8 @@ struct kbd {
+diff -u -r -N --strip-trailing-cr a/keyboard.h b/keyboard.h
+--- a/keyboard.h	2026-11-02 08:08:37.431708978 +0100
++++ b/keyboard.h	2026-11-02 08:09:06.538163914 +0100
+@@ -103,6 +103,8 @@
  
  	bool print;
  	bool print_intersect;
 +	bool shadow;
 +	uint32_t card_x, card_y, card_w, card_h;
  	uint32_t w, h;
+ 	int corner_radius;
  	double scale;
- 	double preferred_scale, preferred_fractional_scale;
-@@ -135,7 +137,7 @@ void draw_over_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
+@@ -139,7 +141,7 @@
  
  void kbd_init(struct kbd *kb, struct layout *layouts,
                char *layer_names_list, char *landscape_layer_names_list);
@@ -170,41 +171,42 @@ index e39f6cf..5682d9d 100644
  struct key *kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y);
  size_t kbd_get_layer_index(struct kbd *kb, struct layout *l);
  void kbd_unpress_key(struct kbd *kb, uint32_t time);
-diff --git a/main.c b/main.c
-index 765abda..2aa0e38 100644
---- a/main.c
-+++ b/main.c
-@@ -74,6 +74,7 @@ static uint32_t height, normal_height, landscape_height;
- static int rounding = DEFAULT_ROUNDING;
- static bool hidden = false;
- static bool im_auto = false;
-+static uint32_t custom_width = 0;
- 
- /* event handler prototypes */
- static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
-@@ -565,8 +566,19 @@ redimension_keyboard()
+diff -u -r -N --strip-trailing-cr a/main.c b/main.c
+--- a/main.c	2026-11-02 08:08:37.432078380 +0100
++++ b/main.c	2026-11-02 08:10:45.559283001 +0100
+@@ -573,14 +573,25 @@
          height = normal_height;
      }
  
--    keyboard.w = available_width;
--    keyboard.h = height;
+-    if (custom_width > 0) {
+-        keyboard.w = custom_width;
+-    } else if (dock_mode != DOCK_FULL) {
+-        keyboard.w = (uint32_t)((double)available_width * width_ratio);
 +    if (custom_width > 0 && custom_width < available_width) {
 +        keyboard.shadow = true;
 +        keyboard.w = custom_width + 32;
 +        keyboard.h = height + 32;
 +        anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
-+    } else {
+     } else {
+-        keyboard.w = available_width;
 +        keyboard.shadow = false;
-+        keyboard.w = available_width;
++        if (custom_width > 0) {
++            keyboard.w = custom_width;
++        } else if (dock_mode != DOCK_FULL) {
++            keyboard.w = (uint32_t)((double)available_width * width_ratio);
++        } else {
++            keyboard.w = available_width;
++        }
 +        keyboard.h = height;
 +        anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
 +                 ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
 +                 ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
-+    }
+     }
+-    keyboard.h = height;
      keyboard.layout = &keyboard.layouts[layer];
      keyboard.layer_index = 0;
      keyboard.prevlayout = keyboard.layout;
-@@ -663,6 +675,7 @@ usage(char *argv0)
+@@ -677,6 +688,7 @@
              "  -O          - Print intersected keys to standard output\n");
      fprintf(stderr, "  -H [int]    - Height in pixels\n");
      fprintf(stderr, "  -L [int]    - Landscape height in pixels\n");
@@ -212,13 +214,23 @@ index 765abda..2aa0e38 100644
      fprintf(stderr, "  -R [int]    - Rounding radius in pixels\n");
      fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
      fprintf(stderr, "  --hidden    - Start hidden (send SIGUSR2 to show)\n");
-@@ -787,8 +800,12 @@ show()
-     layer_surface = zwlr_layer_shell_v1_get_layer_surface(
-         layer_shell, draw_surf.surf, current_output_data, layer, namespace);
+@@ -819,7 +831,9 @@
  
--    zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
-+    uint32_t set_w = (custom_width > 0 && custom_width < available_width) ? keyboard.w : 0;
-+    zwlr_layer_surface_v1_set_size(layer_surface, set_w, keyboard.h);
+     anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
+     uint32_t req_w = 0;
+-    if (dock_mode == DOCK_LEFT) {
++    if (custom_width > 0 && custom_width < available_width) {
++        req_w = keyboard.w;
++    } else if (dock_mode == DOCK_LEFT) {
+         anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT;
+         req_w = keyboard.w;
+     } else if (dock_mode == DOCK_RIGHT) {
+@@ -829,8 +843,11 @@
+         anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
+         req_w = 0;
+     }
+-    zwlr_layer_surface_v1_set_size(layer_surface, req_w, height);
++    zwlr_layer_surface_v1_set_size(layer_surface, req_w, keyboard.h);
      zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
 +    if (custom_width > 0 && custom_width < available_width) {
 +        zwlr_layer_surface_v1_set_margin(layer_surface, 0, 0, 10, 0);
@@ -226,7 +238,7 @@ index 765abda..2aa0e38 100644
      if (keyboard.exclusive) {
          zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
      }
-@@ -870,6 +887,8 @@ main(int argc, char **argv)
+@@ -912,6 +929,8 @@
          normal_height = atoi(tmp);
      if ((tmp = getenv("WVKBD_LANDSCAPE_HEIGHT")))
          landscape_height = atoi(tmp);
@@ -235,16 +247,12 @@ index 765abda..2aa0e38 100644
  
      /* keyboard settings */
      keyboard.layers = (enum layout_id *)&layers;
-@@ -1020,6 +1039,12 @@ main(int argc, char **argv)
+@@ -1152,7 +1171,7 @@
                  exit(1);
              }
-             height = landscape_height = atoi(argv[++i]);
-+        } else if (!strcmp(argv[i], "-W") || !strcmp(argv[i], "--width")) {
-+            if (i >= argc - 1) {
-+                usage(argv[0]);
-+                exit(1);
-+            }
-+            custom_width = atoi(argv[++i]);
-         } else if (!strcmp(argv[i], "-R")) {
+             corner_radius = atoi(argv[++i]);
+-        } else if (!strcmp(argv[i], "--width")) {
++        } else if ((!strcmp(argv[i], "-W")) || (!strcmp(argv[i], "--width"))) {
              if (i >= argc - 1) {
                  usage(argv[0]);
+                 exit(1);
