@@ -114,6 +114,7 @@
     overskride
     nixfmt
     clinfo # OpenCL device diagnostic tool
+    yazi # file manager for Wayland
 
     # -- Applications --
     caprine-bin

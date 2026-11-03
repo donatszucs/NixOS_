@@ -4,7 +4,7 @@
 -- VARIABLES
 -- ==========================================
 local terminal = "kitty"
-local fileManager = "thunar"
+local fileManager = terminal .. " -e yazi"
 -- Escaping the quotes properly for the bash command
 local menu = "bash -c 'quickshell ipc call launcher-$(hyprctl activeworkspace -j | jq -r \".monitor\") toggle'"
 local mainMod = "SUPER"
