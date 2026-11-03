@@ -216,10 +216,8 @@ ExpandableModule {
     // ── Collapsed Content inside headerPill ──────────────────────
     RowLayout {
         id: clockContent
-        parent: root.headerPill
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.top
-        anchors.verticalCenterOffset: Math.round(Theme.moduleHeight / 2)
+        parent: root.headerPill.pill
+        anchors.centerIn: parent
         spacing: 10
         z: 6
         visible: opacity > 0

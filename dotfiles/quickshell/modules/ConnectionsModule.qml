@@ -241,11 +241,10 @@ ExpandableModule {
     // Collapsed content inside the base pill
     Row {
         id: labelRow
-        parent: connectionsModule.headerPill
+        parent: connectionsModule.headerPill.pill
         anchors.left: parent.left
-        anchors.leftMargin: connectionsModule.collapsedPaddingLeft
-        anchors.verticalCenter: parent.top
-        anchors.verticalCenterOffset: Math.round(Theme.moduleHeight / 2)
+        anchors.leftMargin: connectionsModule.collapsedInnerPaddingLeft
+        anchors.verticalCenter: parent.verticalCenter
         height: implicitHeight
         spacing: connectionsModule.collapsedSpacing
         z: 6
@@ -259,48 +258,22 @@ ExpandableModule {
             NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
 
-        Item {
-            width: netIconText.implicitWidth
-            height: netIconText.implicitHeight
+        Text {
+            id: netIconText
+            text: connectionsModule.netIcon
+            color: connectionsModule.netColor
+            font.family: Theme.font
+            font.pixelSize: Theme.fontSize + 1
             anchors.verticalCenter: parent.verticalCenter
-            Text {
-                id: netIconText
-                text: connectionsModule.netIcon
-                color: connectionsModule.netColor
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize + 1
-            }
-            MouseArea {
-                anchors.fill: parent
-                anchors.margins: -4
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    connectionsModule.currentPage = 0
-                    connectionsModule.expanded = true
-                }
-            }
         }
 
-        Item {
-            width: btIconText.implicitWidth
-            height: btIconText.implicitHeight
+        Text {
+            id: btIconText
+            text: connectionsModule.btIcon
+            color: connectionsModule.btColor
+            font.family: Theme.font
+            font.pixelSize: Theme.fontSize + 1
             anchors.verticalCenter: parent.verticalCenter
-            Text {
-                id: btIconText
-                text: connectionsModule.btIcon
-                color: connectionsModule.btColor
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize + 1
-            }
-            MouseArea {
-                anchors.fill: parent
-                anchors.margins: -4
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    connectionsModule.currentPage = 0
-                    connectionsModule.expanded = true
-                }
-            }
         }
 
         Item {
@@ -317,10 +290,7 @@ ExpandableModule {
                 percent: connectionsModule.phoneBatteryPercent
                 charging: connectionsModule.phoneCharging
                 useStatusColors: false
-                onClicked: {
-                    connectionsModule.currentPage = 1
-                    connectionsModule.expanded = true
-                }
+                clickable: false
             }
         }
     }

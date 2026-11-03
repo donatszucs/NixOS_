@@ -503,6 +503,8 @@ ExpandableModule {
             : 0
         spacing: nowPlayingModule.expanded ? 8 : (nowPlayingModule.showPlayerIcon ? 6 : 0)
         z: 10
+        transformOrigin: Item.Center
+        scale: nowPlayingModule.headerPill.pillScale
 
         layer.enabled: true
         layer.effect: MultiEffect {
@@ -641,7 +643,7 @@ ExpandableModule {
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 10
+                        anchors.leftMargin: 8
                         anchors.rightMargin: 12
                         spacing: 6
 
@@ -905,10 +907,10 @@ ExpandableModule {
                     RowLayout {
                         id: middleControls
                         anchors.top: parent.top
-                        anchors.topMargin: 10
+                        anchors.topMargin: 8
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.leftMargin: 10
+                        anchors.leftMargin: 8
                         anchors.rightMargin: 14
                         height: 56
                         spacing: 10

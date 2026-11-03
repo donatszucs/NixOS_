@@ -4,6 +4,16 @@ import QtQuick.Effects
 
 ModuleButton {
     id: root
+    clip: false
+
+    // ── Pill Scale & Hover/Press Animation (matching HeaderButton) ───
+    property bool hasScaleAnimation: true
+    property real normalScale: 1.0
+    property real hoverScale: 1.02
+    property real pressedScale: 0.90
+
+    property alias pill: pillBg
+    readonly property real pillScale: pillBg.scale
 
     property real percent: 100
     property bool animatePercent: true
@@ -84,6 +94,15 @@ ModuleButton {
         topRightRadius: root.pillTopRightRadius
         bottomLeftRadius: root.pillBottomLeftRadius
         bottomRightRadius: root.pillBottomRightRadius
+
+        transformOrigin: Item.Center
+        scale: (!root.enabled || root.openBottom || !root.hasScaleAnimation)
+            ? root.normalScale
+            : (root.pressed ? root.pressedScale : (root.hovered ? root.hoverScale : root.normalScale))
+
+        Behavior on scale {
+            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+        }
 
         gradient: Gradient {
             orientation: Gradient.Vertical

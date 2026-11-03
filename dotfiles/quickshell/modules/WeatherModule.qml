@@ -52,10 +52,8 @@ ExpandableModule {
     // Collapsed content inside the base pill
     RowLayout {
         id: pillContent
-        parent: root.headerPill
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.top
-        anchors.verticalCenterOffset: Math.round(Theme.moduleHeight / 2)
+        parent: root.headerPill.pill
+        anchors.centerIn: parent
         spacing: 8
         z: 6
 

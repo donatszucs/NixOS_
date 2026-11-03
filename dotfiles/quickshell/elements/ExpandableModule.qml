@@ -461,6 +461,8 @@ ModuleButton {
         noHoverColorChange: true
         noPressColorChange: true
 
+        hovered: _headerPillHover.hovered || root.hovered
+
         x: root.contentVisible ? _overlay.x : 0
         y: root.expanded ? Theme.moduleHeight : 0
         width: root.contentVisible ? _overlay.width : root.width
@@ -505,11 +507,8 @@ ModuleButton {
 
             onPressedChanged: {
                 var isPressed = pressed && (pressedButtons & Qt.LeftButton)
-                if (!root.expanded) {
-                    root.pressed = isPressed
-                } else {
-                    _headerPill.pressed = isPressed
-                }
+                root.pressed = isPressed
+                _headerPill.pressed = isPressed
             }
             onClicked: (mouse) => {
                 if (mouse.button === Qt.RightButton) {
