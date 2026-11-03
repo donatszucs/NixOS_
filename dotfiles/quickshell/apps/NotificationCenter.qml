@@ -308,7 +308,7 @@ Item {
                                 StyledSlider {
                                     Layout.fillWidth: true
                                     sliderHeight: 24
-                                    radius: Theme.cardButtonRadius - 8
+                                    radius: Theme.cardButtonRadius - 6
                                     from: 0.0
                                     to: 1.0
                                     value: SharedState.notifVolume

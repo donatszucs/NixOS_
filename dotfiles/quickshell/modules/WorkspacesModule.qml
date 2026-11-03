@@ -306,7 +306,7 @@ ModuleButton {
 
         property bool isSpawned: false
         transformOrigin: Item.Center
-        scale: isSpawned ? (!control.enabled ? 1.0 : (control.pressed ? 0.95 : 1.0)) : 0
+        scale: isSpawned ? (!control.enabled ? 1.0 : (control.pressed ? 0.90 : 1.0)) : 0
         Component.onCompleted: {
             isSpawned = true
         }

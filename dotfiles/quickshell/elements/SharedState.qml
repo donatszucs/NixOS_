@@ -254,7 +254,7 @@ Item {
     }
 
     property bool muted: false
-    property double notifVolume: 0.1
+    property double notifVolume: 0.2
 
     // ==========================================
     // Night Light (wlsunset) State
@@ -286,7 +286,7 @@ Item {
                 var suppress = notification.hints["suppress-sound"]
                 if (suppress === true || suppress === 1 || suppress === "true") return
             }
-            Quickshell.execDetached(["bash", "-c", "REPO=$(dirname $(dirname $(realpath ~/.config/quickshell))); pw-play --volume " + root.notifVolume + " \"$REPO/misc/ping.ogg\""])
+            Quickshell.execDetached(["bash", "-c", "REPO=$(dirname $(dirname $(realpath ~/.config/quickshell))); pw-play --volume " + root.notifVolume / 2 + " \"$REPO/misc/ping.ogg\""])
         }
     }
 
