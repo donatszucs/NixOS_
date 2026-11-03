@@ -101,6 +101,7 @@ Rectangle {
         cursorShape: root.cursorShape
         onPressed: root.pressed = true
         onReleased: root.pressed = false
+        onCanceled: root.pressed = false
         onClicked: root.clicked()
     }
 

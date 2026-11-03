@@ -304,13 +304,15 @@ ModuleButton {
             }
         }
 
-        scale: 0
+        property bool isSpawned: false
+        transformOrigin: Item.Center
+        scale: isSpawned ? (!control.enabled ? 1.0 : (control.pressed ? 0.95 : 1.0)) : 0
         Component.onCompleted: {
-            scale = 1
+            isSpawned = true
         }
-        
+
         Behavior on scale {
-            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutBack }
+            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
 
         RowLayout {
@@ -510,6 +512,7 @@ ModuleButton {
 
                 function handleDragStart() {
                     if (windowIcon.isDragging) return;
+                    if (workspaceBtn) workspaceBtn.pressed = false;
                     dragArea.wasDragged = true;
                     windowIcon.isDragging = true;
                     if (workspaceBtn) workspaceBtn.activeDragCount++;
@@ -596,6 +599,9 @@ ModuleButton {
                 onPressed: (mouse) => {
                     dragArea.wasDragged = false;
                     dragArea.pressPos = Qt.point(mouse.x, mouse.y);
+                    if (mouse.button === Qt.LeftButton && workspaceBtn) {
+                        workspaceBtn.pressed = true;
+                    }
                 }
 
                 onPositionChanged: (mouse) => {
@@ -603,18 +609,25 @@ ModuleButton {
                         var dx = mouse.x - dragArea.pressPos.x;
                         var dy = mouse.y - dragArea.pressPos.y;
                         if ((dx * dx + dy * dy) > 16) {
+                            if (workspaceBtn) workspaceBtn.pressed = false;
                             handleDragStart();
                         }
                     }
                 }
 
                 onReleased: (mouse) => {
+                    if (mouse.button === Qt.LeftButton && workspaceBtn) {
+                        workspaceBtn.pressed = false;
+                    }
                     if (windowIcon.isDragging || dragArea.wasDragged) {
                         handleDragEnd();
                     }
                 }
 
                 onCanceled: {
+                    if (workspaceBtn) {
+                        workspaceBtn.pressed = false;
+                    }
                     if (windowIcon.isDragging || dragArea.wasDragged) {
                         handleDragEnd();
                     }
