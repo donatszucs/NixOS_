@@ -43,7 +43,7 @@ PanelWindow {
 
     HyprlandFocusGrab {
         windows: [topPanel]
-        active: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || notificationCenter.inlineReplyInputFocused || wallpaperPicker.expanded || windowContextMenu.isOpen
+        active: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || notificationCenter.inlineReplyInputFocused || wallpaperPicker.expanded || windowContextMenu.isOpen || savedMenu.expanded
         onCleared: {
             launcherModule.expanded = false
             wallpaperPicker.expanded = false
@@ -51,6 +51,7 @@ PanelWindow {
             rbwMenu.closeMenu()
             notificationCenter.inlineReplyInputFocused = false
             windowContextMenu.close()
+            savedMenu.closeMenu()
         }
     }
 
@@ -59,7 +60,7 @@ PanelWindow {
         anchors.fill: parent
         z: -2
         color: "black"
-        property bool active: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded
+        property bool active: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded || savedMenu.expanded
         opacity: active ? 0.2 : 0.0
         visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
@@ -124,6 +125,11 @@ PanelWindow {
             item: windowContextMenu.visible ? windowContextMenu : null
         }
 
+        // Saved Menu region (bottom-center)
+        Region {
+            item: savedMenu
+        }
+
     }
 
     BackgroundEffect.blurRegion: Region {
@@ -134,6 +140,7 @@ PanelWindow {
         Region { item: wallpaperPicker }
         Region { item: clipboardHistory }
         Region { item: rbwMenu }
+        Region { item: savedMenu }
         Region { item: notificationCenter }
         Region { item: sysmonAppWrapper }
 
@@ -155,7 +162,7 @@ PanelWindow {
         id: bgMouseArea
         anchors.fill: parent
         visible: enabled
-        enabled: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded || notificationCenter.isManuallyOpen || windowContextMenu.isOpen
+        enabled: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded || notificationCenter.isManuallyOpen || windowContextMenu.isOpen || savedMenu.expanded
         onClicked: {
             launcherModule.expanded = false
             wallpaperPicker.expanded = false
@@ -163,6 +170,7 @@ PanelWindow {
             rbwMenu.closeMenu()
             notificationCenter.isManuallyOpen = false
             windowContextMenu.close()
+            savedMenu.closeMenu()
         }
         z: -1
     }
@@ -387,6 +395,18 @@ PanelWindow {
         anchors {
             bottom: parent.bottom
             right: parent.right
+        }
+
+        layer.enabled: true
+        layer.effect: panelShadowEffect
+    }
+
+    SavedMenu {
+        id: savedMenu
+        screenName: modelData.name
+        anchors {
+            bottom: parent.bottom
+            horizontalCenter: parent.horizontalCenter
         }
 
         layer.enabled: true

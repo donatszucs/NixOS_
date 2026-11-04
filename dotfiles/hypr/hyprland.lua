@@ -287,12 +287,13 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), locked_opts)
 hl.bind("Print", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | wl-copy"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | wl-copy"))
 
--- Utilities (Lock, Calc, Cliphist, RBW)
+-- Utilities (Lock, Calc, Cliphist, RBW, SavedMenu)
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("[float; size 800 600] qalculate-gtk"))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("bash -c 'quickshell ipc call cliphist-$(hyprctl activeworkspace -j | jq -r \".monitor\") toggle'"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("bash -c 'quickshell ipc call rbw-$(hyprctl activeworkspace -j | jq -r \".monitor\") toggle'"))
 hl.bind(mainMod .. " + H", hl.dsp.exec_cmd("bash -c 'quickshell ipc call sysmon-$(hyprctl activeworkspace -j | jq -r \".monitor\") toggle'"))
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("bash -c 'quickshell ipc call savedmenu-$(hyprctl activeworkspace -j | jq -r \".monitor\") toggle'"))
 
 -- Sunshine Remote Streaming Emergency Restore
 hl.bind(mainMod .. " + SHIFT + F12", hl.dsp.exec_cmd("/home/doni/nixos-config/scripts/sunshine-virtual-display.sh disconnect"))
