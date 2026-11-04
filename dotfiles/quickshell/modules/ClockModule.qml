@@ -82,6 +82,12 @@ ExpandableModule {
     leftCornerStyle: "bottom"
     rightCornerStyle: "side"
 
+    onPillWheel: (wheel) => {
+        if (root.expanded) {
+            root.handleCalendarWheel(wheel)
+        }
+    }
+
     // ── Helper Functions ─────────────────────────────────────────
     function formatDateStr(y, m, d) {
         var mm = m < 10 ? "0" + m : "" + m
@@ -191,6 +197,45 @@ ExpandableModule {
             viewMonth++
         }
         updateCalendarGrid()
+    }
+
+    // Wheel delta accumulator for smooth and discrete scrolling through months
+    property int _wheelDelta: 0
+
+    Timer {
+        id: wheelResetTimer
+        interval: 350
+        onTriggered: root._wheelDelta = 0
+    }
+
+    function handleCalendarWheel(event) {
+        wheelResetTimer.restart()
+
+        var dy = (event && event.angleDelta) ? event.angleDelta.y : 0
+        var dx = (event && event.angleDelta) ? event.angleDelta.x : 0
+        // Prefer vertical scrolling; if predominantly horizontal, support horizontal scrolling too
+        var delta = Math.abs(dy) >= Math.abs(dx) ? dy : -dx
+        if (delta === 0) return
+
+        // If user changed scroll direction, reset accumulator immediately
+        if ((root._wheelDelta > 0 && delta < 0) || (root._wheelDelta < 0 && delta > 0)) {
+            root._wheelDelta = 0
+        }
+
+        root._wheelDelta += delta
+
+        var threshold = 120
+        if (root._wheelDelta >= threshold) {
+            root.prevMonth()
+            root._wheelDelta = 0
+        } else if (root._wheelDelta <= -threshold) {
+            root.nextMonth()
+            root._wheelDelta = 0
+        }
+
+        if (event && event.accepted !== undefined) {
+            event.accepted = true
+        }
     }
 
     function goToToday() {
@@ -324,6 +369,13 @@ ExpandableModule {
             Layout.alignment: Qt.AlignHCenter
             implicitHeight: headerBar.height + calGridContent.implicitHeight + Theme.cardPadding * 2
             hasHeader: true
+
+            WheelHandler {
+                id: calendarWheelHandler
+                target: calendarCard
+                acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                onWheel: (event) => root.handleCalendarWheel(event)
+            }
 
             headerContent: [
                 // Prev Month Button
