@@ -658,7 +658,8 @@ ModuleButton {
                             isFloating: (modelData.lastIpcObject && modelData.lastIpcObject.floating !== undefined) ? Boolean(modelData.lastIpcObject.floating) : false,
                             isPinned: (modelData.lastIpcObject && modelData.lastIpcObject.pinned !== undefined) ? Boolean(modelData.lastIpcObject.pinned) : false,
                             isFullscreen: (modelData.lastIpcObject && modelData.lastIpcObject.fullscreen !== undefined) ? (modelData.lastIpcObject.fullscreen > 0) : false,
-                            workspace: (workspaceBtn && workspaceBtn.modelData) ? (workspaceBtn.isSpecial ? workspaceBtn.modelData.name : workspaceBtn.modelData.id) : ""
+                            workspace: (workspaceBtn && workspaceBtn.modelData) ? (workspaceBtn.isSpecial ? workspaceBtn.modelData.name : workspaceBtn.modelData.id) : "",
+                            workspacesModule: root
                         };
                         root.requestContextMenu(winData, iconCenterBottom);
                     }

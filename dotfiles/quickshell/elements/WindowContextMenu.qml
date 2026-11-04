@@ -33,6 +33,33 @@ Item {
 
     property alias menuCard: card
 
+    property var workspacesModule: null
+
+    function getCurrentWorkspace() {
+        if (root.workspacesModule && typeof root.workspacesModule.getCurrentWorkspace === "function") {
+            return root.workspacesModule.getCurrentWorkspace();
+        }
+        return null;
+    }
+
+    readonly property bool isOnCurrentWorkspace: {
+        var cur = getCurrentWorkspace();
+        if (!cur) return false;
+        var curId = cur.id !== undefined ? String(cur.id) : "";
+        var curName = cur.name !== undefined ? String(cur.name) : "";
+        return root.targetWorkspace === curId || root.targetWorkspace === curName;
+    }
+
+    function pullToCurrentWorkspace() {
+        var cur = getCurrentWorkspace();
+        if (cur) {
+            var targetWsId = cur.isSpecial ? cur.name : (cur.id !== undefined ? cur.id : cur.name);
+            Hyprland.dispatch("hl.dsp.window.move({ workspace = '" + targetWsId + "', window = 'address:0x" + root.cleanAddress + "' })");
+            Hyprland.dispatch("hl.dsp.focus({ window = 'address:0x" + root.cleanAddress + "' })");
+        }
+        root.close();
+    }
+
     // Auto-close if another module opens
     Connections {
         target: SharedState
@@ -57,6 +84,9 @@ Item {
                             root.isFloating = Boolean(c.floating);
                             root.isPinned = Boolean(c.pinned);
                             root.isFullscreen = (c.fullscreen !== undefined && c.fullscreen > 0);
+                            if (c.workspace) {
+                                root.targetWorkspace = c.workspace.name || String(c.workspace.id);
+                            }
                             break;
                         }
                     }
@@ -67,6 +97,10 @@ Item {
 
     function open(winData, globalPos) {
         if (!winData || !winData.address) return;
+
+        if (winData && winData.workspacesModule) {
+            workspacesModule = winData.workspacesModule;
+        }
 
         targetAddress = winData.address;
         targetTitle = winData.title || winData.appId || "Window";
@@ -317,28 +351,14 @@ Item {
                 }
             }
 
-            // 4. Center Window
+            // 4. Pull to Current Workspace
             ContextMenuItem {
-                iconText: "󰆤"
-                labelText: "Center on Screen"
-                hintText: ""
+                iconText: "󰁌"
+                labelText: "Pull to Current Workspace"
+                hintText: root.isOnCurrentWorkspace ? "Current" : ""
+                isActive: root.isOnCurrentWorkspace
                 onTriggered: {
-                    if (!root.isFloating) {
-                        Hyprland.dispatch("hl.dsp.window.float({ window = 'address:0x" + root.cleanAddress + "' })");
-                    }
-                    Hyprland.dispatch("hl.dsp.window.center({ window = 'address:0x" + root.cleanAddress + "' })");
-                    root.close();
-                }
-            }
-
-            // 5. Focus Window
-            ContextMenuItem {
-                iconText: "󰍉"
-                labelText: "Focus Window"
-                hintText: ""
-                onTriggered: {
-                    Hyprland.dispatch("hl.dsp.focus({ window = 'address:0x" + root.cleanAddress + "' })");
-                    root.close();
+                    root.pullToCurrentWorkspace();
                 }
             }
 

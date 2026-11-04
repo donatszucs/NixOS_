@@ -101,6 +101,8 @@ ExpandableModule {
                     onClicked: SharedState.toggleLight()
                     hasBorder: hovered || pressed
                     horizontalPadding: 8
+                    implicitWidth: 26
+                    implicitHeight: 26
                 }
             ]
 

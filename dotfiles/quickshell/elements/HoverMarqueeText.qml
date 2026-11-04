@@ -22,6 +22,7 @@ Item {
     Layout.preferredWidth: implicitWidth
     Layout.maximumWidth: root.textMaxWidth
     Layout.fillWidth: true
+    Layout.alignment: Qt.AlignVCenter
     clip: true
 
     HoverHandler { id: hover }

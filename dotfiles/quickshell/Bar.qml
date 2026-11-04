@@ -395,6 +395,7 @@ PanelWindow {
 
     WindowContextMenu {
         id: windowContextMenu
+        workspacesModule: launcherModule.activeWorkspaces
         z: 9999
     }
 

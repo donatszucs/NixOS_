@@ -34,6 +34,8 @@ ModuleButton {
     signal toggleClipboardHistory()
     signal requestContextMenu(var windowData, var globalPos)
 
+    property alias activeWorkspaces: activeWorkspaces
+
     property int  panelWidth:  400
     property int  maxVisible:  6
     property int  padding:    10

@@ -84,9 +84,19 @@ Rectangle {
         onClicked: root.clicked()
     }
 
+    FontMetrics {
+        id: fontMetrics
+        font: iconText.font
+    }
+
+    // Optical vertical centering offset to compensate for font descent metrics in icon glyphs
+    property real verticalOffset: fontMetrics.descent ? Math.max(1, Math.round(fontMetrics.descent * 0.25)) : 1
+
     Text {
         id: iconText
-        anchors.centerIn: parent
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: root.verticalOffset
         text: root.icon
         color: root.iconColor
         font.family: root.fontFamily

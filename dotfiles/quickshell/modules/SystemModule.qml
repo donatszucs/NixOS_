@@ -82,6 +82,7 @@ ExpandableModule {
                                 pixelSize: Theme.fontSize + 8
                                 fontBold: true
                                 textColor: Theme.textPrimary
+                                Layout.alignment: Qt.AlignVCenter
 
                                 Process {
                                     command: ["whoami"]
@@ -102,12 +103,14 @@ ExpandableModule {
                             HeaderButton {
                                 icon: "󰚰"
                                 iconSize: 20
+                                Layout.alignment: Qt.AlignVCenter
                                 onClicked: updateProc.running = true
                             }
 
                             HeaderButton {
                                 icon: "󱄅"
                                 iconSize: 20
+                                Layout.alignment: Qt.AlignVCenter
                                 onClicked: rebuildProc.running = true
                             }
                         }
