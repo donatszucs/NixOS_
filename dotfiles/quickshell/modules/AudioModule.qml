@@ -210,7 +210,7 @@ ExpandableModule {
 
                         Repeater {
                             model: sinksListModel
-                            delegate: Rectangle {
+                            delegate: ModuleButton {
                                 id: sinkBtn
                                 required property var modelData
                                 required property int index
@@ -228,15 +228,14 @@ ExpandableModule {
                                     return false
                                 }
 
+                                variant: "neutral"
+                                cursorShape: Qt.PointingHandCursor
                                 Layout.fillWidth: true
-                                implicitHeight: 75
+                                implicitHeight: 80
                                 radius: Theme.cardItemRadius
-                                color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.15) : Theme.divider
+                                opacity: 1.0
                                 border.width: 2
-                                border.color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.45) : Theme.cardBorder
-                                clip: true
-
-                                Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+                                border.color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
                                 Behavior on border.color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
                                 Process {
@@ -244,117 +243,127 @@ ExpandableModule {
                                     command: ["bash", "-c", "wpctl set-default " + modelData.id]
                                 }
 
-                                ColumnLayout {
+                                onClicked: actionProc.running = true
+
+                                RowLayout {
+                                    id: sinkRow
                                     anchors.fill: parent
-                                    anchors.margins: Theme.cardItemPadding
-                                    spacing: 10
+                                    anchors.rightMargin: Theme.cardItemPadding
+                                    spacing: 12
 
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 8
+                                    Rectangle {
+                                        id: sinkIconBox
+                                        Layout.fillHeight: true
+                                        Layout.preferredWidth: 46
+                                        implicitWidth: 46
+                                        color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
+                                        Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+                                        topLeftRadius: Math.min(height / 2, sinkBtn.radius)
+                                        bottomLeftRadius: Math.min(height / 2, sinkBtn.radius)
 
-                                        Item {
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: 28
+                                        InverseRadius {
+                                            anchors.top: parent.top
+                                            anchors.left: parent.right
+                                            cornerPosition: "topLeft"
+                                            color: parent.color
+                                            size: Theme.cardItemIconInverseRadius
+                                        }
 
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: actionProc.running = true
-                                            }
-
-                                            RowLayout {
-                                                anchors.fill: parent
-                                                spacing: 8
-
-                                                Rectangle {
-                                                    width: 28
-                                                    height: 28
-                                                    radius: Theme.innerElementRadius
-                                                    color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
-                                                    Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-
-                                                    Text {
-                                                        anchors.centerIn: parent
-                                                        text: modelData.icon
-                                                        color: isSinkActive ? Theme.statusBlue : Theme.textPrimary
-                                                        opacity: isSinkActive ? 1.0 : 0.7
-                                                        font.family: Theme.font
-                                                        font.pixelSize: Theme.fontSize + 2
-                                                        font.bold: true
-                                                    }
-                                                }
-
-                                                ColumnLayout {
-                                                    Layout.fillWidth: true
-                                                    spacing: 1
-
-                                                    HoverMarqueeText {
-                                                        text: modelData.name
-                                                        textMaxWidth: audioModule.cardWidth - 145
-                                                        Layout.fillWidth: true
-                                                        fontFamily: Theme.font
-                                                        pixelSize: Theme.fontSize
-                                                        fontBold: isSinkActive
-                                                        textColor: Theme.textPrimary
-                                                    }
-
-                                                    Text {
-                                                        text: isSinkActive ? "Active" : "Output"
-                                                        color: isSinkActive ? Theme.statusGreen : Theme.statusDisabled
-                                                        font.family: Theme.font
-                                                        font.pixelSize: Theme.fontSize * 0.72
-                                                        font.bold: isSinkActive
-                                                    }
-                                                }
-                                            }
+                                        InverseRadius {
+                                            anchors.bottom: parent.bottom
+                                            anchors.left: parent.right
+                                            cornerPosition: "bottomLeft"
+                                            color: parent.color
+                                            size: Theme.cardItemIconInverseRadius
                                         }
 
                                         Text {
-                                            text: devMuted ? "Muted" : Math.round(devVolume * 100) + "%"
-                                            color: devMuted ? Theme.statusRed : (isSinkActive ? Theme.textPrimary : Theme.statusDisabled)
+                                            id: sinkIconText
+                                            anchors.centerIn: parent
+                                            text: modelData.icon
+                                            color: isSinkActive ? Theme.statusBlue : Theme.textPrimary
+                                            opacity: isSinkActive ? 1.0 : 0.7
                                             font.family: Theme.font
-                                            font.pixelSize: Theme.fontSize - 1
+                                            font.pixelSize: Theme.fontSize + 3
                                             font.bold: true
-                                            Layout.alignment: Qt.AlignVCenter
-                                        }
-
-                                        ModuleButton {
-                                            variant: devMuted ? "red" : (isSinkActive ? "light" : "neutral")
-                                            label: devMuted ? "󰖁" : ""
-                                            textFont: 12
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                if (devAudio) {
-                                                    devAudio.muted = !devAudio.muted
-                                                }
-                                            }
-                                            implicitHeight: 24
-                                            implicitWidth: 24
-                                            radius: Theme.innerElementRadius
-                                            border.width: 1
-                                            Layout.alignment: Qt.AlignVCenter
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
                                         }
                                     }
 
-                                    StyledSlider {
-                                        id: devSlider
+                                    ColumnLayout {
                                         Layout.fillWidth: true
-                                        sliderHeight: 18
-                                        radius: Theme.sliderRadius
-                                        from: 0.0
-                                        to: 1.0
-                                        value: devVolume
-                                        onMoved: {
-                                            if (devAudio) {
-                                                devAudio.volume = value
-                                                if (devAudio.muted && value > 0) {
-                                                    devAudio.muted = false
-                                                }
+                                        Layout.alignment: Qt.AlignVCenter
+                                        Layout.topMargin: Theme.cardItemPadding
+                                        Layout.bottomMargin: Theme.cardItemPadding
+                                        spacing: 6
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 2
+
+                                            HoverMarqueeText {
+                                                text: modelData.name
+                                                textMaxWidth: audioModule.cardWidth - 85
+                                                Layout.fillWidth: true
+                                                fontFamily: Theme.font
+                                                pixelSize: Theme.fontSize
+                                                fontBold: isSinkActive
+                                                textColor: Theme.textPrimary
+                                            }
+
+                                            Text {
+                                                text: isSinkActive ? "Active" : "Output"
+                                                color: isSinkActive ? Theme.statusGreen : Theme.statusDisabled
+                                                font.family: Theme.font
+                                                font.pixelSize: Theme.fontSize * 0.75
+                                                font.bold: isSinkActive
                                             }
                                         }
-                                        Layout.alignment: Qt.AlignVCenter
 
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 6
+
+                                            StyledSlider {
+                                                id: devSlider
+                                                Layout.fillWidth: true
+                                                sliderHeight: 22
+                                                radius: Theme.sliderRadius + 2
+                                                from: 0.0
+                                                to: 1.0
+                                                value: devVolume
+                                                showText: true
+                                                text: devMuted ? "Muted" : Math.round(devVolume * 100) + "%"
+                                                textColor: Theme.textPrimary
+                                                onMoved: {
+                                                    if (devAudio) {
+                                                        devAudio.volume = value
+                                                        if (devAudio.muted && value > 0) {
+                                                            devAudio.muted = false
+                                                        }
+                                                    }
+                                                }
+                                                Layout.alignment: Qt.AlignVCenter
+                                            }
+
+                                            ModuleButton {
+                                                variant: devMuted ? "red" : (isSinkActive ? "light" : "neutral")
+                                                label: devMuted ? "󰖁" : ""
+                                                textFont: 12
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: {
+                                                    if (devAudio) {
+                                                        devAudio.muted = !devAudio.muted
+                                                    }
+                                                }
+                                                implicitHeight: 22
+                                                implicitWidth: 22
+                                                radius: Theme.sliderRadius + 2
+                                                border.width: 2
+                                                Layout.alignment: Qt.AlignVCenter
+                                            }
+                                        }
                                     }
                                 }
                             }

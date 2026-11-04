@@ -14,6 +14,12 @@ Slider {
     property int bottomRightRadius: radius
     property real scrollStep: 0
 
+    property bool showText: false
+    property string text: Math.round(control.visualPosition * 100) + "%"
+    property int fontSize: Theme.fontSize - 2
+    property color textColor: Theme.textPrimary
+    property color fillTextColor: Theme.textDark
+
     HoverHandler {
         cursorShape: Qt.PointingHandCursor
     }
@@ -56,6 +62,7 @@ Slider {
     }
 
     background: Rectangle {
+        id: bgRect
         x: control.leftPadding
         y: control.topPadding + control.availableHeight / 2 - height / 2
         implicitWidth: 200
@@ -71,15 +78,28 @@ Slider {
         border.width: 2
         border.color: Theme.palette("neutral").border
 
+        Text {
+            visible: control.showText && control.text !== ""
+            anchors.fill: parent
+            text: control.text
+            color: control.textColor
+            font.family: Theme.font
+            font.pixelSize: control.fontSize
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+
         Rectangle {
+            id: progressFill
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.margins: 2
 
-            id: progressFill
-            width: control.visualPosition * parent.width - 4
+            width: Math.max(0, control.visualPosition * (parent.width - 4))
             height: parent.height - 4
+            visible: width > 0
             color: control.pressed ? Theme.palette("light").pressed : Theme.palette("light").base
             border.color: Theme.palette("light").border
             radius: Math.max(0, control.radius - 2)
@@ -87,6 +107,22 @@ Slider {
             topRightRadius: Math.max(0, control.topRightRadius - 2)
             bottomLeftRadius: Math.max(0, control.bottomLeftRadius - 2)
             bottomRightRadius: Math.max(0, control.bottomRightRadius - 2)
+            clip: true
+
+            Text {
+                visible: control.showText && control.text !== ""
+                x: -progressFill.x
+                y: -progressFill.y
+                width: bgRect.width
+                height: bgRect.height
+                text: control.text
+                color: control.fillTextColor
+                font.family: Theme.font
+                font.pixelSize: control.fontSize
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
         }
     }
 

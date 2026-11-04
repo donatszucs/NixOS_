@@ -312,24 +312,15 @@ Item {
                                     from: 0.0
                                     to: 1.0
                                     value: SharedState.notifVolume
+                                    showText: true
+                                    text: SharedState.muted ? "Muted" : Math.round(SharedState.notifVolume * 100) + "%"
+                                    textColor: SharedState.muted ? Theme.statusRed : Theme.textPrimary
                                     onValueChanged: {
                                         SharedState.notifVolume = value
                                         if (value > 0 && SharedState.muted) {
                                             SharedState.muted = false
                                         }
                                     }
-                                    Layout.alignment: Qt.AlignVCenter
-                                }
-
-                                Text {
-                                    text: Math.round(SharedState.notifVolume * 100) + "%"
-                                    color: Theme.textPrimary
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize - 2
-                                    font.bold: true
-                                    opacity: 0.8
-                                    Layout.minimumWidth: 28
-                                    horizontalAlignment: Text.AlignRight
                                     Layout.alignment: Qt.AlignVCenter
                                 }
                             }

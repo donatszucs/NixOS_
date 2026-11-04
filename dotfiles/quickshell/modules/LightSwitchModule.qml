@@ -12,7 +12,6 @@ ExpandableModule {
 
     pillPercent: expanded ? 0 : (SharedState.lightAvailable && SharedState.lightActive ? SharedState.lightBrightness : 0)
     pillText: {
-        if (expanded) return ""
         if (!SharedState.lightAvailable) return "Offline"
         if (SharedState.lightActive) return SharedState.lightBrightness + "% 󱩒"
         return "Off 󱩎"
@@ -83,25 +82,19 @@ ExpandableModule {
             headerTitle: "Brightness"
 
             headerControls: [
-                Text {
-                    text: SharedState.lightActive ? (SharedState.lightBrightness + "%") : "Off"
-                    color: SharedState.lightActive ? Theme.textPrimary : Theme.statusDisabled
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
-                    font.bold: true
-                    opacity: 0.85
-                    Layout.alignment: Qt.AlignVCenter
-                },
 
-                HeaderButton {
-                    icon: SharedState.lightActive ? "󱩒" : "󱩎"
-                    iconColor: SharedState.lightActive ? Theme.paletteYellow : Theme.statusDisabled
-                    iconSize: 15
+                ModuleButton {
+                    id: lightSwitchButton
+                    variant: SharedState.lightActive ? "light" : "neutral"
+                    label: root.pillText
+                    textFont: Theme.fontSize - 1
+                    cursorShape: Qt.PointingHandCursor
                     onClicked: SharedState.toggleLight()
-                    hasBorder: hovered || pressed
-                    horizontalPadding: 8
-                    implicitWidth: 26
                     implicitHeight: 26
+                    radius: Theme.cardButtonRadius
+                    border.width: 2
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.rightMargin: 2
                 }
             ]
 

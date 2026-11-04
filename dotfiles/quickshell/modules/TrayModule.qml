@@ -98,8 +98,8 @@ ExpandableModule {
         border.width: 2
         border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
 
-        implicitWidth: trayColumn.implicitWidth + Theme.cardMargin * 2
-        implicitHeight: trayColumn.implicitHeight + Theme.cardMargin * 2
+        implicitWidth: trayColumn.implicitWidth + 12
+        implicitHeight: trayColumn.implicitHeight + 12
 
         // Visible when expanded or animating close (clipped)
         visible: root.contentVisible && trayColumn.implicitHeight > 0
