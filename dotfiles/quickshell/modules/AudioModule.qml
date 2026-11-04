@@ -231,11 +231,11 @@ ExpandableModule {
                                 variant: "neutral"
                                 cursorShape: Qt.PointingHandCursor
                                 Layout.fillWidth: true
-                                implicitHeight: 80
+                                implicitHeight: 65
                                 radius: Theme.cardItemRadius
                                 opacity: 1.0
                                 border.width: 2
-                                border.color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
+                                border.color: isSinkActive ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, 0.45) : borderColorAdaptive
                                 Behavior on border.color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
                                 Process {
@@ -256,7 +256,7 @@ ExpandableModule {
                                         Layout.fillHeight: true
                                         Layout.preferredWidth: 46
                                         implicitWidth: 46
-                                        color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
+                                        color: isSinkActive ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, 0.45) : Theme.divider
                                         Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
                                         topLeftRadius: Math.min(height / 2, sinkBtn.radius)
                                         bottomLeftRadius: Math.min(height / 2, sinkBtn.radius)
@@ -281,7 +281,7 @@ ExpandableModule {
                                             id: sinkIconText
                                             anchors.centerIn: parent
                                             text: modelData.icon
-                                            color: isSinkActive ? Theme.statusBlue : Theme.textPrimary
+                                            color: isSinkActive ? Theme.statusGreen : Theme.textPrimary
                                             opacity: isSinkActive ? 1.0 : 0.7
                                             font.family: Theme.font
                                             font.pixelSize: Theme.fontSize + 3
@@ -298,27 +298,14 @@ ExpandableModule {
                                         Layout.bottomMargin: Theme.cardItemPadding
                                         spacing: 6
 
-                                        ColumnLayout {
+                                        HoverMarqueeText {
+                                            text: modelData.name
+                                            textMaxWidth: audioModule.cardWidth - 85
                                             Layout.fillWidth: true
-                                            spacing: 2
-
-                                            HoverMarqueeText {
-                                                text: modelData.name
-                                                textMaxWidth: audioModule.cardWidth - 85
-                                                Layout.fillWidth: true
-                                                fontFamily: Theme.font
-                                                pixelSize: Theme.fontSize
-                                                fontBold: isSinkActive
-                                                textColor: Theme.textPrimary
-                                            }
-
-                                            Text {
-                                                text: isSinkActive ? "Active" : "Output"
-                                                color: isSinkActive ? Theme.statusGreen : Theme.statusDisabled
-                                                font.family: Theme.font
-                                                font.pixelSize: Theme.fontSize * 0.75
-                                                font.bold: isSinkActive
-                                            }
+                                            fontFamily: Theme.font
+                                            pixelSize: Theme.fontSize
+                                            fontBold: isSinkActive
+                                            textColor: Theme.textPrimary
                                         }
 
                                         RowLayout {
@@ -424,7 +411,7 @@ ExpandableModule {
                                 radius: Theme.cardItemRadius
                                 opacity: 1.0
                                 border.width: 2
-                                border.color: isSourceActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
+                                border.color: isSourceActive ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, 0.45) : borderColorAdaptive
                                 Behavior on border.color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
                                 RowLayout {
@@ -439,7 +426,7 @@ ExpandableModule {
                                         Layout.preferredWidth: sourceBtn.implicitHeight
                                         implicitWidth: sourceBtn.implicitHeight
                                         implicitHeight: sourceBtn.implicitHeight
-                                        color: isSourceActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
+                                        color: isSourceActive ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, 0.45) : Theme.divider
                                         Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
                                         topLeftRadius: Math.min(height / 2, sourceBtn.radius)
                                         bottomLeftRadius: Math.min(height / 2, sourceBtn.radius)
@@ -464,7 +451,7 @@ ExpandableModule {
                                             id: srcIconText
                                             anchors.centerIn: parent
                                             text: modelData.icon
-                                            color: isSourceActive ? Theme.statusBlue : Theme.textPrimary
+                                            color: isSourceActive ? Theme.statusGreen : Theme.textPrimary
                                             opacity: isSourceActive ? 1.0 : 0.7
                                             font.family: Theme.font
                                             font.pixelSize: Theme.fontSize + 3
@@ -474,28 +461,14 @@ ExpandableModule {
                                         }
                                     }
 
-                                    ColumnLayout {
+                                    HoverMarqueeText {
+                                        text: modelData.name
+                                        textMaxWidth: audioModule.cardWidth - 85
                                         Layout.fillWidth: true
-                                        Layout.alignment: Qt.AlignVCenter
-                                        spacing: 2
-
-                                        HoverMarqueeText {
-                                            text: modelData.name
-                                            textMaxWidth: audioModule.cardWidth - 85
-                                            Layout.fillWidth: true
-                                            fontFamily: Theme.font
-                                            pixelSize: Theme.fontSize
-                                            fontBold: isSourceActive
-                                            textColor: Theme.textPrimary
-                                        }
-
-                                        Text {
-                                            text: isSourceActive ? "Active" : "Input"
-                                            color: isSourceActive ? Theme.statusGreen : Theme.statusDisabled
-                                            font.family: Theme.font
-                                            font.pixelSize: Theme.fontSize * 0.75
-                                            font.bold: isSourceActive
-                                        }
+                                        fontFamily: Theme.font
+                                        pixelSize: Theme.fontSize
+                                        fontBold: isSourceActive
+                                        textColor: Theme.textPrimary
                                     }
                                 }
 
