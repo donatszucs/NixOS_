@@ -134,102 +134,110 @@ ExpandableModule {
                                 { index: 3, icon: "", text: "Reboot", cmd: "systemctl reboot", },
                                 { index: 2, icon: "", text: "Lock", cmd: "hyprlock", }
                             ]
-                            delegate: ModuleButton {
-                                id: actionButton
-
+                            delegate: RowLayout {
+                                id: actionRow
                                 required property var modelData
-                                cursorShape: Qt.PointingHandCursor
-                                variant: "red"
 
                                 Layout.fillWidth: true
+                                Layout.preferredHeight: Theme.listHeight - 10
                                 implicitHeight: Theme.listHeight - 10
+                                spacing: 5
 
-                                radius: Theme.moduleEdgeRadius - 5
-                                border.width: 2
+                                ModuleButton {
+                                    id: actionButton
 
-                                RowLayout {
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: 10
+                                    cursorShape: Qt.PointingHandCursor
+                                    variant: "red"
 
-                                    Rectangle {
-                                        color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
-                                        topLeftRadius: Theme.moduleEdgeRadius - 5
-                                        bottomLeftRadius: Theme.moduleEdgeRadius - 5
-                                        implicitWidth: 40
-                                        implicitHeight: 40
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    implicitHeight: actionRow.implicitHeight
 
-                                        InverseRadius {
-                                            anchors.top: parent.top
-                                            anchors.left: parent.right
-                                            cornerPosition: "topLeft"
-                                            color: parent.color
-                                            size: 10
-                                        }
+                                    radius: Theme.moduleEdgeRadius - 5
+                                    border.width: 2
 
-                                        InverseRadius {
-                                            anchors.bottom: parent.bottom
-                                            anchors.left: parent.right
-                                            cornerPosition: "bottomLeft"
-                                            color: parent.color
-                                            size: 10
+                                    RowLayout {
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 10
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        spacing: 10
+
+                                        Rectangle {
+                                            color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+                                            topLeftRadius: Theme.moduleEdgeRadius - 5
+                                            bottomLeftRadius: Theme.moduleEdgeRadius - 5
+                                            implicitWidth: 40
+                                            implicitHeight: 40
+
+                                            InverseRadius {
+                                                anchors.top: parent.top
+                                                anchors.left: parent.right
+                                                cornerPosition: "topLeft"
+                                                color: parent.color
+                                                size: 10
+                                            }
+
+                                            InverseRadius {
+                                                anchors.bottom: parent.bottom
+                                                anchors.left: parent.right
+                                                cornerPosition: "bottomLeft"
+                                                color: parent.color
+                                                size: 10
+                                            }
+
+                                            Text {
+                                                anchors.fill: parent
+                                                text: actionRow.modelData.icon
+                                                color: actionButton.textColor
+                                                font.family: Theme.font
+                                                font.pixelSize: 20
+                                                font.bold: true
+                                                horizontalAlignment: Text.AlignHCenter
+                                                verticalAlignment: Text.AlignVCenter
+                                            }
                                         }
 
                                         Text {
-                                            anchors.fill: parent
-                                            text: actionButton.modelData.icon
+                                            text: actionRow.modelData.text
                                             color: actionButton.textColor
                                             font.family: Theme.font
-                                            font.pixelSize: 20
+                                            font.pixelSize: Theme.fontSize
                                             font.bold: true
-                                            horizontalAlignment: Text.AlignHCenter
-                                            verticalAlignment: Text.AlignVCenter
+                                            Layout.fillWidth: true
+                                            horizontalAlignment: Text.AlignLeft
                                         }
                                     }
 
-                                    Text {
-                                        text: actionButton.modelData.text
-                                        color: actionButton.textColor
-                                        font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize
-                                        font.bold: true
-                                        Layout.fillWidth: true
-                                        horizontalAlignment: Text.AlignLeft
+                                    Process {
+                                        id: actionProc
+                                        command: ["bash", "-c", actionRow.modelData.cmd]
                                     }
 
-                                    ModuleButton {
-                                        id: winBtn
-                                        visible: actionButton.modelData.index === 3
-                                        variant: "neutral"
-                                        cursorShape: Qt.PointingHandCursor
-                                        radius: Theme.moduleEdgeRadius - 8
+                                    onClicked: actionProc.running = true
+                                }
 
-                                        colorOpacity: 2.0
-                                        textColor: Theme.palette("red").text
+                                ModuleButton {
+                                    id: winBtn
+                                    visible: actionRow.modelData.index === 3
+                                    variant: "red"
+                                    cursorShape: Qt.PointingHandCursor
+                                    radius: Theme.moduleEdgeRadius - 5
+                                    border.width: 2
 
-                                        label: "󰨡"
-                                        textFont: 20
-                                        border.width: 0
-                                        implicitWidth: 40
-                                        implicitHeight: 30
-                                        Layout.rightMargin: 5
-                                        
+                                    label: "󰨡"
+                                    textFont: 20
+                                    Layout.preferredWidth: 40
+                                    Layout.fillHeight: true
+                                    implicitWidth: 40
+                                    implicitHeight: actionRow.implicitHeight
 
-                                        Process {
-                                            id: procWin
-                                            command: ["bash", "-c", "sudo /run/current-system/sw/bin/efibootmgr --bootnext 0000 && systemctl reboot"]
-                                        }
-                                        onClicked: procWin.running = true
+                                    Process {
+                                        id: procWin
+                                        command: ["bash", "-c", "sudo /run/current-system/sw/bin/efibootmgr --bootnext 0000 && systemctl reboot"]
                                     }
+                                    onClicked: procWin.running = true
                                 }
-
-                                Process {
-                                    id: actionProc
-                                    command: ["bash", "-c", modelData.cmd]
-                                }
-
-                                onClicked: actionProc.running = true
                             }
                         }
                     }

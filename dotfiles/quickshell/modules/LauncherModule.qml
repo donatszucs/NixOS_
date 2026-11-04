@@ -21,6 +21,18 @@ ModuleButton {
         launcherModule.expanded = false
     }
 
+    onClicked: {
+        if (!launcherModule.expanded) {
+            launcherModule.expanded = true
+            searchField.text = ""
+            launcherModule.filterApps("")
+            Qt.callLater(function() {
+                searchField.forceActiveFocus()
+                searchField.selectAll()
+            })
+        }
+    }
+
     onExpandedChanged: {
         if (expanded) {
             SharedState.setActiveModule(launcherModule)
@@ -66,6 +78,21 @@ ModuleButton {
 
     Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
     Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration;   easing.type: Easing.OutCubic } }
+
+    property real normalScale: 1.0
+    property real hoverScale: 1.02
+    property real pressedScale: 0.90
+
+    transformOrigin: Item.Center
+    scale: launcherModule.expanded ? 1.0 : (
+        launcherModule.activeDragCount > 0 ? 1.0 : (
+            (launcherModule.pressed || (menuMouseArea && menuMouseArea.pressed))
+                ? pressedScale
+                : (launcherModule.hovered ? hoverScale : normalScale)
+        )
+    )
+
+    Behavior on scale { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
     states: [
         State {
@@ -256,6 +283,7 @@ ModuleButton {
                     }
 
                     MouseArea {
+                        id: menuMouseArea
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
