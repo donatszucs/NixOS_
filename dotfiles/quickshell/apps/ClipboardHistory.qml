@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -187,56 +188,143 @@ Rectangle {
 
             color: Qt.rgba(Theme.dark.base.r, Theme.dark.base.g, Theme.dark.base.b, Theme.moduleOpacity)
 
-            topRightRadius: Theme.moduleEdgeRadius * 2
-            bottomRightRadius: Theme.moduleEdgeRadius * 2
+            topRightRadius: Theme.expandedModuleRadius - Theme.pillExpandedMargin
+            bottomRightRadius: Theme.expandedModuleRadius - Theme.pillExpandedMargin
             topLeftRadius: 0
             bottomLeftRadius: 0
 
             clip: true
 
-            ColumnLayout {
-                anchors {
-                    fill: parent
-                    margins: 20
-                }
-                spacing: 20
-            
-                ModuleButton {
-                    label: " Clipboard History"
-                    color: "transparent"
+            BaseCard {
+                id: mainCard
+                anchors.fill: parent
+                anchors.margins: Theme.cardMargin
+                hasHeader: true
+                headerIcon: ""
+                headerTitle: "Clipboard"
 
-                    textFont: 22
-                    Layout.fillWidth: true
-                }
-                
+                headerControls: [
+                    Rectangle {
+                        implicitHeight: 20
+                        implicitWidth: clipCountText.implicitWidth + 10
+                        radius: 10
+                        color: Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.2)
+                        visible: clipboardModel.count > 0
+                        Layout.alignment: Qt.AlignVCenter
+
+                        Text {
+                            id: clipCountText
+                            anchors.centerIn: parent
+                            text: clipboardModel.count + (clipboardModel.count === 1 ? " item" : " items")
+                            color: Theme.statusBlue
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize * 0.7
+                            font.bold: true
+                        }
+                    },
+
+                    HeaderButton {
+                        id: clearAllBtn
+                        visible: clipboardModel.count > 0
+                        property bool confirming: false
+                        hasBorder: true
+                        icon: confirming ? "Confirm?" : "󰆴 Clear"
+                        iconSize: Math.round(Theme.fontSize * 0.78)
+                        iconColor: confirming ? Theme.statusRed : Theme.textPrimary
+                        normalBorderColor: confirming
+                            ? Qt.rgba(Theme.statusRed.r, Theme.statusRed.g, Theme.statusRed.b, 0.65)
+                            : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.35)
+                        hoverBorderColor: confirming
+                            ? Theme.statusRed
+                            : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.75)
+                        normalBgColor: confirming
+                            ? Qt.rgba(Theme.statusRed.r, Theme.statusRed.g, Theme.statusRed.b, 0.18)
+                            : "transparent"
+                        hoverBgColor: confirming
+                            ? Qt.rgba(Theme.statusRed.r, Theme.statusRed.g, Theme.statusRed.b, 0.28)
+                            : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.08)
+
+                        Timer {
+                            id: resetConfirmTimer
+                            interval: 3000
+                            repeat: false
+                            onTriggered: clearAllBtn.confirming = false
+                        }
+
+                        onClicked: {
+                            if (confirming) {
+                                confirming = false;
+                                resetConfirmTimer.stop();
+                                clipboardPanel.wipeAll();
+                            } else {
+                                confirming = true;
+                                resetConfirmTimer.restart();
+                            }
+                        }
+                    },
+
+                    HeaderButton {
+                        icon: "󰅖"
+                        iconSize: Theme.fontSize + 1
+                        onClicked: clipboardPanel.closeMenu()
+                    }
+                ]
+
                 Item {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    id: listMask
+                    anchors.fill: listContainer
+                    visible: false
+                    layer.enabled: true
+                    layer.smooth: true
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: Theme.cardItemRadius
+                        color: "black"
+                    }
+                }
+
+                Item {
+                    id: listContainer
+                    anchors {
+                        top: mainCard.headerBar.bottom
+                        bottom: parent.bottom
+                        left: parent.left
+                        right: parent.right
+                        margins: Theme.cardPadding
+                    }
+                    clip: true
+                    layer.enabled: true
+                    layer.smooth: true
+                    layer.effect: MultiEffect {
+                        maskEnabled: true
+                        maskSource: listMask
+                    }
 
                     ListView {
                         id: list
                         anchors.fill: parent
                         clip: true
                         spacing: 5
-                        
+
                         model: clipboardModel
                         delegate: ModuleButton {
                             id: delegateItem
+                            width: list.width
                             implicitWidth: list.width
-                            variant: clipboardPanel.selectedIndex === index ? "light" : "neutral"
-                            
+
+                            readonly property bool isSelected: clipboardPanel.selectedIndex === index
+                            variant: isSelected ? "light" : "neutral"
+                            noHoverColorChange: true
+
                             property string currentClipId: typeof clipId !== "undefined" ? clipId : ""
                             property bool isImage: clipContent.startsWith("[[ binary data") && (clipContent.includes("png") || clipContent.includes("jpg") || clipContent.includes("jpeg") || clipContent.includes("webp"))
                             property string imagePath: currentClipId !== "" ? "/tmp/qs-cliphist/img-" + currentClipId + ".png" : ""
 
-                            implicitHeight: isImage ? Theme.listHeight * 4 : Theme.listHeight
-                            radius: Theme.moduleEdgeRadius / 2
-                            
-                            label: isImage ? "" : (clipContent.length > 34 ? clipContent.substring(0, 31) + "..." : clipContent)
-                            textAlign: "left"
-                            leftMargin: 20
-                            rightMargin: 46
-
+                            implicitHeight: isImage ? 136 : Theme.listHeight
+                            height: implicitHeight
+                            radius: Theme.cardItemRadius
+                            label: ""
                             border.width: 2
 
                             Process {
@@ -247,15 +335,6 @@ Rectangle {
                                         img.source = "file://" + delegateItem.imagePath;
                                     }
                                 }
-                            }
-
-                            Image {
-                                id: img
-                                anchors.fill: parent
-                                anchors.margins: 10
-                                anchors.rightMargin: 46
-                                fillMode: Image.PreserveAspectCrop
-                                visible: delegateItem.isImage
                             }
 
                             onCurrentClipIdChanged: {
@@ -272,42 +351,183 @@ Rectangle {
                                 }
                             }
 
-                            MouseArea {
-                                id: itemMouseArea
-                                anchors.top: parent.top
-                                anchors.bottom: parent.bottom
-                                anchors.left: parent.left
-                                anchors.right: deleteItemBtn.left
-                                anchors.rightMargin: 4
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onEntered: clipboardPanel.selectedIndex = index;
-                                onClicked: {
-                                    applyCliphist.targetLine = clipLine;
-                                    applyCliphistTimer.start();
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.rightMargin: 8
+                                spacing: 12
+
+                                Rectangle {
+                                    id: clipIconBox
+                                    Layout.fillHeight: true
+                                    Layout.preferredWidth: 46
+                                    implicitWidth: 46
+                                    color: delegateItem.isSelected
+                                        ? Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.14)
+                                        : Theme.divider
+                                    Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+                                    topLeftRadius: Math.min(height / 2, delegateItem.radius)
+                                    bottomLeftRadius: Math.min(height / 2, delegateItem.radius)
+
+                                    InverseRadius {
+                                        anchors.top: parent.top
+                                        anchors.left: parent.right
+                                        cornerPosition: "topLeft"
+                                        color: parent.color
+                                        size: Theme.cardItemIconInverseRadius
+                                    }
+
+                                    InverseRadius {
+                                        anchors.bottom: parent.bottom
+                                        anchors.left: parent.right
+                                        cornerPosition: "bottomLeft"
+                                        color: parent.color
+                                        size: Theme.cardItemIconInverseRadius
+                                    }
+
+                                    ColumnLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 2
+
+                                        Text {
+                                            text: delegateItem.isImage ? "󰋩" : "󰅌"
+                                            color: delegateItem.textColor
+                                            opacity: delegateItem.isSelected ? 0.95 : 0.75
+                                            font.family: Theme.font
+                                            font.pixelSize: Theme.fontSize + 2
+                                            font.bold: true
+                                            Layout.alignment: Qt.AlignHCenter
+                                        }
+
+                                        Text {
+                                            text: "#" + (index + 1)
+                                            color: delegateItem.textColor
+                                            opacity: delegateItem.isSelected ? 0.65 : 0.45
+                                            font.family: Theme.font
+                                            font.pixelSize: Math.round(Theme.fontSize * 0.68)
+                                            font.bold: true
+                                            Layout.alignment: Qt.AlignHCenter
+                                        }
+                                    }
+                                }
+
+                                // Text entry content
+                                ColumnLayout {
+                                    visible: !delegateItem.isImage
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    spacing: 2
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: clipContent
+                                        color: delegateItem.textColor
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize
+                                        font.bold: true
+                                        elide: Text.ElideRight
+                                        maximumLineCount: 1
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: clipContent.length + (clipContent.length === 1 ? " character" : " characters")
+                                        color: delegateItem.textColor
+                                        opacity: delegateItem.isSelected ? 0.7 : 0.55
+                                        font.family: Theme.font
+                                        font.pixelSize: Math.round(Theme.fontSize * 0.75)
+                                        font.bold: false
+                                        elide: Text.ElideRight
+                                    }
+                                }
+
+                                // Image entry content
+                                Item {
+                                    id: imgWrapper
+                                    visible: delegateItem.isImage
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    Layout.topMargin: 8
+                                    Layout.bottomMargin: 8
+
+                                    Image {
+                                        id: img
+                                        anchors.fill: parent
+                                        fillMode: Image.PreserveAspectCrop
+                                        asynchronous: true
+                                        smooth: true
+                                        visible: false
+                                    }
+
+                                    Item {
+                                        id: imgMask
+                                        anchors.fill: parent
+                                        visible: false
+                                        layer.enabled: true
+                                        layer.smooth: true
+
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            radius: Theme.innerElementRadius
+                                            color: "black"
+                                        }
+                                    }
+
+                                    MultiEffect {
+                                        anchors.fill: parent
+                                        source: img
+                                        maskEnabled: true
+                                        maskSource: imgMask
+                                        visible: img.status === Image.Ready
+                                    }
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: Theme.innerElementRadius
+                                        color: "transparent"
+                                        border.width: 1
+                                        border.color: Qt.rgba(1, 1, 1, 0.15)
+                                    }
+                                }
+
+                                ModuleButton {
+                                    id: deleteItemBtn
+                                    z: 10
+                                    implicitWidth: 28
+                                    implicitHeight: 28
+                                    Layout.preferredWidth: 28
+                                    Layout.preferredHeight: 28
+                                    Layout.alignment: Qt.AlignVCenter
+                                    radius: Theme.innerElementRadius + 2
+                                    border.width: 2
+                                    variant: deleteItemBtn.hovered ? "red" : (delegateItem.isSelected ? "dark" : "neutral")
+                                    label: "󰅖"
+                                    textFont: 12
+                                    cursorShape: Qt.PointingHandCursor
+                                    opacity: (itemMouseArea.containsMouse || deleteItemBtn.hovered || delegateItem.isSelected) ? 1.0 : 0.45
+                                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                                    onHoveredChanged: {
+                                        if (hovered) clipboardPanel.selectedIndex = index;
+                                    }
+                                    onClicked: {
+                                        clipboardPanel.deleteEntry(index, clipLine, currentClipId);
+                                    }
                                 }
                             }
 
-                            ModuleButton {
-                                id: deleteItemBtn
+                            MouseArea {
+                                id: itemMouseArea
+                                z: 5
+                                anchors.top: parent.top
+                                anchors.bottom: parent.bottom
+                                anchors.left: parent.left
                                 anchors.right: parent.right
-                                anchors.rightMargin: 8
-                                anchors.verticalCenter: parent.verticalCenter
-                                z: 10
-                                implicitWidth: 28
-                                implicitHeight: 28
-                                radius: Theme.moduleEdgeRadius / 2
-                                variant: deleteItemBtn.hovered ? "red" : (clipboardPanel.selectedIndex === index ? "dark" : "neutral")
-                                label: "󰅖"
-                                textFont: 13
+                                anchors.rightMargin: 42
+                                hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                opacity: (itemMouseArea.containsMouse || deleteItemBtn.hovered || clipboardPanel.selectedIndex === index) ? 1.0 : 0.35
-                                Behavior on opacity { NumberAnimation { duration: 150 } }
-                                onHoveredChanged: {
-                                    if (hovered) clipboardPanel.selectedIndex = index;
-                                }
+                                onEntered: clipboardPanel.selectedIndex = index
                                 onClicked: {
-                                    clipboardPanel.deleteEntry(index, clipLine, currentClipId);
+                                    applyCliphist.targetLine = clipLine;
+                                    applyCliphistTimer.start();
                                 }
                             }
                         }
@@ -331,58 +551,11 @@ Rectangle {
                             text: "Clipboard history is empty"
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSize
+                            font.bold: true
                             color: Theme.textPrimary
-                            opacity: 0.5
+                            opacity: 0.65
                             Layout.alignment: Qt.AlignHCenter
                         }
-                    }
-                }
-                
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 12
-
-                    ModuleButton {
-                        id: clearAllBtn
-                        visible: clipboardModel.count > 0
-                        property bool confirming: false
-                        label: confirming ? "Confirm Wipe?" : "󰅖 Clear All"
-                        cursorShape: Qt.PointingHandCursor
-                        radius: Theme.moduleEdgeRadius
-                        variant: confirming ? "red" : "neutral"
-                        border.width: 2
-                        implicitWidth: confirming ? 140 : 120
-
-                        Timer {
-                            id: resetConfirmTimer
-                            interval: 3000
-                            repeat: false
-                            onTriggered: clearAllBtn.confirming = false
-                        }
-
-                        onClicked: {
-                            if (confirming) {
-                                confirming = false;
-                                resetConfirmTimer.stop();
-                                clipboardPanel.wipeAll();
-                            } else {
-                                confirming = true;
-                                resetConfirmTimer.restart();
-                            }
-                        }
-                    }
-
-                    ModuleButton {
-                        label: "Close"
-                        Layout.alignment: Qt.AlignHCenter
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: clipboardPanel.closeMenu()
-                        radius: Theme.moduleEdgeRadius
-
-                        variant: "neutral"
-                        border.width: 2
-
-                        implicitWidth: 100
                     }
                 }
             }

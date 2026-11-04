@@ -13,17 +13,33 @@ import "../elements"
 Rectangle {
     id: wallpaperPanel
     
-    property real targetWidth: 500
+    property real targetWidth: 530
     property real targetHeight: 900
     property bool expanded: false
 
     color: "transparent"
+    clip: true
     
     // Animate width for side sliding!
     implicitWidth: expanded ? targetWidth : 0
     Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
     
     implicitHeight: targetHeight
+
+    FolderListModel {
+        id: folderModel
+        folder: "file://" + Quickshell.env("HOME") + "/Pictures/wallpapers"
+        nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
+        showDirs: false
+        onCountChanged: {
+            if (count > 0 && !grid.initialized) {
+                grid.initialized = true;
+                var centerIdx = Math.floor(grid.loopMultiplier / 2) * count;
+                grid.currentIndex = centerIdx;
+                grid.positionViewAtIndex(centerIdx, ListView.Center);
+            }
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -46,50 +62,78 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             color: Qt.rgba(Theme.dark.base.r, Theme.dark.base.g, Theme.dark.base.b, Theme.moduleOpacity)
-            
-            topLeftRadius: Theme.moduleEdgeRadius * 2
-            bottomLeftRadius: Theme.moduleEdgeRadius * 2
+
+            topLeftRadius: Theme.expandedModuleRadius - Theme.pillExpandedMargin
+            bottomLeftRadius: Theme.expandedModuleRadius - Theme.pillExpandedMargin
             topRightRadius: 0
             bottomRightRadius: 0
-            
+
             clip: true
-            
-            // Hide content when collapsed to prevent rendering overlap
-            visible: wallpaperPanel.implicitWidth > 10
-            
-            ColumnLayout {
+
+            // Visible as soon as expanded or while animating
+            visible: wallpaperPanel.expanded || wallpaperPanel.implicitWidth > 0
+
+            BaseCard {
+                id: mainCard
                 anchors.fill: parent
-                anchors.margins: 20
-                spacing: 20
-                
-                ModuleButton {
-                    label: "󰸉 Select Wallpaper"
-                    color: "transparent"
+                anchors.margins: Theme.cardMargin
+                hasHeader: true
+                headerIcon: "󰸉"
+                headerTitle: "Wallpapers"
 
-                    textFont: 22
-                    Layout.fillWidth: true
-                }
-                
-                Item {
-                    id: carouselContainer
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    clip: true
+                readonly property int currentRealIndex: folderModel.count > 0
+                    ? (((grid.currentIndex % folderModel.count) + folderModel.count) % folderModel.count)
+                    : 0
 
-                    FolderListModel {
-                        id: folderModel
-                        folder: "file://" + Quickshell.env("HOME") + "/Pictures/wallpapers"
-                        nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
-                        showDirs: false
-                        onCountChanged: {
-                            if (count > 0 && !grid.initialized) {
-                                grid.initialized = true;
-                                var centerIdx = Math.floor(grid.loopMultiplier / 2) * count;
-                                grid.currentIndex = centerIdx;
-                                grid.positionViewAtIndex(centerIdx, ListView.Center);
+                headerControls: [
+                    Rectangle {
+                        implicitHeight: 20
+                        implicitWidth: wpCountText.implicitWidth + 10
+                        radius: 10
+                        color: Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.2)
+                        visible: folderModel.count > 0
+                        Layout.alignment: Qt.AlignVCenter
+
+                        Text {
+                            id: wpCountText
+                            anchors.centerIn: parent
+                            text: (mainCard.currentRealIndex + 1) + " / " + folderModel.count
+                            color: Theme.statusBlue
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize * 0.7
+                            font.bold: true
+                        }
+                    },
+
+                    HeaderButton {
+                        visible: folderModel.count > 0
+                        hasBorder: true
+                        icon: "󰄬 Apply"
+                        iconSize: Math.round(Theme.fontSize * 0.78)
+                        onClicked: {
+                            if (grid.currentItem && typeof grid.currentItem.applyWallpaper === "function") {
+                                grid.currentItem.applyWallpaper();
                             }
                         }
+                    },
+
+                    HeaderButton {
+                        icon: "󰅖"
+                        iconSize: Theme.fontSize + 1
+                        onClicked: wallpaperPanel.expanded = false
                     }
+                ]
+
+                Item {
+                    id: carouselContainer
+                    anchors {
+                        top: mainCard.headerBar.bottom
+                        bottom: parent.bottom
+                        left: parent.left
+                        right: parent.right
+                        margins: Theme.cardPadding
+                    }
+                    clip: true
 
                     ListView {
                         id: grid
@@ -196,9 +240,10 @@ Rectangle {
 
                             Item {
                                 id: delegateWrapper
-                                width: Math.min(grid.width - 24, 430)
+                                width: 430
                                 height: 215
-                                anchors.centerIn: parent
+                                anchors.right: parent.right
+                                anchors.rightMargin: 25
 
                                 scale: 1.0 - 0.16 * delegateRoot.absDist
                                     + Math.max(0, 1.0 - delegateRoot.absCenterDist / 70) * 0.04
@@ -251,7 +296,7 @@ Rectangle {
 
                                         Rectangle {
                                             anchors.fill: parent
-                                            radius: Theme.moduleEdgeRadius / 2
+                                            radius: Theme.cardItemRadius
                                             color: "black"
                                         }
                                     }
@@ -259,11 +304,11 @@ Rectangle {
                                     Rectangle {
                                         anchors.fill: parent
                                         color: "transparent"
-                                        radius: Theme.moduleEdgeRadius / 2
-                                        border.width: delegateRoot.isCurrent ? 3 : 1.5
+                                        radius: Theme.cardItemRadius
+                                        border.width: delegateRoot.isCurrent ? 2.5 : 2
                                         border.color: delegateRoot.isCurrent
-                                            ? (mouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.95) : Qt.rgba(1, 1, 1, 0.75))
-                                            : (mouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.4) : Qt.rgba(1, 1, 1, 0.15))
+                                            ? (mouseArea.containsMouse ? Theme.palette("light").hover : Theme.palette("light").border)
+                                            : (mouseArea.containsMouse ? Theme.palette("neutral").borderHover : Theme.palette("neutral").border)
 
                                         Behavior on border.color { ColorAnimation { duration: Theme.horizontalDuration } }
                                         Behavior on border.width { NumberAnimation { duration: Theme.horizontalDuration } }
@@ -274,30 +319,46 @@ Rectangle {
                                         anchors.bottom: parent.bottom
                                         anchors.bottomMargin: 10
                                         anchors.horizontalCenter: parent.horizontalCenter
-                                        height: 28
-                                        width: Math.min(parent.width - 32, fileNameText.implicitWidth + 24)
+                                        height: 30
+                                        width: Math.min(parent.width - 32, pillRow.implicitWidth + 24)
                                         opacity: Math.max(0.0, 1.0 - delegateRoot.absCenterDist / 50)
                                         visible: opacity > 0
 
                                         Rectangle {
                                             anchors.fill: parent
-                                            radius: height / 2
-                                            color: Qt.rgba(0, 0, 0, 0.65)
-                                            border.width: 1
-                                            border.color: Qt.rgba(1, 1, 1, 0.2)
+                                            radius: Theme.cardButtonRadius
+                                            color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.84)
+                                            border.width: 1.5
+                                            border.color: Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.35)
                                         }
 
-                                        Text {
-                                            id: fileNameText
+                                        RowLayout {
+                                            id: pillRow
                                             anchors.centerIn: parent
-                                            width: parent.width - 20
-                                            text: delegateRoot.fileName
-                                            color: Theme.palettePaper
-                                            font.family: Theme.font
-                                            font.pixelSize: 12
-                                            font.bold: true
-                                            elide: Text.ElideMiddle
-                                            horizontalAlignment: Text.AlignHCenter
+                                            width: Math.min(parent.width - 20, implicitWidth)
+                                            spacing: 6
+
+                                            Text {
+                                                text: "󰸉"
+                                                color: Theme.statusBlue
+                                                font.family: Theme.font
+                                                font.pixelSize: Theme.fontSize - 1
+                                                font.bold: true
+                                                Layout.alignment: Qt.AlignVCenter
+                                            }
+
+                                            Text {
+                                                id: fileNameText
+                                                Layout.fillWidth: true
+                                                text: delegateRoot.fileName
+                                                color: Theme.textPrimary
+                                                font.family: Theme.font
+                                                font.pixelSize: Theme.fontSize - 2
+                                                font.bold: true
+                                                elide: Text.ElideMiddle
+                                                horizontalAlignment: Text.AlignHCenter
+                                                Layout.alignment: Qt.AlignVCenter
+                                            }
                                         }
                                     }
 
@@ -330,20 +391,31 @@ Rectangle {
                             }
                         }
                     }
-                }
-                
-                ModuleButton {
-                    label: "Close"
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: wallpaperPanel.expanded = false
-                    radius: Theme.moduleEdgeRadius
-                    Layout.alignment: Qt.AlignHCenter
-                    
-                    
-                    variant: "neutral"
-                    border.width: 2
 
-                    implicitWidth: 100
+                    ColumnLayout {
+                        anchors.centerIn: parent
+                        visible: folderModel.count === 0
+                        spacing: 8
+
+                        Text {
+                            text: "󰸉"
+                            font.family: Theme.font
+                            font.pixelSize: 32
+                            color: Theme.textPrimary
+                            opacity: 0.35
+                            Layout.alignment: Qt.AlignHCenter
+                        }
+
+                        Text {
+                            text: "No wallpapers found"
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize
+                            font.bold: true
+                            color: Theme.textPrimary
+                            opacity: 0.65
+                            Layout.alignment: Qt.AlignHCenter
+                        }
+                    }
                 }
             }
         }
