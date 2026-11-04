@@ -1,6 +1,5 @@
 // ExpandableModule.qml — Base for bar modules that expand downward with an overlay dropdown.
 import QtQuick
-import QtQuick.Layouts
 
 ModuleButton {
     id: root
@@ -15,37 +14,9 @@ ModuleButton {
     bottomLeftRadius:  0
     bottomRightRadius: 0
 
-    property real dropdownLeftOffset: {
-        if (!contentVisible) return 0
-        return _overlay.x
-    }
-    property real dropdownRightOffset: {
-        if (!contentVisible) return 0
-        return (_overlay.x + _overlay.width) - root.width
-    }
-
     property real screenEdgeGap: 2 * Theme.moduleEdgeRadius
     readonly property real leftEdgeGap: (leftCornerStyle === "bottom") ? 0 : screenEdgeGap
     readonly property real rightEdgeGap: (rightCornerStyle === "bottom") ? 0 : screenEdgeGap
-
-    readonly property bool touchesLeftEdge: {
-        if (!contentVisible) return false
-        var win = root.Window.window
-        if (!win) return false
-        try {
-            var pt = root.mapToItem(null, 0, 0)
-            return pt && (pt.x + _overlay.x <= root.leftEdgeGap + 1)
-        } catch(e) { return false }
-    }
-    readonly property bool touchesRightEdge: {
-        if (!contentVisible) return false
-        var win = root.Window.window
-        if (!win) return false
-        try {
-            var pt = root.mapToItem(null, 0, 0)
-            return pt && (pt.x + _overlay.x + _overlay.width >= win.width - root.rightEdgeGap - 1)
-        } catch(e) { return false }
-    }
 
     readonly property bool touchesPhysicalLeftEdge: {
         if (!contentVisible) return false
@@ -72,32 +43,20 @@ ModuleButton {
     property int inverseCornerSize: Theme.moduleEdgeRadius
     property int topCornerRadius: Theme.topCornerRadius
     property int expandedTopCornerRadius: Theme.expandedTopCornerRadius
-    property bool inverseCornerSmoothCurve: false
-    property real inverseCornerSmoothTolerance: 0.15
-    readonly property bool hasOwnInverseCorners: true
     readonly property bool hasProtrudingCorners: (leftCornerStyle === "bottom" || rightCornerStyle === "bottom" || leftCornerStyle === "top" || rightCornerStyle === "top")
 
     property alias flowingBackground: _flowingBg
-    property alias overlayBackground: _flowingBg
-    property alias leftSideCorner:     _flowingBg
-    property alias rightSideCorner:    _flowingBg
-    property alias leftBottomCorner:   _flowingBg
-    property alias rightBottomCorner:  _flowingBg
-    property alias leftTopCorner:      _flowingBg
-    property alias rightTopCorner:     _flowingBg
 
     // Title bar configuration
-    property int titleBarHeight: useDefaultPill ? Theme.moduleHeight *1.6 : 0
+    property int titleBarHeight: useDefaultPill ? Theme.moduleHeight * 1.6 : 0
 
     property bool shrinkEnabled: true
-    property int shrinkAmount: 10
     property int collapsedWidth: expanded ? lastPillWidth : pillNaturalWidth
     implicitWidth: (root.expanded && shrinkEnabled) ? 100 : collapsedWidth
 
     // Close button configuration for bar tab
     property bool showCloseButton: shrinkEnabled
     property string closeButtonText: "Close"
-    property alias barTabCloseButton: _closeButtonBg
 
     clip: false
     noHoverColorChange: expanded
@@ -325,21 +284,12 @@ ModuleButton {
     property var  pillBorderColor: null
     property var  pillFillColor: null
     property string expandedPillLabel: ""
+    property int    expandedLabelPixelSize: Theme.fontSize + 5
     property string pillBgImageSource: ""
     property real   pillBgImageOpacity: 0.35
     property real   pillBgImageBrightness: 0.35
     property real   pillBgImageContrast: 0.0
     property real   pillBgImageDarkOverlayOpacity: 0.0
-
-    Text {
-        id: _expandedMeasureText
-        visible: false
-        text: root.expandedPillLabel
-        font.family: Theme.font
-        font.pixelSize: Theme.fontSize
-        font.bold: true
-    }
-    readonly property real expandedLabelWidth: _expandedMeasureText.implicitWidth > 0 ? Math.round(_expandedMeasureText.implicitWidth + 38) : 0
 
     Text {
         id: _collapsedMeasureText
@@ -535,7 +485,7 @@ ModuleButton {
             text: root.expandedPillLabel
             textColor: Theme.textPrimary
             fontFamily: Theme.font
-            pixelSize: Theme.fontSize + 2
+            pixelSize: root.expandedLabelPixelSize
             fontBold: true
             textMaxWidth: Math.max(100, parent.width - 40)
             horizontalAlignment: Text.AlignHCenter

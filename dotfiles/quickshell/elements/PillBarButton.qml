@@ -33,8 +33,8 @@ ModuleButton {
     readonly property color effectiveFillColor: pillFillColor !== null
         ? pillFillColor
         : root.pillPal.pillFill
-    property real gradientOpacityBase: root.openBottom ? 0.4 : 1.0
-    property real gradientOpacityLow: root.openBottom ? 0.0 : 1.0
+    property real gradientOpacityBase: root.openBottom ? 0.15 : 1.0
+    property real gradientOpacityLow: root.openBottom ? 0.5 : 1.0
     property string bgImageSource: ""
     property real bgImageOpacity: 0.35
     property real bgImageBrightness: 0.35
