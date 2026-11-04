@@ -11,7 +11,7 @@ Rectangle {
     id: clipboardPanel
     
     property real targetWidth: 400
-    property real targetHeight: 800
+    property real targetHeight: 810
     property bool expanded: false
     property int selectedIndex: -1
     focus: expanded

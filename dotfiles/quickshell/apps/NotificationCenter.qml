@@ -517,7 +517,7 @@ Item {
         readonly property int effectiveTimeout: isCritical ? 0 : (notif && notif.expireTimeout > 0 ? notif.expireTimeout : 5000)
 
         variant: isCritical ? "red" : "neutral"
-        radius: Theme.moduleEdgeRadius / 2 + 5
+        radius: expireTimer.running ? Theme.cardRadius : Theme.cardItemRadius
         border.width: 2
         border.color: toastRow.hovered ? Theme.palettePaper : toastRow.pal.border
         clip: true

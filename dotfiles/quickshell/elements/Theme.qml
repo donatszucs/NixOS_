@@ -163,7 +163,7 @@ QtObject {
     readonly property real cardHeaderHeight:          cardRadius * 2
     readonly property int  cardItemRadius:            Math.max(0, cardRadius - cardPadding)
     readonly property int  cardHeaderInverseRadius:   cardRadius
-    readonly property int  cardItemIconInverseRadius: Math.max(4, cardItemRadius - cardItemPadding)
+    readonly property int  cardItemIconInverseRadius: cardItemRadius
     readonly property int  cardButtonRadius:          cardItemRadius
     readonly property int  sliderRadius:              Math.max(4, cardItemRadius - cardItemPadding)
     readonly property int  innerElementRadius:        Math.max(4, cardItemRadius - cardItemPadding)

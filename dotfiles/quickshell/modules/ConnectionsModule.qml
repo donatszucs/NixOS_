@@ -1083,7 +1083,7 @@ ExpandableModule {
                         icon: "󰒓"
                         iconSize: Theme.fontSize + 1
                         anchors.right: parent.right
-                        anchors.rightMargin: 7
+                        anchors.rightMargin: 15
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: phoneAppProc.running = true
                     }
