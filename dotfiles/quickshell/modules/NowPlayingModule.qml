@@ -495,12 +495,10 @@ ExpandableModule {
         id: collapsedRow
         parent: nowPlayingModule
         anchors.horizontalCenter: nowPlayingModule.headerPill.horizontalCenter
-        anchors.verticalCenter: nowPlayingModule.expanded
-            ? nowPlayingModule.headerPill.top
-            : nowPlayingModule.headerPill.verticalCenter
+        anchors.verticalCenter: nowPlayingModule.headerPill.top
         anchors.verticalCenterOffset: nowPlayingModule.expanded
             ? Math.round(nowPlayingModule.titleBarHeight / 2)
-            : 0
+            : Math.round(Theme.moduleHeight / 2)
         spacing: nowPlayingModule.expanded ? 8 : (nowPlayingModule.showPlayerIcon ? 6 : 0)
         z: 10
         transformOrigin: Item.Center
@@ -573,6 +571,10 @@ ExpandableModule {
             textColor: Theme.textPrimary
             fontBold: true
             horizontalAlignment: nowPlayingModule.isNothingPlaying ? Text.AlignHCenter : Text.AlignLeft
+
+            Behavior on textMaxWidth {
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
         }
     }
 

@@ -398,7 +398,7 @@ ModuleButton {
                 leftMargin: 6
                 rightMargin: 6
             }
-            radius: Theme.closeButtonRadius
+            radius: 7
             visible: opacity > 0.001
             opacity: (root.expanded && root.showCloseButton) ? 1.0 : 0.0
 
@@ -410,10 +410,10 @@ ModuleButton {
             }
 
             color: _barTabMouseArea.pressed
-                ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.16)
+                ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.06)
                 : (_barTabMouseArea.containsMouse
-                    ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.10)
-                    : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.04))
+                    ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.16)
+                    : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.10))
 
             Behavior on color {
                 ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
