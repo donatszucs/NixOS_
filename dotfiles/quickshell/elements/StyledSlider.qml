@@ -7,7 +7,7 @@ Slider {
     Layout.fillWidth: true
 
     property int sliderHeight: 30
-    property int radius: 7
+    property int radius: Theme.sliderRadius
     property int topLeftRadius: radius
     property int topRightRadius: radius
     property int bottomLeftRadius: radius
@@ -82,11 +82,11 @@ Slider {
             height: parent.height - 4
             color: control.pressed ? Theme.palette("light").pressed : Theme.palette("light").base
             border.color: Theme.palette("light").border
-            radius: control.radius
-            topLeftRadius: control.topLeftRadius
-            topRightRadius: control.topRightRadius
-            bottomLeftRadius: control.bottomLeftRadius
-            bottomRightRadius: control.bottomRightRadius
+            radius: Math.max(0, control.radius - 2)
+            topLeftRadius: Math.max(0, control.topLeftRadius - 2)
+            topRightRadius: Math.max(0, control.topRightRadius - 2)
+            bottomLeftRadius: Math.max(0, control.bottomLeftRadius - 2)
+            bottomRightRadius: Math.max(0, control.bottomRightRadius - 2)
         }
     }
 

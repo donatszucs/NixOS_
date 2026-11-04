@@ -41,10 +41,10 @@ ExpandableModule {
     
     collapsedWidth: topRow.implicitWidth
     
-    implicitHeight: expanded ? trayCard.implicitHeight + Theme.moduleHeight + 10 : Theme.moduleHeight
+    implicitHeight: expanded ? trayCard.implicitHeight + Theme.moduleHeight + Theme.pillExpandedMargin * 2 : Theme.moduleHeight
 
     // Overlay dropdown setup
-    expandedDropdownWidth: Math.max(topRow.implicitWidth, trayCard.implicitWidth + 10)
+    expandedDropdownWidth: Math.max(topRow.implicitWidth, trayCard.implicitWidth + Theme.pillExpandedMargin * 2)
     dropdownAlignment: "center"
 
     expandedBottomLeftRadius: expandedDropdownWidth / 2
@@ -90,16 +90,16 @@ ExpandableModule {
         parent: root.overlay
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 5
+        anchors.topMargin: Theme.pillExpandedMargin
         
         color: Theme.divider
-        radius: Theme.moduleEdgeRadius
+        radius: implicitWidth / 2
 
         border.width: 2
         border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
 
-        implicitWidth: trayColumn.implicitWidth + 10
-        implicitHeight: trayColumn.implicitHeight + 10
+        implicitWidth: trayColumn.implicitWidth + Theme.cardMargin * 2
+        implicitHeight: trayColumn.implicitHeight + Theme.cardMargin * 2
 
         // Visible when expanded or animating close (clipped)
         visible: root.contentVisible && trayColumn.implicitHeight > 0

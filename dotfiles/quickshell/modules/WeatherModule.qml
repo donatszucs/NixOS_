@@ -26,7 +26,7 @@ ExpandableModule {
 
     property int cardWidth: 310
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + 15 : Theme.moduleHeight
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
 
     readonly property real weatherNaturalWidth: Math.max(80, Math.round(pillContent.implicitWidth + 30))
     property real lastWeatherWidth: 100
@@ -39,7 +39,7 @@ ExpandableModule {
 
     collapsedWidth: expanded ? lastWeatherWidth : weatherNaturalWidth
 
-    expandedDropdownWidth: cardWidth + 30
+    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
     dropdownAlignment: "center"
 
     leftCornerStyle: "side"
@@ -103,7 +103,7 @@ ExpandableModule {
     ColumnLayout {
         id: baseColumn
         parent: root.overlay
-        spacing: 10
+        spacing: Theme.cardMargin
         anchors {
             top: parent.top
             topMargin: root.titleBarHeight
@@ -126,7 +126,7 @@ ExpandableModule {
             ColumnLayout {
                 id: popupCol
                 width: parent.width
-                spacing: 10
+                spacing: Theme.cardMargin
 
                 ModuleButton {
                     id: updateBtn
@@ -509,7 +509,7 @@ ExpandableModule {
                                     id: cardBg
                                     anchors.fill: parent
                                     color: Qt.darker(Theme.palettePaper, 1.1)
-                                    radius: Theme.moduleEdgeRadius / 2
+                                    radius: Theme.cardItemRadius
 
                                     layer.enabled: true
                                     layer.smooth: true

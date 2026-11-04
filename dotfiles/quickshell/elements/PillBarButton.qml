@@ -20,9 +20,10 @@ ModuleButton {
     property string pillText: ""
     property string pillVariant: root.variant
     property var pillPal: Theme.palette(pillVariant)
-    property int pillRadius: (Theme.moduleHeight - 10) / 2
-    property int pillHeight: Theme.moduleHeight - 10
-    property int pillPaddingH: 10
+    property int pillRadius: openBottom ? pillExpandedRadius : Theme.pillCollapsedRadius
+    property int pillExpandedRadius: Theme.pillExpandedRadius
+    property int pillHeight: Theme.pillHeight
+    property int pillPaddingH: openBottom ? Theme.pillExpandedPaddingH : Theme.pillCollapsedPaddingH
     property real pillColorOpacity: root.colorOpacity 
     property var pillBorderColor: null
     readonly property color effectiveBorderColor: pillBorderColor !== null
@@ -41,18 +42,15 @@ ModuleButton {
     property real bgImageDarkOverlayOpacity: 0.0
 
     property bool openBottom: false
-    property int openBottomTopMargin: 6
-    property int openBottomBottomMargin: 6
+    property int openBottomTopMargin: Theme.pillExpandedMargin
+    property int openBottomBottomMargin: Theme.pillExpandedMargin
 
-    property int pillTopLeftRadius: pillRadius
-    property int pillTopRightRadius: pillRadius
-    property int pillBottomLeftRadius: openBottom ? (Theme.moduleEdgeRadius + 5): pillRadius
-    property int pillBottomRightRadius: openBottom ? (Theme.moduleEdgeRadius + 5): pillRadius
+    property real pillTopLeftRadius: pillRadius
+    property real pillTopRightRadius: pillRadius
+    property real pillBottomLeftRadius: pillRadius
+    property real pillBottomRightRadius: pillRadius
 
     Behavior on pillHeight {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-    }
-    Behavior on pillRadius {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
     Behavior on pillPaddingH {

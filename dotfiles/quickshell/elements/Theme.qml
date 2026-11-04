@@ -140,13 +140,33 @@ QtObject {
     readonly property int modulePaddingH: 15
     readonly property int modulePaddingV: 5
 
-    // ── Card styling ──────────────────────────────────────────────────
-    readonly property int  cardRadius:       moduleEdgeRadius / 2 + 10
-    readonly property int  cardBorderWidth:  0
-    readonly property real cardHeaderHeight: 40
-    readonly property int  cardButtonRadius: 13
+    // ── Pill & Expanded Module Radii (Master Parameters) ─────────────
+    readonly property int  pillHeight:                moduleHeight - 10
+    readonly property int  pillCollapsedRadius:       pillHeight / 2
+    readonly property int  pillCollapsedPaddingH:     10
+    readonly property int  closeButtonRadius:         pillCollapsedRadius
 
-    // ── Pill Bar Variables ───────────────────────────────────────────
+    // Master outer radius & layer paddings — inner radii are derived concentrically (outerRadius - padding)
+    readonly property int  expandedModuleRadius:      36
+    readonly property int  pillExpandedMargin:        5
+    readonly property int  pillExpandedPaddingH:      pillExpandedMargin * 2
+    readonly property int  pillExpandedRadius:        Math.max(0, expandedModuleRadius - pillExpandedMargin)
+
+    // ── Card & Inner Element Radii (Concentric) ──────────────────────
+    readonly property int  cardMargin:                10
+    readonly property int  dropdownMargin:            pillExpandedMargin + cardMargin
+    readonly property int  cardPadding:               10
+    readonly property int  cardItemPadding:           8
+
+    readonly property int  cardRadius:                Math.max(0, pillExpandedRadius - cardMargin)
+    readonly property int  cardBorderWidth:           0
+    readonly property real cardHeaderHeight:          cardRadius * 2
+    readonly property int  cardItemRadius:            Math.max(0, cardRadius - cardPadding)
+    readonly property int  cardHeaderInverseRadius:   cardRadius
+    readonly property int  cardItemIconInverseRadius: Math.max(4, cardItemRadius - cardItemPadding)
+    readonly property int  cardButtonRadius:          cardItemRadius
+    readonly property int  sliderRadius:              Math.max(4, cardItemRadius - cardItemPadding)
+    readonly property int  innerElementRadius:        Math.max(4, cardItemRadius - cardItemPadding)
 
     // ── Animations ─────────────────────────────────────────────────
     readonly property int verticalDuration: 200

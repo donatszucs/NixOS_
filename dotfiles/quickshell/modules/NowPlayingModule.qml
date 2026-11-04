@@ -123,7 +123,7 @@ ExpandableModule {
     }
     readonly property real thumbnailHeight: cardHeight - Theme.cardHeaderHeight - 2 * Theme.cardBorderWidth
 
-    implicitHeight: expanded ? targetCardHeight + Theme.moduleHeight + nowPlayingModule.titleBarHeight + 15 : Theme.moduleHeight
+    implicitHeight: expanded ? targetCardHeight + Theme.moduleHeight + nowPlayingModule.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
 
     readonly property real mediaNaturalWidth: Math.max(70, Math.min(200, Math.round(collapsedRow.implicitWidth + 26)))
     property real lastCollapsedWidth: 100
@@ -135,7 +135,7 @@ ExpandableModule {
     collapsedWidth: expanded ? lastCollapsedWidth : mediaNaturalWidth
 
     // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + 30
+    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
 
     dropdownAlignment: "right"
 
@@ -624,7 +624,7 @@ ExpandableModule {
                         anchors.left: authorBar.left
                         cornerPosition: "topLeft"
                         color: authorBar.color
-                        size: 15
+                        size: Theme.cardHeaderInverseRadius
                     }
 
                     InverseRadius {
@@ -632,7 +632,7 @@ ExpandableModule {
                         anchors.top: authorBar.bottom
                         anchors.right: authorBar.right
                         color: authorBar.color
-                        size: 15
+                        size: Theme.cardHeaderInverseRadius
                     }
 
                     WheelHandler {
@@ -652,7 +652,7 @@ ExpandableModule {
                             id: prevBtn
                             variant: "dark"
                             cursorShape: nowPlayingModule.canPrev ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            textFont: 15
+                            textFont: 17
                             Layout.preferredWidth: 28
                             Layout.preferredHeight: 26
                             Layout.alignment: Qt.AlignVCenter
@@ -673,7 +673,7 @@ ExpandableModule {
                             id: nextBtn
                             variant: "dark"
                             cursorShape: nowPlayingModule.canNext ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            textFont: 15
+                            textFont: 17
                             Layout.preferredWidth: 28
                             Layout.preferredHeight: 26
                             Layout.alignment: Qt.AlignVCenter

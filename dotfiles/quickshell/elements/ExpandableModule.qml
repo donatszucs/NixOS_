@@ -5,10 +5,12 @@ import QtQuick.Layouts
 ModuleButton {
     id: root
 
-    property int expandedBottomLeftRadius:   Theme.moduleEdgeRadius + 10
-    property int expandedBottomRightRadius:  Theme.moduleEdgeRadius + 10
+    property int expandedBottomLeftRadius:   Theme.expandedModuleRadius
+    property int expandedBottomRightRadius:  Theme.expandedModuleRadius
     property int collapsedBottomLeftRadius:  0
     property int collapsedBottomRightRadius: 0
+    property int collapsedPillRadius:        Theme.pillCollapsedRadius
+    property int expandedPillRadius:         Theme.pillExpandedRadius
 
     bottomLeftRadius:  0
     bottomRightRadius: 0
@@ -396,7 +398,7 @@ ModuleButton {
                 leftMargin: 6
                 rightMargin: 6
             }
-            radius: 8
+            radius: Theme.closeButtonRadius
             visible: opacity > 0.001
             opacity: (root.expanded && root.showCloseButton) ? 1.0 : 0.0
 
@@ -469,9 +471,9 @@ ModuleButton {
         height: root.expanded ? Math.max(Theme.moduleHeight, _overlay.height) : Theme.moduleHeight
         implicitWidth: root.implicitWidth
         openBottom: root.expanded
-        pillPaddingH: root.expanded ? 12 : 10
-        pillHeight: root.expanded ? Math.max(Theme.moduleHeight - 10, _overlay.height) : (Theme.moduleHeight - 10)
-        pillRadius: root.expanded ? 16 : ((Theme.moduleHeight - 10) / 2)
+        pillPaddingH: root.expanded ? Theme.pillExpandedPaddingH : Theme.pillCollapsedPaddingH
+        pillHeight: root.expanded ? Math.max(Theme.pillHeight, _overlay.height) : Theme.pillHeight
+        pillRadius: root.expanded ? root.expandedPillRadius : root.collapsedPillRadius
 
         Behavior on y {
             NumberAnimation {

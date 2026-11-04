@@ -20,18 +20,18 @@ ExpandableModule {
     pillVariant: expanded ? "neutral" : SharedState.lightVariant
     expandedPillLabel: "Lights"
 
-    expandedBottomLeftRadius:   Theme.moduleEdgeRadius + 10
-    expandedBottomRightRadius:  Theme.moduleEdgeRadius + 10
+    expandedBottomLeftRadius:   Theme.expandedModuleRadius
+    expandedBottomRightRadius:  Theme.expandedModuleRadius
     collapsedBottomLeftRadius:  Theme.moduleEdgeRadius
     collapsedBottomRightRadius: 0
 
     leftCornerStyle: "top"
     rightCornerStyle: "side"
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + 5 : Theme.moduleHeight
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
 
     // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + 30
+    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
     dropdownAlignment: "left"
 
     onPillRightClicked: {
@@ -53,34 +53,33 @@ ExpandableModule {
         spacing: 10
         anchors {
             top: parent.top
-            left: parent.left
-            right: parent.right
             topMargin: root.titleBarHeight
-            leftMargin: 5
+            horizontalCenter: parent.horizontalCenter
         }
 
         scale: expanded ? 1 : 0
-        transformOrigin: Item.TopLeft
+        transformOrigin: Item.Top
         Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
         MouseArea {
             visible: root.contentVisible
             opacity: root.contentOpacity
             implicitWidth: root.cardWidth
+            Layout.preferredWidth: root.cardWidth
             Layout.preferredHeight: popupCol.implicitHeight
-            Layout.margins: 10
+            Layout.alignment: Qt.AlignHCenter
             acceptedButtons: Qt.NoButton
 
             ColumnLayout {
                 id: popupCol
                 width: parent.width
-                spacing: 10
+                spacing: Theme.cardMargin
 
         // ── Brightness Card with Slider ──────────────────────────
         BaseCard {
             id: brightnessCard
             Layout.fillWidth: true
-            implicitHeight: headerBar.height + brightContent.implicitHeight + 20
+            implicitHeight: headerBar.height + brightContent.implicitHeight + Theme.cardPadding * 2
             headerTitle: "Brightness"
 
             headerControls: [
@@ -112,7 +111,7 @@ ExpandableModule {
                     top: brightnessCard.headerBar.bottom
                     left: parent.left
                     right: parent.right
-                    margins: 10
+                    margins: Theme.cardPadding
                 }
                 spacing: 10
 
@@ -120,7 +119,7 @@ ExpandableModule {
                     id: brightSlider
                     Layout.fillWidth: true
                     sliderHeight: 28
-                    radius: Theme.moduleEdgeRadius / 2
+                    radius: Theme.cardItemRadius
                     from: 1
                     to: 100
                     value: SharedState.lightBrightness
@@ -237,14 +236,14 @@ ExpandableModule {
             ModuleButton {
                 id: resetButton
                 anchors.right: parent.right
-                anchors.rightMargin: 10
+                anchors.rightMargin: Theme.cardPadding
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                anchors.topMargin: 8
-                anchors.bottomMargin: 8
+                anchors.topMargin: Theme.cardPadding
+                anchors.bottomMargin: Theme.cardPadding
                 width: 36
 
-                radius: 10
+                radius: Theme.cardItemRadius
                 variant: "light"
                 border.width: 2
                 cursorShape: Qt.PointingHandCursor

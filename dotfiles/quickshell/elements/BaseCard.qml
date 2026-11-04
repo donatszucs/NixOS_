@@ -127,6 +127,7 @@ Rectangle {
         anchors.top: headerBar.bottom
         anchors.left: headerBar.left
         color: headerBar.color
+        size: Theme.cardHeaderInverseRadius
     }
 
     InverseRadius {
@@ -137,5 +138,6 @@ Rectangle {
         anchors.top: headerBar.bottom
         anchors.right: headerBar.right
         color: headerBar.color
+        size: Theme.cardHeaderInverseRadius
     }
 }

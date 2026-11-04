@@ -70,9 +70,9 @@ ExpandableModule {
     }
 
     property int cardWidth: 340
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + 15 : Theme.moduleHeight
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
 
-    expandedDropdownWidth: cardWidth + 30
+    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
     dropdownAlignment: "left"
 
     collapsedWidth: clockContent.implicitWidth + 20
@@ -277,9 +277,9 @@ ExpandableModule {
 
         Rectangle {
             color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, Theme.paletteInk.a * 0.6)
-            radius: (Theme.moduleHeight - 10) / 2
-            topLeftRadius: radius - 6
-            bottomLeftRadius: radius - 6
+            radius: Theme.pillCollapsedRadius
+            topLeftRadius: Math.max(0, radius - 6)
+            bottomLeftRadius: Math.max(0, radius - 6)
             implicitWidth: 60
             implicitHeight: Theme.moduleHeight - 14
 
@@ -307,7 +307,7 @@ ExpandableModule {
             topMargin: root.titleBarHeight
             horizontalCenter: parent.horizontalCenter
         }
-        spacing: 10
+        spacing: Theme.cardMargin
 
         visible: opacity > 0
         opacity: root.expanded ? 1.0 : 0.0
@@ -326,7 +326,7 @@ ExpandableModule {
             implicitWidth: root.cardWidth
             Layout.preferredWidth: root.cardWidth
             Layout.alignment: Qt.AlignHCenter
-            implicitHeight: headerBar.height + calGridContent.implicitHeight + 16
+            implicitHeight: headerBar.height + calGridContent.implicitHeight + Theme.cardPadding * 2
             hasHeader: true
 
             headerContent: [
@@ -427,7 +427,7 @@ ExpandableModule {
                     top: calendarCard.headerBar.bottom
                     left: parent.left
                     right: parent.right
-                    margins: 10
+                    margins: Theme.cardPadding
                 }
                 spacing: 5
 
@@ -506,7 +506,7 @@ ExpandableModule {
 
                             Layout.fillWidth: true
                             implicitHeight: 30
-                            radius: 6
+                            radius: Theme.innerElementRadius
 
                             color: isToday 
                                 ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.28) 
@@ -577,7 +577,7 @@ ExpandableModule {
             implicitWidth: root.cardWidth
             Layout.preferredWidth: root.cardWidth
             Layout.alignment: Qt.AlignHCenter
-            implicitHeight: agendaContentCol.implicitHeight + 20
+            implicitHeight: agendaContentCol.implicitHeight + Theme.cardPadding * 2
 
             ColumnLayout {
                 id: agendaContentCol
@@ -585,7 +585,7 @@ ExpandableModule {
                     left: parent.left
                     right: parent.right
                     top: parent.top
-                    margins: 10
+                    margins: Theme.cardPadding
                 }
                 spacing: 10
 
@@ -632,7 +632,7 @@ ExpandableModule {
 
                         Layout.fillWidth: true
                         implicitHeight: eventItemRow.implicitHeight + 15
-                        radius: 8
+                        radius: Theme.cardItemRadius
                         color: Qt.rgba(1, 1, 1, 0.06)
                         border.width: 1
                         border.color: eventItemHover.hovered ? Qt.rgba(eventColor.r, eventColor.g, eventColor.b, 0.4) : Theme.divider
@@ -668,7 +668,7 @@ ExpandableModule {
                                     Rectangle {
                                         implicitHeight: 16
                                         implicitWidth: timeBadgeText.implicitWidth + 8
-                                        radius: 4
+                                        radius: Math.round(Theme.innerElementRadius * 0.6)
                                         color: Qt.rgba(eventItem.eventColor.r, eventItem.eventColor.g, eventItem.eventColor.b, 0.18)
 
                                         Text {
@@ -771,7 +771,7 @@ ExpandableModule {
                 Rectangle {
                     Layout.fillWidth: true
                     implicitHeight: setupCol.implicitHeight + 16
-                    radius: 8
+                    radius: Theme.cardItemRadius
                     color: Qt.rgba(1, 1, 1, 0.05)
                     border.width: 1
                     border.color: Theme.cardBorder

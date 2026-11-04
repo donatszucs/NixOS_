@@ -128,10 +128,10 @@ ExpandableModule {
 
     property int cardWidth: 280
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + audioModule.titleBarHeight + 15 : Theme.moduleHeight
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + audioModule.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
 
     // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + 30
+    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
     dropdownAlignment: "center"
 
     leftCornerStyle: "side"
@@ -152,7 +152,7 @@ ExpandableModule {
     ColumnLayout {
         id: baseColumn
         parent: audioModule.overlay
-        spacing: 10
+        spacing: 100
 
         anchors {
             top: parent.top
@@ -176,12 +176,12 @@ ExpandableModule {
             ColumnLayout {
                 id: popupCol
                 width: parent.width
-                spacing: 10
+                spacing: Theme.cardMargin
 
                 BaseCard {
                     id: sinkCard
                     Layout.fillWidth: true
-                    implicitHeight: headerBar.height + sinkCol.implicitHeight + 20
+                    implicitHeight: headerBar.height + sinkCol.implicitHeight + Theme.cardPadding * 2
                     headerTitle: "Output Devices"
 
                     headerControls: [
@@ -204,7 +204,7 @@ ExpandableModule {
                             top: sinkCard.headerBar.bottom
                             left: parent.left
                             right: parent.right
-                            margins: 10
+                            margins: Theme.cardPadding
                         }
                         spacing: 5
 
@@ -230,7 +230,7 @@ ExpandableModule {
 
                                 Layout.fillWidth: true
                                 implicitHeight: 75
-                                radius: Theme.moduleEdgeRadius / 2 + 5
+                                radius: Theme.cardItemRadius
                                 color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.15) : Theme.divider
                                 border.width: 2
                                 border.color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.45) : Theme.cardBorder
@@ -246,7 +246,7 @@ ExpandableModule {
 
                                 ColumnLayout {
                                     anchors.fill: parent
-                                    anchors.margins: 10
+                                    anchors.margins: Theme.cardItemPadding
                                     spacing: 10
 
                                     RowLayout {
@@ -270,7 +270,7 @@ ExpandableModule {
                                                 Rectangle {
                                                     width: 28
                                                     height: 28
-                                                    radius: 6
+                                                    radius: Theme.innerElementRadius
                                                     color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
                                                     Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
@@ -331,7 +331,7 @@ ExpandableModule {
                                             }
                                             implicitHeight: 24
                                             implicitWidth: 24
-                                            radius: 5
+                                            radius: Theme.innerElementRadius
                                             border.width: 1
                                             Layout.alignment: Qt.AlignVCenter
                                         }
@@ -341,7 +341,7 @@ ExpandableModule {
                                         id: devSlider
                                         Layout.fillWidth: true
                                         sliderHeight: 18
-                                        radius: 5
+                                        radius: Theme.sliderRadius
                                         from: 0.0
                                         to: 1.0
                                         value: devVolume
@@ -365,7 +365,7 @@ ExpandableModule {
                 BaseCard {
                     id: sourceCard
                     Layout.fillWidth: true
-                    implicitHeight: headerBar.height + sourceCol.implicitHeight + 20
+                    implicitHeight: headerBar.height + sourceCol.implicitHeight + Theme.cardPadding * 2
                     headerTitle: "Input Devices"
 
                     headerControls: [
@@ -390,7 +390,7 @@ ExpandableModule {
                             top: sourceCard.headerBar.bottom
                             left: parent.left
                             right: parent.right
-                            margins: 10
+                            margins: Theme.cardPadding
                         }
                         spacing: 5
 
@@ -412,7 +412,7 @@ ExpandableModule {
                                 cursorShape: Qt.PointingHandCursor
                                 Layout.fillWidth: true
                                 implicitHeight: 46
-                                radius: Theme.moduleEdgeRadius / 2 + 5
+                                radius: Theme.cardItemRadius
                                 opacity: 1.0
                                 border.width: 2
                                 border.color: isSourceActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
@@ -432,15 +432,15 @@ ExpandableModule {
                                         implicitHeight: sourceBtn.implicitHeight
                                         color: isSourceActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
                                         Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-                                        topLeftRadius: sourceBtn.radius
-                                        bottomLeftRadius: sourceBtn.radius
+                                        topLeftRadius: Math.min(height / 2, sourceBtn.radius)
+                                        bottomLeftRadius: Math.min(height / 2, sourceBtn.radius)
 
                                         InverseRadius {
                                             anchors.top: parent.top
                                             anchors.left: parent.right
                                             cornerPosition: "topLeft"
                                             color: parent.color
-                                            size: 10
+                                            size: Theme.cardItemIconInverseRadius
                                         }
 
                                         InverseRadius {
@@ -448,7 +448,7 @@ ExpandableModule {
                                             anchors.left: parent.right
                                             cornerPosition: "bottomLeft"
                                             color: parent.color
-                                            size: 10
+                                            size: Theme.cardItemIconInverseRadius
                                         }
 
                                         Text {

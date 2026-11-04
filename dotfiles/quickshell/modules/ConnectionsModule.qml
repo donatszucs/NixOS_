@@ -195,7 +195,7 @@ ExpandableModule {
     expandedPillLabel: "Connections"
 
     // ── Sizing ─────────────────────────────────────────────────
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + connectionsModule.titleBarHeight + 15 : Theme.moduleHeight
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + connectionsModule.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
 
     // ── Collapsed layout metrics ───────────────────────────────
     readonly property int pillInsetH: 5
@@ -224,7 +224,7 @@ ExpandableModule {
     collapsedWidth: expanded ? lastConnectionsWidth : connectionsNaturalWidth
 
     // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + 30
+    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
     dropdownAlignment: "center"
 
     leftCornerStyle: "side"
@@ -303,7 +303,7 @@ ExpandableModule {
             topMargin: connectionsModule.titleBarHeight
             horizontalCenter: parent.horizontalCenter
         }
-        spacing: 10
+        spacing: Theme.cardMargin
 
 
         scale: expanded ? 1 : 0
@@ -334,7 +334,7 @@ ExpandableModule {
             ColumnLayout {
                 id: popupCol
                 width: parent.width
-                spacing: 10
+                spacing: Theme.cardMargin
 
             // ── Page Switcher Pill ──────────────────────────────────────
             Rectangle {
@@ -588,8 +588,8 @@ ExpandableModule {
                         top: btModule.headerBar.bottom
                         left: parent.left
                         right: parent.right
-                        margins: 12
-                        topMargin: 10
+                        margins: Theme.cardPadding
+                        topMargin: Theme.cardPadding
                     }
                     spacing: 5
 
@@ -604,7 +604,7 @@ ExpandableModule {
                         textFont: Theme.fontSize * 0.8
                         Layout.alignment: Qt.AlignHCenter
                         Layout.bottomMargin: 5
-                        radius: Theme.moduleEdgeRadius / 2
+                        radius: Theme.cardButtonRadius
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             connectionsModule.showUnpairedDevices = !connectionsModule.showUnpairedDevices;
@@ -649,7 +649,7 @@ ExpandableModule {
 
                             Layout.fillWidth: true
                             implicitHeight: 46
-                            radius: Theme.moduleEdgeRadius / 2 + 5
+                            radius: Theme.cardItemRadius
                             opacity: 1.0
                             border.width: 2
                             border.color: (isConnected || isBusy) ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
@@ -705,15 +705,15 @@ ExpandableModule {
                                     implicitWidth: pairedDeviceBtn.implicitHeight
                                     implicitHeight: pairedDeviceBtn.implicitHeight
                                     color: (isConnected || isBusy) ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
-                                    topLeftRadius: pairedDeviceBtn.radius
-                                    bottomLeftRadius: pairedDeviceBtn.radius
+                                    topLeftRadius: Math.min(height / 2, pairedDeviceBtn.radius)
+                                    bottomLeftRadius: Math.min(height / 2, pairedDeviceBtn.radius)
 
                                     InverseRadius {
                                         anchors.top: parent.top
                                         anchors.left: parent.right
                                         cornerPosition: "topLeft"
                                         color: parent.color
-                                        size: 10
+                                        size: Theme.cardItemIconInverseRadius
                                     }
 
                                     InverseRadius {
@@ -721,7 +721,7 @@ ExpandableModule {
                                         anchors.left: parent.right
                                         cornerPosition: "bottomLeft"
                                         color: parent.color
-                                        size: 10
+                                        size: Theme.cardItemIconInverseRadius
                                     }
 
                                     Text {
@@ -852,7 +852,7 @@ ExpandableModule {
 
                             Layout.fillWidth: true
                             implicitHeight: 46
-                            radius: Theme.moduleEdgeRadius / 2 + 5
+                            radius: Theme.cardItemRadius
                             opacity: isBusy ? 1.0 : 0.8
                             border.width: 2
                             border.color: isBusy ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
@@ -915,15 +915,15 @@ ExpandableModule {
                                     implicitWidth: unpairedDeviceBtn.implicitHeight
                                     implicitHeight: unpairedDeviceBtn.implicitHeight
                                     color: isBusy ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
-                                    topLeftRadius: unpairedDeviceBtn.radius
-                                    bottomLeftRadius: unpairedDeviceBtn.radius
+                                    topLeftRadius: Math.min(height / 2, unpairedDeviceBtn.radius)
+                                    bottomLeftRadius: Math.min(height / 2, unpairedDeviceBtn.radius)
 
                                     InverseRadius {
                                         anchors.top: parent.top
                                         anchors.left: parent.right
                                         cornerPosition: "topLeft"
                                         color: parent.color
-                                        size: 10
+                                        size: Theme.cardItemIconInverseRadius
                                     }
 
                                     InverseRadius {
@@ -931,7 +931,7 @@ ExpandableModule {
                                         anchors.left: parent.right
                                         cornerPosition: "bottomLeft"
                                         color: parent.color
-                                        size: 10
+                                        size: Theme.cardItemIconInverseRadius
                                     }
 
                                     Text {
@@ -993,7 +993,7 @@ ExpandableModule {
                                         id: pairActionBtn
                                         implicitHeight: 22
                                         implicitWidth: isPairing ? 56 : 48
-                                        radius: Theme.moduleEdgeRadius / 2
+                                        radius: Theme.innerElementRadius
                                         color: isPairing ? Qt.rgba(Theme.statusRed.r, Theme.statusRed.g, Theme.statusRed.b, 0.25)
                                                          : (pairActionHover.hovered ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.25) : Qt.rgba(1, 1, 1, 0.12))
                                         border.width: 1
@@ -1111,7 +1111,7 @@ ExpandableModule {
                             implicitWidth: 62
                             implicitHeight: 82
                             Layout.alignment: Qt.AlignVCenter
-                            radius: 12
+                            radius: Theme.cardItemRadius
                             color: Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.45)
                             border.width: 1.5
                             border.color: connectionsModule.phoneCharging

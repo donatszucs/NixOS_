@@ -67,8 +67,8 @@ ModuleButton {
     }
 
     radius: Theme.moduleEdgeRadius - 2
-    bottomLeftRadius:  launcherModule.expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
-    bottomRightRadius: launcherModule.expanded ? Theme.moduleEdgeRadius * 2 : Theme.moduleEdgeRadius + 2
+    bottomLeftRadius:  launcherModule.expanded ? Theme.expandedModuleRadius : Theme.moduleEdgeRadius + 2
+    bottomRightRadius: launcherModule.expanded ? Theme.expandedModuleRadius : Theme.moduleEdgeRadius + 2
     
     anchors.topMargin: 4
     cursorShape: Qt.PointingHandCursor
@@ -348,7 +348,7 @@ ModuleButton {
                         textFont: Theme.fontSize + 4
                         cursorShape: Qt.PointingHandCursor
 
-                        radius: Theme.moduleEdgeRadius - 5
+                        radius: Theme.cardButtonRadius
                         border.width: 2
 
                         onClicked: {
@@ -365,7 +365,7 @@ ModuleButton {
                         textFont: Theme.fontSize + 4
                         cursorShape: Qt.PointingHandCursor
 
-                        radius: Theme.moduleEdgeRadius - 5
+                        radius: Theme.cardButtonRadius
                         border.width: 2
                         
                         onClicked: {
@@ -382,7 +382,7 @@ ModuleButton {
                         textFont: Theme.fontSize + 4
                         cursorShape: Qt.PointingHandCursor
 
-                        radius: Theme.moduleEdgeRadius - 5
+                        radius: Theme.cardButtonRadius
                         border.width: 2
 
                         onClicked: {
@@ -399,7 +399,7 @@ ModuleButton {
                         textFont: Theme.fontSize + 4
                         cursorShape: Qt.PointingHandCursor
 
-                        radius: Theme.moduleEdgeRadius - 5
+                        radius: Theme.cardButtonRadius
                         border.width: 2
 
                         onClicked: {
@@ -416,7 +416,7 @@ ModuleButton {
                         textFont: Theme.fontSize + 4
                         cursorShape: Qt.PointingHandCursor
 
-                        radius: Theme.moduleEdgeRadius - 5
+                        radius: Theme.cardButtonRadius
                         border.width: 2
 
                         onClicked: {
@@ -439,7 +439,7 @@ ModuleButton {
                         ? (visibleItems * Theme.listHeight + (visibleItems - 1) * 5) // item height + spacing
                         : 0
                     color: "transparent"
-                    radius: Theme.moduleEdgeRadius
+                    radius: Theme.cardItemRadius
                     clip: true
                     layer.enabled: true
                     layer.smooth: true
@@ -478,7 +478,7 @@ ModuleButton {
                             cursorShape: Qt.PointingHandCursor
                             width: appList.width
                             height: Theme.listHeight
-                            radius: Theme.moduleEdgeRadius
+                            radius: Theme.cardItemRadius
                             border.width: 2
                             colorOpacity: 0.7
                             onClicked: {
@@ -499,8 +499,8 @@ ModuleButton {
 
                                 Rectangle {
                                     color: borderColorAdaptive
-                                    topLeftRadius: Theme.moduleEdgeRadius
-                                    bottomLeftRadius: Theme.moduleEdgeRadius
+                                    topLeftRadius: Math.min(height / 2, appButton.radius)
+                                    bottomLeftRadius: Math.min(height / 2, appButton.radius)
                                     implicitWidth: Theme.listHeight
                                     implicitHeight: Theme.listHeight
 
@@ -509,7 +509,7 @@ ModuleButton {
                                         anchors.left: parent.right
                                         cornerPosition: "topLeft"
                                         color: parent.color
-                                        size: 10
+                                        size: Theme.cardItemIconInverseRadius
                                     }
 
                                     InverseRadius {
@@ -517,7 +517,7 @@ ModuleButton {
                                         anchors.left: parent.right
                                         cornerPosition: "bottomLeft"
                                         color: parent.color
-                                        size: 10
+                                        size: Theme.cardItemIconInverseRadius
                                     }
 
                                     IconImage {

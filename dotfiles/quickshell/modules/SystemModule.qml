@@ -15,19 +15,19 @@ ExpandableModule {
     expandedPillLabel: "System"
     pillPercent: 0
     pillVariant: "neutral"
-    expandedBottomLeftRadius: Theme.moduleEdgeRadius + 10
+    expandedBottomLeftRadius: Theme.expandedModuleRadius
 
     headerPill.bottomRightRadius: 0
 
     leftCornerStyle: "side"
     rightCornerStyle: "bottom"
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + systemModule.titleBarHeight + 15 : Theme.moduleHeight
+    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + systemModule.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
 
     collapsedWidth: 50
 
     // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + 30
+    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
     dropdownAlignment: "right"
 
 
@@ -64,7 +64,7 @@ ExpandableModule {
                 BaseCard {
                     id: sysCard
                     Layout.fillWidth: true
-                    implicitHeight: headerBar.height + sysContentCol.implicitHeight + 20
+                    implicitHeight: headerBar.height + sysContentCol.implicitHeight + Theme.cardPadding * 2
                     hasHeader: true
 
                     headerContent: [
@@ -123,7 +123,7 @@ ExpandableModule {
                             bottom: parent.bottom
                             left: parent.left
                             right: parent.right
-                            margins: 10
+                            margins: Theme.cardPadding
                         }
                         spacing: 5
 
@@ -153,7 +153,7 @@ ExpandableModule {
                                     Layout.fillHeight: true
                                     implicitHeight: actionRow.implicitHeight
 
-                                    radius: Theme.moduleEdgeRadius - 5
+                                    radius: Theme.cardItemRadius
                                     border.width: 2
 
                                     RowLayout {
@@ -165,8 +165,8 @@ ExpandableModule {
 
                                         Rectangle {
                                             color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
-                                            topLeftRadius: Theme.moduleEdgeRadius - 5
-                                            bottomLeftRadius: Theme.moduleEdgeRadius - 5
+                                            topLeftRadius: Math.min(height / 2, actionButton.radius)
+                                            bottomLeftRadius: Math.min(height / 2, actionButton.radius)
                                             implicitWidth: 40
                                             implicitHeight: 40
 
@@ -175,7 +175,7 @@ ExpandableModule {
                                                 anchors.left: parent.right
                                                 cornerPosition: "topLeft"
                                                 color: parent.color
-                                                size: 10
+                                                size: Theme.cardItemIconInverseRadius
                                             }
 
                                             InverseRadius {
@@ -183,7 +183,7 @@ ExpandableModule {
                                                 anchors.left: parent.right
                                                 cornerPosition: "bottomLeft"
                                                 color: parent.color
-                                                size: 10
+                                                size: Theme.cardItemIconInverseRadius
                                             }
 
                                             Text {
@@ -222,7 +222,7 @@ ExpandableModule {
                                     visible: actionRow.modelData.index === 3
                                     variant: "red"
                                     cursorShape: Qt.PointingHandCursor
-                                    radius: Theme.moduleEdgeRadius - 5
+                                    radius: Theme.cardItemRadius
                                     border.width: 2
 
                                     label: "󰨡"
