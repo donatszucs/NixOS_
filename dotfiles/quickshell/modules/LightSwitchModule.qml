@@ -1,7 +1,6 @@
 // Tapo Light Switch — toggles on/off, scroll for brightness, expand for colour wheel
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 
 import "../elements"
 
@@ -19,8 +18,6 @@ ExpandableModule {
     pillVariant: expanded ? "neutral" : SharedState.lightVariant
     expandedPillLabel: "Lights"
 
-    expandedBottomLeftRadius:   Theme.expandedModuleRadius
-    expandedBottomRightRadius:  Theme.expandedModuleRadius
     collapsedBottomLeftRadius:  Theme.moduleEdgeRadius
     collapsedBottomRightRadius: 0
 

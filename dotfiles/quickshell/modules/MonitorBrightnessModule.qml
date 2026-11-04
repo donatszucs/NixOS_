@@ -1,6 +1,5 @@
 // Monitor Brightness control — uses ddcutil to control external monitor brightness
 import Quickshell.Io
-import Quickshell
 import QtQuick
 
 import "../elements"

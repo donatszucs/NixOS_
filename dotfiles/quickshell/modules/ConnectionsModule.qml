@@ -1,10 +1,7 @@
 // Connections — hovers open downward showing network + bluetooth info
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
-import QtQuick.Effects
 import Quickshell
-import Quickshell._Window
 import Quickshell.Io
 import Quickshell.Networking
 import Quickshell.Bluetooth

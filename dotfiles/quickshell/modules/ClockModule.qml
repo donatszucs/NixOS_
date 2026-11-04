@@ -1,9 +1,6 @@
 // Clock module — Expandable calendar with Google Calendar integration
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
-import QtQuick.Effects
-import Quickshell
 import Quickshell.Io
 
 import "../elements"
@@ -81,7 +78,6 @@ ExpandableModule {
     pillVariant: "neutral"
     expandedPillLabel: "Calendar"
     expandedBottomLeftRadius: 0
-    bottomLeftRadius: 0
 
     leftCornerStyle: "bottom"
     rightCornerStyle: "side"

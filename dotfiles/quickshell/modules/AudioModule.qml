@@ -3,7 +3,6 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
 import Quickshell.Services.Pipewire
-import QtQuick.Effects
 
 import "../elements"
 
@@ -122,10 +121,6 @@ ExpandableModule {
         }
     }
 
-    function updateSinks() {
-        updateDevices()
-    }
-
     property int cardWidth: 280
 
     implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + audioModule.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
@@ -133,10 +128,6 @@ ExpandableModule {
     // Overlay dropdown setup
     expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
     dropdownAlignment: "center"
-
-    leftCornerStyle: "side"
-    rightCornerStyle: "side"
-
 
     onPillWheel: (wheel) => {
         if (pwAudio) {

@@ -3,7 +3,6 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Mpris
-import Quickshell.Io
 import QtQuick.Effects
 
 import "../elements"
@@ -547,7 +546,7 @@ ExpandableModule {
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 source: nowPlayingModule.getPlayerIconSource(nowPlayingModule.currentPlayer)
-                visible: status === Image.Ready && source != ""
+                visible: status === Image.Ready && source !== ""
             }
 
             Text {

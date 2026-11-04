@@ -42,9 +42,6 @@ ExpandableModule {
     expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
     dropdownAlignment: "center"
 
-    leftCornerStyle: "side"
-    rightCornerStyle: "side"
-
     pillPercent: 0
     pillVariant: "neutral"
     expandedPillLabel: "Weather"

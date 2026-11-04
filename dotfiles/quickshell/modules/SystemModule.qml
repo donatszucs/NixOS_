@@ -1,7 +1,6 @@
 // System group — system icon stays fixed right, action buttons slide out below
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 import Quickshell.Io
 
 import "../elements"
@@ -15,9 +14,6 @@ ExpandableModule {
     expandedPillLabel: "System"
     pillPercent: 0
     pillVariant: "neutral"
-    expandedBottomLeftRadius: Theme.expandedModuleRadius
-
-    headerPill.bottomRightRadius: 0
 
     leftCornerStyle: "side"
     rightCornerStyle: "bottom"
@@ -164,7 +160,7 @@ ExpandableModule {
                                         spacing: 10
 
                                         Rectangle {
-                                            color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+                                            color: Theme.palette("neutral").base
                                             topLeftRadius: Math.min(height / 2, actionButton.radius)
                                             bottomLeftRadius: Math.min(height / 2, actionButton.radius)
                                             implicitWidth: 40

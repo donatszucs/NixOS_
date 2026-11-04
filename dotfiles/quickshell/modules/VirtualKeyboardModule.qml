@@ -1,6 +1,5 @@
 // Virtual Keyboard button
 import Quickshell.Io
-import Quickshell
 import QtQuick
 
 import "../elements"

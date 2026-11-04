@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.SystemTray
@@ -95,8 +94,8 @@ ExpandableModule {
         color: Theme.divider
         radius: implicitWidth / 2
 
-        border.width: 2
-        border.color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.neutral.base.a)
+        border.width: Theme.cardBorderWidth
+        border.color: Theme.cardBorder
 
         implicitWidth: trayColumn.implicitWidth + 12
         implicitHeight: trayColumn.implicitHeight + 12
@@ -161,8 +160,8 @@ ExpandableModule {
                         id: menuAnchor
                         menu: modelData.menu
                         
-                        // Use the explicitly passed window
-                        anchor.window: root.parentWindow 
+                        // Use explicit parentWindow if provided, otherwise resolve from Window attached property
+                        anchor.window: root.parentWindow ?? root.Window.window 
                         
                         // Width and height can be bound directly
                         anchor.rect.width: trayItemDelegate.width
@@ -179,15 +178,14 @@ ExpandableModule {
                         
                         onClicked: (mouse) => {
                             if (mouse.button === Qt.RightButton) {
-                                if (modelData.hasMenu && root.parentWindow !== null) {
+                                var win = root.parentWindow ?? root.Window.window
+                                if (modelData.hasMenu && win !== null) {
                                     // Map the icon's local coordinates to the main scene (window)
                                     let mapped = trayItemDelegate.mapToItem(null, 0, 30)
                                     menuAnchor.anchor.rect.x = mapped.x
                                     menuAnchor.anchor.rect.y = mapped.y
                                     
                                     menuAnchor.open()
-                                } else if (root.parentWindow === null) {
-                                    console.warn("Tray Error: parentWindow is null! Did you pass it in main.qml?")
                                 }
                             } else {
                                 modelData.activate()

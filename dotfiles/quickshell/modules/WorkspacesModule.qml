@@ -1,7 +1,6 @@
 // Workspaces — uses Hyprland IPC via Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 
 import Quickshell
 import Quickshell.Hyprland
