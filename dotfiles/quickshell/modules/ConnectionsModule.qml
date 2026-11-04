@@ -1048,22 +1048,6 @@ ExpandableModule {
                 hasHeader: true
 
                 headerContent: [
-                    HeaderButton {
-                        id: phoneHeaderIcon
-                        icon: ""
-                        iconColor: connectionsModule.phoneConnected ? Theme.palettePaper : Theme.statusDisabled
-                        iconSize: Theme.fontSize + 2
-                        anchors.left: parent.left
-                        anchors.leftMargin: 15
-                        anchors.verticalCenter: parent.verticalCenter
-                        opacity: connectionsModule.phonePollingActive ? 0.35 : 1.0
-
-                        Behavior on opacity {
-                            NumberAnimation { duration: 150 }
-                        }
-
-                        onClicked: connectionsModule.triggerPhonePoll()
-                    },
 
                     Text {
                         id: phoneHeaderTitle

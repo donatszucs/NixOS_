@@ -228,16 +228,6 @@ Item {
                         anchors.rightMargin: 7
                         spacing: 8
 
-                        // Left icon
-                        Text {
-                            id: headerIconText
-                            text: "󰂚"
-                            color: Theme.textPrimary
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize + 2
-                            font.bold: true
-                            Layout.alignment: Qt.AlignVCenter
-                        }
 
                         // Title when volume controls are expanded
                         Text {
