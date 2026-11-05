@@ -15,7 +15,7 @@ ModuleButton {
     property alias pill: pillBg
     readonly property real pillScale: pillBg.scale
 
-    property real percent: 100
+    property real percent: 0
     property bool animatePercent: true
     property string pillText: ""
     property string pillVariant: root.variant
@@ -28,13 +28,23 @@ ModuleButton {
     property var pillBorderColor: null
     readonly property color effectiveBorderColor: pillBorderColor !== null
         ? pillBorderColor
-        : Qt.rgba(root.pillPal.pillBorder.r, root.pillPal.pillBorder.g, root.pillPal.pillBorder.b, root.pillPal.pillBorder.a * root.pillColorOpacity * gradientOpacityBase)
+        : Qt.rgba(root.pillPal.pillBorder.r, root.pillPal.pillBorder.g, root.pillPal.pillBorder.b, root.pillPal.pillBorder.a * root.pillColorOpacity * gradientOpacityBorder)
     property var pillFillColor: null
     readonly property color effectiveFillColor: pillFillColor !== null
         ? pillFillColor
         : root.pillPal.pillFill
-    property real gradientOpacityBase: root.openBottom ? 0.15 : 1.0
-    property real gradientOpacityLow: root.openBottom ? 0.5 : 1.0
+
+    property real gradientOpacityBorder: root.openBottom ? 0.3 : 1.0
+    property real gradientOpacityTop: root.openBottom ? 0.3 : 0.2
+    property real gradientOpacityMid: 0.2
+    property real gradientOpacityBottom: 0.6
+
+    property color gradientTop : Theme.palettePaper
+    property color gradientMid : root.openBottom ? root.pillPal.pillFill : root.pillPal.pillTrack
+    property color gradientBottom : root.openBottom ?root.pillPal.pillFill : root.pillPal.pillTrack
+
+    property real gradientTopHeightPx: 60
+
     property string bgImageSource: ""
     property real bgImageOpacity: 0.35
     property real bgImageBrightness: 0.35
@@ -106,11 +116,15 @@ ModuleButton {
             orientation: Gradient.Vertical
             GradientStop {
                 position: 0.0
-                color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.pillColorOpacity * gradientOpacityBase)
+                color: Qt.rgba(gradientTop.r, gradientTop.g, gradientTop.b, gradientTop.a * root.pillColorOpacity * gradientOpacityTop)
+            }
+            GradientStop {
+                position: pillBg.height > 0 ? Math.min(1.0, root.gradientTopHeightPx / pillBg.height) : 0.0
+                color: Qt.rgba(gradientMid.r, gradientMid.g, gradientMid.b, gradientMid.a * root.pillColorOpacity * gradientOpacityMid)
             }
             GradientStop {
                 position: 1.0
-                color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.pillColorOpacity * gradientOpacityLow)
+                color: Qt.rgba(gradientBottom.r, gradientBottom.g, gradientBottom.b, gradientBottom.a * root.pillColorOpacity * gradientOpacityBottom)
                 Behavior on color {
                     ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
                 }
@@ -185,31 +199,19 @@ ModuleButton {
                 top: parent.top
                 bottom: parent.bottom
             }
-            width: root.openBottom ? parent.width : parent.width * (Math.min(Math.max(root.animatedPercent, 0), 100) / 100)
+            visible: !root.openBottom && root.animatedPercent > 0
+            width: parent.width * (Math.min(Math.max(root.animatedPercent, 0), 100) / 100)
             clip: true
 
             Rectangle {
-                width: parent.parent.width
-                height: parent.parent.height
-                topLeftRadius: parent.parent.topLeftRadius
-                topRightRadius: parent.parent.topRightRadius
-                bottomLeftRadius: parent.parent.bottomLeftRadius
-                bottomRightRadius: parent.parent.bottomRightRadius
+                width: pillBg.width
+                height: pillBg.height
+                topLeftRadius: pillBg.topLeftRadius
+                topRightRadius: pillBg.topRightRadius
+                bottomLeftRadius: pillBg.bottomLeftRadius
+                bottomRightRadius: pillBg.bottomRightRadius
 
-                gradient: Gradient {
-                    orientation: Gradient.Vertical
-                    GradientStop {
-                        position: 0.0
-                        color: Qt.rgba(root.effectiveFillColor.r, root.effectiveFillColor.g, root.effectiveFillColor.b, root.effectiveFillColor.a * root.pillColorOpacity * gradientOpacityBase)
-                    }
-                    GradientStop {
-                        position: 1.0
-                        color: Qt.rgba(root.effectiveFillColor.r, root.effectiveFillColor.g, root.effectiveFillColor.b, root.effectiveFillColor.a * root.pillColorOpacity * gradientOpacityLow)
-                        Behavior on color {
-                            ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-                        }
-                    }
-                }
+                color: root.effectiveFillColor
             }
         }
 
