@@ -290,7 +290,7 @@ ModuleButton {
 
         colorOverride: true
         overrideColor: control.isSpecial
-            ? (active ? control.pal.base : (hovered ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.15) : Qt.darker(control.pal.base, 1.4)))
+            ? (active ? "transparent" : (hovered ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.15) : Qt.darker(control.pal.base, 1.4)))
             : Qt.darker(control.pal.base, 1.4)
 
         onClicked: {
@@ -366,8 +366,8 @@ ModuleButton {
             RowLayout {
                 visible: hasApps && showApps
                 spacing: 5
-                Layout.leftMargin: showApps ? (control.isSpecial ? 7 : 2) : 0
-                Layout.rightMargin: showApps ? 7 : 0
+                Layout.leftMargin: showApps ? (control.isSpecial ? 2 : 2) : 0
+                Layout.rightMargin: showApps ? (control.isSpecial ? 2 : 7) : 0
                 Repeater {
                     model: (hasApps && showApps) ? modelData.toplevels.values : null
                     delegate: WorkspaceAppIcon {
