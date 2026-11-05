@@ -152,11 +152,14 @@ ModuleButton {
     }
 
     // ── Size animations ──────────────────────────────────────────
+    property int expandEasingType: Easing.OutQuint
+    property int collapseEasingType: Easing.OutQuint
+
     Behavior on implicitHeight {
         NumberAnimation {
             id: _heightAnim
             duration: Theme.verticalDuration
-            easing.type: Easing.OutCubic
+            easing.type: root.expanded ? root.expandEasingType : root.collapseEasingType
         }
     }
 
@@ -175,7 +178,7 @@ ModuleButton {
         NumberAnimation {
             id: _opacityAnim
             duration: Theme.verticalDuration
-            easing.type: Easing.OutCubic
+            easing.type: root.expanded ? root.expandEasingType : root.collapseEasingType
         }
     }
 
@@ -261,7 +264,7 @@ ModuleButton {
             NumberAnimation {
                 id: _overlayWidthAnim
                 duration: Theme.horizontalDuration
-                easing.type: Easing.OutCubic
+                easing.type: root.expanded ? root.expandEasingType : root.collapseEasingType
             }
         }
 
@@ -429,7 +432,7 @@ ModuleButton {
             NumberAnimation {
                 id: _headerPillYAnim
                 duration: Theme.verticalDuration
-                easing.type: Easing.OutCubic
+                easing.type: root.expanded ? root.expandEasingType : root.collapseEasingType
             }
         }
 
