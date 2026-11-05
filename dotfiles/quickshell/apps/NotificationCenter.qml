@@ -1,4 +1,4 @@
-// NotificationCenter.qml — DBus notification server & notification center
+// notifCenter.qml — DBus notification server & notification center
 // Displays notifications in a unified card inside the corner base container with inverse radiuses.
 import QtQuick
 import QtQuick.Layouts
@@ -11,7 +11,7 @@ import Quickshell.Services.Notifications as Notif
 import "../elements"
 
 Item {
-    id: root
+    id: notifCenter
 
     // ── Geometry & State ────────────────────────────────────────────────
     readonly property int cardWidth: 350
@@ -33,8 +33,8 @@ Item {
                 break
             }
         }
-        root.hasActiveToasts = active
-        root.contentUpdateTrigger++
+        notifCenter.hasActiveToasts = active
+        notifCenter.contentUpdateTrigger++
     }
 
     // Hover management
@@ -60,13 +60,13 @@ Item {
     IpcHandler {
         target: screenName !== "" ? "notifications-" + screenName : "notifications"
         function toggle(): void {
-            root.isManuallyOpen = !root.isManuallyOpen
+            notifCenter.isManuallyOpen = !notifCenter.isManuallyOpen
         }
         function open(): void {
-            root.isManuallyOpen = true
+            notifCenter.isManuallyOpen = true
         }
         function close(): void {
-            root.isManuallyOpen = false
+            notifCenter.isManuallyOpen = false
         }
     }
 
@@ -112,8 +112,8 @@ Item {
             sizeH: Math.max(containerRect.implicitHeight / 8, Theme.moduleEdgeRadius)
             sizeV: containerRect.implicitHeight
             color: containerRect.color
-            expandingH: root.isCardOpen || containerRect.implicitHeight > 1
-            expandingV: root.isCardOpen || containerRect.implicitHeight > 1
+            expandingH: notifCenter.isCardOpen || containerRect.implicitHeight > 1
+            expandingV: notifCenter.isCardOpen || containerRect.implicitHeight > 1
             animated: false
         }
 
@@ -123,14 +123,14 @@ Item {
             Layout.row: 1
             Layout.column: 1
             Layout.alignment: Qt.AlignRight | Qt.AlignBottom
-            Layout.maximumHeight: root.maxCardHeight + 50
+            Layout.maximumHeight: notifCenter.maxCardHeight + 50
 
             color: Qt.rgba(Theme.dark.base.r, Theme.dark.base.g, Theme.dark.base.b, Theme.moduleOpacity)
             clip: true
             topLeftRadius: Theme.moduleEdgeRadius + 10
 
-            implicitWidth: root.isCardOpen ? (root.showAllNotifications ? (root.cardWidth + 20) : root.cardWidth) : Theme.moduleEdgeRadius
-            implicitHeight: root.isCardOpen ? Math.min(root.maxCardHeight, cardContentHeight + 20) : 0
+            implicitWidth: notifCenter.isCardOpen ? (notifCenter.showAllNotifications ? (notifCenter.cardWidth + 20) : notifCenter.cardWidth) : Theme.moduleEdgeRadius
+            implicitHeight: notifCenter.isCardOpen ? Math.min(notifCenter.maxCardHeight, cardContentHeight + 20) : 0
 
             Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutQuint } }
             Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
@@ -152,8 +152,8 @@ Item {
             }
 
             readonly property int cardContentHeight: {
-                var _ = root.contentUpdateTrigger + root.showAllNotifications + notificationRepeater.count
-                if (!root.showAllNotifications) {
+                var _ = notifCenter.contentUpdateTrigger + notifCenter.showAllNotifications + notificationRepeater.count
+                if (!notifCenter.showAllNotifications) {
                     return calculateNotifColumnHeight()
                 }
                 if (notificationRepeater.count === 0) {
@@ -168,7 +168,7 @@ Item {
                 id: containerHoverHandler
                 onHoveredChanged: {
                     if (!containerHoverHandler.hovered && !cornerHoverHandler.hovered) {
-                        root.inlineReplyInputFocused = false
+                        notifCenter.inlineReplyInputFocused = false
                     }
                 }
             }
@@ -179,12 +179,12 @@ Item {
                 anchors.fill: parent
                 anchors.margins: 10
 
-                color: root.showAllNotifications ? Theme.bgBlurColor : "transparent"
-                border.width: root.showAllNotifications ? Theme.cardBorderWidth : 0
-                border.color: root.showAllNotifications ? Theme.cardBorder : "transparent"
+                color: notifCenter.showAllNotifications ? Theme.bgBlurColor : "transparent"
+                border.width: notifCenter.showAllNotifications ? Theme.cardBorderWidth : 0
+                border.color: notifCenter.showAllNotifications ? Theme.cardBorder : "transparent"
                 shadowEnabled: false
 
-                opacity: root.isCardOpen ? 1.0 : 0.0
+                opacity: notifCenter.isCardOpen ? 1.0 : 0.0
                 visible: opacity > 0
 
                 HoverHandler {
@@ -193,7 +193,7 @@ Item {
 
                 Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
 
-                hasHeader: root.showAllNotifications
+                hasHeader: notifCenter.showAllNotifications
                 property bool volExpanded: false
 
                 headerContent: [
@@ -333,7 +333,7 @@ Item {
                     anchors.top: card.headerBar.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    height: root.showAllNotifications ? 10 : 0
+                    height: notifCenter.showAllNotifications ? 10 : 0
                     visible: height > 0
                     z: 10
                     MouseArea {
@@ -359,20 +359,20 @@ Item {
                     anchors.top: card.headerBar.bottom
                     anchors.bottom: parent.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
-                    width: root.cardWidth - 20
-                    anchors.bottomMargin: root.showAllNotifications ? 10 : 0
-                    anchors.topMargin: root.showAllNotifications ? 10 : 0
+                    width: notifCenter.cardWidth - 20
+                    anchors.bottomMargin: notifCenter.showAllNotifications ? 10 : 0
+                    anchors.topMargin: notifCenter.showAllNotifications ? 10 : 0
 
                     layer.enabled: true
                     layer.effect: MultiEffect {
-                        maskEnabled: root.showAllNotifications
+                        maskEnabled: notifCenter.showAllNotifications
                         maskSource: contentMask
                     }
 
                     // ── Empty State ─────────────────────────────────────
                     Item {
                         id: emptyState
-                        visible: root.showAllNotifications && notificationRepeater.count === 0
+                        visible: notifCenter.showAllNotifications && notificationRepeater.count === 0
                         anchors.fill: parent
                         implicitHeight: 110
 
@@ -417,20 +417,20 @@ Item {
                                 if (first === 0 && notifFlickable.contentY !== 0) {
                                     notifFlickable.contentY = 0
                                 }
-                                root.contentUpdateTrigger++
+                                notifCenter.contentUpdateTrigger++
                             }
                             function onRowsRemoved() {
-                                root.contentUpdateTrigger++
+                                notifCenter.contentUpdateTrigger++
                             }
                             function onModelReset() {
-                                root.contentUpdateTrigger++
+                                notifCenter.contentUpdateTrigger++
                             }
                         }
 
                         Column {
                             id: notifColumn
                             anchors.horizontalCenter: parent.horizontalCenter
-                            width: root.cardWidth - 20
+                            width: notifCenter.cardWidth - 20
                             spacing: 8
                             topPadding: 0
                             bottomPadding: 0
@@ -451,9 +451,9 @@ Item {
                                     notifIndex: index
                                     width: notifColumn.width
 
-                                    onIsToastActiveChanged: root.updateActiveToasts()
-                                    Component.onCompleted: root.updateActiveToasts()
-                                    Component.onDestruction: root.updateActiveToasts()
+                                    onIsToastActiveChanged: notifCenter.updateActiveToasts()
+                                    Component.onCompleted: notifCenter.updateActiveToasts()
+                                    Component.onDestruction: notifCenter.updateActiveToasts()
                                 }
                             }
                         }
@@ -479,7 +479,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: root.isManuallyOpen = !root.isManuallyOpen
+            onClicked: notifCenter.isManuallyOpen = !notifCenter.isManuallyOpen
         }
     }
 
@@ -498,11 +498,11 @@ Item {
         readonly property int effectiveTimeout: isCritical ? 0 : (notif && notif.expireTimeout > 0 ? notif.expireTimeout : 5000)
 
         variant: isCritical ? "red" : "neutral"
-        radius: !root.isManuallyOpen ? Theme.cardRadius : Theme.cardItemRadius
+        radius: !notifCenter.showAllNotifications ? Theme.cardRadius + 20 : Theme.cardItemRadius
         border.width: 0
         clip: true
 
-        readonly property bool shouldBeVisible: root.showAllNotifications || isToastActive
+        readonly property bool shouldBeVisible: notifCenter.showAllNotifications || isToastActive
 
         readonly property int minCol0Height: (cachedImage !== "" ? 74 : 40)
         implicitHeight: Math.max(contentGrid.implicitHeight + 20, minCol0Height + 20)
@@ -887,11 +887,11 @@ Item {
                     }
 
                     Keys.onReturnPressed: {
-                        root.inlineReplyInputFocused = false
+                        notifCenter.inlineReplyInputFocused = false
                         toastRow.submitInlineReply()
                     }
                     onActiveFocusChanged: {
-                        root.inlineReplyInputFocused = activeFocus
+                        notifCenter.inlineReplyInputFocused = activeFocus
                     }
                 }
             }
