@@ -209,7 +209,7 @@ Item {
                         text: "Notifications"
                         color: Theme.textPrimary
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize + 1
+                        font.pixelSize: Theme.fontSize + 3
                         font.bold: true
                         opacity: card.volExpanded ? 0.0 : 1.0
                         visible: opacity > 0

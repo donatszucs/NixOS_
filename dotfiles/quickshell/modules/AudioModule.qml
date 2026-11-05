@@ -226,7 +226,7 @@ ExpandableModule {
                                 radius: Theme.cardItemRadius
                                 opacity: 1.0
                                 border.width: 2
-                                border.color: isSinkActive ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, 0.45) : borderColorAdaptive
+                                border.color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.45) : borderColorAdaptive
                                 Behavior on border.color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
                                 Process {
@@ -247,7 +247,7 @@ ExpandableModule {
                                         Layout.fillHeight: true
                                         Layout.preferredWidth: 46
                                         implicitWidth: 46
-                                        color: isSinkActive ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, 0.45) : Theme.divider
+                                        color: isSinkActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.45) : Theme.divider
                                         Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
                                         topLeftRadius: Math.min(height / 2, sinkBtn.radius)
                                         bottomLeftRadius: Math.min(height / 2, sinkBtn.radius)
@@ -272,7 +272,7 @@ ExpandableModule {
                                             id: sinkIconText
                                             anchors.centerIn: parent
                                             text: modelData.icon
-                                            color: isSinkActive ? Theme.statusGreen : Theme.textPrimary
+                                            color: isSinkActive ? Theme.statusBlue : Theme.textPrimary
                                             opacity: isSinkActive ? 1.0 : 0.7
                                             font.family: Theme.font
                                             font.pixelSize: Theme.fontSize + 3
@@ -327,8 +327,8 @@ ExpandableModule {
 
                                             ModuleButton {
                                                 variant: devMuted ? "red" : (isSinkActive ? "light" : "neutral")
-                                                label: devMuted ? "󰖁" : ""
-                                                textFont: 12
+                                                label: devMuted ? "󰖁" : "󰕾"
+                                                textFont: 15
                                                 cursorShape: Qt.PointingHandCursor
                                                 onClicked: {
                                                     if (devAudio) {
@@ -402,7 +402,7 @@ ExpandableModule {
                                 radius: Theme.cardItemRadius
                                 opacity: 1.0
                                 border.width: 2
-                                border.color: isSourceActive ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, 0.45) : borderColorAdaptive
+                                border.color: isSourceActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.45) : borderColorAdaptive
                                 Behavior on border.color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
                                 RowLayout {
@@ -417,7 +417,7 @@ ExpandableModule {
                                         Layout.preferredWidth: sourceBtn.implicitHeight
                                         implicitWidth: sourceBtn.implicitHeight
                                         implicitHeight: sourceBtn.implicitHeight
-                                        color: isSourceActive ? Qt.rgba(Theme.statusGreen.r, Theme.statusGreen.g, Theme.statusGreen.b, 0.45) : Theme.divider
+                                        color: isSourceActive ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.45) : Theme.divider
                                         Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
                                         topLeftRadius: Math.min(height / 2, sourceBtn.radius)
                                         bottomLeftRadius: Math.min(height / 2, sourceBtn.radius)
@@ -442,7 +442,7 @@ ExpandableModule {
                                             id: srcIconText
                                             anchors.centerIn: parent
                                             text: modelData.icon
-                                            color: isSourceActive ? Theme.statusGreen : Theme.textPrimary
+                                            color: isSourceActive ? Theme.statusBlue : Theme.textPrimary
                                             opacity: isSourceActive ? 1.0 : 0.7
                                             font.family: Theme.font
                                             font.pixelSize: Theme.fontSize + 3
