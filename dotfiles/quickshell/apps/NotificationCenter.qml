@@ -499,13 +499,12 @@ Item {
 
         variant: isCritical ? "red" : "neutral"
         radius: expireTimer.running ? Theme.cardRadius : Theme.cardItemRadius
-        border.width: 2
-        border.color: toastRow.hovered ? Theme.palettePaper : toastRow.pal.border
+        border.width: 0
         clip: true
 
         readonly property bool shouldBeVisible: root.showAllNotifications || isToastActive
 
-        readonly property int minCol0Height: (cachedImage !== "" ? 99 : 61)
+        readonly property int minCol0Height: (cachedImage !== "" ? 74 : 40)
         implicitHeight: Math.max(contentGrid.implicitHeight + 20, minCol0Height + 20)
         height: shouldBeVisible ? implicitHeight : 0
         visible: shouldBeVisible || height > 0
@@ -591,35 +590,102 @@ Item {
             rowSpacing: 8
             columnSpacing: 10
 
-            // [Row 0, Col 0] App Icon & Sent Image & Time
-            ColumnLayout {
+            // [Row 0, Col 0] Media: big sent image with small app icon overlapping bottom-right
+            Item {
+                id: mediaItem
                 Layout.row: 0
                 Layout.column: 0
-                Layout.preferredWidth: 40
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                spacing: 6
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
 
                 readonly property bool hasAppIcon: toastRow.notif && (toastRow.notif.appIcon !== "" || toastRow.notif.desktopEntry !== "")
                 readonly property bool hasImage: toastRow.cachedImage !== ""
+                readonly property int mainSize: hasImage ? 68 : 40
+                readonly property int badgeSize: 26
 
-                // App Icon Box (shown if app has an icon, or if no image is sent)
-                Rectangle {
+                Layout.preferredWidth: mainSize + (hasImage ? 6 : 0)
+                Layout.preferredHeight: mainSize + (hasImage ? 6 : 0)
+
+                // Sent image (large, top-left corner)
+                Item {
+                    id: sentImageBox
+                    visible: mediaItem.hasImage
+                    x: 0
+                    y: 0
+                    width: mediaItem.mainSize
+                    height: mediaItem.mainSize
+                    readonly property real radius: Theme.cardButtonRadius
+
+                    Image {
+                        id: sentImageRaw
+                        anchors.fill: parent
+                        source: toastRow.cachedImage
+                        fillMode: Image.PreserveAspectCrop
+                        smooth: true
+                        cache: true
+                        asynchronous: true
+                        sourceSize.width: 160
+                        sourceSize.height: 160
+                        visible: false
+                    }
+
+                    Item {
+                        id: sentImageMask
+                        anchors.fill: parent
+                        visible: false
+                        layer.enabled: true
+                        layer.smooth: true
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: sentImageBox.radius
+                            color: "black"
+                            antialiasing: true
+                        }
+                    }
+
+                    MultiEffect {
+                        anchors.fill: parent
+                        source: sentImageRaw
+                        maskEnabled: true
+                        maskSource: sentImageMask
+                        visible: sentImageRaw.status === Image.Ready
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (toastRow.cachedImage.startsWith("file://") || toastRow.cachedImage.startsWith("/")) {
+                                Qt.openUrlExternally(toastRow.cachedImage)
+                            } else {
+                                toastRow.dismiss()
+                            }
+                        }
+                    }
+                }
+
+                // App icon (small badge overlapping the image's bottom-right corner;
+                // standalone and larger when there is no image)
+                Item {
                     id: appIconBox
-                    visible: parent.hasAppIcon || !parent.hasImage
-                    Layout.preferredWidth: 40
-                    Layout.preferredHeight: 40
-                    implicitWidth: 40
-                    implicitHeight: 40
-                    radius: Theme.cardButtonRadius - 4
-                    color: Qt.rgba(0, 0, 0, 0.18)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.1)
-                    clip: true
+                    visible: mediaItem.hasAppIcon || !mediaItem.hasImage
+                    width: mediaItem.hasImage ? mediaItem.badgeSize : mediaItem.mainSize
+                    height: width
+                    x: mediaItem.hasImage ? parent.width - width : 0
+                    y: mediaItem.hasImage ? parent.height - height : 0
+
+                    // soft backing so the badge separates from the image
+                    Rectangle {
+                        visible: mediaItem.hasImage
+                        anchors.fill: parent
+                        radius: width / 2
+                        color: Qt.rgba(0.08, 0.06, 0.12, 0.92)
+                    }
 
                     Image {
                         id: appIconImage
                         anchors.fill: parent
-                        anchors.margins: 4
+                        anchors.margins: mediaItem.hasImage ? 4 : 2
                         source: {
                             var icon = toastRow.notif ? toastRow.notif.appIcon : ""
                             if (icon !== "") {
@@ -636,105 +702,19 @@ Item {
                         fillMode: Image.PreserveAspectFit
                         smooth: true
                         cache: true
-                        sourceSize.width: 32
-                        sourceSize.height: 32
+                        sourceSize.width: 64
+                        sourceSize.height: 64
                     }
 
-                    // Fallback icon when app icon is missing or fails to load
                     Text {
                         anchors.centerIn: parent
                         visible: appIconImage.status !== Image.Ready || appIconImage.source == ""
                         text: "󰂚"
                         font.family: Theme.font
-                        font.pixelSize: 18
+                        font.pixelSize: mediaItem.hasImage ? 13 : 22
                         color: toastRow.textColor
-                        opacity: 0.65
+                        opacity: 0.8
                     }
-                }
-
-                // Sent Image Box (rounded corners with border, matching appIcon / nowplaying thumbnail)
-                Rectangle {
-                    id: sentImageBox
-                    visible: parent.hasImage
-                    Layout.preferredWidth: 40
-                    Layout.preferredHeight: 40
-                    implicitWidth: 40
-                    implicitHeight: 40
-                    Layout.alignment: Qt.AlignHCenter
-                    radius: Theme.cardButtonRadius - 5
-                    color: Qt.rgba(0, 0, 0, 0.22)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.15)
-                    clip: true
-
-                    Item {
-                        id: sentImageContainer
-                        anchors.fill: parent
-                        anchors.margins: 2
-                        clip: true
-
-                        Image {
-                            id: sentImageRaw
-                            anchors.fill: parent
-                            source: toastRow.cachedImage
-                            fillMode: Image.PreserveAspectCrop
-                            smooth: true
-                            cache: true
-                            asynchronous: true
-                            sourceSize.width: 64
-                            sourceSize.height: 64
-                            clip: true
-                            visible: false
-                        }
-
-                        Item {
-                            id: sentImageMask
-                            anchors.fill: parent
-                            visible: false
-                            layer.enabled: true
-                            layer.smooth: true
-
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: Math.max(0, sentImageBox.radius - 2)
-                                color: "black"
-                                antialiasing: true
-                            }
-                        }
-
-                        MultiEffect {
-                            anchors.fill: parent
-                            source: sentImageRaw
-                            maskEnabled: true
-                            maskSource: sentImageMask
-                            clip: true
-                            visible: sentImageRaw.status === Image.Ready
-                        }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            if (toastRow.cachedImage.startsWith("file://") || toastRow.cachedImage.startsWith("/")) {
-                                Qt.openUrlExternally(toastRow.cachedImage)
-                            } else {
-                                toastRow.dismiss()
-                            }
-                        }
-                    }
-                }
-
-                Text {
-                    id: timeText
-                    text: Qt.formatDateTime(new Date(), "HH:mm")
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 3
-                    font.bold: true
-                    color: toastRow.textColor
-                    opacity: 0.75
-                    elide: Text.ElideRight
-                    Layout.alignment: Qt.AlignCenter
                 }
             }
 
@@ -746,16 +726,31 @@ Item {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 spacing: 5
 
-                // App Name
-                Text {
-                    text: toastRow.notif ? toastRow.notif.appName : ""
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 1
-                    font.bold: true
-                    color: toastRow.textColor
-                    opacity: 0.7
+                // Header: app name + time
+                RowLayout {
                     Layout.fillWidth: true
-                    elide: Text.ElideRight
+                    spacing: 8
+
+                    Text {
+                        text: toastRow.notif ? toastRow.notif.appName : ""
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize - 1
+                        font.bold: true
+                        color: toastRow.textColor
+                        opacity: 0.7
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                    }
+
+                    Text {
+                        id: timeText
+                        text: Qt.formatDateTime(new Date(), "HH:mm")
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize - 3
+                        font.bold: true
+                        color: toastRow.textColor
+                        opacity: 0.6
+                    }
                 }
 
                 // Summary
