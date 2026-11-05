@@ -20,10 +20,10 @@ ModuleButton {
     property string pillText: ""
     property string pillVariant: root.variant
     property var pillPal: Theme.palette(pillVariant)
-    property int pillRadius: openBottom ? pillExpandedRadius : Theme.pillCollapsedRadius
+    property int pillRadius: expanded ? pillExpandedRadius : Theme.pillCollapsedRadius
     property int pillExpandedRadius: Theme.pillExpandedRadius
     property int pillHeight: Theme.pillHeight
-    property int pillPaddingH: openBottom ? Theme.pillExpandedPaddingH : Theme.pillCollapsedPaddingH
+    property int pillPaddingH: expanded ? Theme.pillExpandedPaddingH : Theme.pillCollapsedPaddingH
     property real pillColorOpacity: root.colorOpacity 
     property var pillBorderColor: null
     readonly property color effectiveBorderColor: pillBorderColor !== null
@@ -34,14 +34,14 @@ ModuleButton {
         ? pillFillColor
         : root.pillPal.pillFill
 
-    property real gradientOpacityBorder: root.openBottom ? 0.3 : 1.0
-    property real gradientOpacityTop: root.openBottom ? 0.3 : 0.2
+    property real gradientOpacityBorder: root.expanded ? 0.5 : 1.0
+    property real gradientOpacityTop: 0.9
     property real gradientOpacityMid: 0.2
-    property real gradientOpacityBottom: 0.6
+    property real gradientOpacityBottom: 0.8
 
-    property color gradientTop : Theme.palettePaper
-    property color gradientMid : root.openBottom ? root.pillPal.pillFill : root.pillPal.pillTrack
-    property color gradientBottom : root.openBottom ?root.pillPal.pillFill : root.pillPal.pillTrack
+    property color gradientTop : Theme.paletteInk
+    property color gradientMid : root.pillPal.pillFill
+    property color gradientBottom : root.pillPal.pillFill
 
     property real gradientTopHeightPx: 60
 
@@ -51,9 +51,9 @@ ModuleButton {
     property real bgImageContrast: 0.0
     property real bgImageDarkOverlayOpacity: 0.0
 
-    property bool openBottom: false
-    property int openBottomTopMargin: Theme.pillExpandedMargin
-    property int openBottomBottomMargin: Theme.pillExpandedMargin
+    expanded: false
+    property int expandedTopMargin: Theme.pillExpandedMargin
+    property int expandedBottomMargin: Theme.pillExpandedMargin
 
     property real pillTopLeftRadius: pillRadius
     property real pillTopRightRadius: pillRadius
@@ -94,8 +94,8 @@ ModuleButton {
         id: pillBg
         anchors.horizontalCenter: parent.horizontalCenter
         width: Math.max(0, parent.width - root.pillPaddingH)
-        y: root.openBottom ? root.openBottomTopMargin : Math.round((parent.height - root.pillHeight) / 2)
-        height: root.openBottom ? Math.max(0, parent.height - root.openBottomTopMargin - root.openBottomBottomMargin) : root.pillHeight
+        y: root.expanded ? root.expandedTopMargin : Math.round((parent.height - root.pillHeight) / 2)
+        height: root.expanded ? Math.max(0, parent.height - root.expandedTopMargin - root.expandedBottomMargin) : root.pillHeight
         clip: true
 
         topLeftRadius: root.pillTopLeftRadius
@@ -104,7 +104,7 @@ ModuleButton {
         bottomRightRadius: root.pillBottomRightRadius
 
         transformOrigin: Item.Center
-        scale: (!root.enabled || root.openBottom || !root.hasScaleAnimation)
+        scale: (!root.enabled || root.expanded || !root.hasScaleAnimation)
             ? root.normalScale
             : (root.pressed ? root.pressedScale : (root.hovered ? root.hoverScale : root.normalScale))
 
@@ -112,7 +112,11 @@ ModuleButton {
             NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
 
-        gradient: Gradient {
+        color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.pillColorOpacity)
+        gradient: root.expanded ? pillGradient : null
+
+        Gradient {
+            id: pillGradient
             orientation: Gradient.Vertical
             GradientStop {
                 position: 0.0
@@ -137,7 +141,7 @@ ModuleButton {
             anchors.fill: parent
             anchors.margins: 2
             visible: root.bgImageSource !== "" && opacity > 0
-            opacity: root.openBottom ? 0.0 : 1.0
+            opacity: root.expanded ? 0.0 : 1.0
 
             Behavior on opacity {
                 NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
@@ -199,7 +203,7 @@ ModuleButton {
                 top: parent.top
                 bottom: parent.bottom
             }
-            visible: !root.openBottom && root.animatedPercent > 0
+            visible: !root.expanded && root.animatedPercent > 0
             width: parent.width * (Math.min(Math.max(root.animatedPercent, 0), 100) / 100)
             clip: true
 
@@ -241,10 +245,10 @@ ModuleButton {
             font.bold: true
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            opacity: root.openBottom ? 0.0 : 1.0
+            opacity: root.expanded ? 0.0 : 1.0
 
             Behavior on opacity {
-                NumberAnimation { duration: root.openBottom ? 0 : Theme.verticalDuration; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: root.expanded ? 0 : Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
 
             Behavior on color {

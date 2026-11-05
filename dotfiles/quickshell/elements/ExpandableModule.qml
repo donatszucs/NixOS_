@@ -420,7 +420,7 @@ ModuleButton {
         width: root.contentVisible ? _overlay.width : root.width
         height: root.expanded ? Math.max(Theme.moduleHeight, _overlay.height) : Theme.moduleHeight
         implicitWidth: root.implicitWidth
-        openBottom: root.expanded
+        expanded: root.expanded
         pillPaddingH: root.expanded ? Theme.pillExpandedPaddingH : Theme.pillCollapsedPaddingH
         pillHeight: root.expanded ? Math.max(Theme.pillHeight, _overlay.height) : Theme.pillHeight
         pillRadius: root.expanded ? root.expandedPillRadius : root.collapsedPillRadius
