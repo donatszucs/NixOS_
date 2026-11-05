@@ -796,7 +796,7 @@ Item {
 
                 // Show More / Less
                 ModuleButton {
-                    variant: "light"
+                    variant: "neutral"
                     visible: bodyText.visible && (bodyText.truncated || bodyText.maximumLineCount > 5)
                     label: bodyText.maximumLineCount === 5 ? "Show More" : "Show Less"
                     radius: Theme.moduleEdgeRadius / 2
@@ -837,7 +837,7 @@ Item {
                     Repeater {
                         model: toastRow.notif ? toastRow.notif.actions : []
                         delegate: ModuleButton {
-                            variant: "light"
+                            variant: "neutral"
                             label: modelData.text
                             border.width: 2
                             height: 24
