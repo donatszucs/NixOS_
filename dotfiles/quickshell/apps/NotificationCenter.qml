@@ -498,7 +498,7 @@ Item {
         readonly property int effectiveTimeout: isCritical ? 0 : (notif && notif.expireTimeout > 0 ? notif.expireTimeout : 5000)
 
         variant: isCritical ? "red" : "neutral"
-        radius: expireTimer.running ? Theme.cardRadius : Theme.cardItemRadius
+        radius: !root.isManuallyOpen ? Theme.cardRadius : Theme.cardItemRadius
         border.width: 0
         clip: true
 
