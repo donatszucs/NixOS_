@@ -132,8 +132,8 @@ Item {
             implicitWidth: root.isCardOpen ? (root.showAllNotifications ? (root.cardWidth + 20) : root.cardWidth) : Theme.moduleEdgeRadius
             implicitHeight: root.isCardOpen ? Math.min(root.maxCardHeight, cardContentHeight + 20) : 0
 
-            Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
-            Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+            Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutQuint } }
+            Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
 
             function calculateNotifColumnHeight() {
                 var total = 0
@@ -436,7 +436,7 @@ Item {
                             bottomPadding: 0
 
                             move: Transition {
-                                NumberAnimation { properties: "y"; duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                                NumberAnimation { properties: "y"; duration: Theme.verticalDuration; easing.type: Easing.OutQuint }
                             }
 
                             Repeater {
@@ -511,8 +511,8 @@ Item {
         visible: shouldBeVisible || height > 0
         opacity: shouldBeVisible ? 1.0 : 0.0
 
-        Behavior on height { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-        Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+        Behavior on height { NumberAnimation { duration: Theme.verticalDuration; easing.type: toastRow.shouldBeVisible ? Easing.OutQuint : Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: toastRow.shouldBeVisible ? Easing.OutQuint : Easing.OutCubic } }
 
         Component.onCompleted: {
             if (toastRow.notif && toastRow.notif.image !== "")

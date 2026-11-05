@@ -29,7 +29,7 @@ Rectangle {
 
     // Animate width for side sliding!
     implicitWidth: expanded ? targetWidth : 0
-    Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
+    Behavior on implicitWidth { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutQuint } }
     implicitHeight: targetHeight + targetHeight / 8
     
     // List model for the clipboard history

@@ -23,10 +23,10 @@ Rectangle {
     implicitWidth: mainLayout.implicitWidth
 
     Behavior on implicitHeight {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint }
     }
     Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutQuint }
     }
 
     // ── IPC trigger (keybind: quickshell ipc call savedmenu-<screenName> toggle) ──

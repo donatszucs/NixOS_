@@ -24,7 +24,7 @@ Rectangle {
     implicitHeight: expanded ? targetHeight : 0
     implicitWidth: targetWidth
     Behavior on implicitHeight {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint }
     }
 
     // ── IPC trigger (keybind: quickshell ipc call rbw-<screenName> toggle) ───────
