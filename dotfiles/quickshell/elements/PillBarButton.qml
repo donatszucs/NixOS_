@@ -9,7 +9,7 @@ ModuleButton {
     // ── Pill Scale & Hover/Press Animation (matching HeaderButton) ───
     property bool hasScaleAnimation: true
     property real normalScale: 1.0
-    property real hoverScale: 1.02
+    property real hoverScale: 0.98
     property real pressedScale: 0.90
 
     property alias pill: pillBg
@@ -33,6 +33,13 @@ ModuleButton {
     readonly property color effectiveFillColor: pillFillColor !== null
         ? pillFillColor
         : root.pillPal.pillFill
+
+    // ── Shadow configuration ─────────────────────────────────────────
+    property bool shadowEnabled: true
+    property color shadowColor: Qt.rgba(0, 0, 0, 0.65)
+    property real shadowBlur: 0.8
+    property real shadowVerticalOffset: 2
+    property real shadowHorizontalOffset: 0
 
     property real gradientOpacityBorder: root.expanded ? 0.0 : 1.0
     property real gradientOpacityTop: 0.9
@@ -96,7 +103,8 @@ ModuleButton {
         width: Math.max(0, parent.width - root.pillPaddingH)
         y: root.expanded ? root.expandedTopMargin : Math.round((parent.height - root.pillHeight) / 2)
         height: root.expanded ? Math.max(0, parent.height - root.expandedTopMargin - root.expandedBottomMargin) : root.pillHeight
-        clip: true
+        clip: false
+        color: "transparent"
 
         topLeftRadius: root.pillTopLeftRadius
         topRightRadius: root.pillTopRightRadius
@@ -112,8 +120,28 @@ ModuleButton {
             NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
 
-        color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.pillColorOpacity)
-        gradient: root.expanded ? pillGradient : null
+        Rectangle {
+            id: background
+            anchors.fill: parent
+            z: -1
+            topLeftRadius: parent.topLeftRadius
+            topRightRadius: parent.topRightRadius
+            bottomLeftRadius: parent.bottomLeftRadius
+            bottomRightRadius: parent.bottomRightRadius
+
+            color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.pillColorOpacity)
+            gradient: root.expanded ? pillGradient : null
+
+            layer.enabled: root.shadowEnabled
+            layer.smooth: true
+            layer.effect: MultiEffect {
+                shadowEnabled: root.shadowEnabled
+                shadowColor: root.shadowColor
+                shadowBlur: root.shadowBlur
+                shadowVerticalOffset: root.shadowVerticalOffset
+                shadowHorizontalOffset: root.shadowHorizontalOffset
+            }
+        }
 
         Gradient {
             id: pillGradient

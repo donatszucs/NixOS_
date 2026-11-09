@@ -15,7 +15,13 @@ ModuleButton {
     noHoverColorChange: launcherModule.expanded
     property string screenName: ""
     property int activeDragCount: (activeWorkspaces ? activeWorkspaces.activeDragCount : 0) + (otherWorkspaces ? otherWorkspaces.activeDragCount : 0)
-    clip: activeDragCount === 0
+    clip: false
+    color: "transparent"
+    border.width: 0
+
+    // ── Shadow configuration ─────────────────────────────────────────
+    property bool shadowEnabled: true
+    property color shadowColor: Qt.rgba(0, 0, 0, 0.55)
 
     function collapseModule() {
         launcherModule.expanded = false
@@ -80,7 +86,7 @@ ModuleButton {
     Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration;   easing.type: Easing.OutCubic } }
 
     property real normalScale: 1.0
-    property real hoverScale: 1.02
+    property real hoverScale: 0.98
     property real pressedScale: 0.90
 
     transformOrigin: Item.Center
@@ -133,6 +139,57 @@ ModuleButton {
             }
         }
     ]
+
+    Rectangle {
+        id: background
+        anchors.fill: parent
+        z: -1
+
+        radius: launcherModule.radius
+        topLeftRadius: launcherModule.topLeftRadius
+        topRightRadius: launcherModule.topRightRadius
+        bottomLeftRadius: launcherModule.bottomLeftRadius
+        bottomRightRadius: launcherModule.bottomRightRadius
+
+        color: launcherModule.colorAdaptive
+        border.color: launcherModule.borderColorAdaptive
+        border.width: 0
+
+        Behavior on color {
+            ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+        }
+        Behavior on bottomLeftRadius { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+        Behavior on bottomRightRadius { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+
+        layer.enabled: launcherModule.activeDragCount === 0 && launcherModule.shadowEnabled
+        layer.smooth: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowHorizontalOffset: 0
+
+            property real shadowPulse: 1.0
+
+            SequentialAnimation on shadowPulse {
+                loops: Animation.Infinite
+                running: launcherModule.expanded
+
+                NumberAnimation { 
+                    to: 0.3
+                    duration: 1000
+                    easing.type: Easing.InOutSine 
+                }
+                NumberAnimation { 
+                    to: 1.0
+                    duration: 1500
+                    easing.type: Easing.InOutSine 
+                }
+            }
+
+            shadowBlur: launcherModule.expanded ? (0.5 + shadowPulse * 1.5) : 1.0
+            shadowVerticalOffset: launcherModule.expanded ? (2 + shadowPulse * 2) : 4
+            shadowColor: Qt.rgba(launcherModule.shadowColor.r, launcherModule.shadowColor.g, launcherModule.shadowColor.b, (launcherModule.expanded ? 0.8 * shadowPulse : launcherModule.shadowColor.a))
+        }
+    }
 
     Rectangle {
         id: headerBg
