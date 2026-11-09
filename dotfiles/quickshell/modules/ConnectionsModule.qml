@@ -1451,9 +1451,9 @@ ExpandableModule {
                                 : (connectionsModule.mouseStatus === "connected"
                                     ? Theme.statusGreen
                                     : (connectionsModule.mouseStatus === "idle"
-                                        ? Theme.paletteYellow
+                                        ? Theme.statusYellow
                                         : (connectionsModule.mouseStatus === "off"
-                                            ? Theme.paletteYellow
+                                            ? Theme.statusYellow
                                             : Theme.statusDisabled)))
                         }
 
