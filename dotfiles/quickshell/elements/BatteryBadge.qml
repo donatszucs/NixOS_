@@ -26,6 +26,7 @@ Item {
         if (charging) return Theme.statusGreen;
         if (normalizedPercent < 0) return Theme.statusDisabled;
         if (normalizedPercent <= 20) return Theme.statusRed;
+        if (normalizedPercent <= 35 && normalizedPercent > 20) return Theme.statusYellow;
         return useStatusColors ? Theme.statusGreen : Theme.palettePaper;
     }
 

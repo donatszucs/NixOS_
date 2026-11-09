@@ -35,7 +35,7 @@
             };
             cargoBuildFlags = [ "-p" "light_controller" ];
             nativeBuildInputs = [ pkgs.pkg-config ];
-            buildInputs = [ pkgs.udev ];
+            buildInputs = [ pkgs.udev pkgs.aws-lc ];
             doCheck = false;
           };
 

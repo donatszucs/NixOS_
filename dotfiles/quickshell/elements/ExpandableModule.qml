@@ -56,7 +56,11 @@ ModuleButton {
 
     // Close button configuration for bar tab
     property bool showCloseButton: shrinkEnabled
-    property string closeButtonText: "Close"
+    property string closeButtonText: ""
+    property int closeButtonWidth: root.width
+    property int closeButtonHeight: Theme.pillHeight
+    property int closeButtonRadius: Theme.pillHeight / 2
+    property int closeButtonInverseRadius: Theme.pillHeight / 2
 
     clip: false
     noHoverColorChange: expanded
@@ -319,8 +323,8 @@ ModuleButton {
 
     // ── Bar tab MouseArea & Close Button ─────────────────────────
     // When expanded, the header pill moves down underneath the bar.
-    // This MouseArea displays a subtle close button in the bar tab
-    // and collapses the module when clicked.
+    // The close button smoothly drops down from the top edge with
+    // InverseRadius wings, knocking the pill downward.
     MouseArea {
         id: _barTabMouseArea
         z: 3
@@ -333,7 +337,13 @@ ModuleButton {
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: true
         enabled: root.expanded && root.showCloseButton
-        visible: (root.expanded && root.showCloseButton) || _closeButtonBg.opacity > 0.001
+        clip: true
+
+        readonly property real closeProgress: root.showCloseButton
+            ? Math.max(0.0, Math.min(1.0, _headerPill.y / Theme.moduleHeight))
+            : 0.0
+
+        visible: root.showCloseButton && (root.expanded || _closeButtonContainer.y > -_closeButtonContainer.height + 0.1)
 
         onClicked: {
             root.collapseModule()
@@ -342,50 +352,90 @@ ModuleButton {
             root.pillWheel(wheel)
         }
 
-        Rectangle {
-            id: _closeButtonBg
-            anchors {
-                fill: parent
-                topMargin: 5
-                bottomMargin: 5
-                leftMargin: 6
-                rightMargin: 6
+        property color buttonColor: pressed
+            ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.08)
+            : (containsMouse
+                ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.18)
+                : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.10))
+
+        Behavior on buttonColor {
+            ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
+        }
+
+        Item {
+            id: _closeButtonContainer
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: root.closeButtonWidth
+            height: root.closeButtonHeight
+            y: (_barTabMouseArea.closeProgress - 1.0) * height
+
+            // Left Inverse Radius Wing (curves ceiling into button left wall)
+            InverseRadius {
+                id: _leftInverseRadius
+                anchors.top: _closeButtonBody.top
+                anchors.right: _closeButtonBody.left
+                cornerPosition: "topRight"
+                size: root.closeButtonInverseRadius
+                animated: false
+                width: size
+                height: size
+                color: _closeButtonBody.color
             }
-            radius: 7
-            visible: opacity > 0.001
-            opacity: (root.expanded && root.showCloseButton) ? 1.0 : 0.0
 
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: Theme.horizontalDuration
-                    easing.type: Easing.OutCubic
-                }
-            }
+            // Central Close Button Body
+            Rectangle {
+                id: _closeButtonBody
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                width: Math.max(0, _closeButtonContainer.width - (2 * root.closeButtonInverseRadius))
+                height: root.closeButtonHeight
 
-            color: _barTabMouseArea.pressed
-                ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.06)
-                : (_barTabMouseArea.containsMouse
-                    ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.16)
-                    : Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.10))
+                topLeftRadius: 0
+                topRightRadius: 0
+                bottomLeftRadius: root.closeButtonRadius
+                bottomRightRadius: root.closeButtonRadius
 
-            Behavior on color {
-                ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
-            }
-
-            Text {
-                id: _closeButtonText
-                anchors.centerIn: parent
-                text: root.closeButtonText
-                color: _barTabMouseArea.containsMouse
-                    ? Qt.lighter(Theme.textPrimary, 1.15)
-                    : Theme.textPrimary
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 1
-                font.bold: true
+                color: _barTabMouseArea.buttonColor
 
                 Behavior on color {
                     ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
                 }
+
+                Text {
+                    id: _closeButtonText
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: _barTabMouseArea.pressed ? 1 : (_barTabMouseArea.containsMouse ? -2 : 0)
+                    text: root.closeButtonText
+                    color: _barTabMouseArea.pressed
+                        ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.90)
+                        : (_barTabMouseArea.containsMouse
+                            ? Theme.textPrimary
+                            : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.70))
+                    font.family: Theme.font
+                    font.pixelSize: 12
+                    font.bold: true
+
+                    Behavior on anchors.verticalCenterOffset {
+                        NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+                    }
+
+                    Behavior on color {
+                        ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
+                    }
+                }
+            }
+
+            // Right Inverse Radius Wing (curves ceiling into button right wall)
+            InverseRadius {
+                id: _rightInverseRadius
+                anchors.top: _closeButtonBody.top
+                anchors.left: _closeButtonBody.right
+                cornerPosition: "topLeft"
+                size: root.closeButtonInverseRadius
+                animated: false
+                width: size
+                height: size
+                color: _closeButtonBody.color
             }
         }
     }
