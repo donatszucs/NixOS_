@@ -34,7 +34,7 @@ ModuleButton {
         ? pillFillColor
         : root.pillPal.pillFill
 
-    property real gradientOpacityBorder: root.expanded ? 0.5 : 1.0
+    property real gradientOpacityBorder: root.expanded ? 0.0 : 1.0
     property real gradientOpacityTop: 0.9
     property real gradientOpacityMid: 0.2
     property real gradientOpacityBottom: 0.8

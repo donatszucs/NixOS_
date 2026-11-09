@@ -582,6 +582,22 @@ Item {
             toastRow.dismiss()
         }
 
+        // Time, locked to the top-right corner of the toast
+        Text {
+            id: timeText
+            z: 1
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: 15
+            anchors.rightMargin: 20
+            text: Qt.formatDateTime(new Date(), "HH:mm")
+            font.family: Theme.font
+            font.pixelSize: Theme.fontSize - 3
+            font.bold: true
+            color: toastRow.textColor
+            opacity: 0.6
+        }
+
         GridLayout {
             id: contentGrid
             anchors.fill: parent
@@ -718,15 +734,15 @@ Item {
                 }
             }
 
-            // [Row 0, Col 1] Text Info
+            // [Row 0, Col 1] Header (app name + title), centered next to the image
             ColumnLayout {
                 Layout.row: 0
                 Layout.column: 1
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                spacing: 5
+                Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                spacing: 3
 
-                // Header: app name + time
+                // Header: app name
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 8
@@ -739,17 +755,8 @@ Item {
                         color: toastRow.textColor
                         opacity: 0.7
                         Layout.fillWidth: true
+                        Layout.rightMargin: 40
                         elide: Text.ElideRight
-                    }
-
-                    Text {
-                        id: timeText
-                        text: Qt.formatDateTime(new Date(), "HH:mm")
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize - 3
-                        font.bold: true
-                        color: toastRow.textColor
-                        opacity: 0.6
                     }
                 }
 
@@ -763,8 +770,21 @@ Item {
                     font.bold: true
                     color: toastRow.textColor
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    elide: Text.ElideRight
+                    maximumLineCount: 2
                     Layout.fillWidth: true
                 }
+
+            }
+
+            // [Row 1] Body: spans full width so it flows under the image
+            ColumnLayout {
+                Layout.row: 1
+                Layout.column: 0
+                Layout.columnSpan: 2
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                spacing: 5
 
                 // Body
                 Text {
@@ -812,7 +832,7 @@ Item {
             // [Row 1] Actions
             Flickable {
                 id: actionFlickable
-                Layout.row: 1
+                Layout.row: 2
                 Layout.column: 0
                 Layout.columnSpan: 2
                 Layout.fillWidth: true
@@ -848,7 +868,7 @@ Item {
             // [Row 2] Inline Reply
             ModuleButton {
                 id: inlineReplyRow
-                Layout.row: 2
+                Layout.row: 3
                 Layout.column: 0
                 Layout.columnSpan: 2
                 Layout.fillWidth: true
@@ -896,10 +916,10 @@ Item {
                 }
             }
 
-            // [Row 3] Timer Progress Bar
+            // [Row 4] Timer Progress Bar
             Rectangle {
                 id: notifTimer
-                Layout.row: 3
+                Layout.row: 4
                 Layout.column: 0
                 Layout.columnSpan: 2
                 Layout.fillWidth: true
