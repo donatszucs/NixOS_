@@ -36,7 +36,7 @@ ModuleButton {
 
     // ── Shadow configuration ─────────────────────────────────────────
     property bool shadowEnabled: true
-    property color shadowColor: Qt.rgba(0, 0, 0, 0.65)
+    property color shadowColor: Qt.rgba(0, 0, 0, 0.85)
     property real shadowBlur: 0.8
     property real shadowVerticalOffset: 2
     property real shadowHorizontalOffset: 0

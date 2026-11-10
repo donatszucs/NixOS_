@@ -21,8 +21,8 @@ ModuleButton {
 
     // ── Shadow configuration ─────────────────────────────────────────
     property bool shadowEnabled: true
-    property color shadowColor: Qt.rgba(0, 0, 0, 0.55)
-
+    property color shadowColor: Qt.rgba(0, 0, 0, 0.85)
+ 
     function collapseModule() {
         launcherModule.expanded = false
     }
@@ -86,7 +86,7 @@ ModuleButton {
     Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration;   easing.type: Easing.OutCubic } }
 
     property real normalScale: 1.0
-    property real hoverScale: 0.98
+    property real hoverScale: 1.02
     property real pressedScale: 0.90
 
     transformOrigin: Item.Center
@@ -320,6 +320,7 @@ ModuleButton {
                     displayMode: "monitor"
                     color: "transparent"
                     anchors.topMargin: 0
+                    shadowColor: launcherModule.shadowColor
                     onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)
                 }
 
@@ -367,6 +368,7 @@ ModuleButton {
                     displayMode: "other"
                     color: "transparent"
                     anchors.topMargin: 0
+                    shadowColor: launcherModule.shadowColor
                     visible: otherWorkspaces.monitorWorkspaces.others.length > 0 || otherWorkspaces.implicitWidth > 0.5
                     onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)
                 }
@@ -379,6 +381,7 @@ ModuleButton {
                     displayMode: "special"
                     color: "transparent"
                     anchors.topMargin: 0
+                    shadowColor: launcherModule.shadowColor
                     Layout.leftMargin: (otherWorkspaces.visible && specialWorkspaces.visible) ? 4 : 0
                     visible: specialWorkspaces.monitorWorkspaces.special.length > 0 || specialWorkspaces.implicitWidth > 0.5
                     onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)

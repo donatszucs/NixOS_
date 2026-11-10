@@ -15,7 +15,7 @@ PanelWindow {
     required property var modelData
     screen: modelData
 
-    property color moduleShadowColor: Qt.rgba(0, 0, 0, 0.55)
+    property color moduleShadowColor: Qt.rgba(0, 0, 0, 0.85)
 
     Component {
         id: panelShadowEffect

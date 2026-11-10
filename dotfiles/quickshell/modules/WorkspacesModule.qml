@@ -1,6 +1,7 @@
 // Workspaces — uses Hyprland IPC via Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 
 import Quickshell
 import Quickshell.Hyprland
@@ -16,6 +17,13 @@ ModuleButton {
     property bool expanded: false
 
     signal requestContextMenu(var windowData, var globalPos)
+
+    // ── Shadow configuration ─────────────────────────────────────────
+    property bool shadowEnabled: true
+    property color shadowColor: Qt.rgba(0, 0, 0, 0.55)
+    property real shadowBlur: 0.8
+    property real shadowVerticalOffset: 2
+    property real shadowHorizontalOffset: 0
 
     clip: false
 
@@ -262,7 +270,17 @@ ModuleButton {
         implicitHeight: root.implicitHeight - 2 * root.overlay
         implicitWidth: isEmptyWorkspace ? implicitHeight : Math.max(contentRow.implicitWidth, implicitHeight)
         cursorShape: Qt.PointingHandCursor
-        clip: activeDragCount === 0
+        clip: false
+
+        layer.enabled: root.shadowEnabled && control.activeDragCount === 0
+        layer.smooth: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: root.shadowColor
+            shadowBlur: root.shadowBlur
+            shadowVerticalOffset: root.shadowVerticalOffset
+            shadowHorizontalOffset: root.shadowHorizontalOffset
+        }
         
         topLeftRadius: isSpecial ? Theme.moduleEdgeRadius : (index === 0 ? Theme.moduleEdgeRadius : 5)
         bottomLeftRadius: isSpecial ? Theme.moduleEdgeRadius : (index === 0 ? Theme.moduleEdgeRadius : 5)
@@ -305,7 +323,7 @@ ModuleButton {
 
         property bool isSpawned: false
         transformOrigin: Item.Center
-        scale: isSpawned ? (!control.enabled ? 1.0 : (control.pressed ? 0.90 : 1.0)) : 0
+        scale: isSpawned ? (!control.enabled ? 1.0 : (control.pressed ? 0.90 : (control.hovered ? 0.96 : 1.0))) : 0
         Component.onCompleted: {
             isSpawned = true
         }
