@@ -290,48 +290,178 @@ Item {
         }
     }
 
-    property alias trackedNotifications: server.trackedNotifications
-
-    ListModel {
-        id: orderedNotifications
-    }
-
+    // ==========================================
+    // Notification State
+    // ==========================================
+    // Every notification, newest (or most recently updated) first.
+    ListModel { id: orderedNotifications }
     property alias notificationsModel: orderedNotifications
 
-    function addNotification(notification) {
-        if (!notification) return
+    // One row per app, ordered by the app's most recent notification.
+    ListModel { id: appGroupsModel }
+    property alias groupsModel: appGroupsModel
+
+    // Emitted after the notification list or its per-app grouping changed.
+    signal notificationListChanged()
+
+    function groupKey(n) {
+        return (n && n.appName) ? n.appName : "Unknown"
+    }
+
+    function notifKey(n) {
+        return (n && n.id !== undefined && n.id !== null) ? "" + n.id : "" + n
+    }
+
+    function indexOfNotification(n) {
         for (var i = 0; i < orderedNotifications.count; ++i) {
-            var entry = orderedNotifications.get(i)
-            if (entry && entry.notifData && (entry.notifData === notification || (entry.notifData.id !== undefined && entry.notifData.id === notification.id))) {
-                if (i !== 0) {
-                    orderedNotifications.move(i, 0, 1)
+            var d = orderedNotifications.get(i).notifData
+            if (d === n || (d && d.id !== undefined && d.id === n.id)) return i
+        }
+        return -1
+    }
+
+    // Notifications of one app, in global order (newest first).
+    function notificationsOf(appName) {
+        var list = []
+        for (var i = 0; i < orderedNotifications.count; ++i) {
+            var d = orderedNotifications.get(i).notifData
+            if (d && root.groupKey(d) === appName) list.push(d)
+        }
+        return list
+    }
+
+    // Reconcile a ListModel (rows of a single `role`) with an ordered list of
+    // values using remove/move/insert only, so delegates are kept alive and
+    // can animate instead of being rebuilt.
+    function syncModel(model, role, values) {
+        for (var r = model.count - 1; r >= 0; --r) {
+            if (values.indexOf(model.get(r)[role]) < 0) model.remove(r)
+        }
+        for (var t = 0; t < values.length; ++t) {
+            if (t < model.count && model.get(t)[role] === values[t]) continue
+            var found = -1
+            for (var j = t + 1; j < model.count; ++j) {
+                if (model.get(j)[role] === values[t]) { found = j; break }
+            }
+            if (found >= 0) {
+                model.move(found, t, 1)
+            } else {
+                var row = {}
+                row[role] = values[t]
+                model.insert(t, row)
+            }
+        }
+    }
+
+    function syncGroups() {
+        var names = []
+        for (var i = 0; i < orderedNotifications.count; ++i) {
+            var k = root.groupKey(orderedNotifications.get(i).notifData)
+            if (names.indexOf(k) < 0) names.push(k)
+        }
+        root.syncModel(appGroupsModel, "appName", names)
+        root.notificationListChanged()
+    }
+
+    // ── Shared Group Expansion State (shared across all monitors) ──
+    // Groups are expanded unless listed here.
+    property var collapsedGroups: ({})
+
+    function isGroupExpanded(appName) {
+        return root.collapsedGroups[appName] !== true
+    }
+
+    function setGroupExpanded(appName, expanded) {
+        var copy = Object.assign({}, root.collapsedGroups)
+        if (expanded) delete copy[appName]
+        else copy[appName] = true
+        root.collapsedGroups = copy
+    }
+
+    function toggleGroupExpanded(appName) {
+        root.setGroupExpanded(appName, !root.isGroupExpanded(appName))
+    }
+
+    // ── Active Toast Tracking (shared across all monitors) ──────────
+    // notification key -> expiry timestamp in ms (0 = stays until dismissed)
+    property var activeToasts: ({})
+    readonly property bool hasActiveToasts: Object.keys(root.activeToasts).length > 0
+
+    function getToastTimeout(n) {
+        if (!n || n.urgency === Notif.NotificationUrgency.Critical) return 0
+        return n.expireTimeout > 0 ? n.expireTimeout : 5000
+    }
+
+    function isToastActive(n) {
+        return !!n && root.activeToasts[root.notifKey(n)] !== undefined
+    }
+
+    function markToastActive(n) {
+        if (!n) return
+        var timeout = root.getToastTimeout(n)
+        var copy = Object.assign({}, root.activeToasts)
+        copy[root.notifKey(n)] = timeout > 0 ? Date.now() + timeout : 0
+        root.activeToasts = copy
+        if (timeout > 0) toastTicker.start()
+    }
+
+    function dismissActiveToast(n) {
+        var k = root.notifKey(n)
+        if (root.activeToasts[k] === undefined) return
+        var copy = Object.assign({}, root.activeToasts)
+        delete copy[k]
+        root.activeToasts = copy
+    }
+
+    // Expires toasts; only runs while at least one toast has a timeout.
+    Timer {
+        id: toastTicker
+        interval: 100
+        repeat: true
+        onTriggered: {
+            var now = Date.now()
+            var copy = {}
+            var pending = false
+            var changed = false
+            for (var k in root.activeToasts) {
+                var expireAt = root.activeToasts[k]
+                if (expireAt > 0 && now >= expireAt) {
+                    changed = true
+                } else {
+                    copy[k] = expireAt
+                    if (expireAt > 0) pending = true
                 }
-                return
             }
-        }
-        orderedNotifications.insert(0, { "notifData": notification })
-    }
-
-    function removeNotification(notification) {
-        if (!notification) return
-        for (var i = 0; i < orderedNotifications.count; ++i) {
-            var entry = orderedNotifications.get(i)
-            if (entry && entry.notifData && (entry.notifData === notification || (entry.notifData.id !== undefined && entry.notifData.id === notification.id))) {
-                orderedNotifications.remove(i)
-                break
-            }
+            if (changed) root.activeToasts = copy
+            if (!pending) toastTicker.stop()
         }
     }
 
-    function dismissAllNotifications() {
-        if (server.trackedNotifications && server.trackedNotifications.values) {
-            var list = server.trackedNotifications.values
-            for (var i = list.length - 1; i >= 0; --i) {
-                var n = list[i]
-                if (n && n.dismiss) n.dismiss()
-            }
-        }
-        orderedNotifications.clear()
+    function addNotification(n) {
+        if (!n) return
+        var i = root.indexOfNotification(n)
+        if (i < 0) orderedNotifications.insert(0, { "notifData": n })
+        else if (i > 0) orderedNotifications.move(i, 0, 1)
+        root.syncGroups()
+    }
+
+    function removeNotification(n) {
+        if (!n) return
+        root.dismissActiveToast(n)
+        var i = root.indexOfNotification(n)
+        if (i >= 0) orderedNotifications.remove(i)
+        root.syncGroups()
+    }
+
+    function dismissNotification(n) {
+        if (!n) return
+        if (n.dismiss) n.dismiss()
+        root.removeNotification(n)
+    }
+
+    function dismissGroup(appName) {
+        var list = root.notificationsOf(appName)
+        for (var k = 0; k < list.length; ++k) root.dismissNotification(list[k])
     }
 
     Connections {
@@ -354,16 +484,21 @@ Item {
         onNotification: notification => {
             notification.tracked = true
             root.addNotification(notification)
+            root.markToastActive(notification)
             root.playNotificationSound(notification)
 
             notification.closed.connect(() => {
                 root.removeNotification(notification)
             })
-            notification.trackedChanged.connect(() => {
-                if (!notification.tracked) {
-                    root.removeNotification(notification)
-                }
-            })
+
+            var onUpdated = function() {
+                root.addNotification(notification)
+                root.markToastActive(notification)
+                root.playNotificationSound(notification)
+            }
+            notification.bodyChanged.connect(onUpdated)
+            notification.summaryChanged.connect(onUpdated)
+            notification.imageChanged.connect(onUpdated)
         }
     }
 

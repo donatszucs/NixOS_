@@ -52,8 +52,8 @@
         renice = 15;
       };
       custom = {
-        start = "${pkgs.libnotify}/bin/notify-send 'GameMode started'";
-        end = "${pkgs.libnotify}/bin/notify-send 'GameMode ended'";
+        start = "${pkgs.libnotify}/bin/notify-send -a 'GameMode' -u low -i 'input-gaming' -t 3000 'GameMode Active' 'Performance optimizations engaged'";
+        end = "${pkgs.libnotify}/bin/notify-send -a 'GameMode' -u low -i 'input-gaming' -t 3000 'GameMode Inactive' 'System profile restored'";
       };
     };
   };

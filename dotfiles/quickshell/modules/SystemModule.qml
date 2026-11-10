@@ -244,11 +244,17 @@ ExpandableModule {
 
     Process {
         id: rebuildProc
-        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config/nix_files && sudo nixos-rebuild switch --flake .#doni --impure && nix run nixpkgs#nvd -- diff $(ls -d1v /nix/var/nix/profiles/system-*-link | tail -2); notify-send 'Rebuild finished'"]
+        command: [
+            "kitty", "--hold", "bash", "-lc",
+            "cd ~/nixos-config/nix_files && notify-send -a 'NixOS' -i 'nix-snowflake' -u low -t 3000 'System Rebuild' 'Building NixOS configuration...' && if sudo nixos-rebuild switch --flake .#doni --impure; then nix run nixpkgs#nvd -- diff $(ls -d1v /nix/var/nix/profiles/system-*-link | tail -2); notify-send -a 'NixOS' -i 'nix-snowflake' -u normal -t 5000 'Rebuild Complete' 'System configuration successfully applied'; else notify-send -a 'NixOS' -i 'dialog-error' -u critical 'Rebuild Failed' 'Errors encountered during build'; fi"
+        ]
     }
 
     Process {
         id: updateProc
-        command: ["kitty", "--hold", "bash", "-lc", "cd ~/nixos-config/nix_files && nix flake update; notify-send 'Flake update finished'"]
+        command: [
+            "kitty", "--hold", "bash", "-lc",
+            "cd ~/nixos-config/nix_files && notify-send -a 'NixOS' -i 'nix-snowflake' -u low -t 3000 'Flake Update' 'Updating flake inputs...' && if nix flake update; then notify-send -a 'NixOS' -i 'nix-snowflake' -u normal -t 5000 'Update Complete' 'Flake inputs successfully updated'; else notify-send -a 'NixOS' -i 'dialog-error' -u critical 'Update Failed' 'Errors encountered updating flake inputs'; fi"
+        ]
     }
 }
