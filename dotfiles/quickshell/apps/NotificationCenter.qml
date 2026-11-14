@@ -903,38 +903,60 @@ Item {
             function onNotificationListChanged() { grp.syncAppNotifs() }
         }
 
+        function dismissGroup() {
+            SharedState.dismissGroup(grp.appName)
+        }
+
         readonly property int count: appNotifsModel.count
         readonly property bool grouped: count > 1
         readonly property bool showHeader: notifCenter.showAllNotifications && grouped
         readonly property int headerHeight: 34
-        readonly property int peekHeight: 12
+        readonly property int peekHeight: 10
         readonly property var pal: Theme.palette("neutral")
 
-        property real headerSlot: showHeader ? headerHeight + 8 : 0
+        property real headerSlot: showHeader ? headerHeight + 6 : 0
         property real peekSlot: (showHeader && !expanded) ? peekHeight : 0
+        property real cardBottomPad: showHeader ? 6 : 0
+        property real toastMargin: showHeader ? 6 : 0
         Behavior on headerSlot { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
         Behavior on peekSlot { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
+        Behavior on cardBottomPad { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
+        Behavior on toastMargin { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutQuint } }
 
         readonly property real toastsHeight: notifCenter.withoutTrailingGap(toastsCol.implicitHeight)
-        readonly property real bodyHeight: headerSlot + toastsHeight + peekSlot
+        readonly property real bodyHeight: headerSlot + toastsHeight + peekSlot + cardBottomPad
         // body plus this group's own scaled gap (see notifCenter.itemGap)
         height: bodyHeight + notifCenter.itemGap * Math.min(1, bodyHeight / (6 * notifCenter.itemGap))
         visible: height > 0
         clip: true
 
-        // ── Group header ────────────────────────────────────────────
-        ModuleButton {
+        // ── Group Card (envelops header + notifications) ────────────
+        Rectangle {
+            id: groupCard
+            width: parent.width
+            height: grp.bodyHeight
+            y: 0
+            visible: grp.headerSlot > 0
+            opacity: grp.headerSlot / (grp.headerHeight + 6)
+            radius: Theme.cardItemRadius
+            color: Qt.rgba(Theme.dark.base.r, Theme.dark.base.g, Theme.dark.base.b, Theme.moduleOpacity)
+            border.width: 0
+        }
+
+        // ── Group Header (existing buttons) ─────────────────────────
+        Item {
             id: groupHeader
             width: parent.width
             height: grp.headerHeight
-            y: grp.headerSlot - (grp.headerHeight + 8)
+            y: grp.headerSlot - (grp.headerHeight + 6)
             visible: grp.headerSlot > 0
-            opacity: grp.headerSlot / (grp.headerHeight + 8)
-            variant: "dark"
-            radius: Theme.cardItemRadius
-            border.width: 0
-            cursorShape: Qt.PointingHandCursor
-            onClicked: SharedState.toggleGroupExpanded(grp.appName)
+            opacity: grp.headerSlot / (grp.headerHeight + 6)
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: SharedState.toggleGroupExpanded(grp.appName)
+            }
 
             RowLayout {
                 anchors.fill: parent
@@ -1024,58 +1046,24 @@ Item {
             }
         }
 
-        // ── Group Content Area (with continuous thread line) ─────────
+        // ── Group Content Area ──────────────────────────────────────
         Item {
             id: groupContent
             y: grp.headerSlot
             width: parent.width
-            height: grp.toastsHeight + grp.peekSlot
+            height: grp.toastsHeight + grp.peekSlot + grp.cardBottomPad
 
-            // Continuous vertical line connecting all cards in the group
+            // ── Stack Peek (shown when collapsed) ───────────────────
             Rectangle {
-                visible: grp.headerSlot > 0
-                opacity: groupHeader.opacity
-                x: 2
-                y: 2
-                width: 4
-                height: Math.max(0, grp.toastsHeight - 8)
-                radius: 2
-                color: Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.35)
-            }
-
-            // ── Stack Layers (shown when collapsed) ─────────────────
-            Item {
-                anchors.left: parent.left
-                anchors.leftMargin: 14
-                anchors.right: parent.right
-                y: grp.toastsHeight
-                height: grp.peekHeight
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: grp.toastsHeight + 2
+                width: parent.width - (grp.showHeader ? 20 : 12)
+                height: 6
+                radius: Theme.cardItemRadius
+                color: Qt.rgba(grp.pal.base.r, grp.pal.base.g, grp.pal.base.b, grp.pal.base.a * Theme.moduleOpacity * 0.75)
+                border.width: 0
                 visible: grp.peekSlot > 0
                 opacity: grp.peekSlot / grp.peekHeight
-
-                // Layer 2 (furthest back)
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    y: 6
-                    width: parent.width - 24
-                    height: 6
-                    radius: Theme.cardItemRadius
-                    color: Qt.rgba(grp.pal.base.r, grp.pal.base.g, grp.pal.base.b, grp.pal.base.a * Theme.moduleOpacity * 0.45)
-                    border.width: 1
-                    border.color: Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.12)
-                }
-
-                // Layer 1 (middle)
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    y: 2
-                    width: parent.width - 12
-                    height: 6
-                    radius: Theme.cardItemRadius
-                    color: Qt.rgba(grp.pal.base.r, grp.pal.base.g, grp.pal.base.b, grp.pal.base.a * Theme.moduleOpacity * 0.75)
-                    border.width: 1
-                    border.color: Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.20)
-                }
 
                 MouseArea {
                     anchors.fill: parent
@@ -1088,8 +1076,9 @@ Item {
             Column {
                 id: toastsCol
                 anchors.left: parent.left
-                anchors.leftMargin: grp.showHeader ? 14 : 0
+                anchors.leftMargin: grp.toastMargin
                 anchors.right: parent.right
+                anchors.rightMargin: grp.toastMargin
                 spacing: 0
 
                 Repeater {
