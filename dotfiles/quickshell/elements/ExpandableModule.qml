@@ -463,6 +463,9 @@ ModuleButton {
         bgImageContrast: root.pillBgImageContrast
         bgImageDarkOverlayOpacity: root.pillBgImageDarkOverlayOpacity
 
+        pillTopLeftRadius: expanded ? Theme.pillCollapsedRadius + 10 : Theme.pillCollapsedRadius
+        pillTopRightRadius: expanded ? Theme.pillCollapsedRadius + 10 : Theme.pillCollapsedRadius
+
         noHoverColorChange: true
         noPressColorChange: true
 

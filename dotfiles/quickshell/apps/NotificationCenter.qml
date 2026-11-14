@@ -20,12 +20,17 @@ Item {
     // Gap between stacked items. Every item carries its own gap (scaled by how
     // much of it is shown) instead of using Column spacing, which would step
     // whenever an item flips visible/invisible. The last item's trailing gap is
-    // removed by withoutTrailingGap().
+    // removed by scaling with maxGroupFraction.
     readonly property int itemGap: 8
-    function withoutTrailingGap(h) {
-        return h - itemGap * Math.min(1, h / (6 * itemGap))
+    readonly property real maxGroupFraction: {
+        var maxF = 0
+        for (var i = 0; i < groupRepeater.count; ++i) {
+            var g = groupRepeater.itemAt(i)
+            if (g && g.groupFraction > maxF) maxF = g.groupFraction
+        }
+        return maxF
     }
-    readonly property real listHeight: withoutTrailingGap(notifColumn.implicitHeight)
+    readonly property real listHeight: Math.max(0, notifColumn.implicitHeight - itemGap * maxGroupFraction)
 
     property bool inlineReplyInputFocused: false
     property bool isManuallyOpen: false
@@ -33,6 +38,7 @@ Item {
     property string screenName: ""
 
     readonly property int totalCount: SharedState.notificationsModel.count
+    readonly property int activeCount: Math.max(0, totalCount - Object.keys(SharedState.dismissingNotifs).length)
 
     // A new notification scrolls the list back to the top.
     Connections {
@@ -136,7 +142,7 @@ Item {
             // opening, closing and group expansion in a single smooth motion.
             property real chromeHeight: !notifCenter.isCardOpen ? 0
                 : (notifCenter.showAllNotifications ? Theme.cardHeaderHeight + 40 : 20)
-            property real emptyHeight: (notifCenter.showAllNotifications && notifCenter.totalCount === 0) ? emptyState.implicitHeight : 0
+            property real emptyHeight: (notifCenter.showAllNotifications && notifCenter.activeCount === 0) ? emptyState.implicitHeight : 0
 
             implicitWidth: notifCenter.isCardOpen ? (notifCenter.showAllNotifications ? (notifCenter.cardWidth + 20) : notifCenter.cardWidth) : Theme.moduleEdgeRadius
             implicitHeight: Math.min(notifCenter.maxCardHeight, chromeHeight + emptyHeight + notifCenter.listHeight)
@@ -162,9 +168,33 @@ Item {
                 anchors.fill: parent
                 anchors.margins: 10
 
-                color: notifCenter.showAllNotifications ? Theme.bgBlurColor : "transparent"
-                border.width: notifCenter.showAllNotifications ? Theme.cardBorderWidth : 0
-                border.color: notifCenter.showAllNotifications ? Theme.cardBorder : "transparent"
+                // Keep the card chrome/background visible while closing so notifications
+                // don't jump up when unhovering.
+                property bool showCenterChrome: notifCenter.showAllNotifications
+                Connections {
+                    target: notifCenter
+                    function onShowAllNotificationsChanged() {
+                        if (notifCenter.showAllNotifications) {
+                            card.showCenterChrome = true
+                        } else if (notifCenter.hasActiveToasts) {
+                            card.showCenterChrome = false
+                        }
+                    }
+                    function onHasActiveToastsChanged() {
+                        if (!notifCenter.showAllNotifications && notifCenter.hasActiveToasts) {
+                            card.showCenterChrome = false
+                        }
+                    }
+                }
+                onVisibleChanged: {
+                    if (!visible && !notifCenter.showAllNotifications) {
+                        showCenterChrome = false
+                    }
+                }
+
+                color: showCenterChrome ? Theme.bgBlurColor : "transparent"
+                border.width: showCenterChrome ? Theme.cardBorderWidth : 0
+                border.color: showCenterChrome ? Theme.cardBorder : "transparent"
                 shadowEnabled: false
 
                 opacity: notifCenter.isCardOpen ? 1.0 : 0.0
@@ -176,7 +206,7 @@ Item {
 
                 Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration / 2; easing.type: Easing.OutCubic } }
 
-                hasHeader: notifCenter.showAllNotifications
+                hasHeader: showCenterChrome
                 property bool volExpanded: false
 
                 headerContent: [
@@ -343,21 +373,24 @@ Item {
                     anchors.bottom: parent.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: notifCenter.cardWidth - 20
-                    anchors.bottomMargin: notifCenter.showAllNotifications ? 10 : 0
-                    anchors.topMargin: notifCenter.showAllNotifications ? 10 : 0
+                    anchors.bottomMargin: card.showCenterChrome ? 10 : 0
+                    anchors.topMargin: card.showCenterChrome ? 10 : 0
 
                     layer.enabled: true
                     layer.effect: MultiEffect {
-                        maskEnabled: notifCenter.showAllNotifications
+                        maskEnabled: card.showCenterChrome
                         maskSource: contentMask
                     }
 
                     // ── Empty State ─────────────────────────────────────
                     Item {
                         id: emptyState
-                        visible: notifCenter.showAllNotifications && notifCenter.totalCount === 0
+                        opacity: (notifCenter.showAllNotifications && notifCenter.activeCount === 0) ? 1.0 : 0.0
+                        visible: opacity > 0
                         anchors.fill: parent
                         implicitHeight: 110
+
+                        Behavior on opacity { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
                         ColumnLayout {
                             anchors.centerIn: parent
@@ -446,6 +479,7 @@ Item {
         property var group: null
 
         readonly property bool isToastActive: SharedState.isToastActive(toastRow.notif)
+        readonly property bool isDismissing: SharedState.isNotificationDismissing(toastRow.notif)
         property string cachedImage: (notif && notif.image) ? notif.image : ""
 
         readonly property bool hasInlineReply: notif && notif.hasInlineReply
@@ -453,13 +487,13 @@ Item {
         readonly property int effectiveTimeout: SharedState.getToastTimeout(toastRow.notif)
 
         variant: isCritical ? "red" : "neutral"
-        radius: !notifCenter.showAllNotifications ? Theme.cardRadius : Theme.cardItemRadius
+        radius: group ? Math.max(0, group.cardRadius - 5) : ((!notifCenter.showAllNotifications ? Theme.cardRadius : Theme.cardItemRadius) - 5)
         border.width: 0
         clip: true
 
-        readonly property bool isNewest: notifIndex === 0
+        readonly property bool isNewest: group ? (group.firstActiveNotif === toastRow.notif) : (notifIndex === 0)
         readonly property bool inGroupView: group ? (group.expanded || !group.grouped || isNewest) : true
-        readonly property bool shouldBeVisible: notifCenter.showAllNotifications ? inGroupView : isToastActive
+        readonly property bool shouldBeVisible: !isDismissing && (notifCenter.showAllNotifications ? inGroupView : isToastActive)
 
         readonly property int minCol0Height: (cachedImage !== "" ? 74 : 40)
         implicitHeight: Math.max(contentGrid.implicitHeight + 20, minCol0Height + 20)
@@ -669,7 +703,7 @@ Item {
                 }
             }
 
-            // [Row 0, Col 1] Header (app name + title), centered next to the image
+            // [Row 0, Col 1] Title (summary), centered next to the image
             ColumnLayout {
                 Layout.row: 0
                 Layout.column: 1
@@ -677,39 +711,21 @@ Item {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 spacing: 3
 
-                // Header: app name
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    Text {
-                        text: toastRow.notif ? toastRow.notif.appName : ""
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize - 1
-                        font.bold: true
-                        color: toastRow.textColor
-                        opacity: 0.7
-                        Layout.fillWidth: true
-                        Layout.rightMargin: 40
-                        elide: Text.ElideRight
-                    }
-                }
-
                 // Summary
                 Text {
                     visible: toastRow.notif && text !== ""
                     text: toastRow.notif ? toastRow.notif.summary : ""
                     textFormat: Text.StyledText
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.fontSize + 2
                     font.bold: true
                     color: toastRow.textColor
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     elide: Text.ElideRight
                     maximumLineCount: 2
                     Layout.fillWidth: true
+                    Layout.rightMargin: 40
                 }
-
             }
 
             // [Row 1] Body: spans full width so it flows under the image
@@ -810,7 +826,7 @@ Item {
                 visible: toastRow.hasInlineReply
                 implicitHeight: 28
 
-                variant: "dark"
+                variant: "neutral"
                 noHoverColorChange: true
                 radius: Theme.moduleEdgeRadius / 2
                 cursorShape: Qt.PointingHandCursor
@@ -823,7 +839,7 @@ Item {
                         rightMargin: 8
                     }
                     verticalAlignment: TextInput.AlignVCenter
-                    color: Theme.palette("dark").text
+                    color: Theme.palette("neutral").text
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize - 1
                     clip: true
@@ -834,7 +850,7 @@ Item {
                         text: (toastRow.notif && toastRow.notif.inlineReplyPlaceholder !== "")
                                 ? toastRow.notif.inlineReplyPlaceholder
                                 : "Reply..."
-                        color: Theme.palette("dark").text
+                        color: Theme.palette("neutral").text
                         opacity: 0.7
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize - 1
@@ -908,25 +924,52 @@ Item {
         }
 
         readonly property int count: appNotifsModel.count
-        readonly property bool grouped: count > 1
-        readonly property bool showHeader: notifCenter.showAllNotifications && grouped
+        readonly property var firstActiveNotif: {
+            var _ = SharedState.dismissingNotifs
+            for (var i = 0; i < appNotifsModel.count; ++i) {
+                var d = appNotifsModel.get(i).notifData
+                if (d && !SharedState.isNotificationDismissing(d)) return d
+            }
+            return null
+        }
+        readonly property int activeGroupCount: {
+            var c = 0
+            var _ = SharedState.dismissingNotifs
+            for (var i = 0; i < appNotifsModel.count; ++i) {
+                var d = appNotifsModel.get(i).notifData
+                if (d && !SharedState.isNotificationDismissing(d)) c++
+            }
+            return c
+        }
+        readonly property int displayCount: activeGroupCount > 0 ? activeGroupCount : count
+        readonly property bool grouped: displayCount > 1
         readonly property int headerHeight: 34
         readonly property int peekHeight: 10
+        readonly property int toastGap: 5
         readonly property var pal: Theme.palette("neutral")
+        readonly property alias cardRadius: groupCard.radius
 
-        property real headerSlot: showHeader ? headerHeight + 6 : 0
-        property real peekSlot: (showHeader && !expanded) ? peekHeight : 0
-        property real cardBottomPad: showHeader ? 6 : 0
-        property real toastMargin: showHeader ? 6 : 0
-        Behavior on headerSlot { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
-        Behavior on peekSlot { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
-        Behavior on cardBottomPad { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
-        Behavior on toastMargin { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutQuint } }
+        // 0..1: how much of this group is currently shown (driven by its active/visible toasts)
+        readonly property real groupFraction: {
+            var maxF = 0
+            for (var i = 0; i < toastsRepeater.count; ++i) {
+                var item = toastsRepeater.itemAt(i)
+                if (item && item.toastFraction > maxF) maxF = item.toastFraction
+            }
+            return maxF
+        }
 
-        readonly property real toastsHeight: notifCenter.withoutTrailingGap(toastsCol.implicitHeight)
+        readonly property real headerSlot: (headerHeight + 5) * groupFraction
+        property real peekBase: (notifCenter.showAllNotifications && grouped && !expanded) ? peekHeight : 0
+        Behavior on peekBase { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
+        readonly property real peekSlot: peekBase * groupFraction
+        readonly property real cardBottomPad: 5 * groupFraction
+        readonly property real toastMargin: 5
+
+        readonly property real toastsHeight: Math.max(0, toastsCol.implicitHeight - toastGap * groupFraction)
         readonly property real bodyHeight: headerSlot + toastsHeight + peekSlot + cardBottomPad
         // body plus this group's own scaled gap (see notifCenter.itemGap)
-        height: bodyHeight + notifCenter.itemGap * Math.min(1, bodyHeight / (6 * notifCenter.itemGap))
+        height: bodyHeight + notifCenter.itemGap * groupFraction
         visible: height > 0
         clip: true
 
@@ -936,10 +979,11 @@ Item {
             width: parent.width
             height: grp.bodyHeight
             y: 0
-            visible: grp.headerSlot > 0
-            opacity: grp.headerSlot / (grp.headerHeight + 6)
-            radius: Theme.cardItemRadius
-            color: Qt.rgba(Theme.dark.base.r, Theme.dark.base.g, Theme.dark.base.b, Theme.moduleOpacity)
+            visible: grp.groupFraction > 0
+            opacity: grp.groupFraction
+            radius: !notifCenter.showAllNotifications ? Theme.cardRadius : Theme.cardItemRadius
+            Behavior on radius { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
+            color: Qt.lighter(Theme.paletteInk, 1.5)
             border.width: 0
         }
 
@@ -948,13 +992,14 @@ Item {
             id: groupHeader
             width: parent.width
             height: grp.headerHeight
-            y: grp.headerSlot - (grp.headerHeight + 6)
-            visible: grp.headerSlot > 0
-            opacity: grp.headerSlot / (grp.headerHeight + 6)
+            y: grp.headerSlot - (grp.headerHeight + 5)
+            visible: grp.groupFraction > 0
+            opacity: grp.groupFraction
 
             MouseArea {
                 anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
+                enabled: grp.grouped
+                cursorShape: grp.grouped ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onClicked: SharedState.toggleGroupExpanded(grp.appName)
             }
 
@@ -1016,7 +1061,7 @@ Item {
                     Text {
                         id: badgeText
                         anchors.centerIn: parent
-                        text: grp.count
+                        text: grp.displayCount
                         color: Theme.paletteInk
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize - 3
@@ -1035,6 +1080,7 @@ Item {
                 }
 
                 HeaderButton {
+                    visible: grp.grouped
                     icon: grp.expanded ? "󰅃" : "󰅀"
                     iconColor: Theme.textPrimary
                     iconSize: 17
@@ -1057,10 +1103,10 @@ Item {
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 y: grp.toastsHeight + 2
-                width: parent.width - (grp.showHeader ? 20 : 12)
+                width: parent.width - 20
                 height: 6
                 radius: Theme.cardItemRadius
-                color: Qt.rgba(grp.pal.base.r, grp.pal.base.g, grp.pal.base.b, grp.pal.base.a * Theme.moduleOpacity * 0.75)
+                color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.moduleOpacity * 0.25)
                 border.width: 0
                 visible: grp.peekSlot > 0
                 opacity: grp.peekSlot / grp.peekHeight
@@ -1082,16 +1128,18 @@ Item {
                 spacing: 0
 
                 Repeater {
+                    id: toastsRepeater
                     model: appNotifsModel
-                    // The 8px gap below each toast scales with the toast's own
+                    // The 5px gap below each toast scales with the toast's own
                     // height, so lists grow/shrink without any hard layout steps.
                     delegate: Item {
                         id: slot
                         required property var notifData
                         required property int index
+                        readonly property alias toastFraction: toast.shownFraction
 
                         width: toastsCol.width
-                        height: toast.height + notifCenter.itemGap * toast.shownFraction
+                        height: toast.height + grp.toastGap * toast.shownFraction
 
                         NotificationToast {
                             id: toast

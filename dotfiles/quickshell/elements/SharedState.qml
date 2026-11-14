@@ -437,8 +437,55 @@ Item {
         }
     }
 
+    // ── Dismissing Animation Tracking (shared across all monitors) ──
+    // notification key -> removal timestamp in ms
+    property var dismissingNotifs: ({})
+
+    function isNotificationDismissing(n) {
+        return !!n && root.dismissingNotifs[root.notifKey(n)] !== undefined
+    }
+
+    Timer {
+        id: dismissTicker
+        interval: 25
+        repeat: true
+        onTriggered: {
+            var now = Date.now()
+            var remaining = {}
+            var pending = false
+            var toRemove = []
+            for (var k in root.dismissingNotifs) {
+                var removeAt = root.dismissingNotifs[k]
+                if (now >= removeAt) {
+                    toRemove.push(k)
+                } else {
+                    remaining[k] = removeAt
+                    pending = true
+                }
+            }
+            if (toRemove.length > 0) {
+                root.dismissingNotifs = remaining
+                for (var i = orderedNotifications.count - 1; i >= 0; --i) {
+                    var d = orderedNotifications.get(i).notifData
+                    if (d && toRemove.indexOf(root.notifKey(d)) >= 0) {
+                        orderedNotifications.remove(i)
+                        if (d.dismiss) d.dismiss()
+                    }
+                }
+                root.syncGroups()
+            }
+            if (!pending) dismissTicker.stop()
+        }
+    }
+
     function addNotification(n) {
         if (!n) return
+        var k = root.notifKey(n)
+        if (root.dismissingNotifs[k] !== undefined) {
+            var copy = Object.assign({}, root.dismissingNotifs)
+            delete copy[k]
+            root.dismissingNotifs = copy
+        }
         var i = root.indexOfNotification(n)
         if (i < 0) orderedNotifications.insert(0, { "notifData": n })
         else if (i > 0) orderedNotifications.move(i, 0, 1)
@@ -448,6 +495,12 @@ Item {
     function removeNotification(n) {
         if (!n) return
         root.dismissActiveToast(n)
+        var k = root.notifKey(n)
+        if (root.dismissingNotifs[k] !== undefined) {
+            var copy = Object.assign({}, root.dismissingNotifs)
+            delete copy[k]
+            root.dismissingNotifs = copy
+        }
         var i = root.indexOfNotification(n)
         if (i >= 0) orderedNotifications.remove(i)
         root.syncGroups()
@@ -455,13 +508,27 @@ Item {
 
     function dismissNotification(n) {
         if (!n) return
-        if (n.dismiss) n.dismiss()
-        root.removeNotification(n)
+        var k = root.notifKey(n)
+        if (root.dismissingNotifs[k] !== undefined) return
+        root.dismissActiveToast(n)
+        var copy = Object.assign({}, root.dismissingNotifs)
+        copy[k] = Date.now() + Theme.verticalDuration
+        root.dismissingNotifs = copy
+        dismissTicker.start()
     }
 
     function dismissGroup(appName) {
         var list = root.notificationsOf(appName)
-        for (var k = 0; k < list.length; ++k) root.dismissNotification(list[k])
+        if (list.length === 0) return
+        var copy = Object.assign({}, root.dismissingNotifs)
+        var exp = Date.now() + Theme.verticalDuration
+        for (var k = 0; k < list.length; ++k) {
+            var n = list[k]
+            root.dismissActiveToast(n)
+            copy[root.notifKey(n)] = exp
+        }
+        root.dismissingNotifs = copy
+        dismissTicker.start()
     }
 
     Connections {

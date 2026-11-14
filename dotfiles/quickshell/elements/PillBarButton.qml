@@ -42,11 +42,11 @@ ModuleButton {
     property real shadowHorizontalOffset: 0
 
     property real gradientOpacityBorder: root.expanded ? 0.0 : 1.0
-    property real gradientOpacityTop: 0.9
+    property real gradientOpacityTop: 0.4
     property real gradientOpacityMid: 0.2
     property real gradientOpacityBottom: 0.8
 
-    property color gradientTop : Theme.paletteInk
+    property color gradientTop : root.pillPal.pillFill
     property color gradientMid : root.pillPal.pillFill
     property color gradientBottom : root.pillPal.pillFill
 
