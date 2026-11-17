@@ -9,13 +9,13 @@ ExpandableModule {
     property int cardWidth: 210
 
 
-    pillPercent: expanded ? 0 : (SharedState.lightAvailable && SharedState.lightActive ? SharedState.lightBrightness : 0)
+    pillPercent: bodyExpanded ? 0 : (SharedState.lightAvailable && SharedState.lightActive ? SharedState.lightBrightness : 0)
     pillText: {
         if (!SharedState.lightAvailable) return "Offline"
         if (SharedState.lightActive) return SharedState.lightBrightness + "% 󱩒"
         return "Off 󱩎"
     }
-    pillVariant: expanded ? "neutral" : SharedState.lightVariant
+    pillVariant: bodyExpanded ? "neutral" : SharedState.lightVariant
     expandedPillLabel: "Lights"
 
     collapsedBottomLeftRadius:  Theme.moduleEdgeRadius
@@ -24,7 +24,7 @@ ExpandableModule {
     leftCornerStyle: "top"
     rightCornerStyle: "side"
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
+    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin
 
     // Overlay dropdown setup
     expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
@@ -53,9 +53,9 @@ ExpandableModule {
             horizontalCenter: parent.horizontalCenter
         }
 
-        scale: expanded ? 1 : 0
+        scale: bodyExpanded ? 1 : 0
         transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
 
         MouseArea {
             visible: root.contentVisible

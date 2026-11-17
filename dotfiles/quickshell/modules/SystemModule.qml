@@ -10,7 +10,7 @@ ExpandableModule {
     expandedBottomRightRadius: 0
     property int cardWidth: 200
 
-    pillText: expanded ? "" : ""
+    pillText: ""
     expandedPillLabel: "System"
     pillPercent: 0
     pillVariant: "neutral"
@@ -18,7 +18,7 @@ ExpandableModule {
     leftCornerStyle: "side"
     rightCornerStyle: "bottom"
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + systemModule.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
+    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + systemModule.titleBarHeight + Theme.dropdownMargin
 
     collapsedWidth: 50
 
@@ -38,9 +38,9 @@ ExpandableModule {
         }
 
 
-        scale: expanded ? 1 : 0
+        scale: bodyExpanded ? 1 : 0
         transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
 
         MouseArea {
             visible: systemModule.contentVisible

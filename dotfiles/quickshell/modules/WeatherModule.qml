@@ -26,18 +26,18 @@ ExpandableModule {
 
     property int cardWidth: 310
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
+    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin
 
     readonly property real weatherNaturalWidth: Math.max(80, Math.round(pillContent.implicitWidth + 30))
     property real lastWeatherWidth: 100
 
     onWeatherNaturalWidthChanged: {
-        if (!expanded && weatherNaturalWidth > 80) {
+        if (!expanded && !pillDropped && weatherNaturalWidth > 80) {
             lastWeatherWidth = weatherNaturalWidth
         }
     }
 
-    collapsedWidth: expanded ? lastWeatherWidth : weatherNaturalWidth
+    collapsedWidth: (expanded || pillDropped) ? lastWeatherWidth : weatherNaturalWidth
 
     expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
     dropdownAlignment: "center"
@@ -54,7 +54,7 @@ ExpandableModule {
         spacing: 8
         z: 6
 
-        opacity: root.expanded ? 0.0 : 1.0
+        opacity: root.bodyExpanded ? 0.0 : 1.0
         visible: opacity > 0
         Behavior on opacity { 
             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
@@ -107,9 +107,9 @@ ExpandableModule {
             horizontalCenter: parent.horizontalCenter
         }
 
-        scale: expanded ? 1 : 0
+        scale: bodyExpanded ? 1 : 0
         transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
 
         MouseArea {
             visible: root.contentVisible

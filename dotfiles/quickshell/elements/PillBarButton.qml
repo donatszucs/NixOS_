@@ -42,8 +42,8 @@ ModuleButton {
     property real shadowHorizontalOffset: 0
 
     property real gradientOpacityBorder: root.expanded ? 0.0 : 1.0
-    property real gradientOpacityTop: 0.4
-    property real gradientOpacityMid: 0.2
+    property real gradientOpacityTop: 0.7
+    property real gradientOpacityMid: 0.6
     property real gradientOpacityBottom: 0.8
 
     property color gradientTop : root.pillPal.pillFill
@@ -71,19 +71,19 @@ ModuleButton {
         NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
     }
     Behavior on pillPaddingH {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint }
     }
     Behavior on pillTopLeftRadius {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint }
     }
     Behavior on pillTopRightRadius {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint }
     }
     Behavior on pillBottomLeftRadius {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint }
     }
     Behavior on pillBottomRightRadius {
-        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint }
     }
 
     // Smooth percentage animation
@@ -101,8 +101,8 @@ ModuleButton {
         id: pillBg
         anchors.horizontalCenter: parent.horizontalCenter
         width: Math.max(0, parent.width - root.pillPaddingH)
-        y: root.expanded ? root.expandedTopMargin : Math.round((parent.height - root.pillHeight) / 2)
-        height: root.expanded ? Math.max(0, parent.height - root.expandedTopMargin - root.expandedBottomMargin) : root.pillHeight
+        y: (root.expanded || parent.height > Theme.moduleHeight + 0.5) ? root.expandedTopMargin : Math.round((parent.height - root.pillHeight) / 2)
+        height: (root.expanded || parent.height > Theme.moduleHeight + 0.5) ? Math.max(0, parent.height - root.expandedTopMargin - root.expandedBottomMargin) : root.pillHeight
         clip: false
         color: "transparent"
 
@@ -129,8 +129,8 @@ ModuleButton {
             bottomLeftRadius: parent.bottomLeftRadius
             bottomRightRadius: parent.bottomRightRadius
 
-            color: Qt.rgba(root.pillPal.pillTrack.r, root.pillPal.pillTrack.g, root.pillPal.pillTrack.b, root.pillPal.pillTrack.a * root.pillColorOpacity)
-            gradient: root.expanded ? pillGradient : null
+            color: "transparent"
+            gradient: pillGradient
 
             layer.enabled: root.shadowEnabled
             layer.smooth: true
@@ -151,7 +151,7 @@ ModuleButton {
                 color: Qt.rgba(gradientTop.r, gradientTop.g, gradientTop.b, gradientTop.a * root.pillColorOpacity * gradientOpacityTop)
             }
             GradientStop {
-                position: pillBg.height > 0 ? Math.min(1.0, root.gradientTopHeightPx / pillBg.height) : 0.0
+                position: 0.2
                 color: Qt.rgba(gradientMid.r, gradientMid.g, gradientMid.b, gradientMid.a * root.pillColorOpacity * gradientOpacityMid)
             }
             GradientStop {
@@ -276,7 +276,7 @@ ModuleButton {
             opacity: root.expanded ? 0.0 : 1.0
 
             Behavior on opacity {
-                NumberAnimation { duration: root.expanded ? 0 : Theme.verticalDuration; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: root.expanded ? Math.round(Theme.verticalDuration / 2) : Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
 
             Behavior on color {

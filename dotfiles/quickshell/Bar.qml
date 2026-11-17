@@ -183,12 +183,12 @@ PanelWindow {
 
 
     // Left-row spacer helpers
-    readonly property real _clockSpacerNeed: clockModule.expanded
+    readonly property real _clockSpacerNeed: clockModule.bodyExpanded
         ? (clockModule.expandedDropdownWidth + (2 * Theme.moduleEdgeRadius)) 
         - (100 + weatherModule.collapsedWidth + nowPlayingModule.collapsedWidth)
         : 0
 
-    readonly property real _weatherSpacerNeed: weatherModule.expanded
+    readonly property real _weatherSpacerNeed: weatherModule.bodyExpanded
         ? ((weatherModule.expandedDropdownWidth / 2) + (2 * Theme.moduleEdgeRadius)) - (50 + nowPlayingModule.collapsedWidth)
         : 0
     readonly property real _leftSpacerWidth: Math.max(_clockSpacerNeed, _weatherSpacerNeed)
@@ -219,7 +219,7 @@ PanelWindow {
             implicitWidth: _leftSpacerWidth
             visible: implicitWidth > 0.1
             Behavior on implicitWidth {
-                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutQuint }
             }
             color: nowPlayingModule.baseColor
         }

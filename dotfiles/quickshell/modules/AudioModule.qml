@@ -13,16 +13,15 @@ ExpandableModule {
     property bool isMuted: pwAudio ? pwAudio.muted : false
     property real currentVolume: pwAudio ? pwAudio.volume : 0.0
 
-    pillPercent: expanded ? 0 : Math.round(currentVolume * 100)
+    pillPercent: bodyExpanded ? 0 : Math.round(currentVolume * 100)
     pillText: {
-        if (expanded) return ""
         var v = Math.round(currentVolume * 100)
         if (isMuted) return v + "% 󰖁"
         if (v === 0) return v + "% "
         if (v > 0 && v < 50) return v + "% "
         return v + "% "
     }
-    pillVariant: expanded ? "neutral" : "dark"
+    pillVariant: bodyExpanded ? "neutral" : "dark"
     expandedPillLabel: "Audio"
 
     function getNode(nodeId) {
@@ -123,7 +122,7 @@ ExpandableModule {
 
     property int cardWidth: 280
 
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + audioModule.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
+    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + audioModule.titleBarHeight + Theme.dropdownMargin
 
     // Overlay dropdown setup
     expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
@@ -151,9 +150,9 @@ ExpandableModule {
             horizontalCenter: parent.horizontalCenter
         }
 
-        scale: expanded ? 1 : 0
+        scale: bodyExpanded ? 1 : 0
         transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
 
         MouseArea {
             visible: audioModule.contentVisible

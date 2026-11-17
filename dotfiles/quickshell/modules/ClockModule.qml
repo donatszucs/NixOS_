@@ -67,7 +67,7 @@ ExpandableModule {
     }
 
     property int cardWidth: 340
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
+    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin
 
     expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
     dropdownAlignment: "left"
@@ -262,10 +262,10 @@ ExpandableModule {
         spacing: 10
         z: 6
         visible: opacity > 0
-        opacity: root.expanded ? 0.0 : 1.0
+        opacity: root.bodyExpanded ? 0.0 : 1.0
 
         Behavior on opacity {
-            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint }
         }
 
         RowLayout {
@@ -350,16 +350,12 @@ ExpandableModule {
         }
         spacing: Theme.cardMargin
 
-        visible: opacity > 0
-        opacity: root.expanded ? 1.0 : 0.0
+        visible: root.contentVisible
+        opacity: root.contentOpacity
 
-        scale: expanded ? 1 : 0
+        scale: bodyExpanded ? 1 : 0
         transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-
-        Behavior on opacity {
-            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
-        }
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
 
         // ── Card 1: Month Calendar ───────────────────────────────
         BaseCard {

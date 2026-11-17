@@ -115,6 +115,7 @@
     nixfmt
     clinfo # OpenCL device diagnostic tool
     yazi # file manager for Wayland
+    meld # GUI diff and merge tool
 
     # -- Applications --
     caprine-bin

@@ -40,7 +40,7 @@ ExpandableModule {
     
     collapsedWidth: topRow.implicitWidth
     
-    implicitHeight: expanded ? trayCard.implicitHeight + Theme.moduleHeight + Theme.pillExpandedMargin * 2 : Theme.moduleHeight
+    expandedHeight: trayCard.implicitHeight + Theme.moduleHeight + Theme.pillExpandedMargin * 2
 
     // Overlay dropdown setup
     expandedDropdownWidth: Math.max(topRow.implicitWidth, trayCard.implicitWidth + Theme.pillExpandedMargin * 2)
@@ -76,8 +76,8 @@ ExpandableModule {
             label: "󱊖"
             textFont: Theme.fontSize + 1
 
-            bottomRightRadius: root.expanded ? Theme.moduleEdgeRadius : 0
-            bottomLeftRadius: root.expanded ? Theme.moduleEdgeRadius : 0
+            bottomRightRadius: (root.expanded || root.pillDropped) ? Theme.moduleEdgeRadius : 0
+            bottomLeftRadius: (root.expanded || root.pillDropped) ? Theme.moduleEdgeRadius : 0
 
             onClicked: missioncenterProcess.running = true
         }

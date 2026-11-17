@@ -192,7 +192,7 @@ ExpandableModule {
     expandedPillLabel: "Connections"
 
     // ── Sizing ─────────────────────────────────────────────────
-    implicitHeight: expanded ? baseColumn.implicitHeight + Theme.moduleHeight + connectionsModule.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
+    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + connectionsModule.titleBarHeight + Theme.dropdownMargin
 
     // ── Collapsed layout metrics ───────────────────────────────
     readonly property int pillInsetH: 5
@@ -213,12 +213,12 @@ ExpandableModule {
     property real lastConnectionsWidth: connectionsNaturalWidth
 
     onConnectionsNaturalWidthChanged: {
-        if (!expanded && connectionsNaturalWidth > 0) {
+        if (!expanded && !pillDropped && connectionsNaturalWidth > 0) {
             lastConnectionsWidth = connectionsNaturalWidth
         }
     }
 
-    collapsedWidth: expanded ? lastConnectionsWidth : connectionsNaturalWidth
+    collapsedWidth: (expanded || pillDropped) ? lastConnectionsWidth : connectionsNaturalWidth
 
     // Overlay dropdown setup
     expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
@@ -246,7 +246,7 @@ ExpandableModule {
         spacing: connectionsModule.collapsedSpacing
         z: 6
 
-        opacity: connectionsModule.expanded ? 0.0 : 1.0
+        opacity: connectionsModule.bodyExpanded ? 0.0 : 1.0
         visible: opacity > 0
         Behavior on opacity { 
             NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
@@ -303,9 +303,9 @@ ExpandableModule {
         spacing: Theme.cardMargin
 
 
-        scale: expanded ? 1 : 0
+        scale: bodyExpanded ? 1 : 0
         transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
 
         // ── Popup dropdown ─────────────────────────────────────────
         MouseArea {

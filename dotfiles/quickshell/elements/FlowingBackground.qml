@@ -11,6 +11,15 @@ Item {
     property real overlayWidth: 0
     property real overlayHeight: 0
     property bool contentVisible: false
+    property bool bodyExpanded: false
+
+    property real stage2Progress: bodyExpanded ? 1.0 : 0.0
+    Behavior on stage2Progress {
+        NumberAnimation {
+            duration: Theme.verticalDuration
+            easing.type: Easing.OutQuint
+        }
+    }
 
     // ── Corner Radii ─────────────────────────────────────────────
     property real cornerRadius: Theme.moduleEdgeRadius
@@ -46,25 +55,20 @@ Item {
     }
 
     readonly property bool isExpanded: contentVisible
-    readonly property bool hasLeftSideCorner: isExpanded && (overlayHeight > 0.1) && (leftCornerStyle === "side") && (overlayX < 0) && !touchesLeftEdge
-    readonly property bool hasRightSideCorner: isExpanded && (overlayHeight > 0.1) && (rightCornerStyle === "side") && ((overlayX + overlayWidth) > headerWidth) && !touchesRightEdge
+    readonly property bool hasLeftSideCorner: isExpanded && (overlayHeight > 0.1) && (leftCornerStyle === "side") && (overlayX <= 0.1) && !touchesLeftEdge
+    readonly property bool hasRightSideCorner: isExpanded && (overlayHeight > 0.1) && (rightCornerStyle === "side") && ((overlayX + overlayWidth) >= headerWidth - 0.1) && !touchesRightEdge
     readonly property bool hasLeftBottomCorner: (leftCornerStyle === "bottom")
     readonly property bool hasRightBottomCorner: (rightCornerStyle === "bottom")
     readonly property bool hasLeftTopCorner: (leftCornerStyle === "top")
     readonly property bool hasRightTopCorner: (rightCornerStyle === "top")
 
-    // Interpolate top corner radius smoothly with dh
-    function calcTop(cR, eR, isExp, currentDh) {
-        if (!isExp || currentDh <= 0.1) return cR;
-        if (eR >= cR) {
-            return Math.min(eR, cR + currentDh / 2);
-        } else {
-            return Math.max(eR, cR - currentDh / 2);
-        }
+    // Interpolate top corner radius smoothly with stage2Progress
+    function calcTop(cR, eR) {
+        return cR + (eR - cR) * stage2Progress;
     }
 
-    readonly property real currentLeftTopR: calcTop(leftTopCornerRadius, expandedLeftTopCornerRadius, isExpanded, isExpanded ? overlayHeight : 0)
-    readonly property real currentRightTopR: calcTop(rightTopCornerRadius, expandedRightTopCornerRadius, isExpanded, isExpanded ? overlayHeight : 0)
+    readonly property real currentLeftTopR: calcTop(leftTopCornerRadius, expandedLeftTopCornerRadius)
+    readonly property real currentRightTopR: calcTop(rightTopCornerRadius, expandedRightTopCornerRadius)
 
     // Dynamic bounding box covering the entire outer silhouette (used for outer bounds query)
     readonly property real sideR: Math.min(cornerRadius, (isExpanded ? overlayHeight : 0) / 2)
@@ -113,14 +117,17 @@ Item {
         // Side inverse fillet size (maximum R, smoothly limited by dh / 2 as height collapses)
         var sR = Math.min(R, dh / 2);
 
-        // Interpolate bottom corner radius smoothly with dh
+        // Interpolate bottom corner radius smoothly across Stage 1 (dh) and Stage 2 (stage2Progress)
         function calcBot(cR, eR, isExp, currentDh) {
-            if (!isExp) return cR;
-            if (eR >= cR) {
-                return Math.min(eR, cR + currentDh / 2);
+            if (!isExp || currentDh <= 0.1) return cR;
+            var stage1Target = (eR >= cR) ? Math.min(eR, Math.max(cR, R)) : Math.max(eR, Math.min(cR, R));
+            var s1;
+            if (stage1Target >= cR) {
+                s1 = Math.min(stage1Target, cR + currentDh / 2);
             } else {
-                return Math.max(eR, cR - currentDh / 2);
+                s1 = Math.max(stage1Target, cR - currentDh / 2);
             }
+            return s1 + (eR - s1) * root.stage2Progress;
         }
 
         var botL = calcBot(cBotL, eBotL, isExpanded, dh);

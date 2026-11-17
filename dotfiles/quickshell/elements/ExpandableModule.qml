@@ -50,9 +50,15 @@ ModuleButton {
     // Title bar configuration
     property int titleBarHeight: useDefaultPill ? Theme.moduleHeight * 1.6 : 0
 
+    property bool pillDropped: false
+    property bool bodyExpanded: false
+    property real expandedHeight: Theme.moduleHeight * 2
+    property real _stage2Height: bodyExpanded ? Math.max(Theme.moduleHeight, expandedHeight - Theme.moduleHeight) : Theme.moduleHeight
+    implicitHeight: _headerPill.y + _stage2Height
+
     property bool shrinkEnabled: true
-    property int collapsedWidth: expanded ? lastPillWidth : pillNaturalWidth
-    implicitWidth: (root.expanded && shrinkEnabled) ? 100 : collapsedWidth
+    property int collapsedWidth: (expanded || pillDropped) ? lastPillWidth : pillNaturalWidth
+    implicitWidth: (root.bodyExpanded && shrinkEnabled) ? 100 : collapsedWidth
 
     // Close button configuration for bar tab
     property bool showCloseButton: shrinkEnabled
@@ -63,8 +69,8 @@ ModuleButton {
     property int closeButtonInverseRadius: Theme.pillHeight / 2
 
     clip: false
-    noHoverColorChange: expanded
-    noPressColorChange: expanded
+    noHoverColorChange: expanded || pillDropped
+    noPressColorChange: expanded || pillDropped
     color: "transparent"
 
     // Unified flowing background that seamlessly renders the header pill,
@@ -75,8 +81,9 @@ ModuleButton {
         headerHeight: Theme.moduleHeight
         overlayX: _overlay.x
         overlayWidth: _overlay.width
-        overlayHeight: _overlay.height
+        overlayHeight: Math.max(0, root.height - Theme.moduleHeight)
         contentVisible: root.contentVisible
+        bodyExpanded: root.bodyExpanded
 
         cornerRadius: root.inverseCornerSize
         topCornerRadius: root.topCornerRadius
@@ -95,7 +102,7 @@ ModuleButton {
         touchesLeftEdge: root.touchesPhysicalLeftEdge
         touchesRightEdge: root.touchesPhysicalRightEdge
 
-        color: (root.expanded || root.noHoverColorChange) ? root.baseColor : root.colorAdaptive
+        color: (root.expanded || root.pillDropped || root.noHoverColorChange) ? root.baseColor : root.colorAdaptive
         dontAnimateColor: root.dontAnimateColor
 
         HoverHandler {
@@ -117,7 +124,7 @@ ModuleButton {
 
     // Combined hover state: true when mouse is over the pill, overlay, flowing background, or bar tab close button
     property bool extraHovered: false
-    readonly property bool rawHovered: _expandHover.hovered || _overlayHover.hovered || _flowingBgHover.hovered || _headerPillHover.hovered || (_barTabMouseArea.containsMouse && root.expanded) || (_expandedLabel && _expandedLabel.hovered) || extraHovered
+    readonly property bool rawHovered: _expandHover.hovered || _overlayHover.hovered || _flowingBgHover.hovered || _headerPillHover.hovered || (_barTabMouseArea.containsMouse && (root.expanded || root.pillDropped)) || (_expandedLabel && _expandedLabel.hovered) || extraHovered
     property bool isHovered: rawHovered || _hoverGraceTimer.running
 
     Timer {
@@ -147,11 +154,48 @@ ModuleButton {
         root.expanded = false
     }
 
+    Timer {
+        id: _stageOverlapTimer
+        interval: Math.round(Theme.verticalDuration / 5)
+        repeat: false
+        onTriggered: {
+            if (root.expanded) {
+                root.bodyExpanded = true
+            } else {
+                root.pillDropped = false
+            }
+        }
+    }
+
+    function _checkStage2CollapseDone() {
+        if (!root.expanded && !root.bodyExpanded && root.pillDropped) {
+            if (!_heightAnim.running && !_overlayWidthAnim.running && !_widthAnim.running) {
+                _stageOverlapTimer.stop()
+                root.pillDropped = false
+            }
+        }
+    }
+
     onExpandedChanged: {
         if (expanded) {
             SharedState.setActiveModule(root)
+            root.pillDropped = true
+            if (!_headerPillYAnim.running && Math.abs(_headerPill.y - Theme.moduleHeight) < 0.5) {
+                _stageOverlapTimer.stop()
+                root.bodyExpanded = true
+            } else {
+                _stageOverlapTimer.restart()
+            }
         } else {
             SharedState.clearActiveModule(root)
+            if (!root.bodyExpanded && !_heightAnim.running && !_overlayWidthAnim.running && !_widthAnim.running) {
+                _stageOverlapTimer.stop()
+                root.pillDropped = false
+            } else {
+                root.bodyExpanded = false
+                _stageOverlapTimer.restart()
+                Qt.callLater(root._checkStage2CollapseDone)
+            }
         }
     }
 
@@ -159,11 +203,14 @@ ModuleButton {
     property int expandEasingType: Easing.OutQuint
     property int collapseEasingType: Easing.OutQuint
 
-    Behavior on implicitHeight {
+    Behavior on _stage2Height {
         NumberAnimation {
             id: _heightAnim
             duration: Theme.verticalDuration
-            easing.type: root.expanded ? root.expandEasingType : root.collapseEasingType
+            easing.type: root.bodyExpanded ? root.expandEasingType : root.collapseEasingType
+            onRunningChanged: {
+                if (!running) root._checkStage2CollapseDone()
+            }
         }
     }
 
@@ -171,22 +218,25 @@ ModuleButton {
         NumberAnimation {
             id: _widthAnim
             duration: Theme.horizontalDuration
-            easing.type: Easing.OutBack
+            easing.type: root.bodyExpanded ? root.expandEasingType : root.collapseEasingType
             easing.overshoot: 1.1
+            onRunningChanged: {
+                if (!running) root._checkStage2CollapseDone()
+            }
         }
     }
 
     // ── Opacity animations ───────────────────────────────────────
-    property real contentOpacity: expanded ? 1.0 : 0.0
+    property real contentOpacity: bodyExpanded ? 1.0 : 0.0
     Behavior on contentOpacity {
         NumberAnimation {
             id: _opacityAnim
             duration: Theme.verticalDuration
-            easing.type: root.expanded ? root.expandEasingType : root.collapseEasingType
+            easing.type: root.bodyExpanded ? root.expandEasingType : root.collapseEasingType
         }
     }
 
-    readonly property bool contentVisible: expanded || _heightAnim.running || _headerPillHeightAnim.running || _overlayWidthAnim.running || _opacityAnim.running || _headerPillYAnim.running || contentOpacity > 0.01 || implicitHeight > Theme.moduleHeight + 1
+    readonly property bool contentVisible: expanded || pillDropped || bodyExpanded || _heightAnim.running || _overlayWidthAnim.running || _opacityAnim.running || _headerPillYAnim.running || contentOpacity > 0.01 || implicitHeight > Theme.moduleHeight + 1
 
     // ── Overlay (dropdown container) ─────────────────────────────
     // The overlay renders the wider dropdown content below the header pill.
@@ -204,14 +254,14 @@ ModuleButton {
         id: _overlay
         z: 2
 
-        // Vertical: starts right below the header pill area
-        y: Theme.moduleHeight
+        // Vertical: tracks the header pill during Stage 1/2 overlap
+        y: _headerPill.y
 
         // Width: animates from collapsed (module width) to expanded dropdown width
-        width: root.expanded ? root.expandedDropdownWidth : root.collapsedWidth
+        width: root.bodyExpanded ? root.expandedDropdownWidth : root.collapsedWidth
 
-        // Height: fills remaining module height below the pill
-        height: Math.max(0, root.height - Theme.moduleHeight)
+        // Height: follows Stage 2 height
+        height: root._stage2Height
 
         clip: true
 
@@ -268,7 +318,10 @@ ModuleButton {
             NumberAnimation {
                 id: _overlayWidthAnim
                 duration: Theme.horizontalDuration
-                easing.type: root.expanded ? root.expandEasingType : root.collapseEasingType
+                easing.type: root.bodyExpanded ? root.expandEasingType : root.collapseEasingType
+                onRunningChanged: {
+                    if (!running) root._checkStage2CollapseDone()
+                }
             }
         }
 
@@ -309,14 +362,14 @@ ModuleButton {
 
     property real lastPillWidth: 50
     readonly property real pillNaturalWidth: {
-        if (!expanded && _collapsedMeasureText.implicitWidth > 0) {
+        if (!expanded && !pillDropped && _collapsedMeasureText.implicitWidth > 0) {
             return Math.max(50, Math.round(_collapsedMeasureText.implicitWidth + 38))
         }
         return lastPillWidth
     }
 
     onPillNaturalWidthChanged: {
-        if (!expanded && pillNaturalWidth > 50) {
+        if (!expanded && !pillDropped && pillNaturalWidth > 50) {
             lastPillWidth = pillNaturalWidth
         }
     }
@@ -336,14 +389,14 @@ ModuleButton {
         height: Theme.moduleHeight
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: true
-        enabled: root.expanded && root.showCloseButton
+        enabled: (root.expanded || root.pillDropped) && root.showCloseButton
         clip: true
 
         readonly property real closeProgress: root.showCloseButton
             ? Math.max(0.0, Math.min(1.0, _headerPill.y / Theme.moduleHeight))
             : 0.0
 
-        visible: root.showCloseButton && (root.expanded || _closeButtonContainer.y > -_closeButtonContainer.height + 0.1)
+        visible: root.showCloseButton && (root.expanded || root.pillDropped || _closeButtonContainer.y > -_closeButtonContainer.height + 0.1)
 
         onClicked: {
             root.collapseModule()
@@ -463,38 +516,35 @@ ModuleButton {
         bgImageContrast: root.pillBgImageContrast
         bgImageDarkOverlayOpacity: root.pillBgImageDarkOverlayOpacity
 
-        pillTopLeftRadius: expanded ? Theme.pillCollapsedRadius + 10 : Theme.pillCollapsedRadius
-        pillTopRightRadius: expanded ? Theme.pillCollapsedRadius + 10 : Theme.pillCollapsedRadius
+        pillTopLeftRadius: root.bodyExpanded ? Theme.pillCollapsedRadius + 10 : Theme.pillCollapsedRadius
+        pillTopRightRadius: root.bodyExpanded ? Theme.pillCollapsedRadius + 10 : Theme.pillCollapsedRadius
 
         noHoverColorChange: true
         noPressColorChange: true
+        hasScaleAnimation: !root.expanded && !root.pillDropped
 
         hovered: _headerPillHover.hovered || root.hovered
 
         x: root.contentVisible ? _overlay.x : 0
-        y: root.expanded ? Theme.moduleHeight : 0
+        y: root.pillDropped ? Theme.moduleHeight : 0
         width: root.contentVisible ? _overlay.width : root.width
-        height: root.expanded ? Math.max(Theme.moduleHeight, _overlay.height) : Theme.moduleHeight
+        height: root._stage2Height
         implicitWidth: root.implicitWidth
-        expanded: root.expanded
-        pillPaddingH: root.expanded ? Theme.pillExpandedPaddingH : Theme.pillCollapsedPaddingH
-        pillHeight: root.expanded ? Math.max(Theme.pillHeight, _overlay.height) : Theme.pillHeight
-        pillRadius: root.expanded ? root.expandedPillRadius : root.collapsedPillRadius
+        expanded: root.bodyExpanded
+        pillPaddingH: root.bodyExpanded ? Theme.pillExpandedPaddingH : Theme.pillCollapsedPaddingH
+        pillRadius: root.bodyExpanded ? root.expandedPillRadius : root.collapsedPillRadius
 
         Behavior on y {
             NumberAnimation {
                 id: _headerPillYAnim
-                duration: Theme.verticalDuration
-                easing.type: root.expanded ? root.expandEasingType : root.collapseEasingType
-            }
-        }
-
-        Behavior on height {
-            enabled: !root.expanded
-            NumberAnimation {
-                id: _headerPillHeightAnim
-                duration: Theme.verticalDuration
-                easing.type: Easing.OutCubic
+                duration: root.pillDropped ? Math.round(Theme.verticalDuration * 0.6) : Theme.verticalDuration
+                easing.type: root.pillDropped ? root.expandEasingType : root.collapseEasingType
+                onRunningChanged: {
+                    if (!running && root.expanded && root.pillDropped) {
+                        _stageOverlapTimer.stop()
+                        root.bodyExpanded = true
+                    }
+                }
             }
         }
 
@@ -509,7 +559,7 @@ ModuleButton {
                 left: parent.left
                 right: parent.right
             }
-            height: root.expanded ? root.titleBarHeight : parent.height
+            height: root.bodyExpanded ? root.titleBarHeight : parent.height
             cursorShape: Qt.PointingHandCursor
             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
@@ -546,10 +596,10 @@ ModuleButton {
             textMaxWidth: Math.max(100, parent.width - 40)
             horizontalAlignment: Text.AlignHCenter
             visible: opacity > 0 && root.expandedPillLabel !== ""
-            opacity: root.expanded ? 1.0 : 0.0
+            opacity: root.bodyExpanded ? 1.0 : 0.0
 
             Behavior on opacity {
-                NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Theme.verticalDuration; easing.type: root.bodyExpanded ? root.expandEasingType : root.collapseEasingType }
             }
         }
     }

@@ -64,10 +64,10 @@ ExpandableModule {
     readonly property bool canNext: currentPlayer && currentPlayer.canGoNext !== false
     readonly property bool canSeek: currentPlayer && (currentPlayer.canSeek || currentPlayer.positionSupported) && trackLength > 0
 
-    pillPercent: expanded ? 0 : (trackLength > 0 ? Math.round((currentPosition / trackLength) * 100) : 0)
-    pillVariant: expanded ? "neutral" : "dark"
-    pillBorderColor: expanded ? null : Qt.darker(Theme.palette("light").border, 1.2)
-    pillFillColor: expanded ? null : Qt.darker(Theme.palettePaper, 1.4)
+    pillPercent: bodyExpanded ? 0 : (trackLength > 0 ? Math.round((currentPosition / trackLength) * 100) : 0)
+    pillVariant: bodyExpanded ? "neutral" : "dark"
+    pillBorderColor: bodyExpanded ? null : Qt.darker(Theme.palette("light").border, 1.2)
+    pillFillColor: bodyExpanded ? null : Qt.darker(Theme.palettePaper, 1.4)
     pillColorOpacity: 1.0
     pillBgImageSource: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
     pillBgImageBrightness: 0.3
@@ -122,16 +122,16 @@ ExpandableModule {
     }
     readonly property real thumbnailHeight: cardHeight - Theme.cardHeaderHeight - 2 * Theme.cardBorderWidth
 
-    implicitHeight: expanded ? targetCardHeight + Theme.moduleHeight + nowPlayingModule.titleBarHeight + Theme.dropdownMargin : Theme.moduleHeight
+    expandedHeight: targetCardHeight + Theme.moduleHeight + nowPlayingModule.titleBarHeight + Theme.dropdownMargin
 
     readonly property real mediaNaturalWidth: Math.max(70, Math.min(200, Math.round(collapsedRow.implicitWidth + 26)))
     property real lastCollapsedWidth: 100
     onMediaNaturalWidthChanged: {
-        if (!expanded && mediaNaturalWidth > 70) {
+        if (!expanded && !pillDropped && mediaNaturalWidth > 70) {
             lastCollapsedWidth = mediaNaturalWidth
         }
     }
-    collapsedWidth: expanded ? lastCollapsedWidth : mediaNaturalWidth
+    collapsedWidth: (expanded || pillDropped) ? lastCollapsedWidth : mediaNaturalWidth
 
     // Overlay dropdown setup
     expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
@@ -495,10 +495,10 @@ ExpandableModule {
         parent: nowPlayingModule
         anchors.horizontalCenter: nowPlayingModule.headerPill.horizontalCenter
         anchors.verticalCenter: nowPlayingModule.headerPill.top
-        anchors.verticalCenterOffset: nowPlayingModule.expanded
+        anchors.verticalCenterOffset: nowPlayingModule.bodyExpanded
             ? Math.round(nowPlayingModule.titleBarHeight / 2)
             : Math.round(Theme.moduleHeight / 2)
-        spacing: nowPlayingModule.expanded ? 8 : (nowPlayingModule.showPlayerIcon ? 6 : 0)
+        spacing: nowPlayingModule.bodyExpanded ? 8 : (nowPlayingModule.showPlayerIcon ? 6 : 0)
         z: 10
         transformOrigin: Item.Center
         scale: nowPlayingModule.headerPill.pillScale
@@ -526,8 +526,8 @@ ExpandableModule {
         Item {
             id: collapsedIconItem
             visible: nowPlayingModule.showPlayerIcon
-            implicitWidth: visible ? (nowPlayingModule.expanded ? 18 : 16) : 0
-            implicitHeight: visible ? (nowPlayingModule.expanded ? 18 : 16) : 0
+            implicitWidth: visible ? (nowPlayingModule.bodyExpanded ? 18 : 16) : 0
+            implicitHeight: visible ? (nowPlayingModule.bodyExpanded ? 18 : 16) : 0
             Layout.alignment: Qt.AlignVCenter
             Layout.leftMargin: visible ? 4 : 0
 
@@ -554,7 +554,7 @@ ExpandableModule {
                 text: nowPlayingModule.getPlayerIcon(nowPlayingModule.currentPlayer)
                 color: Theme.textPrimary
                 font.family: Theme.font
-                font.pixelSize: nowPlayingModule.expanded ? Theme.fontSize + 1 : Theme.fontSize
+                font.pixelSize: nowPlayingModule.bodyExpanded ? Theme.fontSize + 1 : Theme.fontSize
                 visible: !collapsedAppIcon.visible
             }
         }
@@ -564,9 +564,9 @@ ExpandableModule {
             clip: true
             Layout.alignment: Qt.AlignVCenter
             text: nowPlayingModule.titleText
-            textMaxWidth: nowPlayingModule.expanded ? 210 : 150
+            textMaxWidth: nowPlayingModule.bodyExpanded ? 210 : 150
             fontFamily: Theme.font
-            pixelSize: nowPlayingModule.expanded ? Theme.fontSize : Theme.fontSize - 1
+            pixelSize: nowPlayingModule.bodyExpanded ? Theme.fontSize : Theme.fontSize - 1
             textColor: Theme.textPrimary
             fontBold: true
             horizontalAlignment: nowPlayingModule.isNothingPlaying ? Text.AlignHCenter : Text.AlignLeft
@@ -588,9 +588,9 @@ ExpandableModule {
             horizontalCenter: parent.horizontalCenter
         }
 
-        scale: expanded ? 1 : 0
+        scale: bodyExpanded ? 1 : 0
         transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
 
         MouseArea {
             visible: nowPlayingModule.contentVisible
