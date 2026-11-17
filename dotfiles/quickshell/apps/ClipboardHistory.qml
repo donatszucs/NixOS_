@@ -124,7 +124,7 @@ Rectangle {
         function toggle(): void {
             if (clipboardPanel.expanded) {
                 clipboardPanel.closeMenu();
-            } else {
+            } else if (!SharedState.vramSavingMode) {
                 clipboardPanel.openMenu();
             }
         }

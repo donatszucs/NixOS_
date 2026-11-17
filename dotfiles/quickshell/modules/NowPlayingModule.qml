@@ -448,7 +448,7 @@ ExpandableModule {
     Timer {
         id: positionTimer
         interval: 350
-        running: nowPlayingModule.currentPlayer !== null && nowPlayingModule.currentPlayer.isPlaying
+        running: !SharedState.vramSavingMode && nowPlayingModule.currentPlayer !== null && nowPlayingModule.currentPlayer.isPlaying
         repeat: true
         onTriggered: {
             if (!nowPlayingModule.scrubbing && nowPlayingModule.currentPlayer && nowPlayingModule.currentPlayer.positionSupported) {
@@ -460,9 +460,18 @@ ExpandableModule {
     // Fallback polling (1000ms) for external players that don't emit property signals
     Timer {
         interval: 1000
-        running: true
+        running: !SharedState.vramSavingMode
         repeat: true
         onTriggered: pickPlayer()
+    }
+
+    Connections {
+        target: SharedState
+        function onVramSavingModeChanged() {
+            if (!SharedState.vramSavingMode) {
+                nowPlayingModule.pickPlayer()
+            }
+        }
     }
 
     Component.onCompleted: pickPlayer()

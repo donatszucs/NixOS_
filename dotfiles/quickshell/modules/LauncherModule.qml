@@ -171,7 +171,7 @@ ModuleButton {
 
             SequentialAnimation on shadowPulse {
                 loops: Animation.Infinite
-                running: launcherModule.expanded
+                running: launcherModule.expanded && !SharedState.vramSavingMode
 
                 NumberAnimation { 
                     to: 0.3
@@ -271,11 +271,12 @@ ModuleButton {
         function toggle(): void {
             if (launcherModule.expanded) {
                 close()
-            } else {
+            } else if (!SharedState.vramSavingMode) {
                 open()
             }
         }
         function open(): void {
+            if (SharedState.vramSavingMode) return
             launcherModule.expanded = true
             searchField.text = ""
             launcherModule.filterApps("")
@@ -648,7 +649,7 @@ ModuleButton {
                             // The breathing animation
                             SequentialAnimation on opacity {
                                 loops: Animation.Infinite
-                                running: searchField.activeFocus // Only breathe when focused
+                                running: searchField.activeFocus && !SharedState.vramSavingMode // Only breathe when focused
                                 
                                 NumberAnimation { 
                                     to: 0.3

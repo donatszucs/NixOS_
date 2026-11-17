@@ -9,6 +9,82 @@ Item {
     id: root
 
     // ==========================================
+    // VRAM Saving Mode
+    // ==========================================
+    property bool vramSavingMode: false
+    property bool _restoreHyprpaperOnExit: false
+
+    function _startHyprpaper() {
+        Quickshell.execDetached([
+            "bash", "-c",
+            "if ! pgrep -x hyprpaper >/dev/null; then " +
+            "if [ -s \"$HOME/.config/hypr/hyprpaper.conf\" ]; then " +
+            "exec hyprpaper >/dev/null 2>&1; " +
+            "else " +
+            "exec \"$HOME/.config/quickshell/scripts/WallpaperSetup/init-hyprpaper.sh\" >/dev/null 2>&1; " +
+            "fi; fi"
+        ])
+    }
+
+    function enterVramSavingMode() {
+        if (root.vramSavingMode) return
+        root.closeActiveModule()
+        root.vramSavingMode = true
+        vramGcTimer.restart()
+        if (!hyprpaperStopProc.running) {
+            hyprpaperStopProc.running = true
+        }
+    }
+
+    function exitVramSavingMode() {
+        if (!root.vramSavingMode) return
+        vramGcTimer.stop()
+        root.vramSavingMode = false
+        if (!hyprpaperStopProc.running && root._restoreHyprpaperOnExit) {
+            root._restoreHyprpaperOnExit = false
+            root._startHyprpaper()
+        }
+    }
+
+    function setVramSavingMode(enabled) {
+        if (enabled) root.enterVramSavingMode()
+        else root.exitVramSavingMode()
+    }
+
+    function toggleVramSavingMode() {
+        root.setVramSavingMode(!root.vramSavingMode)
+    }
+
+    Timer {
+        id: vramGcTimer
+        interval: 100
+        repeat: false
+        onTriggered: gc()
+    }
+
+    Process {
+        id: hyprpaperStopProc
+        command: [
+            "bash", "-c",
+            "pkill -x hyprpaper || exit 1; " +
+            "for _ in $(seq 1 50); do pgrep -x hyprpaper >/dev/null || exit 0; sleep 0.02; done"
+        ]
+        onExited: (code, status) => {
+            if (code === 0) {
+                if (root.vramSavingMode) {
+                    root._restoreHyprpaperOnExit = true
+                } else {
+                    root._restoreHyprpaperOnExit = false
+                    root._startHyprpaper()
+                }
+            } else if (!root.vramSavingMode && root._restoreHyprpaperOnExit) {
+                root._restoreHyprpaperOnExit = false
+                root._startHyprpaper()
+            }
+        }
+    }
+
+    // ==========================================
     // Module Mutex (Only one module open at a time)
     // ==========================================
     property var activeModule: null

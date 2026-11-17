@@ -71,10 +71,16 @@ Item {
     IpcHandler {
         target: screenName !== "" ? "notifications-" + screenName : "notifications"
         function toggle(): void {
-            notifCenter.isManuallyOpen = !notifCenter.isManuallyOpen
+            if (notifCenter.isManuallyOpen) {
+                notifCenter.isManuallyOpen = false
+            } else if (!SharedState.vramSavingMode) {
+                notifCenter.isManuallyOpen = true
+            }
         }
         function open(): void {
-            notifCenter.isManuallyOpen = true
+            if (!SharedState.vramSavingMode) {
+                notifCenter.isManuallyOpen = true
+            }
         }
         function close(): void {
             notifCenter.isManuallyOpen = false
@@ -886,7 +892,7 @@ Item {
                     from: 1.0
                     to: 0.0
                     duration: toastRow.effectiveTimeout
-                    running: toastRow.isToastActive && toastRow.effectiveTimeout > 0
+                    running: !SharedState.vramSavingMode && toastRow.isToastActive && toastRow.effectiveTimeout > 0
                 }
             }
         }

@@ -1500,55 +1500,57 @@ ExpandableModule {
 
 
     // ── Data refresh ───────────────────────────────────────────
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            var devs = (Networking.devices && Networking.devices.values) ? Networking.devices.values : [];
-            var bestDev = null;
-            var bestNet = null;
-            
-            for (var i = 0; i < devs.length; i++) {
-                var d = devs[i];
-                if (d && d.connected) {
-                    bestDev = d;
-                    // DeviceType.Wifi is 1, DeviceType.Wired is 2
-                    if (d.type === DeviceType.Wifi || d.type === 1) {
-                        var nets = (d.networks && d.networks.values) ? d.networks.values : [];
-                        for (var j = 0; j < nets.length; j++) {
-                            var net = nets[j];
-                            if (net && net.connected) {
-                                bestNet = net;
-                                break;
-                            }
+    function updateNetworkStatus() {
+        var devs = (Networking.devices && Networking.devices.values) ? Networking.devices.values : [];
+        var bestDev = null;
+        var bestNet = null;
+        
+        for (var i = 0; i < devs.length; i++) {
+            var d = devs[i];
+            if (d && d.connected) {
+                bestDev = d;
+                // DeviceType.Wifi is 1, DeviceType.Wired is 2
+                if (d.type === DeviceType.Wifi || d.type === 1) {
+                    var nets = (d.networks && d.networks.values) ? d.networks.values : [];
+                    for (var j = 0; j < nets.length; j++) {
+                        var net = nets[j];
+                        if (net && net.connected) {
+                            bestNet = net;
+                            break;
                         }
-                    } else if (d.type === DeviceType.Wired || d.type === 2) {
-                        bestNet = null;
                     }
-                    if (bestNet) break;
+                } else if (d.type === DeviceType.Wired || d.type === 2) {
+                    bestNet = null;
                 }
-            }
-            
-            if (bestDev) {
-                connectionsModule.netName  = bestNet ? bestNet.name : ((bestDev.type === DeviceType.Wired || bestDev.type === 2) ? "Ethernet" : bestDev.name);
-                connectionsModule.netState = "connected";
-                connectionsModule.netColor = Theme.statusGreen;
-                if (bestDev.type === DeviceType.Wifi || bestDev.type === 1) {
-                    connectionsModule.netIcon = "󰤨";
-                } else if (bestDev.type === DeviceType.Wired || bestDev.type === 2) {
-                    connectionsModule.netIcon = "󰈀";
-                } else {
-                    connectionsModule.netIcon = "󰈂";
-                }
-            } else {
-                connectionsModule.netName  = "Disconnected";
-                connectionsModule.netState = "disconnected";
-                connectionsModule.netIcon  = "󰈂";
-                connectionsModule.netColor = Theme.statusRed;
+                if (bestNet) break;
             }
         }
+        
+        if (bestDev) {
+            connectionsModule.netName  = bestNet ? bestNet.name : ((bestDev.type === DeviceType.Wired || bestDev.type === 2) ? "Ethernet" : bestDev.name);
+            connectionsModule.netState = "connected";
+            connectionsModule.netColor = Theme.statusGreen;
+            if (bestDev.type === DeviceType.Wifi || bestDev.type === 1) {
+                connectionsModule.netIcon = "󰤨";
+            } else if (bestDev.type === DeviceType.Wired || bestDev.type === 2) {
+                connectionsModule.netIcon = "󰈀";
+            } else {
+                connectionsModule.netIcon = "󰈂";
+            }
+        } else {
+            connectionsModule.netName  = "Disconnected";
+            connectionsModule.netState = "disconnected";
+            connectionsModule.netIcon  = "󰈂";
+            connectionsModule.netColor = Theme.statusRed;
+        }
+    }
+
+    Timer {
+        interval: 2000
+        running: !SharedState.vramSavingMode
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: connectionsModule.updateNetworkStatus()
     }
 
     Process {
@@ -1665,7 +1667,7 @@ ExpandableModule {
     Timer {
         id: peripheralsTimer
         interval: 10000
-        running: true
+        running: !SharedState.vramSavingMode
         repeat: true
         onTriggered: {
             peripheralsFile.reload()
@@ -1708,7 +1710,7 @@ ExpandableModule {
     Timer {
         id: phonePollTimer
         interval: 3000
-        running: true
+        running: !SharedState.vramSavingMode
         repeat: true
         onTriggered: {
             if (!phonePollProcess.running) {
@@ -1777,7 +1779,20 @@ ExpandableModule {
         }
     }
 
+    Connections {
+        target: SharedState
+        function onVramSavingModeChanged() {
+            if (!SharedState.vramSavingMode) {
+                updateNetworkStatus();
+                peripheralsFile.reload();
+                updatePeripherals();
+                triggerPhonePoll();
+            }
+        }
+    }
+
     Component.onCompleted: {
+        updateNetworkStatus();
         updatePeripherals();
         triggerPhonePoll();
         if (btAdapter && btPowered) {

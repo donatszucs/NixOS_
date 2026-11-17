@@ -35,7 +35,7 @@ Rectangle {
         function toggle(): void {
             if (savedPanel.expanded) {
                 savedPanel.closeMenu();
-            } else {
+            } else if (!SharedState.vramSavingMode) {
                 savedPanel.openMenu();
             }
         }

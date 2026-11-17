@@ -59,7 +59,7 @@ Item {
     
     SequentialAnimation {
         id: marqueeAnim
-        running: root.isHovered && visibleText.implicitWidth > root.width
+        running: root.isHovered && visibleText.implicitWidth > root.width && !SharedState.vramSavingMode
         loops: Animation.Infinite
 
         onRunningChanged: {

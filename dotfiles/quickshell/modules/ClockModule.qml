@@ -877,9 +877,19 @@ ExpandableModule {
     // 1-second clock timer
     Timer {
         interval: 1000
-        running: true
+        running: !SharedState.vramSavingMode
         repeat: true
         onTriggered: root.updateTime()
+    }
+
+    Connections {
+        target: SharedState
+        function onVramSavingModeChanged() {
+            if (!SharedState.vramSavingMode) {
+                root.updateTime()
+                root.updateCalendarGrid()
+            }
+        }
     }
 
     // Browser launcher process for Google Calendar

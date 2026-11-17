@@ -84,7 +84,7 @@ ExpandableModule {
                     id: lightSwitchButton
                     variant: SharedState.lightActive ? "light" : "neutral"
                     label: root.pillText
-                    textFont: Theme.fontSize - 1
+                    textFont: Theme.fontSize - 3
                     cursorShape: Qt.PointingHandCursor
                     onClicked: SharedState.toggleLight()
                     implicitHeight: 26

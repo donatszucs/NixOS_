@@ -41,7 +41,18 @@ PillBarButton {
         command: ["pkill", "-f", "wvkbd"]
     }
 
+    Connections {
+        target: SharedState
+        function onVramSavingModeChanged() {
+            if (SharedState.vramSavingMode && virtualKbrd.active) {
+                virtualKbrd.active = false;
+                killProc.running = true;
+            }
+        }
+    }
+
     onClicked: {
+        if (SharedState.vramSavingMode) return;
         virtualKbrd.active = !virtualKbrd.active; // Toggle the state
         
         if (virtualKbrd.active) {

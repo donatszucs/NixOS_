@@ -14,6 +14,7 @@ PanelWindow {
 
     required property var modelData
     screen: modelData
+    visible: !SharedState.vramSavingMode
 
     property color moduleShadowColor: Qt.rgba(0, 0, 0, 0.85)
 
@@ -41,9 +42,38 @@ PanelWindow {
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
+    function closeAllOverlays() {
+        launcherModule.expanded = false
+        wallpaperPicker.expanded = false
+        clipboardHistory.closeMenu()
+        rbwMenu.closeMenu()
+        notificationCenter.isManuallyOpen = false
+        notificationCenter.inlineReplyInputFocused = false
+        windowContextMenu.close()
+        savedMenu.closeMenu()
+        sysmonApp.expanded = false
+        clockModule.expanded = false
+        weatherModule.expanded = false
+        nowPlayingModule.expanded = false
+        lightSwitchModule.expanded = false
+        audioModule.expanded = false
+        connectionsModule.expanded = false
+        trayModule.expanded = false
+        systemModule.expanded = false
+    }
+
+    Connections {
+        target: SharedState
+        function onVramSavingModeChanged() {
+            if (SharedState.vramSavingMode) {
+                topPanel.closeAllOverlays()
+            }
+        }
+    }
+
     HyprlandFocusGrab {
         windows: [topPanel]
-        active: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || notificationCenter.inlineReplyInputFocused || wallpaperPicker.expanded || windowContextMenu.isOpen || savedMenu.expanded
+        active: !SharedState.vramSavingMode && (launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || notificationCenter.inlineReplyInputFocused || wallpaperPicker.expanded || windowContextMenu.isOpen || savedMenu.expanded)
         onCleared: {
             launcherModule.expanded = false
             wallpaperPicker.expanded = false
@@ -406,6 +436,7 @@ PanelWindow {
     // tiled/maximised windows start below the bar
     PanelWindow {
         screen: topPanel.modelData
+        visible: !SharedState.vramSavingMode
         anchors { top: true; left: true; right: true }
         implicitHeight: Theme.moduleHeight
         color: "transparent"

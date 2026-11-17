@@ -33,7 +33,7 @@ Rectangle {
         function toggle(): void {
             if (rbwPanel.expanded) {
                 rbwPanel.closeMenu();
-            } else {
+            } else if (!SharedState.vramSavingMode) {
                 rbwPanel.openMenu();
             }
         }

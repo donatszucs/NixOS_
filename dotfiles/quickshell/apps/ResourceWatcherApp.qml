@@ -30,7 +30,11 @@ Rectangle {
     IpcHandler {
         target: "sysmon-" + sysmonPanel.screenName
         function toggle(): void {
-            sysmonPanel.expanded = !sysmonPanel.expanded;
+            if (sysmonPanel.expanded) {
+                sysmonPanel.expanded = false;
+            } else if (!SharedState.vramSavingMode) {
+                sysmonPanel.expanded = true;
+            }
         }
     }
 

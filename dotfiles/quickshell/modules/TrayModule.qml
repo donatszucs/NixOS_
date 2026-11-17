@@ -171,6 +171,15 @@ ExpandableModule {
                         onClosed: trayItemDelegate.menuOpen = false
                     }
 
+                    Connections {
+                        target: SharedState
+                        function onVramSavingModeChanged() {
+                            if (SharedState.vramSavingMode && menuAnchor.visible) {
+                                menuAnchor.close()
+                            }
+                        }
+                    }
+
                     // 2. Trigger the anchor to open
                     MouseArea {
                         anchors.fill: parent
