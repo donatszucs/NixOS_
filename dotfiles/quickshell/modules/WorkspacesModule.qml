@@ -605,6 +605,7 @@ ModuleButton {
                         title: (modelData && modelData.title) ? modelData.title : (windowIcon.appId || "Window"),
                         appId: windowIcon.appId,
                         icon: windowIcon.resolvedIcon,
+                        toplevel: (modelData && modelData.wayland) ? modelData.wayland : null,
                         isFloating: (modelData && modelData.lastIpcObject && modelData.lastIpcObject.floating !== undefined) ? Boolean(modelData.lastIpcObject.floating) : false,
                         isPinned: (modelData && modelData.lastIpcObject && modelData.lastIpcObject.pinned !== undefined) ? Boolean(modelData.lastIpcObject.pinned) : false,
                         isFullscreen: (modelData && modelData.lastIpcObject && modelData.lastIpcObject.fullscreen !== undefined) ? (modelData.lastIpcObject.fullscreen > 0) : false,
@@ -619,7 +620,7 @@ ModuleButton {
 
                 Timer {
                     id: hoverPreviewTimer
-                    interval: 1000
+                    interval: 500
                     repeat: false
                     onTriggered: {
                         if (dragArea.containsMouse && !windowIcon.isDragging && !SharedState.vramSavingMode && modelData) {

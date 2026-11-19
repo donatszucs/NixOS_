@@ -4,6 +4,8 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
+import Quickshell.Wayland
+import Quickshell.Widgets
 
 Item {
     id: root
@@ -23,9 +25,16 @@ Item {
     property string targetAppId: ""
     property string targetIcon: ""
     property string targetWorkspace: ""
+    property var targetToplevel: null
     property bool isFloating: false
     property bool isPinned: false
     property bool isFullscreen: false
+
+    onVisibleChanged: {
+        if (!visible) {
+            targetToplevel = null;
+        }
+    }
 
     readonly property string cleanAddress: {
         var a = String(targetAddress).trim();
@@ -111,6 +120,7 @@ Item {
         targetAppId = winData.appId || "";
         targetIcon = winData.icon || "";
         targetWorkspace = winData.workspace !== undefined ? String(winData.workspace) : "";
+        targetToplevel = (winData && winData.toplevel) ? winData.toplevel : null;
 
         if (!sameTarget) {
             isFloating = Boolean(winData.isFloating);
@@ -368,6 +378,27 @@ Item {
                                 }
                             }
                         }
+                    }
+                }
+
+                // ── Window Live Preview (hover only) ──────────────────────
+                ClippingRectangle {
+                    id: previewFrame
+                    Layout.alignment: Qt.AlignHCenter
+                    visible: root.isPreview && root.targetToplevel !== null
+                    implicitWidth: screencopy.hasContent ? Math.min(card.width - 16, Math.round(screencopy.implicitWidth)) : 0
+                    implicitHeight: screencopy.hasContent ? Math.round(screencopy.implicitHeight) : 0
+                    Layout.topMargin: screencopy.hasContent ? 2 : -mainCol.spacing
+                    radius: 8
+                    color: "transparent"
+
+                    ScreencopyView {
+                        id: screencopy
+                        anchors.centerIn: parent
+                        captureSource: (root.visible && root.isPreview && !SharedState.vramSavingMode) ? root.targetToplevel : null
+                        live: root.isOpen && root.isPreview
+                        paintCursor: false
+                        constraintSize: Qt.size(card.width - 16, 150)
                     }
                 }
 
