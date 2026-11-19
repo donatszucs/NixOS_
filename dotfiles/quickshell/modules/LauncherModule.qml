@@ -14,7 +14,7 @@ ModuleButton {
     label: ""
     noHoverColorChange: launcherModule.expanded
     property string screenName: ""
-    property int activeDragCount: (activeWorkspaces ? activeWorkspaces.activeDragCount : 0) + (otherWorkspaces ? otherWorkspaces.activeDragCount : 0)
+    property int activeDragCount: (activeWorkspaces ? activeWorkspaces.activeDragCount : 0) + (otherWorkspaces ? otherWorkspaces.activeDragCount : 0) + (specialWorkspaces ? specialWorkspaces.activeDragCount : 0)
     clip: false
     color: "transparent"
     border.width: 0
@@ -51,6 +51,8 @@ ModuleButton {
     signal toggleBitwardenMenu()
     signal toggleClipboardHistory()
     signal requestContextMenu(var windowData, var globalPos)
+    signal requestPreview(var windowData, var globalPos)
+    signal dismissPreview(string address)
 
     property alias activeWorkspaces: activeWorkspaces
 
@@ -79,26 +81,20 @@ ModuleButton {
     anchors.topMargin: 4
     cursorShape: Qt.PointingHandCursor
 
-    implicitWidth:  launcherModule.expanded ? Math.max(panelWidth, headerRow.implicitWidth) : headerRow.implicitWidth
+    hovered: !launcherModule.expanded && menuMouseArea.containsMouse
+    pressed: !launcherModule.expanded && menuMouseArea.pressed
+
+    property real expandWidthProgress: launcherModule.expanded ? 1.0 : 0.0
+    Behavior on expandWidthProgress { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
+
+    implicitWidth:  headerRow.implicitWidth + (Math.max(panelWidth, headerRow.implicitWidth) - headerRow.implicitWidth) * expandWidthProgress
     implicitHeight: launcherModule.expanded ? dropPanel.implicitHeight : Theme.moduleHeight - 4
 
-    Behavior on implicitWidth  { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
     Behavior on implicitHeight { NumberAnimation { duration: Theme.verticalDuration;   easing.type: Easing.OutCubic } }
 
     property real normalScale: 1.0
-    property real hoverScale: 1.02
+    property real hoverScale: 0.96
     property real pressedScale: 0.90
-
-    transformOrigin: Item.Center
-    scale: launcherModule.expanded ? 1.0 : (
-        launcherModule.activeDragCount > 0 ? 1.0 : (
-            (launcherModule.pressed || (menuMouseArea && menuMouseArea.pressed))
-                ? pressedScale
-                : (launcherModule.hovered ? hoverScale : normalScale)
-        )
-    )
-
-    Behavior on scale { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
 
     states: [
         State {
@@ -161,7 +157,7 @@ ModuleButton {
         Behavior on bottomLeftRadius { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
         Behavior on bottomRightRadius { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
-        layer.enabled: launcherModule.activeDragCount === 0 && launcherModule.shadowEnabled
+        layer.enabled: launcherModule.shadowEnabled
         layer.smooth: true
         layer.effect: MultiEffect {
             shadowEnabled: true
@@ -294,11 +290,12 @@ ModuleButton {
     ModuleButton {
         id: dropPanel
         noHoverColorChange: true
+        noPressColorChange: true
         color: "transparent"
         clip: launcherModule.activeDragCount === 0
         topMarginButton: 0 // Removes default margin from ModuleButton
         anchors { left: parent.left; right: parent.right; top: parent.top }
-        implicitWidth:  launcherModule.expanded ? Math.max(launcherModule.panelWidth, headerRow.implicitWidth) : headerRow.implicitWidth
+        implicitWidth:  launcherModule.implicitWidth
         implicitHeight: launcherModule.expanded ? panelCol.implicitHeight + 10 : Theme.moduleHeight - 4
 
         ColumnLayout {
@@ -323,27 +320,49 @@ ModuleButton {
                     anchors.topMargin: 0
                     shadowColor: launcherModule.shadowColor
                     onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)
+                    onRequestPreview: (winData, globalPos) => launcherModule.requestPreview(winData, globalPos)
+                    onDismissPreview: (address) => launcherModule.dismissPreview(address)
                 }
 
                 Item {
                     id: collapsedRow
                     Layout.fillWidth: true
                     implicitHeight: Theme.moduleHeight - 4
-                    implicitWidth: menuText.implicitWidth + 20
+                    implicitWidth: menuMouseArea.pressed
+                    ? menuText.implicitWidth + 10
+                    : menuMouseArea.containsMouse ? menuText.implicitWidth + 30 : menuText.implicitWidth + 20
 
+                    Behavior on implicitWidth {
+                        NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutQintic }
+                    }
+                    
                     Text {
                         id: menuText
-                        anchors.centerIn: parent
+                        anchors.fill: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
                         text: "MENU"
                         color: launcherModule.textColor
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize
                         font.bold: true
+
+                        transformOrigin: Item.Center
+                        scale: (launcherModule.expanded || launcherModule.activeDragCount > 0)
+                            ? launcherModule.normalScale
+                            : (menuMouseArea.pressed
+                                ? launcherModule.pressedScale
+                                : (menuMouseArea.containsMouse ? launcherModule.hoverScale : launcherModule.normalScale))
+
+                        Behavior on scale {
+                            NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+                        }
                     }
 
                     MouseArea {
                         id: menuMouseArea
                         anchors.fill: parent
+                        hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             if (launcherModule.expanded) {
@@ -372,6 +391,8 @@ ModuleButton {
                     shadowColor: launcherModule.shadowColor
                     visible: otherWorkspaces.monitorWorkspaces.others.length > 0 || otherWorkspaces.implicitWidth > 0.5
                     onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)
+                    onRequestPreview: (winData, globalPos) => launcherModule.requestPreview(winData, globalPos)
+                    onDismissPreview: (address) => launcherModule.dismissPreview(address)
                 }
 
                 WorkspacesModule {
@@ -386,6 +407,8 @@ ModuleButton {
                     Layout.leftMargin: (otherWorkspaces.visible && specialWorkspaces.visible) ? 4 : 0
                     visible: specialWorkspaces.monitorWorkspaces.special.length > 0 || specialWorkspaces.implicitWidth > 0.5
                     onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)
+                    onRequestPreview: (winData, globalPos) => launcherModule.requestPreview(winData, globalPos)
+                    onDismissPreview: (address) => launcherModule.dismissPreview(address)
                 }
             }
 

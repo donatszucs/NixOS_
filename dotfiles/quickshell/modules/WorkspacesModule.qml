@@ -17,6 +17,8 @@ ModuleButton {
     property bool expanded: false
 
     signal requestContextMenu(var windowData, var globalPos)
+    signal requestPreview(var windowData, var globalPos)
+    signal dismissPreview(string address)
 
     // ── Shadow configuration ─────────────────────────────────────────
     property bool shadowEnabled: true
@@ -203,7 +205,7 @@ ModuleButton {
     }
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }
 
     RowLayout {
@@ -260,32 +262,118 @@ ModuleButton {
         property bool isEmptyWorkspace: false
 
         variant: active ? "light" : "neutral"
-        border.width: 2
+        color: "transparent"
+        border.width: 0
+        noHoverColorChange: true
+        noPressColorChange: true
         property int activeDragCount: 0
         z: activeDragCount > 0 ? 99 : 0
         
         property bool showApps: !isEmptyWorkspace
         property bool hasApps: !isEmptyWorkspace && modelData !== null && modelData.toplevels && modelData.toplevels.values.length > 0
+        readonly property bool cutoutsActive: !isEmptyWorkspace && !isSpecial && hasApps && showApps
 
         implicitHeight: root.implicitHeight - 2 * root.overlay
         implicitWidth: isEmptyWorkspace ? implicitHeight : Math.max(contentRow.implicitWidth, implicitHeight)
         cursorShape: Qt.PointingHandCursor
         clip: false
-
-        layer.enabled: root.shadowEnabled && control.activeDragCount === 0
-        layer.smooth: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: root.shadowColor
-            shadowBlur: root.shadowBlur
-            shadowVerticalOffset: root.shadowVerticalOffset
-            shadowHorizontalOffset: root.shadowHorizontalOffset
-        }
         
         topLeftRadius: isSpecial ? Theme.moduleEdgeRadius : (index === 0 ? Theme.moduleEdgeRadius : 5)
         bottomLeftRadius: isSpecial ? Theme.moduleEdgeRadius : (index === 0 ? Theme.moduleEdgeRadius : 5)
         topRightRadius: isSpecial ? Theme.moduleEdgeRadius : (isLastInGroup ? Theme.moduleEdgeRadius : 5)
         bottomRightRadius: isSpecial ? Theme.moduleEdgeRadius : (isLastInGroup ? Theme.moduleEdgeRadius : 5)
+
+        property color badgeColor: control.pressed
+            ? control.pal.pressed
+            : (control.hovered ? control.pal.hover : control.pal.base)
+
+        Behavior on badgeColor {
+            enabled: !control.dontAnimateColor
+            ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+        }
+
+        property color trayColor: control.isSpecial
+            ? (control.active
+                ? (control.pressed
+                    ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.08)
+                    : (control.hovered
+                        ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.15)
+                        : "transparent"))
+                : (control.pressed
+                    ? Qt.darker(control.pal.pressed, 1.4)
+                    : (control.hovered ? Qt.darker(control.pal.hover, 1.3) : Qt.darker(control.pal.base, 1.4))))
+            : (control.pressed
+                ? Qt.darker(control.pal.pressed, 1.4)
+                : (control.hovered ? Qt.darker(control.pal.hover, 1.3) : Qt.darker(control.pal.base, 1.4)))
+
+        Behavior on trayColor {
+            enabled: !control.dontAnimateColor
+            ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+        }
+
+        Rectangle {
+            id: background
+            anchors.fill: parent
+            z: -1
+
+            topLeftRadius: control.topLeftRadius
+            topRightRadius: control.topRightRadius
+            bottomLeftRadius: control.bottomLeftRadius
+            bottomRightRadius: control.bottomRightRadius
+
+            readonly property real traySpace: Math.max(0, width - 24)
+            readonly property bool isBadgeOnly: !control.isSpecial && !control.isEmptyWorkspace && traySpace <= 0.5
+
+            color: isBadgeOnly ? control.badgeColor : control.trayColor
+            border.color: control.badgeColor
+            border.width: isBadgeOnly ? 0 : 2
+
+            Rectangle {
+                id: leftBadgeBg
+                visible: !control.isSpecial && !control.isEmptyWorkspace && !background.isBadgeOnly
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: Math.min(24, parent.width)
+                color: control.badgeColor
+                topLeftRadius: control.topLeftRadius
+                bottomLeftRadius: control.bottomLeftRadius
+                topRightRadius: Math.max(0, control.topRightRadius - background.traySpace)
+                bottomRightRadius: Math.max(0, control.bottomRightRadius - background.traySpace)
+
+                readonly property int filletSize: Math.max(0, Math.min(5, Math.floor(background.traySpace - 2)))
+
+                InverseRadius {
+                    visible: leftBadgeBg.filletSize > 0
+                    anchors.top: parent.top
+                    anchors.left: parent.right
+                    cornerPosition: "topLeft"
+                    color: control.badgeColor
+                    size: leftBadgeBg.filletSize
+                    animated: false
+                }
+
+                InverseRadius {
+                    visible: leftBadgeBg.filletSize > 0
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.right
+                    cornerPosition: "bottomLeft"
+                    color: control.badgeColor
+                    size: leftBadgeBg.filletSize
+                    animated: false
+                }
+            }
+
+            layer.enabled: root.shadowEnabled
+            layer.smooth: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: root.shadowColor
+                shadowBlur: root.shadowBlur
+                shadowVerticalOffset: root.shadowVerticalOffset
+                shadowHorizontalOffset: root.shadowHorizontalOffset
+            }
+        }
 
         readonly property bool isSpecial: modelData !== null && modelData.name && modelData.name.indexOf("special:") === 0
 
@@ -305,11 +393,6 @@ ModuleButton {
         )
 
         label: isEmptyWorkspace ? "" : ""
-
-        colorOverride: true
-        overrideColor: control.isSpecial
-            ? (active ? "transparent" : (hovered ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.15) : Qt.darker(control.pal.base, 1.4)))
-            : Qt.darker(control.pal.base, 1.4)
 
         onClicked: {
             if (control.isSpecial) {
@@ -341,38 +424,15 @@ ModuleButton {
             spacing: 5
             visible: !isEmptyWorkspace
 
-            Rectangle {
+            Item {
                 visible: !control.isSpecial
-                color: control.pal.base
-                topLeftRadius: control.topLeftRadius
-                bottomLeftRadius: control.bottomLeftRadius
-                property bool cutoutsActive: hasApps && showApps
-
-                topRightRadius: cutoutsActive ? 0 : control.topRightRadius
-                bottomRightRadius: cutoutsActive ? 0 : control.bottomRightRadius
                 implicitWidth: control.isSpecial ? 0 : 24
                 implicitHeight: control.height
 
-                InverseRadius {
-                    visible: parent.cutoutsActive
-                    anchors.top: parent.top
-                    anchors.left: parent.right
-                    cornerPosition: "topLeft"
-                    color: parent.color
-                    size: 5
-                }
-
-                InverseRadius {
-                    visible: parent.cutoutsActive
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.right
-                    cornerPosition: "bottomLeft"
-                    color: parent.color
-                    size: 5
-                }
-
                 Text {
-                    anchors.centerIn: parent
+                    anchors.fill: parent
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
                     text: isEmptyWorkspace ? "" : (modelData ? modelData.name : "")
                     color: active ? Theme.textDark : Theme.textPrimary
                     font.family: Theme.font
@@ -437,7 +497,7 @@ ModuleButton {
 
             height: Theme.moduleHeight - 20
             property real imgAspect: (implicitWidth > 0 && implicitHeight > 0) ? (implicitWidth / implicitHeight) : 1.0
-            width: height * imgAspect
+            width: Math.max(1, Math.round(height * imgAspect))
 
             fillMode: Image.PreserveAspectFit
             asynchronous: true
@@ -522,6 +582,63 @@ ModuleButton {
 
                 property point pressPos: Qt.point(0, 0)
                 property bool wasDragged: false
+                property string cachedAddress: ""
+
+                function updateCachedAddress() {
+                    if (modelData && modelData.address !== undefined) {
+                        cachedAddress = String(modelData.address);
+                    }
+                }
+
+                Component.onCompleted: updateCachedAddress()
+                Component.onDestruction: {
+                    hoverPreviewTimer.stop();
+                    if (cachedAddress !== "") {
+                        root.dismissPreview(cachedAddress);
+                    }
+                }
+
+                function buildWindowData() {
+                    updateCachedAddress();
+                    return {
+                        address: cachedAddress,
+                        title: (modelData && modelData.title) ? modelData.title : (windowIcon.appId || "Window"),
+                        appId: windowIcon.appId,
+                        icon: windowIcon.resolvedIcon,
+                        isFloating: (modelData && modelData.lastIpcObject && modelData.lastIpcObject.floating !== undefined) ? Boolean(modelData.lastIpcObject.floating) : false,
+                        isPinned: (modelData && modelData.lastIpcObject && modelData.lastIpcObject.pinned !== undefined) ? Boolean(modelData.lastIpcObject.pinned) : false,
+                        isFullscreen: (modelData && modelData.lastIpcObject && modelData.lastIpcObject.fullscreen !== undefined) ? (modelData.lastIpcObject.fullscreen > 0) : false,
+                        workspace: (workspaceBtn && workspaceBtn.modelData) ? (workspaceBtn.isSpecial ? workspaceBtn.modelData.name : workspaceBtn.modelData.id) : "",
+                        workspacesModule: root
+                    };
+                }
+
+                function getAnchorPoint() {
+                    return windowIcon.mapToItem(null, windowIcon.width / 2, windowIcon.height + 4);
+                }
+
+                Timer {
+                    id: hoverPreviewTimer
+                    interval: 1000
+                    repeat: false
+                    onTriggered: {
+                        if (dragArea.containsMouse && !windowIcon.isDragging && !SharedState.vramSavingMode && modelData) {
+                            root.requestPreview(dragArea.buildWindowData(), dragArea.getAnchorPoint());
+                        }
+                    }
+                }
+
+                onContainsMouseChanged: {
+                    if (containsMouse && !windowIcon.isDragging && !SharedState.vramSavingMode) {
+                        updateCachedAddress();
+                        hoverPreviewTimer.restart();
+                    } else {
+                        hoverPreviewTimer.stop();
+                        if (cachedAddress !== "") {
+                            root.dismissPreview(cachedAddress);
+                        }
+                    }
+                }
 
                 drag.target: windowIcon
                 drag.axis: Drag.XAndYAxis
@@ -529,6 +646,10 @@ ModuleButton {
 
                 function handleDragStart() {
                     if (windowIcon.isDragging) return;
+                    hoverPreviewTimer.stop();
+                    if (cachedAddress !== "") {
+                        root.dismissPreview(cachedAddress);
+                    }
                     if (workspaceBtn) workspaceBtn.pressed = false;
                     dragArea.wasDragged = true;
                     windowIcon.isDragging = true;
@@ -616,6 +737,10 @@ ModuleButton {
                 onPressed: (mouse) => {
                     dragArea.wasDragged = false;
                     dragArea.pressPos = Qt.point(mouse.x, mouse.y);
+                    hoverPreviewTimer.stop();
+                    if (mouse.button !== Qt.RightButton && cachedAddress !== "") {
+                        root.dismissPreview(cachedAddress);
+                    }
                     if (mouse.button === Qt.LeftButton && workspaceBtn) {
                         workspaceBtn.pressed = true;
                     }
@@ -642,6 +767,10 @@ ModuleButton {
                 }
 
                 onCanceled: {
+                    hoverPreviewTimer.stop();
+                    if (cachedAddress !== "") {
+                        root.dismissPreview(cachedAddress);
+                    }
                     if (workspaceBtn) {
                         workspaceBtn.pressed = false;
                     }
@@ -652,6 +781,7 @@ ModuleButton {
 
                 onClicked: (mouse) => {
                     if (dragArea.wasDragged) return;
+                    hoverPreviewTimer.stop();
                     if (mouse.button === Qt.MiddleButton) {
                         var addr = String(modelData.address).trim();
                         if (addr.indexOf("0x") === 0) addr = addr.substring(2);
@@ -666,19 +796,7 @@ ModuleButton {
                             }
                         }
                     } else if (mouse.button === Qt.RightButton) {
-                        var iconCenterBottom = windowIcon.mapToItem(null, windowIcon.width / 2, windowIcon.height + 4);
-                        var winData = {
-                            address: String(modelData.address),
-                            title: modelData.title || windowIcon.appId || "Window",
-                            appId: windowIcon.appId,
-                            icon: windowIcon.resolvedIcon,
-                            isFloating: (modelData.lastIpcObject && modelData.lastIpcObject.floating !== undefined) ? Boolean(modelData.lastIpcObject.floating) : false,
-                            isPinned: (modelData.lastIpcObject && modelData.lastIpcObject.pinned !== undefined) ? Boolean(modelData.lastIpcObject.pinned) : false,
-                            isFullscreen: (modelData.lastIpcObject && modelData.lastIpcObject.fullscreen !== undefined) ? (modelData.lastIpcObject.fullscreen > 0) : false,
-                            workspace: (workspaceBtn && workspaceBtn.modelData) ? (workspaceBtn.isSpecial ? workspaceBtn.modelData.name : workspaceBtn.modelData.id) : "",
-                            workspacesModule: root
-                        };
-                        root.requestContextMenu(winData, iconCenterBottom);
+                        root.requestContextMenu(dragArea.buildWindowData(), dragArea.getAnchorPoint());
                     }
                 }
             }

@@ -73,7 +73,7 @@ PanelWindow {
 
     HyprlandFocusGrab {
         windows: [topPanel]
-        active: !SharedState.vramSavingMode && (launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || notificationCenter.inlineReplyInputFocused || wallpaperPicker.expanded || windowContextMenu.isOpen || savedMenu.expanded)
+        active: !SharedState.vramSavingMode && (launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || notificationCenter.inlineReplyInputFocused || wallpaperPicker.expanded || windowContextMenu.isFullMenu || savedMenu.expanded)
         onCleared: {
             launcherModule.expanded = false
             wallpaperPicker.expanded = false
@@ -150,9 +150,9 @@ PanelWindow {
             item: notificationCenter
         }
 
-        // Window Context Menu region
+        // Window Context Menu region (only capture input in full right-click mode)
         Region {
-            item: windowContextMenu.visible ? windowContextMenu : null
+            item: windowContextMenu.isFullMenu ? windowContextMenu : null
         }
 
         // Saved Menu region (bottom-center)
@@ -192,7 +192,7 @@ PanelWindow {
         id: bgMouseArea
         anchors.fill: parent
         visible: enabled
-        enabled: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded || notificationCenter.isManuallyOpen || windowContextMenu.isOpen || savedMenu.expanded
+        enabled: launcherModule.expanded || clipboardHistory.expanded || rbwMenu.expanded || wallpaperPicker.expanded || notificationCenter.isManuallyOpen || windowContextMenu.isFullMenu || savedMenu.expanded
         onClicked: {
             launcherModule.expanded = false
             wallpaperPicker.expanded = false
@@ -284,6 +284,12 @@ PanelWindow {
         }
         onRequestContextMenu: (winData, globalPos) => {
             windowContextMenu.open(winData, globalPos);
+        }
+        onRequestPreview: (winData, globalPos) => {
+            windowContextMenu.openPreview(winData, globalPos);
+        }
+        onDismissPreview: (address) => {
+            windowContextMenu.closePreview(address);
         }
 
         shadowColor: topPanel.moduleShadowColor
