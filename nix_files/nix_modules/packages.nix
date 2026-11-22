@@ -134,6 +134,7 @@
     teams-for-linux
     heroic
     protontricks
+    onlyoffice-desktopeditors
     # szeretlek eszter
 
     (prismlauncher.override {
