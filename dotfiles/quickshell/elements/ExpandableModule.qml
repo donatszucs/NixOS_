@@ -1,5 +1,6 @@
 // ExpandableModule.qml — Base for bar modules that expand downward with an overlay dropdown.
 import QtQuick
+import QtQuick.Shapes
 
 ModuleButton {
     id: root
@@ -57,16 +58,16 @@ ModuleButton {
     implicitHeight: _headerPill.y + _stage2Height
 
     property bool shrinkEnabled: true
-    property int collapsedWidth: (expanded || pillDropped) ? lastPillWidth : pillNaturalWidth
+    property int collapsedWidth: (expanded || pillDropped || _headerPillYAnim.running) ? lastPillWidth : pillNaturalWidth
     implicitWidth: (root.bodyExpanded && shrinkEnabled) ? 100 : collapsedWidth
 
     // Close button configuration for bar tab
     property bool showCloseButton: shrinkEnabled
     property string closeButtonText: ""
-    property int closeButtonWidth: root.width
-    property int closeButtonHeight: Theme.pillHeight
-    property int closeButtonRadius: Theme.pillHeight / 2
-    property int closeButtonInverseRadius: Theme.pillHeight / 2
+    property real closeButtonWidth: root.width
+    property real closeButtonHeight: Theme.pillHeight
+    property real closeButtonRadius: Theme.pillHeight / 2
+    property real closeButtonInverseRadius: Theme.pillHeight / 2
 
     clip: false
     noHoverColorChange: expanded || pillDropped
@@ -154,6 +155,13 @@ ModuleButton {
         root.expanded = false
     }
 
+    function _setPillDropped(dropped) {
+        if (root.pillDropped === dropped) return
+        _headerPillYAnim.duration = dropped ? Math.round(Theme.verticalDuration * 0.6) : Theme.verticalDuration
+        _headerPillYAnim.easing.type = dropped ? root.expandEasingType : root.collapseEasingType
+        root.pillDropped = dropped
+    }
+
     Timer {
         id: _stageOverlapTimer
         interval: Math.round(Theme.verticalDuration / 5)
@@ -162,7 +170,7 @@ ModuleButton {
             if (root.expanded) {
                 root.bodyExpanded = true
             } else {
-                root.pillDropped = false
+                root._setPillDropped(false)
             }
         }
     }
@@ -171,7 +179,7 @@ ModuleButton {
         if (!root.expanded && !root.bodyExpanded && root.pillDropped) {
             if (!_heightAnim.running && !_overlayWidthAnim.running && !_widthAnim.running) {
                 _stageOverlapTimer.stop()
-                root.pillDropped = false
+                root._setPillDropped(false)
             }
         }
     }
@@ -179,7 +187,7 @@ ModuleButton {
     onExpandedChanged: {
         if (expanded) {
             SharedState.setActiveModule(root)
-            root.pillDropped = true
+            root._setPillDropped(true)
             if (!_headerPillYAnim.running && Math.abs(_headerPill.y - Theme.moduleHeight) < 0.5) {
                 _stageOverlapTimer.stop()
                 root.bodyExpanded = true
@@ -190,7 +198,7 @@ ModuleButton {
             SharedState.clearActiveModule(root)
             if (!root.bodyExpanded && !_heightAnim.running && !_overlayWidthAnim.running && !_widthAnim.running) {
                 _stageOverlapTimer.stop()
-                root.pillDropped = false
+                root._setPillDropped(false)
             } else {
                 root.bodyExpanded = false
                 _stageOverlapTimer.restart()
@@ -218,7 +226,7 @@ ModuleButton {
         NumberAnimation {
             id: _widthAnim
             duration: Theme.horizontalDuration
-            easing.type: root.bodyExpanded ? root.expandEasingType : root.collapseEasingType
+            easing.type: Easing.OutBack
             easing.overshoot: 1.1
             onRunningChanged: {
                 if (!running) root._checkStage2CollapseDone()
@@ -362,14 +370,14 @@ ModuleButton {
 
     property real lastPillWidth: 50
     readonly property real pillNaturalWidth: {
-        if (!expanded && !pillDropped && _collapsedMeasureText.implicitWidth > 0) {
+        if (!expanded && !pillDropped && !_headerPillYAnim.running && _collapsedMeasureText.implicitWidth > 0) {
             return Math.max(50, Math.round(_collapsedMeasureText.implicitWidth + 38))
         }
         return lastPillWidth
     }
 
     onPillNaturalWidthChanged: {
-        if (!expanded && !pillDropped && pillNaturalWidth > 50) {
+        if (!expanded && !pillDropped && !_headerPillYAnim.running && pillNaturalWidth > 50) {
             lastPillWidth = pillNaturalWidth
         }
     }
@@ -422,73 +430,91 @@ ModuleButton {
             height: root.closeButtonHeight
             y: (_barTabMouseArea.closeProgress - 1.0) * height
 
-            // Left Inverse Radius Wing (curves ceiling into button left wall)
-            InverseRadius {
-                id: _leftInverseRadius
-                anchors.top: _closeButtonBody.top
-                anchors.right: _closeButtonBody.left
-                cornerPosition: "topRight"
-                size: root.closeButtonInverseRadius
-                animated: false
-                width: size
-                height: size
-                color: _closeButtonBody.color
+            // Unified GPU-accelerated shape (seamless translucent body + inverse-radius wings)
+            Shape {
+                id: _closeButtonShape
+                anchors.fill: parent
+                visible: width > 0.1 && height > 0.1
+                antialiasing: true
+                smooth: true
+                asynchronous: false
+                preferredRendererType: Shape.CurveRenderer
+
+                readonly property real invR: Math.max(0, Math.min(root.closeButtonInverseRadius, height, width / 2))
+                readonly property real bodyW: Math.max(0, width - 2 * invR)
+                readonly property real botR: Math.max(0, Math.min(root.closeButtonRadius, height - invR, bodyW / 2))
+                readonly property real leftX: invR
+                readonly property real rightX: width - invR
+                readonly property real botY: bodyW > 0.1 ? height : invR
+                readonly property real k: 0.55228475
+                readonly property real ik: 1.0 - k
+
+                ShapePath {
+                    fillColor: _barTabMouseArea.buttonColor
+                    strokeColor: "transparent"
+                    strokeWidth: 0
+                    startX: 0; startY: 0
+
+                    PathLine { x: _closeButtonShape.width; y: 0 }
+                    PathCubic {
+                        control1X: _closeButtonShape.width - _closeButtonShape.invR * _closeButtonShape.k
+                        control1Y: 0
+                        control2X: _closeButtonShape.rightX
+                        control2Y: _closeButtonShape.invR * _closeButtonShape.ik
+                        x: _closeButtonShape.rightX
+                        y: _closeButtonShape.invR
+                    }
+                    PathLine { x: _closeButtonShape.rightX; y: _closeButtonShape.botY - _closeButtonShape.botR }
+                    PathCubic {
+                        control1X: _closeButtonShape.rightX
+                        control1Y: _closeButtonShape.botY - _closeButtonShape.botR * _closeButtonShape.ik
+                        control2X: _closeButtonShape.rightX - _closeButtonShape.botR * _closeButtonShape.ik
+                        control2Y: _closeButtonShape.botY
+                        x: _closeButtonShape.rightX - _closeButtonShape.botR
+                        y: _closeButtonShape.botY
+                    }
+                    PathLine { x: _closeButtonShape.leftX + _closeButtonShape.botR; y: _closeButtonShape.botY }
+                    PathCubic {
+                        control1X: _closeButtonShape.leftX + _closeButtonShape.botR * _closeButtonShape.ik
+                        control1Y: _closeButtonShape.botY
+                        control2X: _closeButtonShape.leftX
+                        control2Y: _closeButtonShape.botY - _closeButtonShape.botR * _closeButtonShape.ik
+                        x: _closeButtonShape.leftX
+                        y: _closeButtonShape.botY - _closeButtonShape.botR
+                    }
+                    PathLine { x: _closeButtonShape.leftX; y: _closeButtonShape.invR }
+                    PathCubic {
+                        control1X: _closeButtonShape.leftX
+                        control1Y: _closeButtonShape.invR * _closeButtonShape.ik
+                        control2X: _closeButtonShape.invR * _closeButtonShape.k
+                        control2Y: 0
+                        x: 0
+                        y: 0
+                    }
+                }
             }
 
-            // Central Close Button Body
-            Rectangle {
-                id: _closeButtonBody
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                width: Math.max(0, _closeButtonContainer.width - (2 * root.closeButtonInverseRadius))
-                height: root.closeButtonHeight
+            Text {
+                id: _closeButtonText
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: _barTabMouseArea.pressed ? 1 : (_barTabMouseArea.containsMouse ? -2 : 0)
+                text: root.closeButtonText
+                color: _barTabMouseArea.pressed
+                    ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.90)
+                    : (_barTabMouseArea.containsMouse
+                        ? Theme.textPrimary
+                        : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.70))
+                font.family: Theme.font
+                font.pixelSize: 12
+                font.bold: true
 
-                topLeftRadius: 0
-                topRightRadius: 0
-                bottomLeftRadius: root.closeButtonRadius
-                bottomRightRadius: root.closeButtonRadius
-
-                color: _barTabMouseArea.buttonColor
+                Behavior on anchors.verticalCenterOffset {
+                    NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+                }
 
                 Behavior on color {
                     ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
                 }
-
-                Text {
-                    id: _closeButtonText
-                    anchors.centerIn: parent
-                    anchors.verticalCenterOffset: _barTabMouseArea.pressed ? 1 : (_barTabMouseArea.containsMouse ? -2 : 0)
-                    text: root.closeButtonText
-                    color: _barTabMouseArea.pressed
-                        ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.90)
-                        : (_barTabMouseArea.containsMouse
-                            ? Theme.textPrimary
-                            : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.70))
-                    font.family: Theme.font
-                    font.pixelSize: 12
-                    font.bold: true
-
-                    Behavior on anchors.verticalCenterOffset {
-                        NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
-                    }
-
-                    Behavior on color {
-                        ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
-                    }
-                }
-            }
-
-            // Right Inverse Radius Wing (curves ceiling into button right wall)
-            InverseRadius {
-                id: _rightInverseRadius
-                anchors.top: _closeButtonBody.top
-                anchors.left: _closeButtonBody.right
-                cornerPosition: "topLeft"
-                size: root.closeButtonInverseRadius
-                animated: false
-                width: size
-                height: size
-                color: _closeButtonBody.color
             }
         }
     }
@@ -537,10 +563,10 @@ ModuleButton {
         Behavior on y {
             NumberAnimation {
                 id: _headerPillYAnim
-                duration: root.pillDropped ? Math.round(Theme.verticalDuration * 0.6) : Theme.verticalDuration
-                easing.type: root.pillDropped ? root.expandEasingType : root.collapseEasingType
+                duration: Theme.verticalDuration
+                easing.type: root.expandEasingType
                 onRunningChanged: {
-                    if (!running && root.expanded && root.pillDropped) {
+                    if (!running && root.expanded && root.pillDropped && !root.bodyExpanded) {
                         _stageOverlapTimer.stop()
                         root.bodyExpanded = true
                     }

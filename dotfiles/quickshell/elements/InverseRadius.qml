@@ -1,12 +1,13 @@
 import QtQuick
+import QtQuick.Shapes
 
-Canvas {
+Item {
     id: root
     property bool expandingV: true
     property bool expandingH: true
-    property int size: Theme.moduleEdgeRadius
-    property int sizeH: size
-    property int sizeV: size
+    property real size: Theme.moduleEdgeRadius
+    property real sizeH: size
+    property real sizeV: size
     property int animationDuration: Theme.verticalDuration
     // Set false to disable the built-in Behavior so width/height can be bound externally
     property bool animated: true
@@ -19,116 +20,84 @@ Canvas {
     // "topRight": solid at (width,0). Empty circle at (0, height)
     // "bottomLeft": solid at (0,height). Empty circle at (width, 0)
     // "bottomRight": solid at (width,height). Empty circle at (0, 0)
-    property string cornerPosition: "topLeft" 
-    
-    // Use an exponential/squircle-like smooth bezier curve instead of a strict circular arc
+    property string cornerPosition: "topLeft"
+
+    // Use a continuous bezier curve instead of a circular/elliptical quarter-arc
     property bool smoothCurve: false
-    // Values closer to 0 make the corner "sharper" but perfectly smooth. 0.15 is roughly Apple's continuous corner. 0.4477 is roughly a perfect circle.
+    // Values closer to 0 make the corner "sharper" but perfectly smooth. 0.15 is roughly Apple's continuous corner. 0.447715 matches a circular arc.
     property real smoothTolerance: 0.15
 
     // Round the outer corner (the sharp vertex)
     property real outerRadius: 0
 
-    // Ensure smooth curved edges
-    antialiasing: true
-    smooth: true
+    // Retained as a no-op for compatibility with Canvas callers
+    function requestPaint() {}
 
-    onColorChanged: requestPaint()
-    onCornerPositionChanged: requestPaint()
-    onSmoothCurveChanged: requestPaint()
-    onSmoothToleranceChanged: requestPaint()
-    onOuterRadiusChanged: requestPaint()
-    onWidthChanged: requestPaint()
-    onHeightChanged: requestPaint()
+    // GPU-accelerated inverse corner fillet (no CPU Canvas repaints)
+    Shape {
+        id: _shape
+        anchors.fill: parent
+        visible: width > 0.1 && height > 0.1
+        antialiasing: true
+        smooth: true
+        asynchronous: false
+        preferredRendererType: Shape.CurveRenderer
 
-    onPaint: {
-        if (width <= 0 || height <= 0) return;
-        var ctx = getContext("2d");
-        ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        
-        ctx.save();
-        var scaleX = width > 0 ? width : 1;
-        var scaleY = height > 0 ? height : 1;
-        ctx.scale(scaleX, scaleY);
-        
-        var c = smoothCurve ? smoothTolerance : 0.447715;
-        var rx = outerRadius > 0 ? Math.min(0.5, outerRadius / scaleX) : 0;
-        var ry = outerRadius > 0 ? Math.min(0.5, outerRadius / scaleY) : 0;
+        readonly property bool isRight: root.cornerPosition === "topRight" || root.cornerPosition === "bottomRight"
+        readonly property bool isBottom: root.cornerPosition === "bottomLeft" || root.cornerPosition === "bottomRight"
+        readonly property real c: Math.max(0, Math.min(1, root.smoothCurve ? root.smoothTolerance : 0.44771525))
+        readonly property real ik: 0.44771525
 
-        if (cornerPosition === "topLeft") {
-            if (rx > 0) {
-                ctx.moveTo(rx, 0);
-                ctx.lineTo(1, 0);
-                if (smoothCurve) ctx.bezierCurveTo(c, 0, 0, c, 0, 1);
-                else ctx.arc(1, 1, 1, 1.5 * Math.PI, Math.PI, true);
-                ctx.lineTo(0, ry);
-                ctx.arc(rx, ry, rx, Math.PI, 1.5 * Math.PI, false);
-                ctx.closePath();
-            } else {
-                ctx.moveTo(0, 0);
-                ctx.lineTo(1, 0);
-                if (smoothCurve) ctx.bezierCurveTo(c, 0, 0, c, 0, 1);
-                else ctx.arc(1, 1, 1, 1.5 * Math.PI, Math.PI, true);
-                ctx.lineTo(0, 1);
-                ctx.closePath();
+        // Solid outer vertex and arm endpoints
+        readonly property real vx: isRight ? width : 0
+        readonly property real vy: isBottom ? height : 0
+        readonly property real hx: isRight ? 0 : width
+        readonly property real ty: isBottom ? 0 : height
+        readonly property real dx: isRight ? -1 : 1
+        readonly property real dy: isBottom ? -1 : 1
+
+        readonly property real orx: root.outerRadius > 0 ? Math.min(width * 0.5, root.outerRadius) : 0
+        readonly property real ory: root.outerRadius > 0 ? Math.min(height * 0.5, root.outerRadius) : 0
+
+        ShapePath {
+            fillColor: root.color
+            strokeColor: "transparent"
+            strokeWidth: 0
+            startX: _shape.vx + _shape.dx * _shape.orx
+            startY: _shape.vy
+
+            // Horizontal edge to arm tip
+            PathLine {
+                x: _shape.hx
+                y: _shape.vy
             }
-        } else if (cornerPosition === "topRight") {
-            if (rx > 0) {
-                ctx.moveTo(1 - rx, 0);
-                ctx.lineTo(0, 0);
-                if (smoothCurve) ctx.bezierCurveTo(1 - c, 0, 1, c, 1, 1);
-                else ctx.arc(0, 1, 1, 1.5 * Math.PI, 2.0 * Math.PI, false);
-                ctx.lineTo(1, 1);
-                ctx.lineTo(1, ry);
-                ctx.arc(1 - rx, ry, rx, 0, 1.5 * Math.PI, true);
-                ctx.closePath();
-            } else {
-                ctx.moveTo(1, 0);
-                ctx.lineTo(0, 0);
-                if (smoothCurve) ctx.bezierCurveTo(1 - c, 0, 1, c, 1, 1);
-                else ctx.arc(0, 1, 1, 1.5 * Math.PI, 2.0 * Math.PI, false);
-                ctx.lineTo(1, 1);
-                ctx.closePath();
+
+            // Concave inverse-radius curve from horizontal tip to vertical tip
+            PathCubic {
+                control1X: _shape.vx + (_shape.hx - _shape.vx) * _shape.c
+                control1Y: _shape.vy
+                control2X: _shape.vx
+                control2Y: _shape.vy + (_shape.ty - _shape.vy) * _shape.c
+                x: _shape.vx
+                y: _shape.ty
             }
-        } else if (cornerPosition === "bottomLeft") {
-            if (rx > 0) {
-                ctx.moveTo(0, 0);
-                ctx.lineTo(0, 1 - ry);
-                ctx.arc(rx, 1 - ry, rx, Math.PI, 0.5 * Math.PI, true);
-                ctx.lineTo(1, 1);
-                if (smoothCurve) ctx.bezierCurveTo(c, 1, 0, 1 - c, 0, 0);
-                else ctx.arc(1, 0, 1, 0.5 * Math.PI, Math.PI, false);
-                ctx.closePath();
-            } else {
-                ctx.moveTo(0, 1);
-                ctx.lineTo(1, 1);
-                if (smoothCurve) ctx.bezierCurveTo(c, 1, 0, 1 - c, 0, 0);
-                else ctx.arc(1, 0, 1, 0.5 * Math.PI, Math.PI, false);
-                ctx.lineTo(0, 0);
-                ctx.closePath();
+
+            // Vertical edge back toward outer vertex
+            PathLine {
+                x: _shape.vx
+                y: _shape.vy + _shape.dy * _shape.ory
             }
-        } else if (cornerPosition === "bottomRight") {
-            if (rx > 0) {
-                ctx.moveTo(1, 0);
-                ctx.lineTo(1, 1 - ry);
-                ctx.arc(1 - rx, 1 - ry, rx, 0, 0.5 * Math.PI, false);
-                ctx.lineTo(0, 1);
-                if (smoothCurve) ctx.bezierCurveTo(1 - c, 1, 1, 1 - c, 1, 0);
-                else ctx.arc(0, 0, 1, 0.5 * Math.PI, 0, true);
-                ctx.closePath();
-            } else {
-                ctx.moveTo(1, 1);
-                ctx.lineTo(0, 1);
-                if (smoothCurve) ctx.bezierCurveTo(1 - c, 1, 1, 1 - c, 1, 0);
-                else ctx.arc(0, 0, 1, 0.5 * Math.PI, 0, true);
-                ctx.lineTo(1, 0);
-                ctx.closePath();
+
+            // Optional rounded outer vertex (collapses to vertex when outerRadius == 0)
+            PathCubic {
+                control1X: _shape.vx
+                control1Y: _shape.vy + _shape.dy * _shape.ory * _shape.ik
+                control2X: _shape.vx + _shape.dx * _shape.orx * _shape.ik
+                control2Y: _shape.vy
+                x: _shape.vx + _shape.dx * _shape.orx
+                y: _shape.vy
             }
         }
-        ctx.restore();
-        ctx.fill();
     }
 
     Behavior on implicitWidth {
