@@ -617,12 +617,11 @@ ExpandableModule {
                     Repeater {
                         id: pairedDeviceRepeater
                         model: connectionsModule.btPowered && connectionsModule.btDevices ? connectionsModule.btDevices : []
-                        delegate: ModuleButton {
+                        delegate: ListButton {
                             id: pairedDeviceBtn
                             required property var modelData
 
                             visible: modelData && modelData.paired
-                            variant: "neutral"
 
                             readonly property bool isConnected: modelData && (modelData.connected === true || modelData.state === 1)
                             readonly property bool isConnecting: modelData && (modelData.state === 3)
@@ -646,11 +645,13 @@ ExpandableModule {
 
                             Layout.fillWidth: true
                             implicitHeight: 46
-                            radius: Theme.cardItemRadius
-                            opacity: 1.0
-                            border.width: 2
-                            border.color: (isConnected || isBusy) ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
+                            icon: connectionsModule.getBtDeviceIcon(modelData.icon, isConnected, isBusy)
+                            iconSize: Theme.fontSize + 3
+                            iconSpinning: isBusy
+                            accent: (isConnected || isBusy) ? Theme.statusBlue : Theme.palettePaper
+                            active: isConnected || isBusy
                             cursorShape: isBusy ? Qt.WaitCursor : Qt.PointingHandCursor
+                            rightPadding: 8
 
                             function doConnect() {
                                 connectionsModule.trustBtDevice(modelData);
@@ -689,127 +690,62 @@ ExpandableModule {
                                 else doConnect();
                             }
 
-                            RowLayout {
-                                id: pairedDeviceRow
-                                anchors.fill: parent
-                                anchors.rightMargin: 6
-                                spacing: 12
+                            content: ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: 2
 
-                                Rectangle {
-                                    id: pairedIconBox
-                                    Layout.fillHeight: true
-                                    Layout.preferredWidth: pairedDeviceBtn.implicitHeight
-                                    implicitWidth: pairedDeviceBtn.implicitHeight
-                                    implicitHeight: pairedDeviceBtn.implicitHeight
-                                    color: (isConnected || isBusy) ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
-                                    topLeftRadius: Math.min(height / 2, pairedDeviceBtn.radius)
-                                    bottomLeftRadius: Math.min(height / 2, pairedDeviceBtn.radius)
-
-                                    InverseRadius {
-                                        anchors.top: parent.top
-                                        anchors.left: parent.right
-                                        cornerPosition: "topLeft"
-                                        color: parent.color
-                                        size: Theme.cardItemIconInverseRadius
-                                    }
-
-                                    InverseRadius {
-                                        anchors.bottom: parent.bottom
-                                        anchors.left: parent.right
-                                        cornerPosition: "bottomLeft"
-                                        color: parent.color
-                                        size: Theme.cardItemIconInverseRadius
-                                    }
-
-                                    Text {
-                                        id: devIconText
-                                        anchors.centerIn: parent
-                                        text: connectionsModule.getBtDeviceIcon(modelData.icon, isConnected, isBusy)
-                                        color: isConnected ? Theme.statusBlue : (isBusy ? Theme.statusBlue : Theme.textPrimary)
-                                        opacity: isConnected || isBusy ? 1.0 : 0.7
-                                        font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize + 3
-                                        font.bold: true
-                                        horizontalAlignment: Text.AlignHCenter
-                                        verticalAlignment: Text.AlignVCenter
-
-                                        rotation: isBusy ? spinAnim.angle : 0
-
-                                        NumberAnimation {
-                                            id: spinAnim
-                                            property real angle: 0
-                                            target: spinAnim
-                                            property: "angle"
-                                            from: 0
-                                            to: 360
-                                            duration: 900
-                                            loops: Animation.Infinite
-                                            running: isBusy
-                                            onStopped: angle = 0
-                                        }
-                                    }
-                                }
-
-                                ColumnLayout {
+                                HoverMarqueeText {
+                                    text: modelData.name || modelData.deviceName || "Unknown Device"
+                                    textMaxWidth: connectionsModule.cardWidth - pairedDeviceBtn.trailingWidth - 92
+                                    textColor: pairedDeviceBtn.primaryTextColor
+                                    forceHovered: pairedDeviceBtn.hovered
                                     Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignVCenter
-                                    spacing: 2
-
-                                    HoverMarqueeText {
-                                        text: modelData.name || modelData.deviceName || "Unknown Device"
-                                        textMaxWidth: connectionsModule.cardWidth - rightActionsRow.implicitWidth - 85
-                                        Layout.fillWidth: true
-                                    }
-
-                                    Text {
-                                        text: statusText
-                                        color: statusColor
-                                        font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize * 0.75
-                                        font.bold: isConnected || isBusy
-                                    }
                                 }
 
-                                RowLayout {
-                                    id: rightActionsRow
-                                    spacing: 6
-                                    Layout.alignment: Qt.AlignVCenter
-                                    Layout.rightMargin: 6
-
-                                    BatteryBadge {
-                                        id: pairedDeviceBatteryBtn
-                                        visible: modelData.batteryAvailable
-                                        badgeHeight: 20
-                                        percent: Math.round(modelData.battery * 100)
-                                        clickable: false
-                                    }
-
-                                    // Forget / Unpair button on hover
-                                    Rectangle {
-                                        width: 22
-                                        height: 22
-                                        radius: 11
-                                        color: forgetHover.hovered ? Qt.rgba(1, 0.3, 0.3, 0.3) : Qt.rgba(1, 1, 1, 0.1)
-                                        visible: pairedDeviceBtn.hovered && !isBusy
-
-                                        HoverHandler { id: forgetHover }
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: ""
-                                            color: forgetHover.hovered ? Theme.statusRed : Theme.textPrimary
-                                            font.family: Theme.font
-                                            font.pixelSize: 11
-                                        }
-
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: doForget()
-                                        }
-                                    }
+                                Text {
+                                    text: statusText
+                                    color: statusColor
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize * 0.75
+                                    font.bold: isConnected || isBusy
                                 }
                             }
+
+                            trailing: [
+                                BatteryBadge {
+                                    id: pairedDeviceBatteryBtn
+                                    visible: modelData.batteryAvailable
+                                    badgeHeight: 20
+                                    percent: Math.round(modelData.battery * 100)
+                                    clickable: false
+                                },
+
+                                // Forget / Unpair button on hover
+                                Rectangle {
+                                    width: 22
+                                    height: 22
+                                    radius: 11
+                                    color: forgetHover.hovered ? Qt.rgba(1, 0.3, 0.3, 0.3) : Qt.rgba(1, 1, 1, 0.1)
+                                    visible: pairedDeviceBtn.hovered && !isBusy
+
+                                    HoverHandler { id: forgetHover }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: ""
+                                        color: forgetHover.hovered ? Theme.statusRed : Theme.textPrimary
+                                        font.family: Theme.font
+                                        font.pixelSize: 11
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: doForget()
+                                    }
+                                }
+                            ]
                         }
                     }
 
@@ -829,12 +765,11 @@ ExpandableModule {
                     Repeater {
                         id: unpairedDeviceRepeater
                         model: connectionsModule.btPowered && connectionsModule.btDevices ? connectionsModule.btDevices : []
-                        delegate: ModuleButton {
+                        delegate: ListButton {
                             id: unpairedDeviceBtn
                             required property var modelData
 
                             visible: connectionsModule.showUnpairedDevices && modelData && !modelData.paired
-                            variant: "neutral"
 
                             readonly property bool isPairing: modelData && (modelData.pairing === true)
                             readonly property bool isConnecting: modelData && (modelData.state === 3)
@@ -849,11 +784,14 @@ ExpandableModule {
 
                             Layout.fillWidth: true
                             implicitHeight: 46
-                            radius: Theme.cardItemRadius
-                            opacity: isBusy ? 1.0 : 0.8
-                            border.width: 2
-                            border.color: isBusy ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : borderColorAdaptive
+                            opacity: isBusy ? 1.0 : 0.85
+                            icon: connectionsModule.getBtDeviceIcon(modelData.icon, false, isBusy)
+                            iconSize: Theme.fontSize + 3
+                            iconSpinning: isBusy
+                            accent: isBusy ? Theme.statusBlue : Theme.palettePaper
+                            active: isBusy
                             cursorShape: isBusy ? Qt.WaitCursor : Qt.PointingHandCursor
+                            rightPadding: 8
 
                             function doPair() {
                                 if (isBusy) return;
@@ -899,123 +837,56 @@ ExpandableModule {
                                 if (!isBusy) doPair();
                             }
 
-                            RowLayout {
-                                id: unpairedDeviceRow
-                                anchors.fill: parent
-                                anchors.rightMargin: 6
-                                spacing: 12
+                            content: ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: 2
 
-                                Rectangle {
-                                    id: unpairedIconBox
-                                    Layout.fillHeight: true
-                                    Layout.preferredWidth: unpairedDeviceBtn.implicitHeight
-                                    implicitWidth: unpairedDeviceBtn.implicitHeight
-                                    implicitHeight: unpairedDeviceBtn.implicitHeight
-                                    color: isBusy ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.35) : Theme.divider
-                                    topLeftRadius: Math.min(height / 2, unpairedDeviceBtn.radius)
-                                    bottomLeftRadius: Math.min(height / 2, unpairedDeviceBtn.radius)
-
-                                    InverseRadius {
-                                        anchors.top: parent.top
-                                        anchors.left: parent.right
-                                        cornerPosition: "topLeft"
-                                        color: parent.color
-                                        size: Theme.cardItemIconInverseRadius
-                                    }
-
-                                    InverseRadius {
-                                        anchors.bottom: parent.bottom
-                                        anchors.left: parent.right
-                                        cornerPosition: "bottomLeft"
-                                        color: parent.color
-                                        size: Theme.cardItemIconInverseRadius
-                                    }
-
-                                    Text {
-                                        id: unpairedIconText
-                                        anchors.centerIn: parent
-                                        text: connectionsModule.getBtDeviceIcon(modelData.icon, false, isBusy)
-                                        color: isBusy ? Theme.statusBlue : Theme.textPrimary
-                                        opacity: isBusy ? 1.0 : 0.6
-                                        font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize + 3
-                                        font.bold: true
-                                        horizontalAlignment: Text.AlignHCenter
-                                        verticalAlignment: Text.AlignVCenter
-
-                                        rotation: isBusy ? unpairedSpinAnim.angle : 0
-
-                                        NumberAnimation {
-                                            id: unpairedSpinAnim
-                                            property real angle: 0
-                                            target: unpairedSpinAnim
-                                            property: "angle"
-                                            from: 0
-                                            to: 360
-                                            duration: 900
-                                            loops: Animation.Infinite
-                                            running: isBusy
-                                            onStopped: angle = 0
-                                        }
-                                    }
-                                }
-
-                                ColumnLayout {
+                                HoverMarqueeText {
+                                    text: modelData.name || modelData.deviceName || modelData.address || "Unknown Device"
+                                    textMaxWidth: connectionsModule.cardWidth - unpairedDeviceBtn.trailingWidth - 92
+                                    textColor: unpairedDeviceBtn.primaryTextColor
+                                    forceHovered: unpairedDeviceBtn.hovered
                                     Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignVCenter
-                                    spacing: 2
-
-                                    HoverMarqueeText {
-                                        text: modelData.name || modelData.deviceName || modelData.address || "Unknown Device"
-                                        textMaxWidth: connectionsModule.cardWidth - unpairedRightActions.implicitWidth - 85
-                                        Layout.fillWidth: true
-                                    }
-
-                                    Text {
-                                        text: statusText
-                                        color: isBusy ? Theme.statusBlue : Theme.statusDisabled
-                                        font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize * 0.75
-                                        font.bold: isBusy
-                                    }
                                 }
 
-                                RowLayout {
-                                    id: unpairedRightActions
-                                    spacing: 6
-                                    Layout.alignment: Qt.AlignVCenter
-                                    Layout.rightMargin: 6
+                                Text {
+                                    text: statusText
+                                    color: isBusy ? Theme.statusBlue : Theme.statusDisabled
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize * 0.75
+                                    font.bold: isBusy
+                                }
+                            }
 
-                                    Rectangle {
-                                        id: pairActionBtn
-                                        implicitHeight: 22
-                                        implicitWidth: isPairing ? 56 : 48
-                                        radius: Theme.innerElementRadius
-                                        color: isPairing ? Qt.rgba(Theme.statusRed.r, Theme.statusRed.g, Theme.statusRed.b, 0.25)
-                                                         : (pairActionHover.hovered ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.25) : Qt.rgba(1, 1, 1, 0.12))
-                                        border.width: 1
-                                        border.color: isPairing ? Theme.statusRed : (pairActionHover.hovered ? Theme.statusBlue : Theme.divider)
+                            trailing: Rectangle {
+                                id: pairActionBtn
+                                implicitHeight: 22
+                                implicitWidth: isPairing ? 56 : 48
+                                radius: Theme.innerElementRadius
+                                color: isPairing ? Qt.rgba(Theme.statusRed.r, Theme.statusRed.g, Theme.statusRed.b, 0.25)
+                                                 : (pairActionHover.hovered ? Qt.rgba(Theme.statusBlue.r, Theme.statusBlue.g, Theme.statusBlue.b, 0.25) : Qt.rgba(1, 1, 1, 0.12))
+                                border.width: 1
+                                border.color: isPairing ? Theme.statusRed : (pairActionHover.hovered ? Theme.statusBlue : Theme.divider)
 
-                                        HoverHandler { id: pairActionHover }
+                                HoverHandler { id: pairActionHover }
 
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: isPairing ? "Cancel" : "Pair"
-                                            color: isPairing ? Theme.statusRed : (pairActionHover.hovered ? Theme.statusBlue : Theme.textPrimary)
-                                            font.family: Theme.font
-                                            font.pixelSize: Theme.fontSize * 0.75
-                                            font.bold: true
-                                        }
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: isPairing ? "Cancel" : "Pair"
+                                    color: isPairing ? Theme.statusRed : (pairActionHover.hovered ? Theme.statusBlue : Theme.textPrimary)
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize * 0.75
+                                    font.bold: true
+                                }
 
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: (mouse) => {
-                                                mouse.accepted = true;
-                                                if (isPairing) doCancelPair();
-                                                else doPair();
-                                            }
-                                        }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: (mouse) => {
+                                        mouse.accepted = true;
+                                        if (isPairing) doCancelPair();
+                                        else doPair();
                                     }
                                 }
                             }

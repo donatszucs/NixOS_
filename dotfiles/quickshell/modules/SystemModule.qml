@@ -116,117 +116,63 @@ ExpandableModule {
                         id: sysContentCol
                         anchors {
                             top: sysCard.headerBar.bottom
-                            bottom: parent.bottom
                             left: parent.left
                             right: parent.right
                             margins: Theme.cardPadding
                         }
-                        spacing: 5
+                        spacing: 6
 
                         Repeater {
                             model: [
-                                { index: 0, icon: "", text: "Shutdown", cmd: "systemctl poweroff", },
-                                { index: 1, icon: "󰌪", text: "Suspend", cmd: "systemctl suspend", },
-                                { index: 3, icon: "", text: "Reboot", cmd: "systemctl reboot", },
-                                { index: 2, icon: "", text: "Lock", cmd: "hyprlock", }
+                                { icon: "", text: "Shutdown", cmd: "systemctl poweroff", hasWinBtn: false, isPrimary: true },
+                                { icon: "󰌪", text: "Suspend",  cmd: "systemctl suspend",  hasWinBtn: false, isPrimary: false },
+                                { icon: "", text: "Reboot",   cmd: "systemctl reboot",   hasWinBtn: true,  isPrimary: false },
+                                { icon: "", text: "Lock",     cmd: "hyprlock",           hasWinBtn: false, isPrimary: false }
                             ]
                             delegate: RowLayout {
                                 id: actionRow
                                 required property var modelData
+                                readonly property int splitRadius: Math.max(5, Theme.innerElementRadius)
 
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: Theme.listHeight - 10
-                                implicitHeight: Theme.listHeight - 10
-                                spacing: 5
+                                Layout.preferredHeight: Theme.listHeight - 8
+                                implicitHeight: Theme.listHeight - 8
+                                spacing: 4
 
-                                ModuleButton {
-                                    id: actionButton
-
-                                    cursorShape: Qt.PointingHandCursor
-                                    variant: "red"
-
+                                ListButton {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
                                     implicitHeight: actionRow.implicitHeight
 
-                                    radius: Theme.cardItemRadius
-                                    border.width: 2
-
-                                    RowLayout {
-                                        anchors.left: parent.left
-                                        anchors.right: parent.right
-                                        anchors.rightMargin: 10
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        spacing: 10
-
-                                        Rectangle {
-                                            color: Theme.palette("neutral").base
-                                            topLeftRadius: Math.min(height / 2, actionButton.radius)
-                                            bottomLeftRadius: Math.min(height / 2, actionButton.radius)
-                                            implicitWidth: 40
-                                            implicitHeight: 40
-
-                                            InverseRadius {
-                                                anchors.top: parent.top
-                                                anchors.left: parent.right
-                                                cornerPosition: "topLeft"
-                                                color: parent.color
-                                                size: Theme.cardItemIconInverseRadius
-                                            }
-
-                                            InverseRadius {
-                                                anchors.bottom: parent.bottom
-                                                anchors.left: parent.right
-                                                cornerPosition: "bottomLeft"
-                                                color: parent.color
-                                                size: Theme.cardItemIconInverseRadius
-                                            }
-
-                                            Text {
-                                                anchors.fill: parent
-                                                text: actionRow.modelData.icon
-                                                color: actionButton.textColor
-                                                font.family: Theme.font
-                                                font.pixelSize: 20
-                                                font.bold: true
-                                                horizontalAlignment: Text.AlignHCenter
-                                                verticalAlignment: Text.AlignVCenter
-                                            }
-                                        }
-
-                                        Text {
-                                            text: actionRow.modelData.text
-                                            color: actionButton.textColor
-                                            font.family: Theme.font
-                                            font.pixelSize: Theme.fontSize
-                                            font.bold: true
-                                            Layout.fillWidth: true
-                                            horizontalAlignment: Text.AlignLeft
-                                        }
-                                    }
+                                    icon: actionRow.modelData.icon
+                                    text: actionRow.modelData.text
+                                    trailingIcon: actionRow.modelData.hasWinBtn ? "" : "󰅂"
+                                    accent: Theme.palette("red").base
+                                    accentText: Theme.palette("red").text
+                                    active: actionRow.modelData.isPrimary
+                                    rightPadding: actionRow.modelData.hasWinBtn ? 8 : 10
+                                    topRightRadius: actionRow.modelData.hasWinBtn ? actionRow.splitRadius : Theme.cardItemRadius
+                                    bottomRightRadius: actionRow.modelData.hasWinBtn ? actionRow.splitRadius : Theme.cardItemRadius
 
                                     Process {
                                         id: actionProc
                                         command: ["bash", "-c", actionRow.modelData.cmd]
                                     }
-
                                     onClicked: actionProc.running = true
                                 }
 
-                                ModuleButton {
-                                    id: winBtn
-                                    visible: actionRow.modelData.index === 3
-                                    variant: "red"
-                                    cursorShape: Qt.PointingHandCursor
-                                    radius: Theme.cardItemRadius
-                                    border.width: 2
-
-                                    label: "󰨡"
-                                    textFont: 20
-                                    Layout.preferredWidth: 40
+                                ListButton {
+                                    visible: actionRow.modelData.hasWinBtn
+                                    Layout.preferredWidth: actionRow.implicitHeight
                                     Layout.fillHeight: true
-                                    implicitWidth: 40
+                                    implicitWidth: actionRow.implicitHeight
                                     implicitHeight: actionRow.implicitHeight
+
+                                    iconOnly: true
+                                    icon: "󰨡"
+                                    accent: Theme.statusBlue
+                                    topLeftRadius: actionRow.splitRadius
+                                    bottomLeftRadius: actionRow.splitRadius
 
                                     Process {
                                         id: procWin

@@ -552,75 +552,31 @@ ModuleButton {
                         clip: true
                         spacing: 5
                         focus: false
-                        delegate: ModuleButton {
+                        delegate: ListButton {
                             required property var modelData
                             required property int index
 
                             id: appButton
-                            variant: isCurrent ? "light" : "neutral"
-                            noHoverColorChange: true
-                            cursorShape: Qt.PointingHandCursor
                             width: appList.width
                             height: Theme.listHeight
-                            radius: Theme.cardItemRadius
-                            border.width: 2
-                            colorOpacity: 0.7
+                            highlighted: index === appList.currentIndex
+                            hoverEnabled: false
+                            text: modelData.name
+                            trailingIcon: "󰅂"
+
+                            iconContent: IconImage {
+                                anchors.centerIn: parent
+                                implicitSize: Theme.moduleHeight - 10
+                                source: modelData.icon !== "" ? Quickshell.iconPath(modelData.icon) : ""
+                                visible: modelData.icon !== ""
+                                scale: appButton.pressed ? 0.92 : (appButton.lit ? 1.08 : 1.0)
+                                Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutBack; easing.overshoot: 1.4 } }
+                            }
+
+                            onEntered: appList.currentIndex = index
                             onClicked: {
                                 launcherModule.launchApp(modelData)
                                 launcherModule.expanded = false
-                            }
-
-                            // Visual highlight when keyboard-selected or mouse-hovered
-                            property bool isCurrent: index === appList.currentIndex
-
-                            HoverHandler {
-                                onHoveredChanged: if (hovered) appList.currentIndex = index
-                            }
-
-                            RowLayout {
-                                anchors { fill: parent; rightMargin: 10 }
-                                spacing: 10
-
-                                Rectangle {
-                                    color: borderColorAdaptive
-                                    topLeftRadius: Math.min(height / 2, appButton.radius)
-                                    bottomLeftRadius: Math.min(height / 2, appButton.radius)
-                                    implicitWidth: Theme.listHeight
-                                    implicitHeight: Theme.listHeight
-
-                                    InverseRadius {
-                                        anchors.top: parent.top
-                                        anchors.left: parent.right
-                                        cornerPosition: "topLeft"
-                                        color: parent.color
-                                        size: Theme.cardItemIconInverseRadius
-                                    }
-
-                                    InverseRadius {
-                                        anchors.bottom: parent.bottom
-                                        anchors.left: parent.right
-                                        cornerPosition: "bottomLeft"
-                                        color: parent.color
-                                        size: Theme.cardItemIconInverseRadius
-                                    }
-
-                                    IconImage {
-                                        anchors.centerIn: parent
-                                        implicitSize: Theme.moduleHeight - 10
-                                        source: modelData.icon !== "" ? Quickshell.iconPath(modelData.icon) : ""
-                                        visible: modelData.icon !== ""
-                                    }
-                                }
-
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: modelData.name
-                                    color: textColor
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize
-                                    font.bold: true
-                                    elide: Text.ElideRight
-                                }
                             }
                         }
                     }

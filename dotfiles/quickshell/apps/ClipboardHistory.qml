@@ -308,24 +308,21 @@ Rectangle {
                         spacing: 5
 
                         model: clipboardModel
-                        delegate: ModuleButton {
+                        delegate: ListButton {
                             id: delegateItem
                             width: list.width
                             implicitWidth: list.width
 
                             readonly property bool isSelected: clipboardPanel.selectedIndex === index
-                            variant: isSelected ? "light" : "neutral"
-                            noHoverColorChange: true
-
                             property string currentClipId: typeof clipId !== "undefined" ? clipId : ""
                             property bool isImage: clipContent.startsWith("[[ binary data") && (clipContent.includes("png") || clipContent.includes("jpg") || clipContent.includes("jpeg") || clipContent.includes("webp"))
                             property string imagePath: currentClipId !== "" ? "/tmp/qs-cliphist/img-" + currentClipId + ".png" : ""
 
                             implicitHeight: isImage ? 136 : Theme.listHeight
                             height: implicitHeight
-                            radius: Theme.cardItemRadius
-                            label: ""
-                            border.width: 2
+                            highlighted: isSelected
+                            hoverEnabled: false
+                            rightPadding: 8
 
                             Process {
                                 id: decodeImage
@@ -351,65 +348,39 @@ Rectangle {
                                 }
                             }
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.rightMargin: 8
-                                spacing: 12
+                            onEntered: clipboardPanel.selectedIndex = index
+                            onClicked: {
+                                applyCliphist.targetLine = clipLine;
+                                applyCliphistTimer.start();
+                            }
 
-                                Rectangle {
-                                    id: clipIconBox
-                                    Layout.fillHeight: true
-                                    Layout.preferredWidth: 46
-                                    implicitWidth: 46
-                                    color: delegateItem.isSelected
-                                        ? Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.14)
-                                        : Theme.divider
-                                    Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
-                                    topLeftRadius: Math.min(height / 2, delegateItem.radius)
-                                    bottomLeftRadius: Math.min(height / 2, delegateItem.radius)
+                            iconContent: ColumnLayout {
+                                anchors.centerIn: parent
+                                spacing: 2
 
-                                    InverseRadius {
-                                        anchors.top: parent.top
-                                        anchors.left: parent.right
-                                        cornerPosition: "topLeft"
-                                        color: parent.color
-                                        size: Theme.cardItemIconInverseRadius
-                                    }
-
-                                    InverseRadius {
-                                        anchors.bottom: parent.bottom
-                                        anchors.left: parent.right
-                                        cornerPosition: "bottomLeft"
-                                        color: parent.color
-                                        size: Theme.cardItemIconInverseRadius
-                                    }
-
-                                    ColumnLayout {
-                                        anchors.centerIn: parent
-                                        spacing: 2
-
-                                        Text {
-                                            text: delegateItem.isImage ? "󰋩" : "󰅌"
-                                            color: delegateItem.textColor
-                                            opacity: delegateItem.isSelected ? 0.95 : 0.75
-                                            font.family: Theme.font
-                                            font.pixelSize: Theme.fontSize + 2
-                                            font.bold: true
-                                            Layout.alignment: Qt.AlignHCenter
-                                        }
-
-                                        Text {
-                                            text: "#" + (index + 1)
-                                            color: delegateItem.textColor
-                                            opacity: delegateItem.isSelected ? 0.65 : 0.45
-                                            font.family: Theme.font
-                                            font.pixelSize: Math.round(Theme.fontSize * 0.68)
-                                            font.bold: true
-                                            Layout.alignment: Qt.AlignHCenter
-                                        }
-                                    }
+                                Text {
+                                    text: delegateItem.isImage ? "󰋩" : "󰅌"
+                                    color: delegateItem.iconColor
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize + 2
+                                    font.bold: true
+                                    Layout.alignment: Qt.AlignHCenter
+                                    Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.OutCubic } }
                                 }
 
+                                Text {
+                                    text: "#" + (index + 1)
+                                    color: delegateItem.iconColor
+                                    opacity: delegateItem.lit ? 0.75 : 0.55
+                                    font.family: Theme.font
+                                    font.pixelSize: Math.round(Theme.fontSize * 0.68)
+                                    font.bold: true
+                                    Layout.alignment: Qt.AlignHCenter
+                                    Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                                }
+                            }
+
+                            content: [
                                 // Text entry content
                                 ColumnLayout {
                                     visible: !delegateItem.isImage
@@ -420,7 +391,7 @@ Rectangle {
                                     Text {
                                         Layout.fillWidth: true
                                         text: clipContent
-                                        color: delegateItem.textColor
+                                        color: delegateItem.primaryTextColor
                                         font.family: Theme.font
                                         font.pixelSize: Theme.fontSize
                                         font.bold: true
@@ -431,14 +402,13 @@ Rectangle {
                                     Text {
                                         Layout.fillWidth: true
                                         text: clipContent.length + (clipContent.length === 1 ? " character" : " characters")
-                                        color: delegateItem.textColor
-                                        opacity: delegateItem.isSelected ? 0.7 : 0.55
+                                        color: delegateItem.primaryTextColor
+                                        opacity: delegateItem.lit ? 0.72 : 0.55
                                         font.family: Theme.font
                                         font.pixelSize: Math.round(Theme.fontSize * 0.75)
-                                        font.bold: false
                                         elide: Text.ElideRight
                                     }
-                                }
+                                },
 
                                 // Image entry content
                                 Item {
@@ -446,8 +416,8 @@ Rectangle {
                                     visible: delegateItem.isImage
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    Layout.topMargin: 8
-                                    Layout.bottomMargin: 8
+                                    Layout.topMargin: 6
+                                    Layout.bottomMargin: 6
 
                                     Image {
                                         id: img
@@ -488,47 +458,23 @@ Rectangle {
                                         border.color: Qt.rgba(1, 1, 1, 0.15)
                                     }
                                 }
+                            ]
 
-                                ModuleButton {
-                                    id: deleteItemBtn
-                                    z: 10
-                                    implicitWidth: 28
-                                    implicitHeight: 28
-                                    Layout.preferredWidth: 28
-                                    Layout.preferredHeight: 28
-                                    Layout.alignment: Qt.AlignVCenter
-                                    radius: Theme.innerElementRadius + 2
-                                    border.width: 2
-                                    variant: deleteItemBtn.hovered ? "red" : (delegateItem.isSelected ? "dark" : "neutral")
-                                    label: "󰅖"
-                                    textFont: 12
-                                    cursorShape: Qt.PointingHandCursor
-                                    opacity: (itemMouseArea.containsMouse || deleteItemBtn.hovered || delegateItem.isSelected) ? 1.0 : 0.45
-                                    Behavior on opacity { NumberAnimation { duration: 150 } }
-                                    onHoveredChanged: {
-                                        if (hovered) clipboardPanel.selectedIndex = index;
-                                    }
-                                    onClicked: {
-                                        clipboardPanel.deleteEntry(index, clipLine, currentClipId);
-                                    }
-                                }
-                            }
-
-                            MouseArea {
-                                id: itemMouseArea
-                                z: 5
-                                anchors.top: parent.top
-                                anchors.bottom: parent.bottom
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.rightMargin: 42
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onEntered: clipboardPanel.selectedIndex = index
-                                onClicked: {
-                                    applyCliphist.targetLine = clipLine;
-                                    applyCliphistTimer.start();
-                                }
+                            trailing: ListButton {
+                                id: deleteItemBtn
+                                iconOnly: true
+                                icon: "󰅖"
+                                iconSize: 12
+                                accent: Theme.palette("red").base
+                                accentText: Theme.palette("red").text
+                                implicitWidth: 28
+                                implicitHeight: 28
+                                Layout.preferredWidth: 28
+                                Layout.preferredHeight: 28
+                                radius: Theme.innerElementRadius + 3
+                                opacity: (delegateItem.lit || deleteItemBtn.hovered) ? 1.0 : 0.45
+                                Behavior on opacity { NumberAnimation { duration: 150 } }
+                                onClicked: clipboardPanel.deleteEntry(index, clipLine, currentClipId)
                             }
                         }
                     }

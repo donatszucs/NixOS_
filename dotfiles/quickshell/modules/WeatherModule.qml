@@ -125,19 +125,31 @@ ExpandableModule {
                 width: parent.width
                 spacing: Theme.cardMargin
 
-                ModuleButton {
+                ListButton {
                     id: updateBtn
                     Layout.fillWidth: true
-                    implicitHeight: 30
-                    radius: Theme.cardButtonRadius
-                    variant: root.isUpdating ? "light" : "neutral"
-                    label: root.isUpdating
-                        ? "󰑐  Updating..."
-                        : (root.timeAgoText !== "" ? "󰑐  Update Forecast (" + root.timeAgoText + ")" : "󰑐  Update Forecast")
-                    textFont: Theme.fontSize - 1
+                    implicitHeight: 38
+                    icon: "󰑐"
+                    iconSize: 16
+                    iconSpinning: root.isUpdating
+                    text: root.isUpdating ? "Updating..." : "Update Forecast"
+                    accent: root.isUpdating ? Theme.statusBlue : Theme.palettePaper
+                    active: root.isUpdating
+                    clickable: !root.isUpdating
+                    hoverEnabled: !root.isUpdating
                     cursorShape: root.isUpdating ? Qt.ArrowCursor : Qt.PointingHandCursor
-                    enabled: !root.isUpdating
+                    rightPadding: 12
                     onClicked: root.fetchWeather()
+
+                    trailing: Text {
+                        visible: !root.isUpdating && root.timeAgoText !== ""
+                        text: root.timeAgoText
+                        color: updateBtn.primaryTextColor
+                        opacity: updateBtn.lit ? 0.8 : 0.55
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize - 2
+                        Behavior on opacity { NumberAnimation { duration: 150 } }
+                    }
                 }
 
                 BaseCard {
