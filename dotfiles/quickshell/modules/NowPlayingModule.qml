@@ -614,42 +614,14 @@ ExpandableModule {
             BaseCard {
                 id: carouselPanel
                 anchors.fill: parent
+                hasHeader: true
 
-                // Top metadata bar with InverseRadius fillets (matching BaseCard headerBar across all modules)
-                Rectangle {
-                    id: authorBar
-                    z: 25
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: Theme.cardHeaderHeight
-                    color: Theme.topBarBlurColor
-                    topLeftRadius: carouselPanel.radius
-                    topRightRadius: carouselPanel.radius
-                    bottomLeftRadius: 0
-                    bottomRightRadius: 0
-
-                    InverseRadius {
-                        anchors.top: authorBar.bottom
-                        anchors.left: authorBar.left
-                        cornerPosition: "topLeft"
-                        color: authorBar.color
-                        size: Theme.cardHeaderInverseRadius
-                    }
-
-                    InverseRadius {
-                        cornerPosition: "topRight"
-                        anchors.top: authorBar.bottom
-                        anchors.right: authorBar.right
-                        color: authorBar.color
-                        size: Theme.cardHeaderInverseRadius
-                    }
-
+                headerContent: [
                     WheelHandler {
                         onWheel: function(event) {
                             nowPlayingModule.changeVolume(event.angleDelta.y > 0 ? 0.05 : -0.05)
                         }
-                    }
+                    },
 
                     RowLayout {
                         anchors.fill: parent
@@ -723,12 +695,12 @@ ExpandableModule {
                             fontBold: false
                         }
                     }
-                }
+                ]
 
-                // Artwork stage below authorBar (thumbnail is beneath the controls)
+                // Artwork stage below headerBar (thumbnail is beneath the controls)
                 Item {
                     id: artStage
-                    anchors.top: authorBar.bottom
+                    anchors.top: carouselPanel.headerBar.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.leftMargin: carouselPanel.border.width
@@ -907,7 +879,7 @@ ExpandableModule {
                 // Playback & seeker controls overlaid ON TOP OF the thumbnail
                 Item {
                     id: controlsOverlay
-                    anchors.top: authorBar.bottom
+                    anchors.top: carouselPanel.headerBar.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom

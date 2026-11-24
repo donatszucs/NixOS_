@@ -198,7 +198,7 @@ Item {
                     }
                 }
 
-                color: showCenterChrome ? Theme.bgBlurColor : "transparent"
+                color: showCenterChrome ? defaultColor : "transparent"
                 border.width: showCenterChrome ? Theme.cardBorderWidth : 0
                 border.color: showCenterChrome ? Theme.cardBorder : "transparent"
                 shadowEnabled: false
