@@ -465,8 +465,7 @@ Rectangle {
                                 iconOnly: true
                                 icon: "󰅖"
                                 iconSize: 12
-                                accent: Theme.palette("red").base
-                                accentText: Theme.palette("red").text
+                                variant: "red"
                                 implicitWidth: 28
                                 implicitHeight: 28
                                 Layout.preferredWidth: 28

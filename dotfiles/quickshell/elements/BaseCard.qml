@@ -7,7 +7,11 @@ Item {
     id: root
 
     // ── Sizing & styling tokens ──────────────────────────────────────
-    property color accent: Theme.palettePaper
+    // Set variant to: "light" (default) | "dark" | "neutral" | "red" | "blue" | "green" | "yellow" | "transparent"
+    property string variant: "light"
+    readonly property var pal: Theme.palette(variant)
+
+    property color accent: pal.base
     property int   frameWidth: 2
     readonly property color defaultColor: glassColor(0.12, 0.32)
     property color color: defaultColor
@@ -25,15 +29,7 @@ Item {
     Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
     function glassColor(tintAlpha, inkAlpha) {
-        var a = tintAlpha + inkAlpha * (1.0 - tintAlpha);
-        if (a <= 0.001) return Qt.rgba(0, 0, 0, 0);
-        var w = inkAlpha * (1.0 - tintAlpha);
-        return Qt.rgba(
-            (accent.r * tintAlpha + Theme.paletteInk.r * w) / a,
-            (accent.g * tintAlpha + Theme.paletteInk.g * w) / a,
-            (accent.b * tintAlpha + Theme.paletteInk.b * w) / a,
-            a
-        );
+        return Theme.glassColor(accent, tintAlpha, inkAlpha);
     }
 
     // ── Shadow configuration ─────────────────────────────────────────
@@ -56,7 +52,11 @@ Item {
     // ── Header bar configuration ─────────────────────────────────────
     property bool hasHeader: headerTitle !== "" || headerIcon !== ""
     property real headerHeight: Theme.cardHeaderHeight
-    property color headerColor: Qt.rgba(accent.r, accent.g, accent.b, 0.30)
+    property real headerInverseRadius: radius
+    property color headerColor: accent.a <= 0.001
+        ? Qt.rgba(0, 0, 0, 0)
+        : Qt.rgba(accent.r, accent.g, accent.b, variant === "dark" ? 0.55 : 0.30)
+    property real frameBottomOpacity: 0.25
     property string headerTitle: ""
     property string headerIcon: ""
     property real headerRightMargin: 7
@@ -88,7 +88,6 @@ Item {
 
         readonly property real w: width
         readonly property real h: height
-        readonly property real k: 0.44771525
         readonly property real r: Math.max(0, Math.min(root.radius, h / 2, w / 2))
 
         ShapePath {
@@ -96,18 +95,18 @@ Item {
             strokeColor: "transparent"
             strokeWidth: 0
             startX: bgShape.r; startY: 0
-            PathLine  { x: bgShape.w - bgShape.r; y: 0 }
-            PathCubic { control1X: bgShape.w - bgShape.r * bgShape.k; control1Y: 0; control2X: bgShape.w; control2Y: bgShape.r * bgShape.k; x: bgShape.w; y: bgShape.r }
-            PathLine  { x: bgShape.w; y: bgShape.h - bgShape.r }
-            PathCubic { control1X: bgShape.w; control1Y: bgShape.h - bgShape.r * bgShape.k; control2X: bgShape.w - bgShape.r * bgShape.k; control2Y: bgShape.h; x: bgShape.w - bgShape.r; y: bgShape.h }
-            PathLine  { x: bgShape.r; y: bgShape.h }
-            PathCubic { control1X: bgShape.r * bgShape.k; control1Y: bgShape.h; control2X: 0; control2Y: bgShape.h - bgShape.r * bgShape.k; x: 0; y: bgShape.h - bgShape.r }
-            PathLine  { x: 0; y: bgShape.r }
-            PathCubic { control1X: 0; control1Y: bgShape.r * bgShape.k; control2X: bgShape.r * bgShape.k; control2Y: 0; x: bgShape.r; y: 0 }
+            PathLine { x: bgShape.w - bgShape.r; y: 0 }
+            PathArc  { x: bgShape.w; y: bgShape.r; radiusX: bgShape.r; radiusY: bgShape.r }
+            PathLine { x: bgShape.w; y: bgShape.h - bgShape.r }
+            PathArc  { x: bgShape.w - bgShape.r; y: bgShape.h; radiusX: bgShape.r; radiusY: bgShape.r }
+            PathLine { x: bgShape.r; y: bgShape.h }
+            PathArc  { x: 0; y: bgShape.h - bgShape.r; radiusX: bgShape.r; radiusY: bgShape.r }
+            PathLine { x: 0; y: bgShape.r }
+            PathArc  { x: bgShape.r; y: 0; radiusX: bgShape.r; radiusY: bgShape.r }
         }
     }
 
-    // ── Unified Frame Shape: Header + Concave Fillets + Uniform Border ──
+    // ── Unified Frame Shape: Header + Concave Fillets + Gradually Fading Border ──
     Shape {
         id: frameShape
         anchors.fill: parent
@@ -120,7 +119,6 @@ Item {
         readonly property real w: width
         readonly property real h: height
         readonly property real bw: root.frameWidth
-        readonly property real k: 0.44771525
         readonly property real r: Math.max(0, Math.min(root.radius, h / 2, w / 2))
 
         readonly property real ix1: bw
@@ -131,34 +129,46 @@ Item {
         readonly property real ih: iy2 - iy1
 
         readonly property real irTop: root.hasHeader
-            ? Math.max(0, Math.min(Theme.cardHeaderInverseRadius - bw, ih / 2, iw / 2))
+            ? Math.max(0, Math.min(root.headerInverseRadius - bw, ih / 2, iw / 2))
             : Math.max(0, Math.min(r - bw, ih / 2, iw / 2))
         readonly property real irBot: Math.max(0, Math.min(r - bw, ih / 2, iw / 2))
+        readonly property real fadeStartY: root.hasHeader ? iy1 : 0
 
         ShapePath {
-            fillColor: root.headerColor
             fillRule: ShapePath.OddEvenFill
             strokeColor: "transparent"
             strokeWidth: 0
-            startX: frameShape.r; startY: 0
-            PathLine  { x: frameShape.w - frameShape.r; y: 0 }
-            PathCubic { control1X: frameShape.w - frameShape.r * frameShape.k; control1Y: 0; control2X: frameShape.w; control2Y: frameShape.r * frameShape.k; x: frameShape.w; y: frameShape.r }
-            PathLine  { x: frameShape.w; y: frameShape.h - frameShape.r }
-            PathCubic { control1X: frameShape.w; control1Y: frameShape.h - frameShape.r * frameShape.k; control2X: frameShape.w - frameShape.r * frameShape.k; control2Y: frameShape.h; x: frameShape.w - frameShape.r; y: frameShape.h }
-            PathLine  { x: frameShape.r; y: frameShape.h }
-            PathCubic { control1X: frameShape.r * frameShape.k; control1Y: frameShape.h; control2X: 0; control2Y: frameShape.h - frameShape.r * frameShape.k; x: 0; y: frameShape.h - frameShape.r }
-            PathLine  { x: 0; y: frameShape.r }
-            PathCubic { control1X: 0; control1Y: frameShape.r * frameShape.k; control2X: frameShape.r * frameShape.k; control2Y: 0; x: frameShape.r; y: 0 }
+            fillGradient: LinearGradient {
+                x1: 0
+                y1: frameShape.fadeStartY
+                x2: 0
+                y2: Math.max(frameShape.fadeStartY + 1, frameShape.h)
+                GradientStop { position: 0.0; color: root.headerColor }
+                GradientStop {
+                    position: 1.0
+                    color: Qt.rgba(root.headerColor.r, root.headerColor.g, root.headerColor.b, root.headerColor.a * root.frameBottomOpacity)
+                }
+            }
 
-            PathMove  { x: frameShape.ix1 + frameShape.irTop; y: frameShape.iy1 }
-            PathLine  { x: frameShape.ix2 - frameShape.irTop; y: frameShape.iy1 }
-            PathCubic { control1X: frameShape.ix2 - frameShape.irTop * frameShape.k; control1Y: frameShape.iy1; control2X: frameShape.ix2; control2Y: frameShape.iy1 + frameShape.irTop * frameShape.k; x: frameShape.ix2; y: frameShape.iy1 + frameShape.irTop }
-            PathLine  { x: frameShape.ix2; y: frameShape.iy2 - frameShape.irBot }
-            PathCubic { control1X: frameShape.ix2; control1Y: frameShape.iy2 - frameShape.irBot * frameShape.k; control2X: frameShape.ix2 - frameShape.irBot * frameShape.k; control2Y: frameShape.iy2; x: frameShape.ix2 - frameShape.irBot; y: frameShape.iy2 }
-            PathLine  { x: frameShape.ix1 + frameShape.irBot; y: frameShape.iy2 }
-            PathCubic { control1X: frameShape.ix1 + frameShape.irBot * frameShape.k; control1Y: frameShape.iy2; control2X: frameShape.ix1; control2Y: frameShape.iy2 - frameShape.irBot * frameShape.k; x: frameShape.ix1; y: frameShape.iy2 - frameShape.irBot }
-            PathLine  { x: frameShape.ix1; y: frameShape.iy1 + frameShape.irTop }
-            PathCubic { control1X: frameShape.ix1; control1Y: frameShape.iy1 + frameShape.irTop * frameShape.k; control2X: frameShape.ix1 + frameShape.irTop * frameShape.k; control2Y: frameShape.iy1; x: frameShape.ix1 + frameShape.irTop; y: frameShape.iy1 }
+            startX: frameShape.r; startY: 0
+            PathLine { x: frameShape.w - frameShape.r; y: 0 }
+            PathArc  { x: frameShape.w; y: frameShape.r; radiusX: frameShape.r; radiusY: frameShape.r }
+            PathLine { x: frameShape.w; y: frameShape.h - frameShape.r }
+            PathArc  { x: frameShape.w - frameShape.r; y: frameShape.h; radiusX: frameShape.r; radiusY: frameShape.r }
+            PathLine { x: frameShape.r; y: frameShape.h }
+            PathArc  { x: 0; y: frameShape.h - frameShape.r; radiusX: frameShape.r; radiusY: frameShape.r }
+            PathLine { x: 0; y: frameShape.r }
+            PathArc  { x: frameShape.r; y: 0; radiusX: frameShape.r; radiusY: frameShape.r }
+
+            PathMove { x: frameShape.ix1 + frameShape.irTop; y: frameShape.iy1 }
+            PathLine { x: frameShape.ix2 - frameShape.irTop; y: frameShape.iy1 }
+            PathArc  { x: frameShape.ix2; y: frameShape.iy1 + frameShape.irTop; radiusX: frameShape.irTop; radiusY: frameShape.irTop }
+            PathLine { x: frameShape.ix2; y: frameShape.iy2 - frameShape.irBot }
+            PathArc  { x: frameShape.ix2 - frameShape.irBot; y: frameShape.iy2; radiusX: frameShape.irBot; radiusY: frameShape.irBot }
+            PathLine { x: frameShape.ix1 + frameShape.irBot; y: frameShape.iy2 }
+            PathArc  { x: frameShape.ix1; y: frameShape.iy2 - frameShape.irBot; radiusX: frameShape.irBot; radiusY: frameShape.irBot }
+            PathLine { x: frameShape.ix1; y: frameShape.iy1 + frameShape.irTop }
+            PathArc  { x: frameShape.ix1 + frameShape.irTop; y: frameShape.iy1; radiusX: frameShape.irTop; radiusY: frameShape.irTop }
         }
     }
 

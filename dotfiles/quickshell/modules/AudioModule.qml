@@ -222,7 +222,7 @@ ExpandableModule {
                                 implicitHeight: 65
                                 icon: modelData.icon
                                 iconSize: Theme.fontSize + 3
-                                accent: isSinkActive ? Theme.statusBlue : Theme.palettePaper
+                                variant: isSinkActive ? "blue" : "light"
                                 active: isSinkActive
                                 rightPadding: Theme.cardItemPadding
 
@@ -350,7 +350,7 @@ ExpandableModule {
                                 implicitHeight: 46
                                 icon: modelData.icon
                                 iconSize: Theme.fontSize + 3
-                                accent: isSourceActive ? Theme.statusBlue : Theme.palettePaper
+                                variant: isSourceActive ? "blue" : "light"
                                 active: isSourceActive
 
                                 content: HoverMarqueeText {

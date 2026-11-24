@@ -20,6 +20,17 @@ ModuleButton {
     property string pillText: ""
     property string pillVariant: root.variant
     property var pillPal: Theme.palette(pillVariant)
+    readonly property color _derivedPillFill: {
+        if (pillPal.base.a <= 0.001) return Qt.rgba(0, 0, 0, 0)
+        if (pillVariant === "dark")  return Qt.darker(Theme.palettePaper, 2.3)
+        if (pillPal.base.a < 0.95)   return Qt.rgba(0.5, 0.5, 0.5, 0.5)
+        if (pillVariant === "red")   return Qt.rgba(1, 1, 1, 0.2)
+        return Qt.darker(pillPal.base, 1.4)
+    }
+    readonly property color _derivedPillBorder: {
+        if (pillPal.base.a <= 0.001) return Qt.rgba(0, 0, 0, 0)
+        return pillVariant === "light" ? Qt.rgba(1, 1, 1, 0.3) : Qt.rgba(1, 1, 1, 0.2)
+    }
     property int pillRadius: expanded ? pillExpandedRadius : Theme.pillCollapsedRadius
     property int pillExpandedRadius: Theme.pillExpandedRadius
     property int pillHeight: Theme.pillHeight
@@ -28,11 +39,11 @@ ModuleButton {
     property var pillBorderColor: null
     readonly property color effectiveBorderColor: pillBorderColor !== null
         ? pillBorderColor
-        : Qt.rgba(root.pillPal.pillBorder.r, root.pillPal.pillBorder.g, root.pillPal.pillBorder.b, root.pillPal.pillBorder.a * root.pillColorOpacity * gradientOpacityBorder)
+        : Qt.rgba(root._derivedPillBorder.r, root._derivedPillBorder.g, root._derivedPillBorder.b, root._derivedPillBorder.a * root.pillColorOpacity * gradientOpacityBorder)
     property var pillFillColor: null
     readonly property color effectiveFillColor: pillFillColor !== null
         ? pillFillColor
-        : root.pillPal.pillFill
+        : root._derivedPillFill
 
     // ── Shadow configuration ─────────────────────────────────────────
     property bool shadowEnabled: true
@@ -46,9 +57,9 @@ ModuleButton {
     property real gradientOpacityMid: 0.6
     property real gradientOpacityBottom: 0.8
 
-    property color gradientTop : root.pillPal.pillFill
-    property color gradientMid : root.pillPal.pillFill
-    property color gradientBottom : root.pillPal.pillFill
+    property color gradientTop : root._derivedPillFill
+    property color gradientMid : root._derivedPillFill
+    property color gradientBottom : root._derivedPillFill
 
     property real gradientTopHeightPx: 60
 
@@ -267,7 +278,7 @@ ModuleButton {
         Text {
             anchors.fill: parent
             text: root.pillText
-            color: root.pillPal.pillText
+            color: root.pillPal.text
             font.family: Theme.font
             font.pixelSize: Theme.fontSize - 1
             font.bold: true

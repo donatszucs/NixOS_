@@ -648,7 +648,7 @@ ExpandableModule {
                             icon: connectionsModule.getBtDeviceIcon(modelData.icon, isConnected, isBusy)
                             iconSize: Theme.fontSize + 3
                             iconSpinning: isBusy
-                            accent: (isConnected || isBusy) ? Theme.statusBlue : Theme.palettePaper
+                            variant: (isConnected || isBusy) ? "blue" : "light"
                             active: isConnected || isBusy
                             cursorShape: isBusy ? Qt.WaitCursor : Qt.PointingHandCursor
                             rightPadding: 8
@@ -788,7 +788,7 @@ ExpandableModule {
                             icon: connectionsModule.getBtDeviceIcon(modelData.icon, false, isBusy)
                             iconSize: Theme.fontSize + 3
                             iconSpinning: isBusy
-                            accent: isBusy ? Theme.statusBlue : Theme.palettePaper
+                            variant: isBusy ? "blue" : "light"
                             active: isBusy
                             cursorShape: isBusy ? Qt.WaitCursor : Qt.PointingHandCursor
                             rightPadding: 8

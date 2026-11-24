@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 
 QtObject {
+    id: theme
     // ── Divider-anchored palette seed ───────────────────────────────
     readonly property color palettePaper:        '#e5c2f7'
     readonly property color paletteInk:          '#1f1f1f'
@@ -23,102 +24,82 @@ QtObject {
     readonly property color topBarBlurColor:    Qt.rgba(palettePaper.r * 0.7, palettePaper.g * 0.7, palettePaper.b * 0.7, 0.4)
 
     // ── Variant palettes ─────────────────────────────────────────────
-    // Each palette exposes: top, bottom, hoverTop, hoverBottom, text
-    // Use as:  Theme.palette["dark"].top  or  Theme.dark.top
-
+    // Each variant defines only its core identity (base, text, border).
+    // Interactive states (hover/pressed/glass/frame/pill) are derived by the elements themselves.
+    // Use as: Theme.palette("light") or Theme.light
     readonly property QtObject dark: QtObject {
-        
-        readonly property color base:        paletteInk
-        readonly property color hover:       Qt.lighter(Theme.paletteInk, 1.4)
-        readonly property color pressed:     Qt.darker(Theme.paletteInk, 1.4)
-        readonly property color text:        Theme.palettePaper
-
-        readonly property color border:         Qt.rgba(paletteInk.r, paletteInk.g, paletteInk.b, 0.7)
-        readonly property color borderHover:    Qt.lighter(border, 1.4)
-        readonly property color borderPressed:  Qt.darker(border, 1.4)
-        
-        readonly property color pillTrack:       Qt.rgba(0, 0, 0, 0.1)
-        readonly property color pillFill:        Qt.darker(palettePaper, 2.3)
-        readonly property color pillBorder:      Qt.rgba(1, 1, 1, 0.2)
-        readonly property color pillText:        text
+        readonly property color base:   theme.paletteInk
+        readonly property color text:   theme.palettePaper
+        readonly property color border: Qt.rgba(base.r, base.g, base.b, 0.7)
     }
 
     readonly property QtObject neutral: QtObject {
-        readonly property color white:        '#ffffff'
-        
-        readonly property color base:        Qt.rgba(white.r, white.g, white.b, 0.22)
-        readonly property color hover:       Qt.rgba(white.r, white.g, white.b, 0.34)
-        readonly property color pressed:     Qt.rgba(white.r, white.g, white.b, 0.14)
-        readonly property color text:        Theme.palettePaper
-        
-        readonly property color border:      Qt.rgba(1, 1, 1, 0.24)
-        readonly property color borderHover:    Qt.lighter(border, 2.4)
-        readonly property color borderPressed:  Qt.darker(border, 2.4)
-        
-        readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.1)
-        readonly property color pillFill:        Qt.rgba(0.5, 0.5, 0.5, 0.5)
-        readonly property color pillBorder:      Qt.rgba(1, 1, 1, 0.2)
-        readonly property color pillText:        text
+        readonly property color white:  "#ffffff"
+        readonly property color base:   Qt.rgba(1, 1, 1, 0.22)
+        readonly property color text:   theme.palettePaper
+        readonly property color border: Qt.rgba(1, 1, 1, 0.24)
     }
 
     readonly property QtObject light: QtObject {
-        
-        readonly property color base:       Theme.palettePaper
-        readonly property color hover:      Qt.lighter(Theme.palettePaper, 1.2)
-        readonly property color pressed:    Qt.darker(Theme.palettePaper, 1.4)
-        readonly property color text:       Theme.paletteInk
-
-        readonly property color border:         Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.8)
-        readonly property color borderHover:    Qt.lighter(border, 1.4)
-        readonly property color borderPressed:  Qt.darker(border, 1.4)
-        
-        readonly property color pillTrack:       Qt.rgba(1, 1, 1, 0.55)
-        readonly property color pillFill:        Qt.darker(Theme.palettePaper, 1.4)
-        readonly property color pillBorder:      Qt.rgba(1, 1, 1, 0.3)
-        readonly property color pillText:        Theme.paletteInk
+        readonly property color base:   theme.palettePaper
+        readonly property color text:   theme.paletteInk
+        readonly property color border: Qt.rgba(base.r, base.g, base.b, 0.8)
     }
 
     readonly property QtObject red: QtObject {
-        
-        readonly property color base:       '#e17580'
-        readonly property color hover:      Qt.lighter(base, 1.2)
-        readonly property color pressed:    Qt.darker(base, 1.2)
-        readonly property color text:       "#2a202f"
+        readonly property color base:   "#e17580"
+        readonly property color text:   "#2a202f"
+        readonly property color border: Qt.darker(theme.statusRed, 1.2)
+    }
 
-        readonly property color border:     Qt.darker(statusRed, 1.2)
-        readonly property color borderHover:    Qt.lighter(border, 1.4)
-        readonly property color borderPressed:  Qt.darker(border, 1.4)
-        
-        readonly property color pillTrack:       Qt.lighter(base, 1.6)
-        readonly property color pillFill:        Qt.rgba(1, 1, 1, 0.2)
-        readonly property color pillBorder:      Qt.rgba(1, 1, 1, 0.2)
-        readonly property color pillText:        text
+    readonly property QtObject blue: QtObject {
+        readonly property color base:   theme.statusBlue
+        readonly property color text:   theme.paletteInk
+        readonly property color border: Qt.rgba(base.r, base.g, base.b, 0.8)
+    }
+
+    readonly property QtObject green: QtObject {
+        readonly property color base:   theme.statusGreen
+        readonly property color text:   theme.paletteInk
+        readonly property color border: Qt.rgba(base.r, base.g, base.b, 0.8)
+    }
+
+    readonly property QtObject yellow: QtObject {
+        readonly property color base:   theme.statusYellow
+        readonly property color text:   theme.paletteInk
+        readonly property color border: Qt.rgba(base.r, base.g, base.b, 0.8)
     }
 
     readonly property QtObject transparent: QtObject {
-        readonly property color base:            Qt.rgba(0, 0, 0, 0)
-        readonly property color hover:           Qt.rgba(0, 0, 0, 0)
-        readonly property color pressed:         Qt.rgba(0, 0, 0, 0)
-        readonly property color text:            Theme.palettePaper
-
-        readonly property color border:          Qt.rgba(0, 0, 0, 0)
-        readonly property color borderHover:     Qt.rgba(0, 0, 0, 0)
-        readonly property color borderPressed:   Qt.rgba(0, 0, 0, 0)
-
-        readonly property color pillTrack:       Qt.rgba(0, 0, 0, 0)
-        readonly property color pillFill:        Qt.rgba(0, 0, 0, 0)
-        readonly property color pillBorder:      Qt.rgba(0, 0, 0, 0)
-        readonly property color pillText:        text
+        readonly property color base:   Qt.rgba(0, 0, 0, 0)
+        readonly property color text:   theme.palettePaper
+        readonly property color border: Qt.rgba(0, 0, 0, 0)
     }
 
     // Helper: resolve a variant name string → palette object
-    // Usage: Theme.palette("dark").top
-        function palette(name) {
-        if (name === "light")       return Theme.light
-        if (name === "red")         return Theme.red
-        if (name === "neutral")     return Theme.neutral
-        if (name === "transparent") return Theme.transparent
-        return Theme.dark
+    function palette(name) {
+        if (name === "light")       return theme.light
+        if (name === "red")         return theme.red
+        if (name === "blue")        return theme.blue
+        if (name === "green")       return theme.green
+        if (name === "yellow")      return theme.yellow
+        if (name === "neutral")     return theme.neutral
+        if (name === "transparent") return theme.transparent
+        return theme.dark
+    }
+
+    // Helper: smoked-glass tint composited over paletteInk (shared by BaseCard & ListButton)
+    function glassColor(tint, tintAlpha, inkAlpha) {
+        if (tint.a <= 0.001) return Qt.rgba(0, 0, 0, 0)
+        var a = tintAlpha + inkAlpha * (1.0 - tintAlpha)
+        if (a <= 0.001) return Qt.rgba(0, 0, 0, 0)
+        var w = inkAlpha * (1.0 - tintAlpha)
+        return Qt.rgba(
+            (tint.r * tintAlpha + theme.paletteInk.r * w) / a,
+            (tint.g * tintAlpha + theme.paletteInk.g * w) / a,
+            (tint.b * tintAlpha + theme.paletteInk.b * w) / a,
+            a
+        )
     }
 
     // ── Bar background ───────────────────────────────────────────────

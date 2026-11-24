@@ -307,8 +307,8 @@ Rectangle {
                                         radius: Theme.cardItemRadius
                                         border.width: delegateRoot.isCurrent ? 2.5 : 2
                                         border.color: delegateRoot.isCurrent
-                                            ? (mouseArea.containsMouse ? Theme.palette("light").hover : Theme.palette("light").border)
-                                            : (mouseArea.containsMouse ? Theme.palette("neutral").borderHover : Theme.palette("neutral").border)
+                                            ? (mouseArea.containsMouse ? Qt.lighter(Theme.palette("light").base, 1.2) : Theme.palette("light").border)
+                                            : (mouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.48) : Theme.palette("neutral").border)
 
                                         Behavior on border.color { ColorAnimation { duration: Theme.horizontalDuration } }
                                         Behavior on border.width { NumberAnimation { duration: Theme.horizontalDuration } }

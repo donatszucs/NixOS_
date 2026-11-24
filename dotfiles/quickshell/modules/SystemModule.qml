@@ -147,8 +147,7 @@ ExpandableModule {
                                     icon: actionRow.modelData.icon
                                     text: actionRow.modelData.text
                                     trailingIcon: actionRow.modelData.hasWinBtn ? "" : "󰅂"
-                                    accent: Theme.palette("red").base
-                                    accentText: Theme.palette("red").text
+                                    variant: "red"
                                     active: actionRow.modelData.isPrimary
                                     rightPadding: actionRow.modelData.hasWinBtn ? 8 : 10
                                     topRightRadius: actionRow.modelData.hasWinBtn ? actionRow.splitRadius : Theme.cardItemRadius
@@ -170,7 +169,7 @@ ExpandableModule {
 
                                     iconOnly: true
                                     icon: "󰨡"
-                                    accent: Theme.statusBlue
+                                    variant: "blue"
                                     topLeftRadius: actionRow.splitRadius
                                     bottomLeftRadius: actionRow.splitRadius
 

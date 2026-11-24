@@ -905,12 +905,18 @@ ExpandableModule {
                             baseColor: nowPlayingModule.isMediaPlaying
                                 ? Qt.rgba(pal.base.r, pal.base.g, pal.base.b, 0.96)
                                 : Qt.tint(Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.90), Qt.rgba(1, 1, 1, 0.24))
-                            hoverColor: nowPlayingModule.isMediaPlaying
-                                ? Qt.rgba(pal.hover.r, pal.hover.g, pal.hover.b, 0.98)
-                                : Qt.tint(Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.92), Qt.rgba(1, 1, 1, 0.34))
-                            pressedColor: nowPlayingModule.isMediaPlaying
-                                ? Qt.rgba(pal.pressed.r, pal.pressed.g, pal.pressed.b, 0.98)
-                                : Qt.tint(Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.92), Qt.rgba(1, 1, 1, 0.16))
+                            hoverColor: {
+                                if (!nowPlayingModule.isMediaPlaying)
+                                    return Qt.tint(Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.92), Qt.rgba(1, 1, 1, 0.34))
+                                var c = _deriveStateColor(pal.base, "hover")
+                                return Qt.rgba(c.r, c.g, c.b, 0.98)
+                            }
+                            pressedColor: {
+                                if (!nowPlayingModule.isMediaPlaying)
+                                    return Qt.tint(Qt.rgba(Theme.paletteInk.r, Theme.paletteInk.g, Theme.paletteInk.b, 0.92), Qt.rgba(1, 1, 1, 0.16))
+                                var c = _deriveStateColor(pal.base, "pressed")
+                                return Qt.rgba(c.r, c.g, c.b, 0.98)
+                            }
                             cursorShape: Qt.PointingHandCursor
                             textFont: 35
                             Layout.preferredWidth: 56
@@ -969,9 +975,10 @@ ExpandableModule {
                                         anchors.bottom: parent.bottom
                                         width: parent.width * seekTrack.progressRatio
                                         radius: parent.radius
-                                        color: nowPlayingModule.scrubbing
-                                            ? Qt.rgba(Theme.palette("light").pressed.r, Theme.palette("light").pressed.g, Theme.palette("light").pressed.b, 0.98)
-                                            : Qt.rgba(Theme.palette("light").base.r, Theme.palette("light").base.g, Theme.palette("light").base.b, 0.98)
+                                        color: {
+                                            var c = nowPlayingModule.scrubbing ? Qt.darker(Theme.palette("light").base, 1.4) : Theme.palette("light").base
+                                            return Qt.rgba(c.r, c.g, c.b, 0.98)
+                                        }
 
                                         Behavior on width {
                                             enabled: !nowPlayingModule.scrubbing

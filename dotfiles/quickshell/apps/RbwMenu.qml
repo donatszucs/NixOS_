@@ -214,7 +214,7 @@ Rectangle {
                         hoverEnabled: false
                         icon: "󰍉"
                         iconSize: Theme.fontSize + 2
-                        accent: searchInput.activeFocus ? Theme.statusBlue : Theme.palettePaper
+                        variant: searchInput.activeFocus ? "blue" : "light"
                         active: searchInput.activeFocus
 
                         content: TextInput {

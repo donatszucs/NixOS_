@@ -333,7 +333,7 @@ ModuleButton {
                     : menuMouseArea.containsMouse ? menuText.implicitWidth + 30 : menuText.implicitWidth + 20
 
                     Behavior on implicitWidth {
-                        NumberAnimation { duration: Theme.horizontalDuration / 2; easing.type: Easing.OutQintic }
+                        NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutBack}
                     }
                     
                     Text {

@@ -100,7 +100,7 @@ Slider {
             width: Math.max(0, control.visualPosition * (parent.width - 4))
             height: parent.height - 4
             visible: width > 0
-            color: control.pressed ? Theme.palette("light").pressed : Theme.palette("light").base
+            color: control.pressed ? Qt.darker(Theme.palette("light").base, 1.4) : Theme.palette("light").base
             border.color: Theme.palette("light").border
             radius: Math.max(0, control.radius - 2)
             topLeftRadius: Math.max(0, control.topLeftRadius - 2)

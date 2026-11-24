@@ -67,6 +67,109 @@ Item {
     width: implicitWidth
     height: implicitHeight
 
+    // ── Dynamic Per-App Color Derivation (icon hue + deterministic hash fallback) ──
+    property var appHueCache: ({})
+    property int appHueRevision: 0
+
+    function cacheAppHue(key, hue) {
+        if (!key) return
+        appHueCache[key] = hue
+        appHueRevision++
+    }
+
+    function appNameHashHue(name) {
+        var s = (name || "app").trim().toLowerCase()
+        var h = 2166136261
+        for (var i = 0; i < s.length; ++i) {
+            h ^= s.charCodeAt(i)
+            h = Math.imul(h, 16777619)
+        }
+        // Golden-ratio scatter mapped outside the critical-red zone (~332°..22°)
+        var frac = ((h >>> 0) * 0.61803398875) % 1.0
+        return 0.065 + frac * 0.855
+    }
+
+    function harmonizeAppHue(hue) {
+        var h = ((hue % 1.0) + 1.0) % 1.0
+        // Nudge pure red slightly aside so non-critical apps stay distinct from critical alerts
+        if (h > 0.935) h = 0.915
+        else if (h < 0.045) h = 0.058
+
+        var c = Qt.hsla(h, 0.54, 0.58, 1.0)
+        // Perceptual Rec.709 luminance normalization so yellow/green/cyan match blue/violet weight
+        var lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+        var scale = lum > 0.001 ? Math.pow(0.42 / lum, 0.78) : 1.0
+        var r = Math.max(0, Math.min(1, c.r * scale))
+        var g = Math.max(0, Math.min(1, c.g * scale))
+        var b = Math.max(0, Math.min(1, c.b * scale))
+
+        // Gently anchor 12% toward Theme.palettePaper so every hue shares the shell's palette tone
+        var p = Theme.palettePaper
+        var mix = 0.12
+        return Qt.rgba(
+            r * (1 - mix) + p.r * mix,
+            g * (1 - mix) + p.g * mix,
+            b * (1 - mix) + p.b * mix,
+            1.0
+        )
+    }
+
+    function extractDominantHue(data) {
+        var bins = new Array(24)
+        var sinSum = new Array(24)
+        var cosSum = new Array(24)
+        for (var b = 0; b < 24; ++b) { bins[b] = 0; sinSum[b] = 0; cosSum[b] = 0 }
+        var totalWeight = 0
+
+        for (var i = 0; i < data.length; i += 4) {
+            var a = data[i + 3] / 255.0
+            if (a < 0.35) continue
+            var r = data[i] / 255.0
+            var g = data[i + 1] / 255.0
+            var bl = data[i + 2] / 255.0
+            var max = Math.max(r, g, bl)
+            var min = Math.min(r, g, bl)
+            var chroma = max - min
+            if (chroma < 0.12 || max < 0.14) continue
+            var sat = chroma / max
+            if (sat < 0.18) continue
+
+            var hue = 0
+            if (max === r)      hue = ((g - bl) / chroma + (g < bl ? 6 : 0)) / 6.0
+            else if (max === g) hue = ((bl - r) / chroma + 2) / 6.0
+            else                hue = ((r - g) / chroma + 4) / 6.0
+
+            var w = a * chroma * sat
+            var idx = Math.floor(hue * 24) % 24
+            var ang = hue * Math.PI * 2
+            bins[idx] += w
+            sinSum[idx] += Math.sin(ang) * w
+            cosSum[idx] += Math.cos(ang) * w
+            totalWeight += w
+        }
+
+        // Monochrome/symbolic icons fall back to the deterministic app-name hash
+        if (totalWeight < 1.2) return -2
+
+        var bestBin = 0
+        var bestScore = -1
+        for (var j = 0; j < 24; ++j) {
+            var score = bins[(j + 23) % 24] * 0.5 + bins[j] + bins[(j + 1) % 24] * 0.5
+            if (score > bestScore) {
+                bestScore = score
+                bestBin = j
+            }
+        }
+
+        var pIdx = (bestBin + 23) % 24
+        var nIdx = (bestBin + 1) % 24
+        var sy = sinSum[pIdx] * 0.5 + sinSum[bestBin] + sinSum[nIdx] * 0.5
+        var cx = cosSum[pIdx] * 0.5 + cosSum[bestBin] + cosSum[nIdx] * 0.5
+        var meanHue = Math.atan2(sy, cx) / (Math.PI * 2)
+        if (meanHue < 0) meanHue += 1.0
+        return meanHue
+    }
+
     // IPC support for external toggle (e.g. hyprland keybinding)
     IpcHandler {
         target: screenName !== "" ? "notifications-" + screenName : "notifications"
@@ -493,7 +596,7 @@ Item {
         readonly property int effectiveTimeout: SharedState.getToastTimeout(toastRow.notif)
 
         variant: isCritical ? "red" : "neutral"
-        radius: group ? Math.max(0, group.cardRadius - 5) : ((!notifCenter.showAllNotifications ? Theme.cardRadius : Theme.cardItemRadius) - 5)
+        radius: group ? Math.max(4, group.cardRadius - group.toastMargin) : Math.max(4, (!notifCenter.showAllNotifications ? Theme.cardRadius : Theme.cardItemRadius) - 6)
         border.width: 0
         clip: true
 
@@ -949,10 +1052,12 @@ Item {
         }
         readonly property int displayCount: activeGroupCount > 0 ? activeGroupCount : count
         readonly property bool grouped: displayCount > 1
+        readonly property bool hasCritical: firstActiveNotif && firstActiveNotif.urgency === Notif.NotificationUrgency.Critical
         readonly property int headerHeight: 34
         readonly property int peekHeight: 10
         readonly property int toastGap: 5
-        readonly property var pal: Theme.palette("neutral")
+        readonly property int innerPad: 5
+        readonly property int toastMargin: groupCard.frameWidth + innerPad
         readonly property alias cardRadius: groupCard.radius
 
         // 0..1: how much of this group is currently shown (driven by its active/visible toasts)
@@ -965,12 +1070,11 @@ Item {
             return maxF
         }
 
-        readonly property real headerSlot: (headerHeight + 5) * groupFraction
+        readonly property real headerSlot: (headerHeight + innerPad) * groupFraction
         property real peekBase: (notifCenter.showAllNotifications && grouped && !expanded) ? peekHeight : 0
         Behavior on peekBase { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
         readonly property real peekSlot: peekBase * groupFraction
-        readonly property real cardBottomPad: 5 * groupFraction
-        readonly property real toastMargin: 5
+        readonly property real cardBottomPad: toastMargin * groupFraction
 
         readonly property real toastsHeight: Math.max(0, toastsCol.implicitHeight - toastGap * groupFraction)
         readonly property real bodyHeight: headerSlot + toastsHeight + peekSlot + cardBottomPad
@@ -979,180 +1083,242 @@ Item {
         visible: height > 0
         clip: true
 
-        // ── Group Card (envelops header + notifications) ────────────
-        Rectangle {
+        readonly property string appKey: grp.appName.trim().toLowerCase()
+        readonly property string iconSource: {
+            var n = grp.newest
+            if (!n) return ""
+            var icon = n.appIcon !== "" ? n.appIcon : n.desktopEntry
+            if (!icon) return ""
+            if (icon.indexOf("/") !== -1 || icon.startsWith("file:")) return icon
+            return "image://icon/" + icon
+        }
+        readonly property real sampledHue: {
+            var _ = notifCenter.appHueRevision
+            var v = notifCenter.appHueCache[grp.appKey]
+            return v !== undefined ? v : -1
+        }
+        readonly property color appAccent: notifCenter.harmonizeAppHue(
+            sampledHue >= 0 ? sampledHue : notifCenter.appNameHashHue(grp.appName)
+        )
+
+        // One-shot 16x16 icon color sampler — self-destroys as soon as the app hue is cached
+        Loader {
+            id: iconHueLoader
+            active: grp.sampledHue === -1
+                && groupIcon.status === Image.Ready
+                && grp.iconSource !== ""
+                && !SharedState.vramSavingMode
+            sourceComponent: Canvas {
+                width: 16
+                height: 16
+                opacity: 0
+                renderStrategy: Canvas.Immediate
+                readonly property string loadUrl: grp.iconSource.startsWith("/")
+                    ? ("file://" + grp.iconSource)
+                    : grp.iconSource
+                property bool handled: false
+
+                function finish(hue) {
+                    if (handled) return
+                    handled = true
+                    notifCenter.cacheAppHue(grp.appKey, hue)
+                }
+
+                Timer {
+                    interval: 1500
+                    running: true
+                    onTriggered: finish(-2)
+                }
+
+                Component.onCompleted: {
+                    if (loadUrl !== "") loadImage(loadUrl)
+                    else finish(-2)
+                }
+                onImageLoaded: {
+                    if (isImageError(loadUrl)) finish(-2)
+                    else requestPaint()
+                }
+                onPaint: {
+                    if (handled || !isImageLoaded(loadUrl)) return
+                    try {
+                        var ctx = getContext("2d")
+                        ctx.clearRect(0, 0, width, height)
+                        ctx.drawImage(loadUrl, 0, 0, width, height)
+                        var hue = notifCenter.extractDominantHue(ctx.getImageData(0, 0, width, height).data)
+                        unloadImage(loadUrl)
+                        finish(hue)
+                    } catch (e) {
+                        finish(-2)
+                    }
+                }
+            }
+        }
+
+        // ── Group Card (BaseCard enveloping app header + notifications) ──
+        BaseCard {
             id: groupCard
             width: parent.width
             height: grp.bodyHeight
             y: 0
             visible: grp.groupFraction > 0
             opacity: grp.groupFraction
+
+            hasHeader: true
+            headerHeight: grp.headerHeight
+            variant: grp.hasCritical ? "red" : "light"
+            accent: grp.hasCritical ? pal.base : grp.appAccent
+            color: glassColor(0.05, 0.84)
+            headerColor: glassColor(grp.hasCritical ? 0.36 : 0.24, grp.hasCritical ? 0.48 : 0.64)
             radius: !notifCenter.showAllNotifications ? Theme.cardRadius : Theme.cardItemRadius
             Behavior on radius { NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic } }
-            color: Qt.lighter(Theme.paletteInk, 1.5)
-            border.width: 0
-        }
 
-        // ── Group Header (existing buttons) ─────────────────────────
-        Item {
-            id: groupHeader
-            width: parent.width
-            height: grp.headerHeight
-            y: grp.headerSlot - (grp.headerHeight + 5)
-            visible: grp.groupFraction > 0
-            opacity: grp.groupFraction
-
-            MouseArea {
-                anchors.fill: parent
-                enabled: grp.grouped
-                cursorShape: grp.grouped ? Qt.PointingHandCursor : Qt.ArrowCursor
-                onClicked: SharedState.toggleGroupExpanded(grp.appName)
-            }
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 4
-                spacing: 8
-
-                Image {
-                    id: groupIcon
-                    Layout.preferredWidth: 18
-                    Layout.preferredHeight: 18
-                    Layout.alignment: Qt.AlignVCenter
-                    fillMode: Image.PreserveAspectFit
-                    smooth: true
-                    sourceSize.width: 32
-                    sourceSize.height: 32
-                    visible: status === Image.Ready
-                    source: {
-                        var n = grp.newest
-                        if (!n) return ""
-                        var icon = n.appIcon !== "" ? n.appIcon : n.desktopEntry
-                        if (!icon) return ""
-                        if (icon.indexOf("/") !== -1 || icon.startsWith("file:")) return icon
-                        return "image://icon/" + icon
-                    }
-                }
-
-                Text {
-                    visible: !groupIcon.visible
-                    text: "󰂚"
-                    color: Theme.textPrimary
-                    opacity: 0.8
-                    font.family: Theme.font
-                    font.pixelSize: 15
-                    Layout.alignment: Qt.AlignVCenter
-                }
-
-                Text {
-                    text: grp.appName
-                    color: Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
-                    font.bold: true
-                    elide: Text.ElideRight
-                    Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignVCenter
-                }
-
-                // Count badge
-                Rectangle {
-                    Layout.alignment: Qt.AlignVCenter
-                    Layout.preferredHeight: 18
-                    Layout.preferredWidth: Math.max(18, badgeText.implicitWidth + 10)
-                    radius: height / 2
-                    color: Theme.palettePaper
-
-                    Text {
-                        id: badgeText
-                        anchors.centerIn: parent
-                        text: grp.displayCount
-                        color: Theme.paletteInk
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize - 3
-                        font.bold: true
-                    }
-                }
-
-                HeaderButton {
-                    icon: "󰆴"
-                    iconColor: Theme.textPrimary
-                    iconSize: 15
-                    implicitHeight: 24
-                    implicitWidth: 24
-                    Layout.alignment: Qt.AlignVCenter
-                    onClicked: grp.dismissGroup()
-                }
-
-                HeaderButton {
-                    visible: grp.grouped
-                    icon: grp.expanded ? "󰅃" : "󰅀"
-                    iconColor: Theme.textPrimary
-                    iconSize: 17
-                    implicitHeight: 24
-                    implicitWidth: 24
-                    Layout.alignment: Qt.AlignVCenter
-                    onClicked: SharedState.toggleGroupExpanded(grp.appName)
-                }
-            }
-        }
-
-        // ── Group Content Area ──────────────────────────────────────
-        Item {
-            id: groupContent
-            y: grp.headerSlot
-            width: parent.width
-            height: grp.toastsHeight + grp.peekSlot + grp.cardBottomPad
-
-            // ── Stack Peek (shown when collapsed) ───────────────────
-            Rectangle {
-                anchors.horizontalCenter: parent.horizontalCenter
-                y: grp.toastsHeight + 2
-                width: parent.width - 20
-                height: 6
-                radius: Theme.cardItemRadius
-                color: Qt.rgba(Theme.neutral.base.r, Theme.neutral.base.g, Theme.neutral.base.b, Theme.moduleOpacity * 0.25)
-                border.width: 0
-                visible: grp.peekSlot > 0
-                opacity: grp.peekSlot / grp.peekHeight
-
+            headerContent: [
                 MouseArea {
                     anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: SharedState.setGroupExpanded(grp.appName, true)
+                    enabled: grp.grouped
+                    cursorShape: grp.grouped ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    onClicked: SharedState.toggleGroupExpanded(grp.appName)
+                },
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 12
+                    anchors.rightMargin: 6
+                    spacing: 8
+
+                    Image {
+                        id: groupIcon
+                        Layout.preferredWidth: 18
+                        Layout.preferredHeight: 18
+                        Layout.alignment: Qt.AlignVCenter
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                        sourceSize.width: 32
+                        sourceSize.height: 32
+                        visible: status === Image.Ready
+                        source: grp.iconSource
+                    }
+
+                    Text {
+                        visible: !groupIcon.visible
+                        text: "󰂚"
+                        color: Theme.textPrimary
+                        opacity: 0.8
+                        font.family: Theme.font
+                        font.pixelSize: 15
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    Text {
+                        text: grp.appName
+                        color: Theme.textPrimary
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize
+                        font.bold: true
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    // Count badge
+                    Rectangle {
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.preferredHeight: 18
+                        Layout.preferredWidth: Math.max(18, badgeText.implicitWidth + 10)
+                        radius: height / 2
+                        color: groupCard.accent
+                        Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
+
+                        Text {
+                            id: badgeText
+                            anchors.centerIn: parent
+                            text: grp.displayCount
+                            color: Theme.paletteInk
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize - 3
+                            font.bold: true
+                        }
+                    }
+
+                    HeaderButton {
+                        icon: "󰆴"
+                        iconColor: Theme.textPrimary
+                        iconSize: 15
+                        implicitHeight: 24
+                        implicitWidth: 24
+                        Layout.alignment: Qt.AlignVCenter
+                        onClicked: grp.dismissGroup()
+                    }
+
+                    HeaderButton {
+                        visible: grp.grouped
+                        icon: grp.expanded ? "󰅃" : "󰅀"
+                        iconColor: Theme.textPrimary
+                        iconSize: 17
+                        implicitHeight: 24
+                        implicitWidth: 24
+                        Layout.alignment: Qt.AlignVCenter
+                        onClicked: SharedState.toggleGroupExpanded(grp.appName)
+                    }
                 }
-            }
+            ]
 
-            // ── Cards Column ────────────────────────────────────────
-            Column {
-                id: toastsCol
-                anchors.left: parent.left
-                anchors.leftMargin: grp.toastMargin
-                anchors.right: parent.right
-                anchors.rightMargin: grp.toastMargin
-                spacing: 0
+            // ── Group Content Area ──────────────────────────────────────
+            Item {
+                id: groupContent
+                y: grp.headerSlot
+                width: parent.width
+                height: grp.toastsHeight + grp.peekSlot + grp.cardBottomPad
 
-                Repeater {
-                    id: toastsRepeater
-                    model: appNotifsModel
-                    // The 5px gap below each toast scales with the toast's own
-                    // height, so lists grow/shrink without any hard layout steps.
-                    delegate: Item {
-                        id: slot
-                        required property var notifData
-                        required property int index
-                        readonly property alias toastFraction: toast.shownFraction
+                // ── Stack Peek (shown when collapsed) ───────────────────
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    y: grp.toastsHeight + 2
+                    width: parent.width - grp.toastMargin * 2 - 12
+                    height: 6
+                    radius: Math.max(3, groupCard.radius - grp.toastMargin)
+                    color: Qt.rgba(Theme.palette("neutral").base.r, Theme.palette("neutral").base.g, Theme.palette("neutral").base.b, Theme.moduleOpacity * 0.25)
+                    border.width: 0
+                    visible: grp.peekSlot > 0
+                    opacity: grp.peekSlot / grp.peekHeight
 
-                        width: toastsCol.width
-                        height: toast.height + grp.toastGap * toast.shownFraction
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: SharedState.setGroupExpanded(grp.appName, true)
+                    }
+                }
 
-                        NotificationToast {
-                            id: toast
-                            width: parent.width
-                            notif: slot.notifData
-                            notifIndex: slot.index
-                            group: grp
+                // ── Cards Column ────────────────────────────────────────
+                Column {
+                    id: toastsCol
+                    anchors.left: parent.left
+                    anchors.leftMargin: grp.toastMargin
+                    anchors.right: parent.right
+                    anchors.rightMargin: grp.toastMargin
+                    spacing: 0
+
+                    Repeater {
+                        id: toastsRepeater
+                        model: appNotifsModel
+                        // The 5px gap below each toast scales with the toast's own
+                        // height, so lists grow/shrink without any hard layout steps.
+                        delegate: Item {
+                            id: slot
+                            required property var notifData
+                            required property int index
+                            readonly property alias toastFraction: toast.shownFraction
+
+                            width: toastsCol.width
+                            height: toast.height + grp.toastGap * toast.shownFraction
+
+                            NotificationToast {
+                                id: toast
+                                width: parent.width
+                                notif: slot.notifData
+                                notifIndex: slot.index
+                                group: grp
+                            }
                         }
                     }
                 }

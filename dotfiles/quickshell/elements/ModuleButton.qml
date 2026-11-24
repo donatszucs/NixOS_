@@ -33,7 +33,7 @@ Rectangle {
         rightMargin: rightMarginButton
     }
     // ── Variant ──────────────────────────────────────────────────────
-    // Set to one of: "dark" (default) | "light" | "red" | "transparent"
+    // Set to one of: "dark" (default) | "light" | "neutral" | "red" | "blue" | "green" | "yellow" | "transparent"
     property string variant: "dark"
 
     // Whether to suppress the hover colour change
@@ -49,15 +49,39 @@ Rectangle {
     // instances (e.g. `Qt.PointingHandCursor: Qt.PointingHandCursor`). Default is arrow.
     property int cursorShape: Qt.ArrowCursor
 
-    // ── variant and palette ---overrideColor-----------------------------
+    // ── Variant palette & derived interactive state colors ───────────
     property real colorOpacity: Theme.moduleOpacity
     property var pal: Theme.palette(variant)
-    property color baseColor: Qt.rgba(pal.base.r, pal.base.g, pal.base.b, pal.base.a * colorOpacity)
-    property color hoverColor: Qt.rgba(pal.hover.r, pal.hover.g, pal.hover.b, pal.hover.a * colorOpacity)
-    property color pressedColor: Qt.rgba(pal.pressed.r, pal.pressed.g, pal.pressed.b, pal.pressed.a * colorOpacity)
+
+    function _deriveStateColor(c, state) {
+        if (c.a <= 0.001) return Qt.rgba(0, 0, 0, 0)
+        if (c.a < 0.95) {
+            var a = state === "hover" ? Math.min(1.0, c.a * 1.55) : c.a * 0.64
+            return Qt.rgba(c.r, c.g, c.b, a)
+        }
+        var lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+        if (state === "hover")   return Qt.lighter(c, lum < 0.25 ? 1.4 : 1.2)
+        if (state === "pressed") return Qt.darker(c, (lum < 0.25 || lum > 0.35) ? 1.4 : 1.2)
+        return c
+    }
+
+    function _deriveBorderColor(c, state) {
+        if (c.a <= 0.001) return Qt.rgba(0, 0, 0, 0)
+        if (c.a < 0.5) {
+            var a = state === "hover" ? Math.min(1.0, c.a * 1.8) : c.a * 0.55
+            return Qt.rgba(c.r, c.g, c.b, a)
+        }
+        if (state === "hover")   return Qt.lighter(c, 1.4)
+        if (state === "pressed") return Qt.darker(c, 1.4)
+        return c
+    }
+
+    property color baseColor:    Qt.rgba(pal.base.r, pal.base.g, pal.base.b, pal.base.a * colorOpacity)
+    property color hoverColor:   { var c = _deriveStateColor(pal.base, "hover");   return Qt.rgba(c.r, c.g, c.b, c.a * colorOpacity) }
+    property color pressedColor: { var c = _deriveStateColor(pal.base, "pressed"); return Qt.rgba(c.r, c.g, c.b, c.a * colorOpacity) }
 
     property color colorAdaptive: (root.pressed && !root.noPressColorChange) ? root.pressedColor : ((root.hovered && !root.noHoverColorChange) ? root.hoverColor : colorOverride ? root.overrideColor : root.baseColor)
-    property color borderColorAdaptive: (root.pressed && !root.noPressColorChange) ? pal.borderPressed : ((root.hovered && !root.noHoverColorChange) ? pal.borderHover : pal.border)
+    property color borderColorAdaptive: (root.pressed && !root.noPressColorChange) ? _deriveBorderColor(pal.border, "pressed") : ((root.hovered && !root.noHoverColorChange) ? _deriveBorderColor(pal.border, "hover") : pal.border)
 
     HoverHandler {
         id: rootHover

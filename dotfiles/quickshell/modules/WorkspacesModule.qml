@@ -253,7 +253,7 @@ ModuleButton {
         }
     }
 
-    component WorkspaceButton : ModuleButton {
+    component WorkspaceButton : ListButton {
         id: control
         required property var modelData
         required property int index
@@ -261,119 +261,11 @@ ModuleButton {
         property bool isLastInGroup: false
         property bool isEmptyWorkspace: false
 
-        variant: active ? "light" : "neutral"
-        color: "transparent"
-        border.width: 0
-        noHoverColorChange: true
-        noPressColorChange: true
         property int activeDragCount: 0
         z: activeDragCount > 0 ? 99 : 0
-        
+
         property bool showApps: !isEmptyWorkspace
         property bool hasApps: !isEmptyWorkspace && modelData !== null && modelData.toplevels && modelData.toplevels.values.length > 0
-        readonly property bool cutoutsActive: !isEmptyWorkspace && !isSpecial && hasApps && showApps
-
-        implicitHeight: root.implicitHeight - 2 * root.overlay
-        implicitWidth: isEmptyWorkspace ? implicitHeight : Math.max(contentRow.implicitWidth, implicitHeight)
-        cursorShape: Qt.PointingHandCursor
-        clip: false
-        
-        topLeftRadius: isSpecial ? Theme.moduleEdgeRadius : (index === 0 ? Theme.moduleEdgeRadius : 5)
-        bottomLeftRadius: isSpecial ? Theme.moduleEdgeRadius : (index === 0 ? Theme.moduleEdgeRadius : 5)
-        topRightRadius: isSpecial ? Theme.moduleEdgeRadius : (isLastInGroup ? Theme.moduleEdgeRadius : 5)
-        bottomRightRadius: isSpecial ? Theme.moduleEdgeRadius : (isLastInGroup ? Theme.moduleEdgeRadius : 5)
-
-        property color badgeColor: control.pressed
-            ? control.pal.pressed
-            : (control.hovered ? control.pal.hover : control.pal.base)
-
-        Behavior on badgeColor {
-            enabled: !control.dontAnimateColor
-            ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-        }
-
-        property color trayColor: control.isSpecial
-            ? (control.active
-                ? (control.pressed
-                    ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.08)
-                    : (control.hovered
-                        ? Qt.rgba(Theme.palettePaper.r, Theme.palettePaper.g, Theme.palettePaper.b, 0.15)
-                        : "transparent"))
-                : (control.pressed
-                    ? Qt.darker(control.pal.pressed, 1.4)
-                    : (control.hovered ? Qt.darker(control.pal.hover, 1.3) : Qt.darker(control.pal.base, 1.4))))
-            : (control.pressed
-                ? Qt.darker(control.pal.pressed, 1.4)
-                : (control.hovered ? Qt.darker(control.pal.hover, 1.3) : Qt.darker(control.pal.base, 1.4)))
-
-        Behavior on trayColor {
-            enabled: !control.dontAnimateColor
-            ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-        }
-
-        Rectangle {
-            id: background
-            anchors.fill: parent
-            z: -1
-
-            topLeftRadius: control.topLeftRadius
-            topRightRadius: control.topRightRadius
-            bottomLeftRadius: control.bottomLeftRadius
-            bottomRightRadius: control.bottomRightRadius
-
-            readonly property real traySpace: Math.max(0, width - 24)
-            readonly property bool isBadgeOnly: !control.isSpecial && !control.isEmptyWorkspace && traySpace <= 0.5
-
-            color: isBadgeOnly ? control.badgeColor : control.trayColor
-            border.color: control.badgeColor
-            border.width: isBadgeOnly ? 0 : 2
-
-            Rectangle {
-                id: leftBadgeBg
-                visible: !control.isSpecial && !control.isEmptyWorkspace && !background.isBadgeOnly
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                width: Math.min(24, parent.width)
-                color: control.badgeColor
-                topLeftRadius: control.topLeftRadius
-                bottomLeftRadius: control.bottomLeftRadius
-                topRightRadius: Math.max(0, control.topRightRadius - background.traySpace)
-                bottomRightRadius: Math.max(0, control.bottomRightRadius - background.traySpace)
-
-                readonly property int filletSize: Math.max(0, Math.min(5, Math.floor(background.traySpace - 2)))
-
-                InverseRadius {
-                    visible: leftBadgeBg.filletSize > 0
-                    anchors.top: parent.top
-                    anchors.left: parent.right
-                    cornerPosition: "topLeft"
-                    color: control.badgeColor
-                    size: leftBadgeBg.filletSize
-                    animated: false
-                }
-
-                InverseRadius {
-                    visible: leftBadgeBg.filletSize > 0
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.right
-                    cornerPosition: "bottomLeft"
-                    color: control.badgeColor
-                    size: leftBadgeBg.filletSize
-                    animated: false
-                }
-            }
-
-            layer.enabled: root.shadowEnabled
-            layer.smooth: true
-            layer.effect: MultiEffect {
-                shadowEnabled: true
-                shadowColor: root.shadowColor
-                shadowBlur: root.shadowBlur
-                shadowVerticalOffset: root.shadowVerticalOffset
-                shadowHorizontalOffset: root.shadowHorizontalOffset
-            }
-        }
 
         readonly property bool isSpecial: modelData !== null && modelData.name && modelData.name.indexOf("special:") === 0
 
@@ -392,7 +284,39 @@ ModuleButton {
             )
         )
 
-        label: isEmptyWorkspace ? "" : ""
+        implicitHeight: root.implicitHeight - 2 * root.overlay
+        implicitWidth: {
+            if (isEmptyWorkspace) return implicitHeight;
+            if (isSpecial) return Math.max(implicitHeight, appsRow.implicitWidth + leftPadding + rightPadding);
+            return (hasApps && showApps)
+                ? Math.max(implicitHeight, 24 + leftPadding + appsRow.implicitWidth + rightPadding)
+                : implicitHeight;
+        }
+
+        iconOnly: isEmptyWorkspace
+        iconBayWidth: isSpecial ? 0 : 24
+        filletRadius: 5
+        leftPadding: isSpecial ? 6 : 7
+        rightPadding: isSpecial ? 6 : 7
+        icon: isEmptyWorkspace ? "" : (isSpecial ? "" : (modelData ? modelData.name : ""))
+        iconSize: Theme.fontSize
+        iconHoverScale: 1.0
+        highlighted: active
+        fillOnHover: false
+        variant: active ? "light" : "neutral"
+        cursorShape: Qt.PointingHandCursor
+        clip: false
+
+        shadowEnabled: root.shadowEnabled
+        shadowColor: root.shadowColor
+        shadowBlur: root.shadowBlur
+        shadowVerticalOffset: root.shadowVerticalOffset
+        shadowHorizontalOffset: root.shadowHorizontalOffset
+
+        topLeftRadius: isSpecial ? Theme.moduleEdgeRadius : (index === 0 ? Theme.moduleEdgeRadius : 5)
+        bottomLeftRadius: isSpecial ? Theme.moduleEdgeRadius : (index === 0 ? Theme.moduleEdgeRadius : 5)
+        topRightRadius: isSpecial ? Theme.moduleEdgeRadius : (isLastInGroup ? Theme.moduleEdgeRadius : 5)
+        bottomRightRadius: isSpecial ? Theme.moduleEdgeRadius : (isLastInGroup ? Theme.moduleEdgeRadius : 5)
 
         onClicked: {
             if (control.isSpecial) {
@@ -407,56 +331,28 @@ ModuleButton {
         property bool isSpawned: false
         transformOrigin: Item.Center
         scale: isSpawned ? (!control.enabled ? 1.0 : (control.pressed ? 0.90 : (control.hovered ? 0.96 : 1.0))) : 0
-        Component.onCompleted: {
-            isSpawned = true
-        }
+        Component.onCompleted: isSpawned = true
 
         Behavior on scale {
             NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
 
-        RowLayout {
-            id: contentRow
-            anchors.left: control.isSpecial ? undefined : parent.left
-            anchors.horizontalCenter: control.isSpecial ? parent.horizontalCenter : undefined
-            anchors.verticalCenter: parent.verticalCenter
-            height: parent.height
-            spacing: 5
-            visible: !isEmptyWorkspace
-
-            Item {
-                visible: !control.isSpecial
-                implicitWidth: control.isSpecial ? 0 : 24
-                implicitHeight: control.height
-
-                Text {
-                    anchors.fill: parent
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    text: isEmptyWorkspace ? "" : (modelData ? modelData.name : "")
-                    color: active ? Theme.textDark : Theme.textPrimary
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
-                    font.bold: true
-                }
-            }
-
-            RowLayout {
-                visible: hasApps && showApps
-                spacing: 5
-                Layout.leftMargin: showApps ? (control.isSpecial ? 2 : 2) : 0
-                Layout.rightMargin: showApps ? (control.isSpecial ? 2 : 7) : 0
-                Repeater {
-                    model: (hasApps && showApps) ? modelData.toplevels.values : null
-                    delegate: WorkspaceAppIcon {
-                        workspaceBtn: control
-                    }
-                }
-            }
-        }
-
         Behavior on implicitWidth {
             NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+        }
+
+        content: RowLayout {
+            id: appsRow
+            visible: control.hasApps && control.showApps
+            spacing: 5
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+
+            Repeater {
+                model: (control.hasApps && control.showApps) ? control.modelData.toplevels.values : null
+                delegate: WorkspaceAppIcon {
+                    workspaceBtn: control
+                }
+            }
         }
     }
 
@@ -651,7 +547,7 @@ ModuleButton {
                     if (cachedAddress !== "") {
                         root.dismissPreview(cachedAddress);
                     }
-                    if (workspaceBtn) workspaceBtn.pressed = false;
+                    if (workspaceBtn) workspaceBtn.externalPressed = false;
                     dragArea.wasDragged = true;
                     windowIcon.isDragging = true;
                     if (workspaceBtn) workspaceBtn.activeDragCount++;
@@ -743,7 +639,7 @@ ModuleButton {
                         root.dismissPreview(cachedAddress);
                     }
                     if (mouse.button === Qt.LeftButton && workspaceBtn) {
-                        workspaceBtn.pressed = true;
+                        workspaceBtn.externalPressed = true;
                     }
                 }
 
@@ -752,7 +648,7 @@ ModuleButton {
                         var dx = mouse.x - dragArea.pressPos.x;
                         var dy = mouse.y - dragArea.pressPos.y;
                         if ((dx * dx + dy * dy) > 16) {
-                            if (workspaceBtn) workspaceBtn.pressed = false;
+                            if (workspaceBtn) workspaceBtn.externalPressed = false;
                             handleDragStart();
                         }
                     }
@@ -760,7 +656,7 @@ ModuleButton {
 
                 onReleased: (mouse) => {
                     if (mouse.button === Qt.LeftButton && workspaceBtn) {
-                        workspaceBtn.pressed = false;
+                        workspaceBtn.externalPressed = false;
                     }
                     if (windowIcon.isDragging || dragArea.wasDragged) {
                         handleDragEnd();
@@ -773,7 +669,7 @@ ModuleButton {
                         root.dismissPreview(cachedAddress);
                     }
                     if (workspaceBtn) {
-                        workspaceBtn.pressed = false;
+                        workspaceBtn.externalPressed = false;
                     }
                     if (windowIcon.isDragging || dragArea.wasDragged) {
                         handleDragEnd();

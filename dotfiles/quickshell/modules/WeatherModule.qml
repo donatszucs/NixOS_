@@ -133,7 +133,7 @@ ExpandableModule {
                     iconSize: 16
                     iconSpinning: root.isUpdating
                     text: root.isUpdating ? "Updating..." : "Update Forecast"
-                    accent: root.isUpdating ? Theme.statusBlue : Theme.palettePaper
+                    variant: root.isUpdating ? "blue" : "light"
                     active: root.isUpdating
                     clickable: !root.isUpdating
                     hoverEnabled: !root.isUpdating
