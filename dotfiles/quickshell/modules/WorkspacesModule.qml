@@ -284,6 +284,10 @@ ModuleButton {
             )
         )
 
+        readonly property bool isEmpty: isEmptyWorkspace || (!hasApps && !isSpecial)
+        readonly property bool hasBigLeftRadius: !isSpecial && index === 0
+        readonly property bool hasBigRightRadius: !isSpecial && isLastInGroup
+
         implicitHeight: root.implicitHeight - 2 * root.overlay
         implicitWidth: {
             if (isEmptyWorkspace) return implicitHeight;
@@ -295,6 +299,7 @@ ModuleButton {
 
         iconOnly: isEmptyWorkspace
         iconBayWidth: isSpecial ? 0 : 24
+        iconOffsetX: (isEmpty && hasBigLeftRadius !== hasBigRightRadius) ? (hasBigLeftRadius ? 2 : -1) : 0
         filletRadius: 5
         leftPadding: isSpecial ? 6 : 7
         rightPadding: isSpecial ? 6 : 7

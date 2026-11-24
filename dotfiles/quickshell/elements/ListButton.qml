@@ -10,6 +10,7 @@ Item {
     // ── Content ───────────────────────────────────────────────────────
     property string icon: ""
     property int    iconSize: 18
+    property real   iconOffsetX: 0
     property real   iconHoverScale: 1.12
     property bool   iconSpinning: false
     property bool   iconOnly: false
@@ -279,6 +280,7 @@ Item {
             id: defaultIconText
             visible: !iconSlot.visible && root.icon !== ""
             anchors.centerIn: parent
+            anchors.horizontalCenterOffset: root.iconOffsetX
             text: root.icon
             color: root.iconColor
             font.family: Theme.font

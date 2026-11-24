@@ -317,7 +317,6 @@ ModuleButton {
                     displayMode: "monitor"
                     color: "transparent"
                     anchors.topMargin: 0
-                    shadowColor: launcherModule.shadowColor
                     onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)
                     onRequestPreview: (winData, globalPos) => launcherModule.requestPreview(winData, globalPos)
                     onDismissPreview: (address) => launcherModule.dismissPreview(address)
@@ -387,7 +386,6 @@ ModuleButton {
                     displayMode: "other"
                     color: "transparent"
                     anchors.topMargin: 0
-                    shadowColor: launcherModule.shadowColor
                     visible: otherWorkspaces.monitorWorkspaces.others.length > 0 || otherWorkspaces.implicitWidth > 0.5
                     onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)
                     onRequestPreview: (winData, globalPos) => launcherModule.requestPreview(winData, globalPos)
@@ -402,7 +400,6 @@ ModuleButton {
                     displayMode: "special"
                     color: "transparent"
                     anchors.topMargin: 0
-                    shadowColor: launcherModule.shadowColor
                     Layout.leftMargin: (otherWorkspaces.visible && specialWorkspaces.visible) ? 4 : 0
                     visible: specialWorkspaces.monitorWorkspaces.special.length > 0 || specialWorkspaces.implicitWidth > 0.5
                     onRequestContextMenu: (winData, globalPos) => launcherModule.requestContextMenu(winData, globalPos)

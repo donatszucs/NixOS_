@@ -96,7 +96,7 @@ ExpandableModule {
         BaseCard {
             id: colorCard
             Layout.fillWidth: true
-            implicitHeight: 130
+            implicitHeight: 140
 
             // ── Colour wheel ────────────────────────────────────────────
             Item {
