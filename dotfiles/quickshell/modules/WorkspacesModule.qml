@@ -299,7 +299,7 @@ ModuleButton {
 
         iconOnly: isEmptyWorkspace
         iconBayWidth: isSpecial ? 0 : 24
-        iconOffsetX: (isEmpty && hasBigLeftRadius !== hasBigRightRadius) ? (hasBigLeftRadius ? 2 : -1) : 0
+        iconOffsetX: (isEmpty && hasBigRightRadius && !hasBigLeftRadius) ? -1 : 0
         filletRadius: 5
         leftPadding: isSpecial ? 6 : 7
         rightPadding: isSpecial ? 6 : 7
