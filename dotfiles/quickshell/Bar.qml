@@ -43,23 +43,21 @@ PanelWindow {
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
     function closeAllOverlays() {
-        launcherModule.expanded = false
-        wallpaperPicker.expanded = false
+        var expandable = [
+            launcherModule, wallpaperPicker, sysmonApp,
+            clockModule, weatherModule, nowPlayingModule,
+            lightSwitchModule, audioModule, connectionsModule,
+            trayModule, systemModule
+        ]
+        for (var i = 0; i < expandable.length; ++i) {
+            expandable[i].expanded = false
+        }
         clipboardHistory.closeMenu()
         rbwMenu.closeMenu()
         notificationCenter.isManuallyOpen = false
         notificationCenter.inlineReplyInputFocused = false
         windowContextMenu.close()
         savedMenu.closeMenu()
-        sysmonApp.expanded = false
-        clockModule.expanded = false
-        weatherModule.expanded = false
-        nowPlayingModule.expanded = false
-        lightSwitchModule.expanded = false
-        audioModule.expanded = false
-        connectionsModule.expanded = false
-        trayModule.expanded = false
-        systemModule.expanded = false
     }
 
     Connections {
@@ -122,14 +120,14 @@ PanelWindow {
         }
 
         // Expandable module interaction regions
-        Region { item: (clockModule.contentVisible || clockModule.hasProtrudingCorners) ? clockModule.flowingBackground : null }
-        Region { item: (weatherModule.contentVisible || weatherModule.hasProtrudingCorners) ? weatherModule.flowingBackground : null }
-        Region { item: (nowPlayingModule.contentVisible || nowPlayingModule.hasProtrudingCorners) ? nowPlayingModule.flowingBackground : null }
-        Region { item: (lightSwitchModule.contentVisible || lightSwitchModule.hasProtrudingCorners) ? lightSwitchModule.flowingBackground : null }
-        Region { item: (audioModule.contentVisible || audioModule.hasProtrudingCorners) ? audioModule.flowingBackground : null }
-        Region { item: (connectionsModule.contentVisible || connectionsModule.hasProtrudingCorners) ? connectionsModule.flowingBackground : null }
-        Region { item: (trayModule.contentVisible || trayModule.hasProtrudingCorners) ? trayModule.flowingBackground : null }
-        Region { item: (systemModule.contentVisible || systemModule.hasProtrudingCorners) ? systemModule.flowingBackground : null }
+        Region { item: clockModule.activeRegion }
+        Region { item: weatherModule.activeRegion }
+        Region { item: nowPlayingModule.activeRegion }
+        Region { item: lightSwitchModule.activeRegion }
+        Region { item: audioModule.activeRegion }
+        Region { item: connectionsModule.activeRegion }
+        Region { item: trayModule.activeRegion }
+        Region { item: systemModule.activeRegion }
 
         // Wallpaper Picker interaction region (side edge)
         Region {
@@ -175,14 +173,14 @@ PanelWindow {
         Region { item: sysmonAppWrapper }
 
         // Expandable module flowing backgrounds
-        Region { item: (clockModule.contentVisible || clockModule.hasProtrudingCorners) ? clockModule.flowingBackground : null }
-        Region { item: (weatherModule.contentVisible || weatherModule.hasProtrudingCorners) ? weatherModule.flowingBackground : null }
-        Region { item: (nowPlayingModule.contentVisible || nowPlayingModule.hasProtrudingCorners) ? nowPlayingModule.flowingBackground : null }
-        Region { item: (lightSwitchModule.contentVisible || lightSwitchModule.hasProtrudingCorners) ? lightSwitchModule.flowingBackground : null }
-        Region { item: (audioModule.contentVisible || audioModule.hasProtrudingCorners) ? audioModule.flowingBackground : null }
-        Region { item: (connectionsModule.contentVisible || connectionsModule.hasProtrudingCorners) ? connectionsModule.flowingBackground : null }
-        Region { item: (trayModule.contentVisible || trayModule.hasProtrudingCorners) ? trayModule.flowingBackground : null }
-        Region { item: (systemModule.contentVisible || systemModule.hasProtrudingCorners) ? systemModule.flowingBackground : null }
+        Region { item: clockModule.activeRegion }
+        Region { item: weatherModule.activeRegion }
+        Region { item: nowPlayingModule.activeRegion }
+        Region { item: lightSwitchModule.activeRegion }
+        Region { item: audioModule.activeRegion }
+        Region { item: connectionsModule.activeRegion }
+        Region { item: trayModule.activeRegion }
+        Region { item: systemModule.activeRegion }
         Region { item: bottomLeftBorder }
         Region { item: windowContextMenu.isOpen ? windowContextMenu.menuCard : null }
     }

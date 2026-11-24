@@ -10,7 +10,6 @@ QtObject {
     // ── Base colors ──────────────────────────────────────────────────
     readonly property color textPrimary:  palettePaper
     readonly property color textDark:     paletteInk
-    readonly property color accentBorder: paletteInk
     // status colors
     readonly property color statusGreen:   "#a0e0a0"
     readonly property color statusRed:     "#e09090"
@@ -20,8 +19,6 @@ QtObject {
 
     readonly property color divider:        Qt.rgba(1,1,1,0.12)
     readonly property color cardBorder:     Qt.rgba(palettePaper.r, palettePaper.g, palettePaper.b, 0.22)
-    readonly property color bgBlurColor:    Qt.rgba(palettePaper.r * 0.75, palettePaper.g * 0.75, palettePaper.b * 0.75, 0.24)
-    readonly property color topBarBlurColor:    Qt.rgba(palettePaper.r * 0.7, palettePaper.g * 0.7, palettePaper.b * 0.7, 0.4)
 
     // ── Variant palettes ─────────────────────────────────────────────
     // Each variant defines only its core identity (base, text, border).
@@ -102,9 +99,21 @@ QtObject {
         )
     }
 
-    // ── Bar background ───────────────────────────────────────────────
-    readonly property color barBgTop:    "transparent"
-    readonly property color barBgBottom: "transparent"
+    // Helper: level-aware battery icon glyph (shared by BatteryBadge & ConnectionsModule)
+    function batteryIcon(pct, isCharging) {
+        if (isCharging) return "󰂄"
+        if (pct >= 90) return "󰁹"
+        if (pct >= 80) return "󰂂"
+        if (pct >= 70) return "󰂁"
+        if (pct >= 60) return "󰂀"
+        if (pct >= 50) return "󰁿"
+        if (pct >= 40) return "󰁾"
+        if (pct >= 30) return "󰁽"
+        if (pct >= 20) return "󰁼"
+        if (pct >= 10) return "󰁻"
+        if (pct >= 0)  return "󰁺"
+        return "󰂎"
+    }
 
     // ── Typography ───────────────────────────────────────────────────
     readonly property string font: "RobotoMono Nerd Font Propo"
@@ -117,8 +126,6 @@ QtObject {
     readonly property int moduleEdgeRadius: 18
     readonly property int topCornerRadius: moduleEdgeRadius
     readonly property int expandedTopCornerRadius: 30
-    readonly property int modulePaddingH: 15
-    readonly property int modulePaddingV: 5
 
     // ── Pill & Expanded Module Radii (Master Parameters) ─────────────
     readonly property int  pillHeight:                moduleHeight - 10
@@ -139,10 +146,8 @@ QtObject {
     readonly property int  cardItemPadding:           8
 
     readonly property int  cardRadius:                Math.max(0, pillExpandedRadius - cardMargin)
-    readonly property int  cardBorderWidth:           0
     readonly property real cardHeaderHeight:          cardRadius * 2
     readonly property int  cardItemRadius:            Math.max(0, cardRadius - cardPadding)
-    readonly property int  cardHeaderInverseRadius:   cardRadius
     readonly property int  cardItemIconInverseRadius: cardItemRadius
     readonly property int  cardButtonRadius:          cardItemRadius
     readonly property int  sliderRadius:              Math.max(4, cardItemRadius - cardItemPadding)

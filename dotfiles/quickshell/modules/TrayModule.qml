@@ -9,30 +9,10 @@ import "../elements"
 ExpandableModule {
     id: root
 
-    collapseOnHoverExit: false   // managed manually (menu-aware)
     useDefaultPill: false
-
     property int openMenus: 0
-
-    HoverHandler {
-        id: parentHover
-        onHoveredChanged: {
-            if (!parentHover.hovered && !root.isHovered && expanded && openMenus === 0) expanded = false
-            else if (parentHover.hovered && !expanded) expanded = true
-        }
-    }
-
-    onIsHoveredChanged: {
-        if (!isHovered && !parentHover.hovered && expanded && openMenus === 0) {
-            expanded = false
-        }
-    }
-
-    onOpenMenusChanged: {
-        if (openMenus === 0 && !parentHover.hovered && !root.isHovered && expanded) {
-            expanded = false
-        }
-    }
+    collapseOnHoverExit: openMenus === 0
+    onRawHoveredChanged: if (rawHovered && !expanded) expanded = true
 
     // This MUST be assigned when you create the component in your main file
     property var parentWindow: null
@@ -73,7 +53,6 @@ ExpandableModule {
             icon: "󱊖"
             implicitWidth: Theme.moduleHeight + 6
             implicitHeight: Theme.moduleHeight
-            label: "󱊖"
             textFont: Theme.fontSize + 1
 
             bottomRightRadius: (root.expanded || root.pillDropped) ? Theme.moduleEdgeRadius : 0
@@ -93,9 +72,6 @@ ExpandableModule {
         
         color: Theme.divider
         radius: implicitWidth / 2
-
-        border.width: Theme.cardBorderWidth
-        border.color: Theme.cardBorder
 
         implicitWidth: trayColumn.implicitWidth + 12
         implicitHeight: trayColumn.implicitHeight + 12

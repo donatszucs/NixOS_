@@ -1,6 +1,5 @@
 // Reusable themed battery badge showing level-aware icon and percentage
 import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
@@ -32,23 +31,7 @@ Item {
 
     property color textColor: root.statusColor
 
-    // Battery icon helper
-    function getBatteryIcon(pct, isCharging) {
-        if (isCharging) return "󰂄";
-        if (pct >= 90) return "󰁹";
-        if (pct >= 80) return "󰂂";
-        if (pct >= 70) return "󰂁";
-        if (pct >= 60) return "󰂀";
-        if (pct >= 50) return "󰁿";
-        if (pct >= 40) return "󰁾";
-        if (pct >= 30) return "󰁽";
-        if (pct >= 20) return "󰁼";
-        if (pct >= 10) return "󰁻";
-        if (pct >= 0)  return "󰁺";
-        return "󰂎";
-    }
-
-    property string iconText: getBatteryIcon(normalizedPercent, charging)
+    property string iconText: Theme.batteryIcon(normalizedPercent, charging)
     property string percentText: normalizedPercent >= 0 ? (normalizedPercent + "%") : "--"
 
     property int iconSize: Math.max(10, Math.round(badgeHeight * 0.55))

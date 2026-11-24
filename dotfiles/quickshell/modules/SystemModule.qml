@@ -8,7 +8,9 @@ import "../elements"
 ExpandableModule {
     id: systemModule
     expandedBottomRightRadius: 0
-    property int cardWidth: 200
+    cardWidth: 200
+    naturalWidth: 50
+    dropdownAlignment: "right"
 
     pillText: ""
     expandedPillLabel: "System"
@@ -18,47 +20,10 @@ ExpandableModule {
     leftCornerStyle: "side"
     rightCornerStyle: "bottom"
 
-    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + systemModule.titleBarHeight + Theme.dropdownMargin
-
-    collapsedWidth: 50
-
-    // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
-    dropdownAlignment: "right"
-
-
-    ColumnLayout {
-        id: baseColumn
-        parent: systemModule.overlay
-        spacing: 10
-        anchors {
-            top: parent.top
-            topMargin: systemModule.titleBarHeight
-            horizontalCenter: parent.horizontalCenter
-        }
-
-
-        scale: bodyExpanded ? 1 : 0
-        transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
-
-        MouseArea {
-            visible: systemModule.contentVisible
-            opacity: systemModule.contentOpacity
-            implicitWidth: systemModule.cardWidth
-            Layout.preferredWidth: systemModule.cardWidth
-            Layout.preferredHeight: popupCol.implicitHeight
-            Layout.alignment: Qt.AlignHCenter
-            acceptedButtons: Qt.NoButton
-
-            ColumnLayout {
-                id: popupCol
-                width: parent.width
-                spacing: 10
-
-                // ── System Actions ─────────────────────────────────────────
-                BaseCard {
-                    id: sysCard
+    dropdownContent: [
+        // ── System Actions ─────────────────────────────────────────
+        BaseCard {
+            id: sysCard
                     Layout.fillWidth: true
                     implicitHeight: headerBar.height + sysContentCol.implicitHeight + Theme.cardPadding * 2
                     hasHeader: true
@@ -183,9 +148,7 @@ ExpandableModule {
                         }
                     }
                 }
-            }
-        }
-    }
+    ]
 
     Process {
         id: rebuildProc

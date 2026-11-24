@@ -1,6 +1,5 @@
 // Reusable "dark purple" pill button — matches waybar's base module style
 import QtQuick
-import QtQuick.Layouts
 
 Rectangle {
     id: root
@@ -21,32 +20,16 @@ Rectangle {
     property int topMargin: 0
     property int bottomMargin: 0
 
-    property int leftMarginButton: 0
-    property int rightMarginButton: 0
-    property int topMarginButton: 0
-    property int bottomMarginButton: 0
-
-    anchors {
-        topMargin: topMarginButton
-        bottomMargin: bottomMarginButton
-        leftMargin: leftMarginButton
-        rightMargin: rightMarginButton
-    }
     // ── Variant ──────────────────────────────────────────────────────
     // Set to one of: "dark" (default) | "light" | "neutral" | "red" | "blue" | "green" | "yellow" | "transparent"
     property string variant: "dark"
 
-    // Whether to suppress the hover colour change
+    // Whether to suppress the hover/press colour change
     property bool noHoverColorChange: false
     property bool noPressColorChange: false
 
-    property bool colorOverride: false
-    property color overrideColor: Qt.rgba(pal.base.r, pal.base.g, pal.base.b, 0.0)
-
-    property bool dontAnimateColor: false
-
     // Cursor shape to use when hovering this button. Can be overridden by
-    // instances (e.g. `Qt.PointingHandCursor: Qt.PointingHandCursor`). Default is arrow.
+    // instances (e.g. `cursorShape: Qt.PointingHandCursor`). Default is arrow.
     property int cursorShape: Qt.ArrowCursor
 
     // ── Variant palette & derived interactive state colors ───────────
@@ -80,7 +63,7 @@ Rectangle {
     property color hoverColor:   { var c = _deriveStateColor(pal.base, "hover");   return Qt.rgba(c.r, c.g, c.b, c.a * colorOpacity) }
     property color pressedColor: { var c = _deriveStateColor(pal.base, "pressed"); return Qt.rgba(c.r, c.g, c.b, c.a * colorOpacity) }
 
-    property color colorAdaptive: (root.pressed && !root.noPressColorChange) ? root.pressedColor : ((root.hovered && !root.noHoverColorChange) ? root.hoverColor : colorOverride ? root.overrideColor : root.baseColor)
+    property color colorAdaptive: (root.pressed && !root.noPressColorChange) ? root.pressedColor : ((root.hovered && !root.noHoverColorChange) ? root.hoverColor : root.baseColor)
     property color borderColorAdaptive: (root.pressed && !root.noPressColorChange) ? _deriveBorderColor(pal.border, "pressed") : ((root.hovered && !root.noHoverColorChange) ? _deriveBorderColor(pal.border, "hover") : pal.border)
 
     HoverHandler {
@@ -129,17 +112,11 @@ Rectangle {
         onClicked: root.clicked()
     }
 
-    Behavior on gradient {
-        ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
-    }
-
     Behavior on color {
-        enabled: !root.dontAnimateColor
         ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }
 
     Behavior on border.color {
-        enabled: !root.dontAnimateColor
         ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
     }
 

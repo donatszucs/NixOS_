@@ -12,8 +12,7 @@ ExpandableModule {
     id: connectionsModule
     property int currentPage: 0
 
-
-    property int cardWidth: 280
+    cardWidth: 280
     property int textMaxWidth: cardWidth - 40
 
     // ── State ──────────────────────────────────────────────────
@@ -64,37 +63,19 @@ ExpandableModule {
         Quickshell.execDetached(["bash", "-c", "pkill -f 'bluetoothctl.*" + addr + "' || true"]);
     }
 
-    function trustBtDevice(dev) {
+    function setBtDeviceTrust(dev, trusted) {
         if (!dev) return;
-        var addr = "";
-        if (typeof dev === "string") {
-            addr = dev;
-        } else {
-            try {
-                dev.trusted = true;
-            } catch (e) {}
-            addr = dev.address || "";
+        var addr = typeof dev === "string" ? dev : (dev.address || "");
+        if (typeof dev !== "string") {
+            try { dev.trusted = trusted; } catch (e) {}
         }
-        if (addr && addr.length > 0) {
-            Quickshell.execDetached(["bluetoothctl", "trust", addr]);
+        if (addr.length > 0) {
+            Quickshell.execDetached(["bluetoothctl", trusted ? "trust" : "untrust", addr]);
         }
     }
 
-    function untrustBtDevice(dev) {
-        if (!dev) return;
-        var addr = "";
-        if (typeof dev === "string") {
-            addr = dev;
-        } else {
-            try {
-                dev.trusted = false;
-            } catch (e) {}
-            addr = dev.address || "";
-        }
-        if (addr && addr.length > 0) {
-            Quickshell.execDetached(["bluetoothctl", "untrust", addr]);
-        }
-    }
+    function trustBtDevice(dev)   { setBtDeviceTrust(dev, true); }
+    function untrustBtDevice(dev) { setBtDeviceTrust(dev, false); }
 
     // Phone state (KDE Connect)
     property bool   phoneConnected: false
@@ -112,21 +93,6 @@ ExpandableModule {
     property bool   phonePollingActive: false
     property string phoneActionStatus: ""
     property string phoneBatteryPercentLabel: phoneBatteryPercent >= 0 ? (phoneBatteryPercent + "%") : "--"
-
-    function getPhoneBatteryIcon(pct, charging) {
-        if (charging) return "󰂄";
-        if (pct >= 90) return "󰁹";
-        if (pct >= 80) return "󰂂";
-        if (pct >= 70) return "󰂁";
-        if (pct >= 60) return "󰂀";
-        if (pct >= 50) return "󰁿";
-        if (pct >= 40) return "󰁾";
-        if (pct >= 30) return "󰁽";
-        if (pct >= 20) return "󰁼";
-        if (pct >= 10) return "󰁻";
-        if (pct >= 0)  return "󰁺";
-        return "󰂎";
-    }
 
     function getPhoneSignalIcon(strength) {
         if (strength >= 4) return "󰢿";
@@ -191,9 +157,6 @@ ExpandableModule {
     pillVariant: "neutral"
     expandedPillLabel: "Connections"
 
-    // ── Sizing ─────────────────────────────────────────────────
-    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + connectionsModule.titleBarHeight + Theme.dropdownMargin
-
     // ── Collapsed layout metrics ───────────────────────────────
     readonly property int pillInsetH: 5
 
@@ -205,25 +168,11 @@ ExpandableModule {
     readonly property int collapsedInnerPaddingRight: phoneBatteryVisible ? 5 : collapsedInnerPaddingLeft
     readonly property int collapsedSpacing: 10
 
-    // Margins relative to headerPill (inner padding + pillInsetH)
     readonly property int collapsedPaddingLeft: pillInsetH + collapsedInnerPaddingLeft
     readonly property int collapsedPaddingRight: pillInsetH + collapsedInnerPaddingRight
 
-    readonly property real connectionsNaturalWidth: Math.max(Theme.moduleHeight, Math.round(labelRow.implicitWidth + collapsedPaddingLeft + collapsedPaddingRight))
-    property real lastConnectionsWidth: connectionsNaturalWidth
-
-    onConnectionsNaturalWidthChanged: {
-        if (!expanded && !pillDropped && connectionsNaturalWidth > 0) {
-            lastConnectionsWidth = connectionsNaturalWidth
-        }
-    }
-
-    collapsedWidth: (expanded || pillDropped) ? lastConnectionsWidth : connectionsNaturalWidth
-
-    // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
+    naturalWidth: Math.max(Theme.moduleHeight, Math.round(labelRow.implicitWidth + collapsedPaddingLeft + collapsedPaddingRight))
     dropdownAlignment: "center"
-
     leftCornerStyle: "side"
     rightCornerStyle: "side"
 
@@ -236,21 +185,14 @@ ExpandableModule {
     }
 
     // Collapsed content inside the base pill
-    Row {
+    pillContent: Row {
         id: labelRow
-        parent: connectionsModule.headerPill.pill
         anchors.left: parent.left
         anchors.leftMargin: connectionsModule.collapsedInnerPaddingLeft
         anchors.verticalCenter: parent.verticalCenter
         height: implicitHeight
         spacing: connectionsModule.collapsedSpacing
-        z: 6
 
-        opacity: connectionsModule.bodyExpanded ? 0.0 : 1.0
-        visible: opacity > 0
-        Behavior on opacity { 
-            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
-        }
         Behavior on anchors.leftMargin {
             NumberAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
         }
@@ -292,50 +234,18 @@ ExpandableModule {
         }
     }
 
-    ColumnLayout {
-        id: baseColumn
-        parent: connectionsModule.overlay
-        anchors { 
-            top: parent.top
-            topMargin: connectionsModule.titleBarHeight
-            horizontalCenter: parent.horizontalCenter
-        }
-        spacing: Theme.cardMargin
-
-
-        scale: bodyExpanded ? 1 : 0
-        transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
-
-        // ── Popup dropdown ─────────────────────────────────────────
-        MouseArea {
-            visible: connectionsModule.contentVisible
-            opacity: connectionsModule.contentOpacity
-            implicitWidth: connectionsModule.cardWidth
-            Layout.preferredWidth: connectionsModule.cardWidth
-            Layout.preferredHeight: popupCol.implicitHeight
-            Layout.alignment: Qt.AlignHCenter
-
-            acceptedButtons: Qt.NoButton
+    dropdownContent: [
+        WheelHandler {
             onWheel: (wheel) => {
-                if (wheel.angleDelta.y > 0) {
-                    if (connectionsModule.currentPage !== 1) connectionsModule.currentPage = 1
-                    else connectionsModule.currentPage = 0
-                }
-                else if (wheel.angleDelta.y < 0) {
-                    if (connectionsModule.currentPage !== 0) connectionsModule.currentPage = 0
-                    else connectionsModule.currentPage = 1
+                if (wheel.angleDelta.y !== 0) {
+                    connectionsModule.currentPage = 1 - connectionsModule.currentPage
                 }
             }
+        },
 
-            ColumnLayout {
-                id: popupCol
-                width: parent.width
-                spacing: Theme.cardMargin
-
-            // ── Page Switcher Pill ──────────────────────────────────────
-            Rectangle {
-                id: pageSwitcher
+        // ── Page Switcher Pill ──────────────────────────────────────
+        Rectangle {
+            id: pageSwitcher
                 Layout.fillWidth: true
                 Layout.preferredHeight: 38
                 implicitHeight: 38
@@ -448,7 +358,7 @@ ExpandableModule {
                         }
                     }
                 }
-            }
+            },
 
             // ── Network ──────────────────────────────────
             BaseCard {
@@ -507,7 +417,7 @@ ExpandableModule {
                         font.pixelSize: Theme.fontSize * 0.9
                     }
                 }
-            }
+            },
                             
             // ── Bluetooth ──────────────────────────────────
             BaseCard {
@@ -907,7 +817,7 @@ ExpandableModule {
                         Layout.bottomMargin: 5
                     }
                 }
-            }
+            },
 
             // ── Phone (KDE Connect) ──────────────────────
             BaseCard {
@@ -1098,7 +1008,7 @@ ExpandableModule {
                                     Text {
                                         text: connectionsModule.phoneCharging
                                             ? "󱐋 Charging"
-                                            : (connectionsModule.getPhoneBatteryIcon(connectionsModule.phoneBatteryPercent, false) + " Battery")
+                                            : (Theme.batteryIcon(connectionsModule.phoneBatteryPercent, false) + " Battery")
                                         color: connectionsModule.phoneCharging ? Theme.statusGreen : Theme.textPrimary
                                         opacity: connectionsModule.phoneCharging ? 1.0 : 0.85
                                         font.family: Theme.font
@@ -1239,7 +1149,7 @@ ExpandableModule {
                         }
                     }
                 }
-            }
+            },
 
             // ── Mouse ──────────────────────────────────
             BaseCard {
@@ -1364,11 +1274,7 @@ ExpandableModule {
                     }
                 }
             }
-
-        }
-        }
-    }
-
+    ]
 
     // ── Data refresh ───────────────────────────────────────────
     function updateNetworkStatus() {

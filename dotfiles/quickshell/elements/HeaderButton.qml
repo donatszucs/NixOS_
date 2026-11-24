@@ -44,9 +44,8 @@ Rectangle {
     property bool bold: true
 
     // ── State & Interaction ───────────────────────────────────────────
-    property bool enabled: true
     property int cursorShape: Qt.PointingHandCursor
-    property bool hovered: mouseArea.containsMouse || rootHover.hovered
+    property bool hovered: _mouseArea.containsMouse
     property bool pressed: false
 
     property real normalOpacity: 0.85
@@ -58,22 +57,17 @@ Rectangle {
 
     // ── Sizing & Alignment ────────────────────────────────────────────
     property real horizontalPadding: hasBorder ? 8 : 4
-    implicitWidth: Math.max(26, Math.round(iconText.implicitWidth + (horizontalPadding * 2)))
+    implicitWidth: Math.max(26, Math.round(_iconText.implicitWidth + (horizontalPadding * 2)))
     implicitHeight: 26
     Layout.alignment: Qt.AlignVCenter
 
     // ── Aliases ───────────────────────────────────────────────────────
-    property alias iconText: iconText
-    property alias labelText: iconText
-    property alias mouseArea: mouseArea
-
-    HoverHandler {
-        id: rootHover
-        enabled: root.enabled
-    }
+    property alias iconText: _iconText
+    property alias labelText: _iconText
+    property alias mouseArea: _mouseArea
 
     MouseArea {
-        id: mouseArea
+        id: _mouseArea
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: root.enabled ? root.cursorShape : Qt.ArrowCursor
@@ -86,14 +80,14 @@ Rectangle {
 
     FontMetrics {
         id: fontMetrics
-        font: iconText.font
+        font: _iconText.font
     }
 
     // Optical vertical centering offset to compensate for font descent metrics in icon glyphs
     property real verticalOffset: fontMetrics.descent ? Math.max(1, Math.round(fontMetrics.descent * 0.25)) : 1
 
     Text {
-        id: iconText
+        id: _iconText
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
         anchors.verticalCenterOffset: root.verticalOffset

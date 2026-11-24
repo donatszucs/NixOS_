@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Effects
 
 ModuleButton {
@@ -13,7 +12,9 @@ ModuleButton {
     property real pressedScale: 0.90
 
     property alias pill: pillBg
+    property alias pillContent: _pillCustomContent.data
     readonly property real pillScale: pillBg.scale
+    readonly property real textImplicitWidth: _pillTextItem.implicitWidth
 
     property real percent: 0
     property bool animatePercent: true
@@ -60,8 +61,6 @@ ModuleButton {
     property color gradientTop : root._derivedPillFill
     property color gradientMid : root._derivedPillFill
     property color gradientBottom : root._derivedPillFill
-
-    property real gradientTopHeightPx: 60
 
     property string bgImageSource: ""
     property real bgImageOpacity: 0.35
@@ -276,6 +275,7 @@ ModuleButton {
 
         // Text inside the pill
         Text {
+            id: _pillTextItem
             anchors.fill: parent
             text: root.pillText
             color: root.pillPal.text
@@ -292,6 +292,19 @@ ModuleButton {
 
             Behavior on color {
                 ColorAnimation { duration: Theme.horizontalDuration; easing.type: Easing.OutCubic }
+            }
+        }
+
+        // Custom collapsed content slot (fades out automatically when expanded)
+        Item {
+            id: _pillCustomContent
+            anchors.fill: parent
+            z: 6
+            visible: children.length > 0 && opacity > 0
+            opacity: root.expanded ? 0.0 : 1.0
+
+            Behavior on opacity {
+                NumberAnimation { duration: root.expanded ? Math.round(Theme.verticalDuration / 2) : Theme.verticalDuration; easing.type: Easing.OutCubic }
             }
         }
     }

@@ -302,8 +302,6 @@ Item {
                 }
 
                 color: showCenterChrome ? defaultColor : "transparent"
-                border.width: showCenterChrome ? Theme.cardBorderWidth : 0
-                border.color: showCenterChrome ? Theme.cardBorder : "transparent"
                 shadowEnabled: false
 
                 opacity: notifCenter.isCardOpen ? 1.0 : 0.0

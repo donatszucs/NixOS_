@@ -16,15 +16,7 @@ Item {
     readonly property color defaultColor: glassColor(0.12, 0.32)
     property color color: defaultColor
     property real  radius: Theme.cardRadius
-    property alias border: _borderCompat.border
     clip: true
-
-    Rectangle {
-        id: _borderCompat
-        visible: false
-        border.width: Theme.cardBorderWidth
-        border.color: Theme.cardBorder
-    }
 
     Behavior on color { ColorAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } }
 
@@ -74,7 +66,6 @@ Item {
     property alias titleText: headerTitleText
     property alias iconText: headerIconText
     property alias headerControlRow: headerControlRow
-    readonly property Item headerBottom: headerBarItem
 
     // ── Smoked-Glass Base Shape (behind card children) ───────────────
     Shape {

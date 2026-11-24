@@ -66,13 +66,9 @@ ExpandableModule {
         root.selectedEvents = (root.eventsByDate && root.eventsByDate[root.selectedDate]) ? root.eventsByDate[root.selectedDate] : []
     }
 
-    property int cardWidth: 340
-    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin
-
-    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
+    cardWidth: 340
     dropdownAlignment: "left"
-
-    collapsedWidth: clockContent.implicitWidth + 20
+    naturalWidth: clockContent.implicitWidth + 20
 
     pillPercent: 0
     pillVariant: "neutral"
@@ -255,18 +251,10 @@ ExpandableModule {
     }
 
     // ── Collapsed Content inside headerPill ──────────────────────
-    RowLayout {
+    pillContent: RowLayout {
         id: clockContent
-        parent: root.headerPill.pill
         anchors.centerIn: parent
         spacing: 10
-        z: 6
-        visible: opacity > 0
-        opacity: root.bodyExpanded ? 0.0 : 1.0
-
-        Behavior on opacity {
-            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint }
-        }
 
         RowLayout {
             spacing: 0
@@ -340,29 +328,11 @@ ExpandableModule {
     }
 
     // ── Expanded Content (Calendar Dropdown) ─────────────────────
-    ColumnLayout {
-        id: baseColumn
-        parent: root.overlay
-        anchors {
-            top: parent.top
-            topMargin: root.titleBarHeight
-            horizontalCenter: parent.horizontalCenter
-        }
-        spacing: Theme.cardMargin
-
-        visible: root.contentVisible
-        opacity: root.contentOpacity
-
-        scale: bodyExpanded ? 1 : 0
-        transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
-
+    dropdownContent: [
         // ── Card 1: Month Calendar ───────────────────────────────
         BaseCard {
             id: calendarCard
-            implicitWidth: root.cardWidth
-            Layout.preferredWidth: root.cardWidth
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
             implicitHeight: headerBar.height + calGridContent.implicitHeight + Theme.cardPadding * 2
             hasHeader: true
 
@@ -613,14 +583,12 @@ ExpandableModule {
                     }
                 }
             }
-        }
+        },
 
         // ── Card 2: Selected Day Agenda & Events ─────────────────
         BaseCard {
             id: agendaCard
-            implicitWidth: root.cardWidth
-            Layout.preferredWidth: root.cardWidth
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
             implicitHeight: agendaContentCol.implicitHeight + Theme.cardPadding * 2
 
             ColumnLayout {
@@ -644,6 +612,7 @@ ExpandableModule {
                         font.pixelSize: Theme.fontSize
                         font.bold: true
                         Layout.fillWidth: true
+                        Layout.leftMargin: 5
                     }
 
                     Rectangle {
@@ -871,7 +840,7 @@ ExpandableModule {
                 }
             }
         }
-    }
+    ]
 
     // ── Timers & Background Processes ────────────────────────────
     // 1-second clock timer

@@ -293,7 +293,6 @@ ModuleButton {
         noPressColorChange: true
         color: "transparent"
         clip: launcherModule.activeDragCount === 0
-        topMarginButton: 0 // Removes default margin from ModuleButton
         anchors { left: parent.left; right: parent.right; top: parent.top }
         implicitWidth:  launcherModule.implicitWidth
         implicitHeight: launcherModule.expanded ? panelCol.implicitHeight + 10 : Theme.moduleHeight - 4

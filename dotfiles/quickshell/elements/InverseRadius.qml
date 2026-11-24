@@ -30,9 +30,6 @@ Item {
     // Round the outer corner (the sharp vertex)
     property real outerRadius: 0
 
-    // Retained as a no-op for compatibility with Canvas callers
-    function requestPaint() {}
-
     // GPU-accelerated inverse corner fillet (no CPU Canvas repaints)
     Shape {
         id: _shape

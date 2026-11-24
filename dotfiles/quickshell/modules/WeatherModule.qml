@@ -24,22 +24,8 @@ ExpandableModule {
         SharedState.fetchWeather()
     }
 
-    property int cardWidth: 310
-
-    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin
-
-    readonly property real weatherNaturalWidth: Math.max(80, Math.round(pillContent.implicitWidth + 30))
-    property real lastWeatherWidth: 100
-
-    onWeatherNaturalWidthChanged: {
-        if (!expanded && !pillDropped && weatherNaturalWidth > 80) {
-            lastWeatherWidth = weatherNaturalWidth
-        }
-    }
-
-    collapsedWidth: (expanded || pillDropped) ? lastWeatherWidth : weatherNaturalWidth
-
-    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
+    cardWidth: 310
+    naturalWidth: Math.max(80, Math.round(weatherPillRow.implicitWidth + 30))
     dropdownAlignment: "center"
 
     pillPercent: 0
@@ -47,18 +33,10 @@ ExpandableModule {
     expandedPillLabel: "Weather"
 
     // Collapsed content inside the base pill
-    RowLayout {
-        id: pillContent
-        parent: root.headerPill.pill
+    pillContent: RowLayout {
+        id: weatherPillRow
         anchors.centerIn: parent
         spacing: 8
-        z: 6
-
-        opacity: root.bodyExpanded ? 0.0 : 1.0
-        visible: opacity > 0
-        Behavior on opacity { 
-            NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutCubic } 
-        }
 
         Text {
             text: root.weatherIcon
@@ -97,36 +75,9 @@ ExpandableModule {
         }
     }
 
-    ColumnLayout {
-        id: baseColumn
-        parent: root.overlay
-        spacing: Theme.cardMargin
-        anchors {
-            top: parent.top
-            topMargin: root.titleBarHeight
-            horizontalCenter: parent.horizontalCenter
-        }
-
-        scale: bodyExpanded ? 1 : 0
-        transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
-
-        MouseArea {
-            visible: root.contentVisible
-            opacity: root.contentOpacity
-            implicitWidth: root.cardWidth
-            Layout.preferredWidth: root.cardWidth
-            Layout.preferredHeight: popupCol.implicitHeight
-            Layout.alignment: Qt.AlignHCenter
-            acceptedButtons: Qt.NoButton
-
-            ColumnLayout {
-                id: popupCol
-                width: parent.width
-                spacing: Theme.cardMargin
-
-                ListButton {
-                    id: updateBtn
+    dropdownContent: [
+        ListButton {
+            id: updateBtn
                     Layout.fillWidth: true
                     implicitHeight: 38
                     icon: "󰑐"
@@ -150,7 +101,7 @@ ExpandableModule {
                         font.pixelSize: Theme.fontSize - 2
                         Behavior on opacity { NumberAnimation { duration: 150 } }
                     }
-                }
+                },
 
                 BaseCard {
                     id: hourlyCard
@@ -403,7 +354,7 @@ ExpandableModule {
                         }
                     }
                     }
-                }
+                },
 
                 BaseCard {
                     id: dailyCard
@@ -598,7 +549,5 @@ ExpandableModule {
                         }
                     }
                 }
-            }
-        }
-    }
+    ]
 }

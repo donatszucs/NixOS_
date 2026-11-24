@@ -6,8 +6,7 @@ import "../elements"
 
 ExpandableModule {
     id: root
-    property int cardWidth: 210
-
+    cardWidth: 210
 
     pillPercent: bodyExpanded ? 0 : (SharedState.lightAvailable && SharedState.lightActive ? SharedState.lightBrightness : 0)
     pillText: {
@@ -23,11 +22,6 @@ ExpandableModule {
 
     leftCornerStyle: "top"
     rightCornerStyle: "side"
-
-    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + root.titleBarHeight + Theme.dropdownMargin
-
-    // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
     dropdownAlignment: "left"
 
     onPillRightClicked: {
@@ -43,34 +37,7 @@ ExpandableModule {
         wheel.accepted = true
     }
 
-    ColumnLayout {
-        id: baseColumn
-        parent: root.overlay
-        spacing: 10
-        anchors {
-            top: parent.top
-            topMargin: root.titleBarHeight
-            horizontalCenter: parent.horizontalCenter
-        }
-
-        scale: bodyExpanded ? 1 : 0
-        transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
-
-        MouseArea {
-            visible: root.contentVisible
-            opacity: root.contentOpacity
-            implicitWidth: root.cardWidth
-            Layout.preferredWidth: root.cardWidth
-            Layout.preferredHeight: popupCol.implicitHeight
-            Layout.alignment: Qt.AlignHCenter
-            acceptedButtons: Qt.NoButton
-
-            ColumnLayout {
-                id: popupCol
-                width: parent.width
-                spacing: Theme.cardMargin
-
+    dropdownContent: [
         // ── Brightness Card with Slider ──────────────────────────
         BaseCard {
             id: brightnessCard
@@ -123,7 +90,7 @@ ExpandableModule {
                     Layout.alignment: Qt.AlignVCenter
                 }
             }
-        }
+        },
 
         // Colour wheel
         BaseCard {
@@ -245,9 +212,8 @@ ExpandableModule {
                 }
             }
         }
-            }
-        }
-    }
+    ]
+
     Timer {
         id: colorDebounceTimer
         interval: 100

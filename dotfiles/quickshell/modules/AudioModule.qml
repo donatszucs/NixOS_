@@ -120,12 +120,7 @@ ExpandableModule {
         }
     }
 
-    property int cardWidth: 280
-
-    expandedHeight: baseColumn.implicitHeight + Theme.moduleHeight + audioModule.titleBarHeight + Theme.dropdownMargin
-
-    // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
+    cardWidth: 280
     dropdownAlignment: "center"
 
     onPillWheel: (wheel) => {
@@ -139,37 +134,9 @@ ExpandableModule {
         }
     }
 
-    ColumnLayout {
-        id: baseColumn
-        parent: audioModule.overlay
-        spacing: 100
-
-        anchors {
-            top: parent.top
-            topMargin: audioModule.titleBarHeight
-            horizontalCenter: parent.horizontalCenter
-        }
-
-        scale: bodyExpanded ? 1 : 0
-        transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
-
-        MouseArea {
-            visible: audioModule.contentVisible
-            opacity: audioModule.contentOpacity
-            implicitWidth: audioModule.cardWidth
-            Layout.preferredWidth: audioModule.cardWidth
-            Layout.preferredHeight: popupCol.implicitHeight
-            Layout.alignment: Qt.AlignHCenter
-            acceptedButtons: Qt.NoButton
-
-            ColumnLayout {
-                id: popupCol
-                width: parent.width
-                spacing: Theme.cardMargin
-
-                BaseCard {
-                    id: sinkCard
+    dropdownContent: [
+        BaseCard {
+            id: sinkCard
                     Layout.fillWidth: true
                     implicitHeight: headerBar.height + sinkCol.implicitHeight + Theme.cardPadding * 2
                     headerTitle: "Output Devices"
@@ -298,7 +265,7 @@ ExpandableModule {
                             }
                         }
                     }
-                }
+                },
 
                 BaseCard {
                     id: sourceCard
@@ -374,9 +341,7 @@ ExpandableModule {
                         }
                     }
                 }
-            }
-        }
-    }
+    ]
 
     Component.onCompleted: {
         audioModule.updateDevices()

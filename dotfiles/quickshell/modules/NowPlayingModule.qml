@@ -73,8 +73,8 @@ ExpandableModule {
     pillBgImageBrightness: 0.3
     pillBgImageOpacity: 0.4
 
-    property int cardWidth: 260
-    readonly property real artStageWidth: cardWidth - 2 * Theme.cardBorderWidth
+    cardWidth: 260
+    readonly property real artStageWidth: cardWidth
 
     Image {
         id: activeArtDetector
@@ -111,7 +111,7 @@ ExpandableModule {
         return _cachedAspect
     }
     readonly property real targetThumbnailHeight: Math.max(90, Math.round(artStageWidth / currentAspect))
-    readonly property real targetCardHeight: Theme.cardHeaderHeight + targetThumbnailHeight + 2 * Theme.cardBorderWidth
+    readonly property real targetCardHeight: Theme.cardHeaderHeight + targetThumbnailHeight
 
     property real cardHeight: targetCardHeight
     Behavior on cardHeight {
@@ -120,22 +120,10 @@ ExpandableModule {
             easing.type: Easing.OutCubic
         }
     }
-    readonly property real thumbnailHeight: cardHeight - Theme.cardHeaderHeight - 2 * Theme.cardBorderWidth
+    readonly property real thumbnailHeight: cardHeight - Theme.cardHeaderHeight
 
     expandedHeight: targetCardHeight + Theme.moduleHeight + nowPlayingModule.titleBarHeight + Theme.dropdownMargin
-
-    readonly property real mediaNaturalWidth: Math.max(70, Math.min(200, Math.round(collapsedRow.implicitWidth + 26)))
-    property real lastCollapsedWidth: 100
-    onMediaNaturalWidthChanged: {
-        if (!expanded && !pillDropped && mediaNaturalWidth > 70) {
-            lastCollapsedWidth = mediaNaturalWidth
-        }
-    }
-    collapsedWidth: (expanded || pillDropped) ? lastCollapsedWidth : mediaNaturalWidth
-
-    // Overlay dropdown setup
-    expandedDropdownWidth: cardWidth + Theme.dropdownMargin * 2
-
+    naturalWidth: Math.max(70, Math.min(200, Math.round(collapsedRow.implicitWidth + 26)))
     dropdownAlignment: "right"
 
     leftCornerStyle: "side"
@@ -587,34 +575,13 @@ ExpandableModule {
     }
 
     // ── Expanded card / aspect-preserving art / overlaid controls ──
-    ColumnLayout {
-        id: baseColumn
-        parent: nowPlayingModule.overlay
-        spacing: 10
-        anchors {
-            top: parent.top
-            topMargin: nowPlayingModule.titleBarHeight
-            horizontalCenter: parent.horizontalCenter
-        }
-
-        scale: bodyExpanded ? 1 : 0
-        transformOrigin: Item.Top
-        Behavior on scale { NumberAnimation { duration: Theme.verticalDuration; easing.type: Easing.OutQuint } }
-
-        MouseArea {
-            visible: nowPlayingModule.contentVisible
-            opacity: nowPlayingModule.contentOpacity
-            implicitWidth: nowPlayingModule.cardWidth
-            Layout.preferredWidth: nowPlayingModule.cardWidth
+    dropdownContent: [
+        BaseCard {
+            id: carouselPanel
+            Layout.fillWidth: true
             implicitHeight: nowPlayingModule.cardHeight
             Layout.preferredHeight: nowPlayingModule.cardHeight
-            Layout.alignment: Qt.AlignHCenter
-            acceptedButtons: Qt.NoButton
-
-            BaseCard {
-                id: carouselPanel
-                anchors.fill: parent
-                hasHeader: true
+            hasHeader: true
 
                 headerContent: [
                     WheelHandler {
@@ -703,10 +670,7 @@ ExpandableModule {
                     anchors.top: carouselPanel.headerBar.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.leftMargin: carouselPanel.border.width
-                    anchors.rightMargin: carouselPanel.border.width
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: carouselPanel.border.width
                     clip: true
                     z: 10
 
@@ -1199,7 +1163,6 @@ ExpandableModule {
                         }
                     }
                 }
-            }
         }
-    }
+    ]
 }
