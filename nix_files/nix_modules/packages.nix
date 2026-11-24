@@ -12,11 +12,6 @@
   # Flatpak support
   services.flatpak.enable = true;
 
-  programs.thunar.enable = true;
-  programs.thunar.plugins = with pkgs; [
-    thunar-archive-plugin
-  ];
-
   programs.hyprlock.enable = true;
 
   programs.nix-ld.enable = true;
@@ -114,7 +109,6 @@
     overskride
     nixfmt
     clinfo # OpenCL device diagnostic tool
-    yazi # file manager for Wayland
     # Double Commander file manager (wrapped with Qt5 Kvantum dark theme)
     (symlinkJoin {
       name = "doublecmd-wrapped";
