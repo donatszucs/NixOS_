@@ -14,6 +14,9 @@
   # Enable GVFS for file management in Thunar and other GTK apps
   services.gvfs.enable = true;
 
+  # Enable UDisks2 for disk management and mounting
+  services.udisks2.enable = true;
+
   # 1. Enable firmware (Critical for WiFi/Bluetooth)
   hardware.enableAllFirmware = true;
   hardware.enableRedistributableFirmware = true;

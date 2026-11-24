@@ -104,6 +104,18 @@
   qt = {
     enable = true;
     platformTheme.name = "gtk3";
+    kvantum = {
+      enable = true;
+      themes = [
+        (pkgs.catppuccin-kvantum.override {
+          accent = "mauve";
+          variant = "mocha";
+        })
+      ];
+      settings = {
+        General.theme = "catppuccin-mocha-mauve";
+      };
+    };
   };
 
   # Write KDE config for the dark color scheme, which Qt/KDE apps (incl. KDE Connect) check for

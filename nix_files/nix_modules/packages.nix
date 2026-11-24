@@ -115,6 +115,19 @@
     nixfmt
     clinfo # OpenCL device diagnostic tool
     yazi # file manager for Wayland
+    # Double Commander file manager (wrapped with Qt5 Kvantum dark theme)
+    (symlinkJoin {
+      name = "doublecmd-wrapped";
+      paths = [ doublecmd ];
+      nativeBuildInputs = [ makeWrapper ];
+      postBuild = ''
+        rm -rf $out/bin
+        mkdir -p $out/bin
+        makeWrapper ${doublecmd}/bin/doublecmd $out/bin/doublecmd \
+          --prefix QT_PLUGIN_PATH : "${libsForQt5.qtstyleplugin-kvantum}/${qt5.qtbase.qtPluginPrefix}" \
+          --set QT_STYLE_OVERRIDE kvantum
+      '';
+    })
     meld # GUI diff and merge tool
 
     # -- Applications --

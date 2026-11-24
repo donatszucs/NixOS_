@@ -8,6 +8,10 @@
     ];
   };
 
+  xdg.mime.defaultApplications = {
+    "inode/directory" = "doublecmd.desktop";
+  };
+
   # Enable Hyprland
   programs.hyprland.enable = true;
 
